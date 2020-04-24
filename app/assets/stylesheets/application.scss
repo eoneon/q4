@@ -1,0 +1,95 @@
+/*
+  * This is a manifest file that'll be compiled into application.css, which will include all the files
+  * listed below.
+  *
+  * Any CSS and SCSS file within this directory, lib/assets/stylesheets, or any plugin's
+  * vendor/assets/stylesheets directory can be referenced here using a relative path.
+  *
+  * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+  * compiled file so the styles you add here take precedence over styles defined in any other CSS/SCSS
+  * files in this directory. Styles in this file should be added after the last require_* statement.
+  * It is generally better to create a new file per style scope.
+*/
+
+ @import "bootstrap";
+ @import "font-awesome";
+
+ body {
+   padding-top: 65px;
+ }
+ summary {
+   outline: none !important;
+ }
+ #nav-bar {
+   background-color: #2A1121;
+ }
+
+ //form-elements
+ .bg-disabled {
+   background: #e9ecef !important;
+ }
+ //set width of bootstrap dropdown to length of longest selection
+ .type-label{
+   min-width: 115px !important;
+ }
+ .type-dropdown {
+   min-width: 125px !important;
+ }
+ //counter bootstrap's default rounded corners for select inputs: not in use yet since moving to dropdown
+
+ .border-light-gray {
+   border-color: #ced4da !important;
+ }
+ //borders
+ .input-border {
+   border: 1px solid;
+ }
+ .squared-select-input {
+   border-radius: 0 !important;
+ }
+ .squared-right-border {
+   border-top-right-radius: 0 !important;
+   border-bottom-right-radius: 0 !important;
+ }
+ .squared-left-border {
+   border-top-left-radius: 0 !important;
+   border-bottom-left-radius: 0 !important;
+ }
+ .rounded-border {
+   border: 1px gray solid;
+   border-radius: 1rem;
+ }
+ .rounded-right-border {
+   border-top-right-radius: 1rem !important;
+   border-bottom-right-radius: 1rem !important;
+ }
+ .rounded-left-border {
+   border-top-left-radius: 1rem !important;
+   border-bottom-left-radius: 1rem !important;
+ }
+
+
+ //button elements
+ .caret-toggle {
+   width: 12px;
+ }
+ //remove blue active outline
+ input:focus, select:focus, textarea:focus, button:focus {
+   outline: none !important;
+   box-shadow: none !important;
+ }
+ .fs-m {
+   font-size: 1em;
+ }
+ .fs-s {
+   font-size: .875em;
+ }
+ .fs-xs {
+   font-size: .75em;
+ }
+ .btn-group-xs > .btn, .btn-xs {
+   padding: .25rem .4rem;
+   font-size: .75em;
+   line-height: .5;
+   border-radius: .2rem;
+ }

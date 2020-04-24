@@ -1,0 +1,2 @@
+class SelectValue < FieldItem
+end

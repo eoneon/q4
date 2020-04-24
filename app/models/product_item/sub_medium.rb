@@ -1,0 +1,2 @@
+class SubMedium < ProductItem
+end

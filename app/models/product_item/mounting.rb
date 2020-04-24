@@ -1,0 +1,2 @@
+class Mounting < ProductItem
+end
