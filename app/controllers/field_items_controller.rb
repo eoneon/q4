@@ -1,0 +1,2 @@
+class FieldItemsController < ApplicationController
+end

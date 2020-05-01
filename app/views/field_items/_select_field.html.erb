@@ -1,0 +1,6 @@
+<div class="input-group input-group-sm mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text"><%= "#{assoc.singularize}-type" %></span>
+  </div>
+  <%= f.collection_select fk_id(assoc), type_options(product_item, assoc), :id, :item_name, {prompt: "- select from existing #{assoc} -"}, {class: "form-control"} %>
+</div>

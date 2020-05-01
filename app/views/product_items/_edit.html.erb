@@ -1,0 +1,27 @@
+<%= form_with model: product_item, url: product_item_path(product_item), scope: :product_item, id: "product_item-edit" do |f| %>
+  <div class="form-row align-items-center">
+    <div class="col-4">
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text">Type:</span>
+        </div>
+        <%= f.select :type, types(ProductItem), {prompt: "- select type -"}, {class: "form-control"} %>
+      </div>
+    </div>
+
+    <div class="col-8">
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text">name:</span>
+        </div>
+        <%= f.text_field :item_name, placeholder: "name", class: "form-control" %>
+        <div class="input-group-append">
+          <button class="btn btn-outline-primary form-control" type="submit">submit</button>
+        </div>
+      </div>
+    </div>
+
+    <%= render "product_items/fields_for", product_item: product_item, f: f %>
+
+  </div>
+<% end %>

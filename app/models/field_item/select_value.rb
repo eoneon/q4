@@ -1,2 +1,0 @@
-class SelectValue < FieldItem
-end

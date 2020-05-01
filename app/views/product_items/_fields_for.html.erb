@@ -1,0 +1,14 @@
+<% product_item.target_assocs.each do |assoc| %>
+  <%= f.fields_for assoc.to_sym do |ff| %>
+    <div class="col-12">
+      <%= render "field_items/select_field", product_item: product_item, f: ff, assoc: assoc %>
+    </div>
+    
+    <div class="col-12">
+      <%= render "field_items/text_field", f: ff, assoc: assoc %>
+    </div>
+  <% end %>
+<% end %>
+
+<%#= ff.collection_select fk_id(assoc), type_options(product_item, assoc), :id, :item_name, {prompt: "- select #{assoc.singularize} -"}, {class: "form-control form-control-sm mr-sm-2"} %>
+<%#= ff.text_field :item_name, placeholder: "name", class: "form-control form-control-sm mr-sm-2" %>
