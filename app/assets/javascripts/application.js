@@ -30,4 +30,18 @@ $(document).ready(function(){
     }
   });
 
+  $("body").on("click", ".dropdown a.field-toggle", function(){
+    var target = $(this).attr("href");
+    if ($(target).hasClass("show")){
+      $(target).toggleClass("show collapse");
+    } else {
+      $(target).closest(".toggle-field-group").find(".toggle-field.show").toggleClass("show collapse");
+      $(target).toggleClass("show collapse");
+    }
+  });
+
+  $("body").on("click", ".collapse-field-btn", function(){
+    $(this).closest(".toggle-field").toggleClass("show collapse");
+  });
+
 });

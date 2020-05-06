@@ -3,4 +3,7 @@
     <span class="input-group-text"><%= "#{assoc.singularize}-type" %></span>
   </div>
   <%= f.text_field :item_name, placeholder: "create new #{assoc.singularize}-types using comma separated list", class: "form-control" %>
+  <div class="input-group-append">
+    <button class="btn btn-sm btn-outline-danger collapse-field-btn" type="button" id=""><%= (fa_icon "times") %></button>
+  </div>
 </div>

@@ -9,19 +9,23 @@
       </div>
     </div>
 
-    <div class="col-8">
+    <div class="col-7">
       <div class="input-group input-group-sm mb-3">
         <div class="input-group-prepend">
           <span class="input-group-text">name:</span>
         </div>
         <%= f.text_field :item_name, placeholder: "name", class: "form-control" %>
         <div class="input-group-append">
-          <button class="btn btn-outline-primary form-control" type="submit">submit</button>
+          <%= render "product_items/field_toggle", product_item: product_item %>
         </div>
       </div>
     </div>
+    <div class="col-1">
+      <button class="btn btn-sm btn-outline-primary mb-3" type="submit">edit</button>
+    </div>
 
+  </div>
+  <div class="form-row toggle-field-group" id="<%= dom_ref(product_item, :form, :fields) %>">
     <%= render "product_items/fields_for", product_item: product_item, f: f %>
-
   </div>
 <% end %>

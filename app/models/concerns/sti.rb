@@ -30,6 +30,8 @@ module STI
       set
     end
 
+    ############################################################################
+
     #subclass method:
     #get assoc names scoped to superclass: ProductItem, FieldItem => ["materials", "mountings"]
     def scoped_assocs(super_class)
@@ -53,6 +55,11 @@ module STI
 
   end
 
+  #get all targets; add sort order later
+  def all_targets
+    item_groups.map {|item_group| item_group}
+  end
+
   #AR obj: to_class
   def to_class
     self.class.name.constantize
@@ -66,5 +73,9 @@ module STI
   #=> #<ActiveRecord::Associations::CollectionProxy []>
   def targets(assoc)
     self.public_send(assoc)
+  end
+
+  def target_collection(target)
+    targets(target.class.name.underscore.pluralize)
   end
 end

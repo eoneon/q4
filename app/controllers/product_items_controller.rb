@@ -38,6 +38,17 @@ class ProductItemsController < ApplicationController
     end
   end
 
+  # def destroy
+  #   @product_item = ProductItem.find(params[:id])
+  #
+  #   if @product_item.destroy
+  #     #ItemGroup.where(target_id: params[:id]).destroy_all
+  #     respond_to do |format|
+  #       format.js
+  #     end
+  #   end
+  # end
+
   private
 
   def product_item_params

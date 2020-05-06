@@ -1,0 +1,11 @@
+<div class="dropdown">
+  <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+  </button>
+  <div class="dropdown-menu">
+    <% product_item.target_assocs.each do |assoc| %>
+      <a class="dropdown-item field-toggle" role="button" href='#<%= dom_ref(product_item, assoc.to_sym, :add) %>'><%= "add #{assoc.singularize}-type" %></a>
+      <a class="dropdown-item field-toggle" role="button" href='#<%= dom_ref(product_item, assoc.to_sym, :new) %>'><%= "new #{assoc.singularize}-type" %></a>
+    <% end %>
+  </div>
+</div>

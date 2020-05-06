@@ -28,4 +28,8 @@ module ProductItemsHelper
   def scope_tag(str)
     [str.singularize, 'scope'].join('_')
   end
+
+  def folder_name(item_group)
+    item_group.origin_type.underscore.pluralize
+  end
 end
