@@ -1,0 +1,2 @@
+class FieldTargetsController < ApplicationController
+end

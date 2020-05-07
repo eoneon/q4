@@ -24,12 +24,9 @@ class ProductItemsController < ApplicationController
     @product_item.assign_attributes(product_item_params)
     @product_item.save
 
-    puts "#{target_params}"
     unless target_params.empty?
       target_params.each do |target_hsh|
         assoc = target_hsh.keys.first
-        puts "#{target_hsh[assoc]}"
-        puts "#{@product_item.scoped_target_collection(assoc)}"
         @product_item.scoped_target_collection(assoc) << str_to_class(assoc).update_targets(target_hsh[assoc])
       end
     end
@@ -39,16 +36,15 @@ class ProductItemsController < ApplicationController
     end
   end
 
-  # def destroy
-  #   @product_item = ProductItem.find(params[:id])
-  #
-  #   if @product_item.destroy
-  #     #ItemGroup.where(target_id: params[:id]).destroy_all
-  #     respond_to do |format|
-  #       format.js
-  #     end
-  #   end
-  # end
+  def destroy
+    @product_item = ProductItem.find(params[:id])
+
+    if @product_item.destroy
+      respond_to do |format|
+        format.js
+      end
+    end
+  end
 
   private
 

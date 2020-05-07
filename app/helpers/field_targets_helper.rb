@@ -1,0 +1,2 @@
+module FieldTargetsHelper
+end

@@ -1,0 +1,2 @@
+module ProductTargetsHelper
+end

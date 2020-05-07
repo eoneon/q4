@@ -5,9 +5,10 @@
 
   <div class="card-body p-1" id="<%= dom_ref(product_item, :body) %>">
     <div id='<%= dom_ref(product_item, :index) %>'>
-      <% product_item.targets.each do |item_group| %>
-        <%= render "#{folder_name(item_group)}/target", target: item_group.target %>
-      <% end %>
+      <%= render "product_items/index", origin: product_item %>
+      <%# product_item.targets.each do |item_group| %>
+        <%#= render "#{folder_name(item_group)}/target", origin: product_item, target: item_group.target, item_group: item_group %>
+      <%# end %>
     </div>
   </div>
 </div>

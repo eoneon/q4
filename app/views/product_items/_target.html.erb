@@ -1,6 +1,9 @@
 <div class="card border m-1 border-dark" id="<%= dom_ref(target, :show) %>">
   <div class="card-header" id="<%= dom_ref(target, :header) %>">
     <%= name_method(target) %>
+    <%= button_to item_group_path(item_group), method: :delete, remote: true, data: {confirm: "Are you sure?"}, class: "btn btn-sm bg-transparent font-weight-light text-danger pl-0" do %>
+      <span><%= (fa_icon "minus-square") %></span>
+    <% end %>
   </div>
 
   <div class="card-body p-1" id="<%= dom_ref(target, :body) %>">

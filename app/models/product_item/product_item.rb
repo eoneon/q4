@@ -1,7 +1,7 @@
 class ProductItem < ApplicationRecord
   include STI
 
-  has_many :item_groups, as: :origin, dependent: :destroy
+  has_many :item_groups, as: :origin #, dependent: :delete_all
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
   has_many :text_fields, through: :item_groups, source: :target, source_type: "TextField"
   has_many :check_box_fields, through: :item_groups, source: :target, source_type: "CheckBoxField"

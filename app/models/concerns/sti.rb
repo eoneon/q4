@@ -3,6 +3,47 @@ require 'active_support/concern'
 module STI
   extend ActiveSupport::Concern
 
+  included do
+    before_destroy :remove_dependent_item_groups
+    # relations, callbacks, validations, scopes and others...
+  end
+
+  def remove_dependent_item_groups
+    ItemGroup.where(origin_id: self.id).or(ItemGroup.where(target_id: self.id)).destroy_all
+  end
+
+  #get all targets; add sort order later: should be named: all_targets->targets
+  def targets
+    item_groups.map {|item_group| item_group}
+  end
+
+  #AR obj: to_class
+  def to_class
+    self.class.name.constantize
+  end
+
+  def to_superclass
+    self.class.superclass
+  end
+
+  def to_superclass_name
+    to_superclass.name
+  end
+
+  #=> ["materials", "mountings"]: should really be named: target_assocs->scoped_assoc_names
+  def scoped_assoc_names
+    to_class.scoped_assoc_names(to_class.superclass).map{|assoc| assoc}
+  end
+
+  #=> #<ActiveRecord::Associations::CollectionProxy []>: should be named: targets->scoped_target_collection
+  def scoped_target_collection(assoc)
+    self.public_send(assoc)
+  end
+  #this is similar to above except it converts an AR object to assoc method rather than a string or symbol: consolidate
+  def target_collection(target)
+    scoped_target_collection(target.class.name.underscore.pluralize)
+  end
+
   class_methods do
 
     #h={:assoc=> target_hsh={:item_name=> "horse, dog, cat, mouse", :material_id=> id}}
@@ -37,6 +78,7 @@ module STI
     # def scoped_assoc_names(super_class)
     #   assoc_names.keep_if {|assoc| super_class.file_set.include?(assoc.singularize)}
     # end
+
     def scoped_assoc_names
       assoc_names.keep_if {|assoc| file_set.include?(assoc.singularize)}
     end
@@ -56,37 +98,5 @@ module STI
       Dir.glob("#{Rails.root}/app/models/#{self.to_s.underscore}/*.rb").map {|path| path.split("/").last.split(".").first}
     end
 
-  end
-
-  #get all targets; add sort order later: should be named: all_targets->targets
-  def targets
-    item_groups.map {|item_group| item_group}
-  end
-
-  #AR obj: to_class
-  def to_class
-    self.class.name.constantize
-  end
-
-  def to_superclass
-    self.class.superclass
-  end
-
-  def to_superclass_name
-    to_superclass.name
-  end
-
-  #=> ["materials", "mountings"]: should really be named: target_assocs->scoped_assoc_names
-  def scoped_assoc_names
-    to_class.scoped_assoc_names(to_class.superclass).map{|assoc| assoc}
-  end
-
-  #=> #<ActiveRecord::Associations::CollectionProxy []>: should be named: targets->scoped_target_collection
-  def scoped_target_collection(assoc)
-    self.public_send(assoc)
-  end
-  #this is similar to above except it converts an AR object to assoc method rather than a string or symbol: consolidate
-  def target_collection(target)
-    scoped_target_collection(target.class.name.underscore.pluralize)
   end
 end
