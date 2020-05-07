@@ -1,4 +1,5 @@
-<%= form_with model: product_item, url: product_item_path(product_item), scope: :product_item, id: "product_item-edit" do |f| %>
+<%= form_with model: product_item, url: url, scope: form_scope(product_item), id: dom_ref(product_item, :edit) do |f| %>
+<%#= form_with model: product_item, url: product_item_path(product_item), scope: :product_item..to_superclass_name.underscore.to_sym, id: "product_item-edit" do |f| %>
   <div class="form-row align-items-center">
     <div class="col-4">
       <div class="input-group input-group-sm mb-3">

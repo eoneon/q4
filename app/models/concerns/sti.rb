@@ -19,7 +19,7 @@ module STI
       if k.to_s.split("_").include?("name") #&& !target_hsh[k].blank?
         find_or_create_by(target_hsh[k].split(","), k.to_sym, set)
       elsif k.to_s.split("_").include?("id")
-        find(target_hsh[k])
+        set << find(target_hsh[k])
       end
     end
 
@@ -33,13 +33,16 @@ module STI
     ############################################################################
 
     #subclass method:
-    #get assoc names scoped to superclass: ProductItem, FieldItem => ["materials", "mountings"]
-    def scoped_assocs(super_class)
-      assocs.keep_if {|assoc| super_class.file_set.include?(assoc.singularize)}
+    #get assoc names scoped to superclass: ProductItem, FieldItem => ["materials", "mountings"]: should be named: scoped_assocs->scoped_assoc_names
+    # def scoped_assoc_names(super_class)
+    #   assoc_names.keep_if {|assoc| super_class.file_set.include?(assoc.singularize)}
+    # end
+    def scoped_assoc_names
+      assoc_names.keep_if {|assoc| file_set.include?(assoc.singularize)}
     end
 
-    #get all assoc names except join assoc
-    def assocs
+    #get all assoc names except join assoc: should be named: assoc->assoc_names
+    def assoc_names
       self.reflect_on_all_associations(:has_many).map {|assoc| assoc.name.to_s}.reject {|i| i == 'item_groups'}
     end
 
@@ -55,8 +58,8 @@ module STI
 
   end
 
-  #get all targets; add sort order later
-  def all_targets
+  #get all targets; add sort order later: should be named: all_targets->targets
+  def targets
     item_groups.map {|item_group| item_group}
   end
 
@@ -65,17 +68,25 @@ module STI
     self.class.name.constantize
   end
 
-  #=> ["materials", "mountings"]
-  def target_assocs
-    to_class.scoped_assocs(to_class.superclass).map{|assoc| assoc}
+  def to_superclass
+    self.class.superclass
   end
 
-  #=> #<ActiveRecord::Associations::CollectionProxy []>
-  def targets(assoc)
+  def to_superclass_name
+    to_superclass.name
+  end
+
+  #=> ["materials", "mountings"]: should really be named: target_assocs->scoped_assoc_names
+  def scoped_assoc_names
+    to_class.scoped_assoc_names(to_class.superclass).map{|assoc| assoc}
+  end
+
+  #=> #<ActiveRecord::Associations::CollectionProxy []>: should be named: targets->scoped_target_collection
+  def scoped_target_collection(assoc)
     self.public_send(assoc)
   end
-
+  #this is similar to above except it converts an AR object to assoc method rather than a string or symbol: consolidate
   def target_collection(target)
-    targets(target.class.name.underscore.pluralize)
+    scoped_target_collection(target.class.name.underscore.pluralize)
   end
 end

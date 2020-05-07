@@ -3,9 +3,9 @@
 
   </button>
   <div class="dropdown-menu">
-    <% product_item.target_assocs.each do |assoc| %>
-      <a class="dropdown-item field-toggle" role="button" href='#<%= dom_ref(product_item, assoc.to_sym, :add) %>'><%= "add #{assoc.singularize}-type" %></a>
-      <a class="dropdown-item field-toggle" role="button" href='#<%= dom_ref(product_item, assoc.to_sym, :new) %>'><%= "new #{assoc.singularize}-type" %></a>
+    <% product_item.to_class.assoc_names.each do |assoc| %>
+      <a class="dropdown-item field-toggle" role="button" href='#<%= dom_ref(product_item, assoc.to_sym, :add) %>'><%= "add #{item_hsh(assoc)[:label]}" %></a>
+      <a class="dropdown-item field-toggle" role="button" href='#<%= dom_ref(product_item, assoc.to_sym, :new) %>'><%= "new #{item_hsh(assoc)[:label]}" %></a>
     <% end %>
   </div>
 </div>

@@ -24,12 +24,13 @@ class ProductItemsController < ApplicationController
     @product_item.assign_attributes(product_item_params)
     @product_item.save
 
-    #puts "#{target_params}"
+    puts "#{target_params}"
     unless target_params.empty?
       target_params.each do |target_hsh|
         assoc = target_hsh.keys.first
-        #puts "#{target_hsh[assoc]}"
-        @product_item.targets(assoc) << str_to_class(assoc).update_targets(target_hsh[assoc])
+        puts "#{target_hsh[assoc]}"
+        puts "#{@product_item.scoped_target_collection(assoc)}"
+        @product_item.scoped_target_collection(assoc) << str_to_class(assoc).update_targets(target_hsh[assoc])
       end
     end
 
@@ -52,7 +53,7 @@ class ProductItemsController < ApplicationController
   private
 
   def product_item_params
-    params.require(:product_item).permit(:type, :item_name, :id, materials_attributes: [:material_id, :item_name], mountings_attributes: [:mounting_id, :item_name])
+    params.require(:product_item).permit(:type, :item_name, :id) #, materials_attributes: [:material_id, :item_name], mountings_attributes: [:mounting_id, :item_name]
   end
 
   def target_params
@@ -65,7 +66,8 @@ class ProductItemsController < ApplicationController
   end
 
   def assoc_params
-    @product_item.target_assocs.map{|assoc| assoc.to_sym}
+    #@product_item.scoped_assoc_names.map{|assoc| assoc.to_sym}
+    @product_item.to_class.assoc_names.map{|assoc| assoc.to_sym}
   end
 
   def str_to_class(assoc)
