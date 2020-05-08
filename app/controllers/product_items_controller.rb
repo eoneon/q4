@@ -49,7 +49,7 @@ class ProductItemsController < ApplicationController
   private
 
   def product_item_params
-    params.require(:product_item).permit(:type, :item_name, :id, materials_attributes: [:material_id, :item_name], mountings_attributes: [:mounting_id, :item_name]) #
+    params.require(:product_item).permit(:type, :item_name, :id) #, materials_attributes: [:material_id, :item_name], mountings_attributes: [:mounting_id, :item_name]
   end
 
   def target_params
@@ -62,7 +62,6 @@ class ProductItemsController < ApplicationController
   end
 
   def assoc_params
-    #@product_item.scoped_assoc_names.map{|assoc| assoc.to_sym}
     @product_item.to_class.assoc_names.map{|assoc| assoc.to_sym}
   end
 

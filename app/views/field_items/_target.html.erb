@@ -1,26 +1,21 @@
 <div class="card border m-1 border-dark" id="<%= dom_ref(target, :show) %>">
   <div class="card-header" id="<%= dom_ref(target, :header) %>">
-
     <div class="row align-items-center justify-content-between bg-light">
       <div class="col-auto px-0 mr-0">
         <%= render "item_groups/sorter", item_group: item_group %>
       </div>
-
       <div class="col-9 px-0 mx-0">
         <%#= name_method(target) %>
-        <%= render 'product_items/edit', product_item: target, url: product_item_path(target) %>
+        <%= render 'field_items/edit', field_item: target, url: field_item_path(target) %>
       </div>
-
       <div class="col-1 pl-0 ml-0">
         <span class="badge badge-primary fs-xs"><%= item_group.sort %></span>
-      </div>
-
+      </div> 
       <div class="col-1 pl-0 ml-0">
         <%= button_to item_group_path(item_group), method: :delete, remote: true, data: {confirm: "Are you sure?"}, class: "btn btn-sm bg-transparent font-weight-light text-danger pl-0" do %>
           <span><%= (fa_icon "minus-square") %></span>
         <% end %>
       </div>
-
     </div>
   </div>
 

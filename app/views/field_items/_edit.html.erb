@@ -1,11 +1,11 @@
-<%= form_with model: product_item, url: url, scope: form_scope(product_item), id: dom_ref(product_item, :edit) do |f| %>
+<%= form_with model: field_item, url: url, scope: form_scope(field_item), id: dom_ref(field_item, :edit) do |f| %>
   <div class="form-row align-items-center">
     <div class="col-4">
       <div class="input-group input-group-sm mb-3">
         <div class="input-group-prepend">
           <span class="input-group-text">type:</span>
         </div>
-        <%= f.select :type, types(ProductItem), {prompt: "- select type -"}, {class: "form-control"} %>
+        <%= f.select :type, types(FieldItem), {prompt: "- select type -"}, {class: "form-control"} %>
       </div>
     </div>
 
@@ -14,9 +14,9 @@
         <div class="input-group-prepend">
           <span class="input-group-text">name:</span>
         </div>
-        <%= f.text_field :item_name, placeholder: "name", class: "form-control" %>
+        <%= f.text_field :field_name, placeholder: "field name", class: "form-control" %>
         <div class="input-group-append">
-          <%= render "product_items/field_toggle", product_item: product_item %>
+          <%= render "field_items/field_toggle", field_item: field_item %>
         </div>
       </div>
     </div>
@@ -26,7 +26,7 @@
     </div>
 
   </div>
-  <div class="form-row toggle-field-group" id="<%= dom_ref(product_item, :form, :fields) %>">
-    <%= render "product_items/fields_for", product_item: product_item, f: f %>
+  <div class="form-row toggle-field-group" id="<%= dom_ref(field_item, :form, :fields) %>">
+    <%= render "field_items/fields_for", field_item: field_item, f: f %>
   </div>
 <% end %>

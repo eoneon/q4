@@ -1,0 +1,9 @@
+<div class="input-group input-group-sm mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text"><%= "#{item_hsh(assoc)[:label]}" %></span>
+  </div>
+  <%= f.text_field item_hsh(assoc)[:name_method], placeholder: "create new #{item_hsh(assoc)[:label]} using comma separated list", class: "form-control" %>
+  <div class="input-group-append">
+    <button class="btn btn-sm btn-outline-danger collapse-field-btn" type="button" id=""><%= (fa_icon "times") %></button>
+  </div>
+</div>

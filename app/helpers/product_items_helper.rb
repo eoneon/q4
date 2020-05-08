@@ -48,7 +48,7 @@ module ProductItemsHelper
   #   [str.singularize, 'scope'].join('_')
   # end
 
-  def folder_name(item_group)
-    item_group.origin_type.underscore.pluralize
+  def target_folder(target)
+    target.to_superclass.to_s.underscore.pluralize
   end
 end

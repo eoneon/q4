@@ -2,7 +2,7 @@
   <div class="input-group-prepend">
     <span class="input-group-text"><%= "#{item_hsh(assoc)[:label]}" %></span>
   </div>
-  <%= f.collection_select fk_id(assoc), type_options(field_item, assoc), :id, item_hsh(assoc)[:name_method], {prompt: "- select from existing #{assoc} -"}, {class: "form-control"} %>
+  <%= f.collection_select fk_id(assoc), type_options(product_item, assoc), :id, item_hsh(assoc)[:name_method], {prompt: "- select from existing #{assoc} -"}, {class: "form-control"} %>
   <div class="input-group-append">
     <button class="btn btn-sm btn-outline-danger collapse-field-btn" type="button" id="collapse-field-btn"><%= (fa_icon "times") %></button>
   </div>

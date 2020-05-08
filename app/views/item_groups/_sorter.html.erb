@@ -1,4 +1,5 @@
-<div class="btn-group-vertical btn-group-sm border-left border-right" role="group">
-  <div style="font-size: 0.5rem;"><%= link_to_if item_group.sort.present? && item_group.sort > 1, (fa_icon "chevron-up"), sort_up_item_group_path(item_group), method: :post, remote: true %></div>
-  <div style="font-size: 0.5rem;"><%= link_to_unless item_group.sort.nil? || item_group.max_sort == item_group.sort, (fa_icon "chevron-down"), sort_down_item_group_path(item_group), method: :post, remote: true %></div>
+<div class="btn-group-vertical btn-group-sm" role="group">
+  <div class="fs-xs"><%= link_to_if item_group.sort.present? && item_group.sort > 1, (fa_icon "chevron-up"), sort_up_item_group_path(item_group), method: :post, remote: true %></div>
+  <!-- <span class="badge badge-primary fs-xs"><%#= item_group.sort %></span> -->
+  <div class="fs-xs"><%= link_to_unless item_group.sort.nil? || item_group.max_sort == item_group.sort, (fa_icon "chevron-down"), sort_down_item_group_path(item_group), method: :post, remote: true %></div>
 </div>

@@ -1,11 +1,11 @@
 <% product_item.to_class.assoc_names.each do |assoc| %>
   <%= f.fields_for assoc.to_sym do |ff| %>
     <div class="col-12 collapse toggle-field" id="<%= dom_ref(product_item, assoc.to_sym, :add) %>">
-      <%= render "field_items/select_field", product_item: product_item, f: ff, assoc: assoc %>
+      <%= render "product_items/select_field", product_item: product_item, f: ff, assoc: assoc %>
     </div>
 
     <div class="col-12 collapse toggle-field" id="<%= dom_ref(product_item, assoc.to_sym, :new) %>">
-      <%= render "field_items/text_field", f: ff, assoc: assoc %>
+      <%= render "product_items/text_field", f: ff, assoc: assoc %>
     </div>
   <% end %>
 <% end %>

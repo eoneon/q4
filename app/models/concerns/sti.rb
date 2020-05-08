@@ -3,21 +3,24 @@ require 'active_support/concern'
 module STI
   extend ActiveSupport::Concern
 
+  #relations, callbacks, validations, scopes and others...######################
+
   included do
     before_destroy :remove_dependent_item_groups
-    # relations, callbacks, validations, scopes and others...
   end
+
+  #subclass methods ############################################################
 
   def remove_dependent_item_groups
     ItemGroup.where(origin_id: self.id).or(ItemGroup.where(target_id: self.id)).destroy_all
   end
 
-  #get all targets; add sort order later: should be named: all_targets->targets
-  def targets
-    item_groups.map {|item_group| item_group}
+  #get ALL targets; add sort order later: should be named: all_targets->targets
+  def sorted_targets
+    item_groups.order(:sort)
   end
 
-  #AR obj: to_class
+  #AR obj: to_class -> expand re: Q3/models/concerns/build_set.rb
   def to_class
     self.class.name.constantize
   end
@@ -30,7 +33,7 @@ module STI
     to_superclass.name
   end
 
-  #=> ["materials", "mountings"]: should really be named: target_assocs->scoped_assoc_names
+  #=> ["materials", "mountings"]
   def scoped_assoc_names
     to_class.scoped_assoc_names(to_class.superclass).map{|assoc| assoc}
   end
@@ -39,15 +42,16 @@ module STI
   def scoped_target_collection(assoc)
     self.public_send(assoc)
   end
+
   #this is similar to above except it converts an AR object to assoc method rather than a string or symbol: consolidate
   def target_collection(target)
     scoped_target_collection(target.class.name.underscore.pluralize)
   end
 
   class_methods do
+    #controller methods ########################################################
 
-    #h={:assoc=> target_hsh={:item_name=> "horse, dog, cat, mouse", :material_id=> id}}
-    #target_hsh={:item_name => "horse, dog, cat, mouse"}
+    #param ex: target_hsh={:item_name => "canvas, paper, wood, metal"}
     def update_targets(target_hsh)
       set=[]
       target_hsh.keys.each do |k|
@@ -71,25 +75,21 @@ module STI
       set
     end
 
-    ############################################################################
+    #class context methods, i.e., Medium, Material,...##########################
 
-    #subclass method:
-    #get assoc names scoped to superclass: ProductItem, FieldItem => ["materials", "mountings"]: should be named: scoped_assocs->scoped_assoc_names
-    # def scoped_assoc_names(super_class)
-    #   assoc_names.keep_if {|assoc| super_class.file_set.include?(assoc.singularize)}
-    # end
-
+    #get FILTERED superclass-specific assoc names; used by instance method above => ["materials", "mountings"]
     def scoped_assoc_names
       assoc_names.keep_if {|assoc| file_set.include?(assoc.singularize)}
     end
 
-    #get all assoc names except join assoc: should be named: assoc->assoc_names
+    #get ALL assoc names except join assoc; first param for: scoped_assoc_names #=> ["select_fields", "text_fields", "check_box_fields", "number_fields", "text_area_fields", "materials", "mountings"]
     def assoc_names
       self.reflect_on_all_associations(:has_many).map {|assoc| assoc.name.to_s}.reject {|i| i == 'item_groups'}
     end
 
-    #superclass method: ProductItem, FieldItem
-    #get file names inside superclass directory; prepend with superclass file name: ["product_item",...] and ["field_item",...]
+    #superclass context methods: ProductItem, FieldItem ########################
+
+    #get file names inside superclass directory; second param for: scoped_assoc_names (prepends file set with superclass file name: ["product_item",...] and ["field_item",...]) #=> => ["field_item", "select_field", "text_field", "number_field", "field_set", "radio_button", "option", "check_box_field", "text_area_field"]
     def file_set
       file_names.reject {|i| i == self.to_s.underscore}.prepend(self.to_s.underscore)
     end
