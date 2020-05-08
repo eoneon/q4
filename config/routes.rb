@@ -1,11 +1,10 @@
 Rails.application.routes.draw do
-
-  # resources :product_items do
-  #   resources :product_targets
-  #   resources :field_targets
-  # end
   resources :product_items
-  resources :item_groups
+  resources :item_groups do
+    member do
+      post :sort_up, :sort_down
+    end
+  end
 
   root to: 'product_items#index'
 end
