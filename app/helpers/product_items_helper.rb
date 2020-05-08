@@ -12,7 +12,7 @@ module ProductItemsHelper
   end
 
   def type_options(p_item, assoc)
-    type_options = str_to_class(assoc).all - [p_item]
+    str_to_class(assoc).all - p_item.scoped_target_collection(assoc) - [p_item]
   end
 
   def item_hsh(assoc)

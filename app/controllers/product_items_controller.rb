@@ -49,7 +49,7 @@ class ProductItemsController < ApplicationController
   private
 
   def product_item_params
-    params.require(:product_item).permit(:type, :item_name, :id) #, materials_attributes: [:material_id, :item_name], mountings_attributes: [:mounting_id, :item_name]
+    params.require(:product_item).permit(:type, :item_name, :id, materials_attributes: [:material_id, :item_name], mountings_attributes: [:mounting_id, :item_name]) #
   end
 
   def target_params

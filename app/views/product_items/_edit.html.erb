@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <div class="col-5">
+    <div class="col-7">
       <div class="input-group input-group-sm mb-3">
         <div class="input-group-prepend">
           <span class="input-group-text">name:</span>
@@ -21,10 +21,7 @@
       </div>
     </div>
 
-    <div class="col-3">
-      <%= button_to product_item_path(product_item), method: :delete, remote: true, data: {confirm: "Are you sure?"}, class: "btn btn-sm btn-outline-danger mb-3" do %>
-        <span>delete</span>
-      <% end %>
+    <div class="col-1">
       <button class="btn btn-sm btn-outline-primary mb-3" type="submit">edit</button>
     </div>
 

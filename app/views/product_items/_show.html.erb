@@ -1,6 +1,9 @@
 <div class="card border m-1 border-dark" id="<%= dom_ref(product_item, :show) %>">
   <div class="card-header" id="<%= dom_ref(product_item, :header) %>">
-    <%= render 'product_items/edit', product_item: @product_item, url: product_item_path(@product_item) %>
+    <%= render 'product_items/edit', product_item: product_item, url: product_item_path(product_item) %>
+    <%#= button_to product_item_path(product_item), method: :delete, remote: true, data: {confirm: "Are you sure?"}, class: "btn btn-sm btn-outline-danger mb-3" do %>
+      <!-- <span>delete</span> -->
+    <%# end %>
   </div>
 
   <div class="card-body p-1" id="<%= dom_ref(product_item, :body) %>">

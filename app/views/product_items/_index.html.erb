@@ -1,3 +1,3 @@
-<% origin.targets.each do |item_group| %>
+<% origin.item_groups.order(:sort).each do |item_group| %>
   <%= render "product_items/target", origin: origin, target: item_group.target, item_group: item_group %>
 <% end %>
