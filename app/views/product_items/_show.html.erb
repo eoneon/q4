@@ -1,6 +1,16 @@
-<div class="card border m-1 border-dark" id="<%= dom_ref(product_item, :show) %>">
-  <div class="card-header" id="<%= dom_ref(product_item, :header) %>">
-    <%= render 'product_items/edit', product_item: product_item, url: product_item_path(product_item) %>
+<div class="card border border-dark" id="<%= dom_ref(product_item, :show) %>">
+  <div class="card-header py-0" id="<%= dom_ref(product_item, :header) %>">
+    <div class="row align-items-center bg-light">
+
+      <div class="col-11 mt-3 pr-0">
+        <%= render 'product_items/edit', product_item: product_item, url: product_item_path(product_item) %>
+      </div>
+
+      <div class="col-1">
+        <%= render "product_items/field_toggle", product_item: product_item, delete_url: product_item_path(product_item) %>
+      </div>
+
+    </div>
   </div>
 
   <div class="card-body p-1" id="<%= dom_ref(product_item, :body) %>">

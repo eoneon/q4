@@ -1,6 +1,6 @@
 <%= form_with model: field_item, url: url, scope: form_scope(field_item), id: dom_ref(field_item, :edit) do |f| %>
   <div class="form-row align-items-center">
-    <div class="col-4">
+    <div class="col-5">
       <div class="input-group input-group-sm mb-3">
         <div class="input-group-prepend">
           <span class="input-group-text">type:</span>
@@ -16,16 +16,12 @@
         </div>
         <%= f.text_field :field_name, placeholder: "field name", class: "form-control" %>
         <div class="input-group-append">
-          <%= render "field_items/field_toggle", field_item: field_item %>
+          <button class="btn btn-sm btn-outline-primary" type="submit">edit</button>
         </div>
       </div>
     </div>
-
-    <div class="col-1">
-      <button class="btn btn-sm btn-outline-primary mb-3" type="submit">edit</button>
-    </div>
-
   </div>
+
   <div class="form-row toggle-field-group" id="<%= dom_ref(field_item, :form, :fields) %>">
     <%= render "field_items/fields_for", field_item: field_item, f: f %>
   </div>
