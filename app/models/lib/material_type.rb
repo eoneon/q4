@@ -1,5 +1,5 @@
 class MaterialType
-  class Flat < MaterialType
+  class FlatMaterial < MaterialType
     def self.set
       [Canvas,WrappedCanvas,Paper,Wood,Acrylic,Metal,MetalBox,WoodBox]
     end
@@ -89,50 +89,3 @@ class MaterialType
     end
   end
 end
-  # module Flat
-  #
-  #   module Canvas
-  #   end
-  #
-  #   module Paper
-  #   end
-  #
-  #   module Wood
-  #   end
-  #
-  #   module Acrylic
-  #   end
-  #
-  #   module Metal
-  #   end
-  # end
-
-  # module Wrapped
-  #   module Canvas
-  #   end
-  # end
-
-  # module Boxed
-  #   module Canvas
-  #   end
-  #
-  #   module Metal
-  #   end
-  #
-  #   module Wood
-  #   end
-  #
-  # end
-
-  # module Photography
-  #   module Paper
-  #   end
-  # end
-  #
-  # module Animation
-  #   module Paper
-  #   end
-  # end
-  #
-  # module Sericel
-  # end
