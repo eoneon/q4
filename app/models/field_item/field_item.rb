@@ -1,5 +1,8 @@
 class FieldItem < ApplicationRecord
   include STI
 
-  has_many :item_groups, as: :origin #, dependent: :delete_all
+  validates :type, :field_name, presence: true
+  validates :field_name, uniqueness: true
+
+  has_many :item_groups, as: :origin
 end
