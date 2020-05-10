@@ -7,7 +7,7 @@
       </div>
 
       <div class="col-1">
-        <%= render "product_items/field_toggle", product_item: product_item, delete_url: product_item_path(product_item) %>
+        <%= render "product_items/field_toggle", product_item: product_item, delete_url: product_item_path(product_item, method: "delete") %>
       </div>
 
     </div>

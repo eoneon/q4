@@ -1,11 +1,18 @@
-class MaterialType
-  class FlatMaterial < MaterialType
+class FlatMaterialType
+
+  class StandardMaterial < FlatMaterialType
     def self.set
-      [Canvas,WrappedCanvas,Paper,Wood,Acrylic,Metal,MetalBox,WoodBox]
+      Options.set
+    end
+
+    module Options
+      def self.set
+        [Canvas,WrappedCanvas,Paper,Wood,Acrylic,Metal,MetalBox,WoodBox]
+      end
     end
   end
 
-  class Canvas < MaterialType
+  class Canvas < FlatMaterialType
     def self.set
       Options.set
     end
@@ -17,7 +24,7 @@ class MaterialType
     end
   end
 
-  class WrappedCanvas < MaterialType
+  class WrappedCanvas < FlatMaterialType
     def self.set
       Options.set
     end
@@ -29,7 +36,7 @@ class MaterialType
     end
   end
 
-  class Paper < MaterialType
+  class Paper < FlatMaterialType
     def self.set
       Options.set
     end
@@ -41,7 +48,7 @@ class MaterialType
     end
   end
 
-  class Wood < MaterialType
+  class Wood < FlatMaterialType
     def self.set
       Options.set
     end
@@ -53,7 +60,7 @@ class MaterialType
     end
   end
 
-  class Acrylic < MaterialType
+  class Acrylic < FlatMaterialType
     def self.set
       Options.set
     end
@@ -65,7 +72,7 @@ class MaterialType
     end
   end
 
-  class Metal < MaterialType
+  class Metal < FlatMaterialType
     def self.set
       Options.set
     end
@@ -77,7 +84,7 @@ class MaterialType
     end
   end
 
-  class MetalBox < MaterialType
+  class MetalBox < FlatMaterialType
     def self.set
       Options.set
     end
@@ -89,7 +96,7 @@ class MaterialType
     end
   end
 
-  class WoodBox < MaterialType
+  class WoodBox < FlatMaterialType
     def self.set
       Options.set
     end
@@ -101,7 +108,7 @@ class MaterialType
     end
   end
 
-  class PhotographyPaper < MaterialType
+  class PhotographyPaper < FlatMaterialType
     def self.set
       Options.set
     end
@@ -113,7 +120,7 @@ class MaterialType
     end
   end
 
-  class AnimationPaper < MaterialType
+  class AnimationPaper < FlatMaterialType
     def self.set
       Options.set
     end
@@ -125,7 +132,7 @@ class MaterialType
     end
   end
 
-  class Sericel < MaterialType
+  class Sericel < FlatMaterialType
     def self.set
       Options.set
     end

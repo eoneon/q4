@@ -26,13 +26,8 @@ module STI
   end
 
   def to_base_class
-    #self.class.superclass
     self.class.base_class
   end
-
-  # def to_superclass_name
-  #   to_superclass.name
-  # end
 
   def base_type
     to_base_class.name
@@ -40,12 +35,10 @@ module STI
 
   #=> ["materials", "mountings"]
   def scoped_assoc_names
-    #to_class.scoped_assoc_names(to_class.superclass).map{|assoc| assoc}
-    #to_class.scoped_assoc_names(to_class.base_class).map{|assoc| assoc}
     to_class.scoped_assoc_names(to_base_class).map{|assoc| assoc}
   end
 
-  #=> #<ActiveRecord::Associations::CollectionProxy []>: should be named: targets->scoped_target_collection
+  #=> #<ActiveRecord::Associations::CollectionProxy []>
   def scoped_target_collection(assoc)
     self.public_send(assoc)
   end
@@ -53,6 +46,10 @@ module STI
   #this is similar to above except it converts an AR object to assoc method rather than a string or symbol: consolidate
   def target_collection(target)
     scoped_target_collection(target.class.name.underscore.pluralize)
+  end
+
+  def target_included?(target)
+    self.target_collection(target).include?(target)
   end
 
   class_methods do
