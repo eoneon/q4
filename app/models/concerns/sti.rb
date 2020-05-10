@@ -25,17 +25,24 @@ module STI
     self.class.name.constantize
   end
 
-  def to_superclass
-    self.class.superclass
+  def to_base_class
+    #self.class.superclass
+    self.class.base_class
   end
 
-  def to_superclass_name
-    to_superclass.name
+  # def to_superclass_name
+  #   to_superclass.name
+  # end
+
+  def base_type
+    to_base_class.name
   end
 
   #=> ["materials", "mountings"]
   def scoped_assoc_names
-    to_class.scoped_assoc_names(to_class.superclass).map{|assoc| assoc}
+    #to_class.scoped_assoc_names(to_class.superclass).map{|assoc| assoc}
+    #to_class.scoped_assoc_names(to_class.base_class).map{|assoc| assoc}
+    to_class.scoped_assoc_names(to_base_class).map{|assoc| assoc}
   end
 
   #=> #<ActiveRecord::Associations::CollectionProxy []>: should be named: targets->scoped_target_collection

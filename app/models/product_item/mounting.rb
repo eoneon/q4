@@ -1,2 +1,0 @@
-class Mounting < ProductItem
-end

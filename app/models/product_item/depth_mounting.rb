@@ -1,0 +1,2 @@
+class DepthMounting < ProductItem
+end

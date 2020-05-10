@@ -4,7 +4,8 @@ module ProductItemsHelper
   end
 
   def form_scope(obj)
-    obj.to_superclass_name.underscore.to_sym
+    #obj.class.base_class.to_s.underscore.to_sym
+    obj.base_type.underscore.to_sym
   end
 
   def fk_id(assoc)
@@ -28,27 +29,28 @@ module ProductItemsHelper
   end
 
   def name_method(obj)
-    obj.to_superclass == ProductItem ? obj.item_name : obj.field_name
+    #obj.to_superclass == ProductItem ? obj.item_name : obj.field_name
+    obj.class.base_class == ProductItem ? obj.item_name : obj.field_name
   end
 
-  #we can filter each assoc's collection using: scope = obj.tags[[assoc.singularize, "scope"].join("_")]
-  #assoc.singularize.classify.constantize.where("tags -> ")
-
-  # def scoped_assoc(obj, assoc)
-  #   k = scope_tag(assoc)
-  #   v = obj.tags[k]
-  #   str_to_class(assoc).where("tags -> \'#{k}\' = \'#{v}\'")
-  # end
-  #
   def str_to_class(str)
     str.singularize.classify.constantize
   end
-  #
-  # def scope_tag(str)
-  #   [str.singularize, 'scope'].join('_')
-  # end
 
   def target_folder(target)
-    target.to_superclass.to_s.underscore.pluralize
+    target.class.base_class.to_s.underscore.pluralize
   end
 end
+
+#we can filter each assoc's collection using: scope = obj.tags[[assoc.singularize, "scope"].join("_")]
+#assoc.singularize.classify.constantize.where("tags -> ")
+
+# def scoped_assoc(obj, assoc)
+#   k = scope_tag(assoc)
+#   v = obj.tags[k]
+#   str_to_class(assoc).where("tags -> \'#{k}\' = \'#{v}\'")
+# end
+#
+# def scope_tag(str)
+#   [str.singularize, 'scope'].join('_')
+# end

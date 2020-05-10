@@ -1,0 +1,2 @@
+class FlatMounting < ProductItem
+end
