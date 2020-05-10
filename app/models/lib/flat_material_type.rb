@@ -1,5 +1,6 @@
 class FlatMaterialType
-
+  include Context
+  
   class StandardMaterial < FlatMaterialType
     def self.set
       Options.set
