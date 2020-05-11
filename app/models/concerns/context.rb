@@ -5,6 +5,7 @@ module Context
 
   class_methods do
 
+    #auto-pop methods: not sure if we need to relocate at some point ###########
     def build_type_group
       self.subclasses.each do |klass|
         build_product_item(klass)
@@ -18,7 +19,6 @@ module Context
       end
     end
 
-    #third draft:
     def build_and_assoc_set(product_item, klass)
       if klass.set.first.class == String
         product_item = assoc_unless_included(product_item, build_select_field(klass))

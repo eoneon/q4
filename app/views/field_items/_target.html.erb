@@ -6,7 +6,11 @@
         <%= render "item_groups/sorter", item_group: item_group %>
       </div>
 
-      <div class="col-10 mt-3">
+      <div class="col-auto mr-0 mx-0 pr-0">
+        <button class="caret-toggle btn btn-lg bg-transparent ml-1 my-1 pl-2 py-0" data-toggle="collapse" data-target="#<%= dom_ref(target, :body) %>" type="button"><%= (fa_icon "caret-right") %></button>
+      </div>
+
+      <div class="col-9 mt-3">
         <%= render 'field_items/edit', field_item: target, url: field_item_path(target) %>
       </div>
 

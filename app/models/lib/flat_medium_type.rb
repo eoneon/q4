@@ -1,5 +1,6 @@
 class FlatMediumType
-
+  include Context
+  #FlatMediumType.build_type_group
   class Painting < FlatMediumType
     def self.set
       Options.set
@@ -191,7 +192,7 @@ class FlatMediumType
       end
     end
   end
-
+end
   # module LimitedEdition
   #   def self.set
   #     ['limited edition', 'sold out limited edition']
@@ -317,4 +318,3 @@ class FlatMediumType
   #     ['hand pulled']
   #   end
   # end
-end

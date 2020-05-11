@@ -92,6 +92,22 @@ module STI
     end
 
     #superclass context methods: ProductItem, FieldItem ########################
+    #search and scope methods ########################
+    def type_search
+      set=[]
+      file_names.each do |file_name|
+        set << hsh={scope: file_name.to_sym, type: to_type(file_name), text: to_text(file_name)}
+      end
+      set
+    end
+
+    def to_type(file_name)
+      file_name.split("_").map{|word| word.capitalize}.join("")
+    end
+
+    def to_text(file_name)
+      file_name.split("_").map{|word| word.capitalize}.join("-").pluralize
+    end
 
     #get file names inside superclass directory; second param for: scoped_assoc_names (prepends file set with superclass file name: ["product_item",...] and ["field_item",...]) #=> => ["field_item", "select_field", "text_field", "number_field", "field_set", "radio_button", "option", "check_box_field", "text_area_field"]
     def file_set

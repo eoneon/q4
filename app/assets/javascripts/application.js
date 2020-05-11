@@ -17,6 +17,12 @@
 //= require_tree .
 
 $(document).ready(function(){
+  $("body").on("click", ".caret-toggle", function(){
+    $(this).find("i").toggleClass("fa-caret-right fa-caret-down");
+    $(this).closest(".card").siblings().find("i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
+    $(this).closest(".card").siblings().find(".card-body.show").toggleClass("show hide");
+  });
+  
   //CRUD SHOW
   $("body").on("click", "#tab-index a.list-group-item", function(e){
     var item_id = '#'+$(this).attr("id");
