@@ -1,6 +1,6 @@
 class FlatMediumType
   include Context
-  #FlatMediumType.build_type_group
+  
   class Painting < FlatMediumType
     def self.set
       Options.set

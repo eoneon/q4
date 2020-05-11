@@ -4,7 +4,7 @@ module Context
   extend ActiveSupport::Concern
 
   class_methods do
-
+    #FlatMaterialType.build_type_group
     #auto-pop methods: not sure if we need to relocate at some point ###########
     def build_type_group
       self.subclasses.each do |klass|
@@ -14,26 +14,28 @@ module Context
 
     def build_product_item(klass)
       product_item = base_type_class.where(item_name: decamelize(klass.slice_class(-1))).first_or_create
-      if method_exists?(klass, :set)
-        build_and_assoc_set(product_item, klass)
-      end
+      build_and_assoc_set(product_item, klass) if method_exists?(klass, :set)
     end
 
     def build_and_assoc_set(product_item, klass)
       if klass.set.first.class == String
-        product_item = assoc_unless_included(product_item, build_select_field(klass))
+        assoc_unless_included(product_item, build_select_field(klass))
       else
-        klass.set.each do |target_class|
-          target = build_product_item(target_class)
-          product_item = assoc_unless_included(product_item, target)
-        end
+        build_product_item_set(product_item, klass)
+      end
+      product_item
+    end
+
+    def build_product_item_set(product_item, klass)
+      klass.set.each do |target_class|
+        target = build_product_item(target_class)
+        assoc_unless_included(product_item, target)
       end
       product_item
     end
 
     def assoc_unless_included(origin, target)
       origin.target_collection(target) << target unless origin.target_included?(target)
-      origin
     end
 
     def build_select_field(klass)

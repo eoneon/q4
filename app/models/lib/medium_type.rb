@@ -1,86 +1,23 @@
 class MediumType
-  module LimitedEdition
-    def self.set
-      ['limited edition', 'sold out limited edition']
-    end
+  class LimitedEditionPrint
   end
 
-  module UniqueVariation
-    def self.set
-      ['unique variation']
-    end
+  class UniqueVariationPrint
   end
 
-  module Painting
-    def self.set
-      ['painting', 'oil', 'acrylic', 'mixed media']
-    end
+  class StandardPrint
   end
 
-  module PaintingOnPaper
-    def self.set
-      ['watercolor', 'pastel', 'guache', 'sumi ink']
-    end
+  class Painting
   end
 
-  module Drawing
-    def self.set
-      ['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch',  'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing']
-    end
+  class PaintingOnPaper
   end
 
-  module MixedMedia
-    def self.set
-      ['acrylic mixed media', 'monotype']
-    end
+  class Drawing
   end
 
-  module Serigraph
-    def self.set
-      ['serigraph', 'silkscreen']
-    end
-  end
-
-  module Giclee
-    def self.set
-      ['giclee']
-    end
-  end
-
-  module MixedMediaPrint
-    def self.set
-      ['mixed media']
-    end
-  end
-
-  module Lithograph
-    def self.set
-      ['lithograph', 'offset lithograph', 'original lithograph']
-    end
-  end
-
-  module Etching
-    def self.set
-      ['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint']
-    end
-  end
-
-  module Relief
-    def self.set
-      ['relief', 'linocut', 'woodblock print', 'block print']
-    end
-  end
-
-  module Poster
-    def self.set
-      ['poster', 'vintage poster']
-    end
-  end
-
-  module PhotographyPaper
-    def self.set
-      ['photograph', 'photolithograph', 'archival photograph', 'single exposure photograph']
-    end
+  class MixedMediaDrawing
   end
 
   module Sericel

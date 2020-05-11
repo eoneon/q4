@@ -1,146 +1,122 @@
 class FlatMaterialType
   include Context
-  
+
   class StandardMaterial < FlatMaterialType
     def self.set
-      Options.set
-    end
-
-    module Options
-      def self.set
-        [Canvas,WrappedCanvas,Paper,Wood,Acrylic,Metal,MetalBox,WoodBox]
-      end
+      [Canvas,WrappedCanvas,Paper,Wood,Acrylic,Metal,MetalBox,WoodBox]
     end
   end
 
   class Canvas < FlatMaterialType
     def self.set
-      Options.set
+      ['canvas', 'canvas board', 'textured canvas']
     end
 
-    module Options
-      def self.set
-        ['canvas', 'canvas board', 'textured canvas']
+    module Assocs
+      def self.assocs
+        [FlatMountingType::CanvasMounting]
       end
     end
   end
 
   class WrappedCanvas < FlatMaterialType
     def self.set
-      Options.set
-    end
-
-    module Options
-      def self.set
-        ['gallery wrapped canvas', 'stretched canvas']
-      end
+      ['gallery wrapped canvas', 'stretched canvas']
     end
   end
 
   class Paper < FlatMaterialType
     def self.set
-      Options.set
+      ['paper', 'deckle edge paper', 'rice paper', 'arches paper', 'sommerset paper', 'mother of pearl paper']
     end
 
-    module Options
-      def self.set
-        ['paper', 'deckle edge paper', 'rice paper', 'arches paper', 'sommerset paper', 'mother of pearl paper']
+    module Assocs
+      def self.assocs
+        [FlatMountingType::StandardMounting]
       end
     end
   end
 
   class Wood < FlatMaterialType
     def self.set
-      Options.set
+      ['wood', 'wood panel', 'board']
     end
 
-    module Options
-      def self.set
-        ['wood', 'wood panel', 'board']
+    module Assocs
+      def self.assocs
+        [FlatMountingType::StandardMounting]
       end
     end
   end
 
   class Acrylic < FlatMaterialType
     def self.set
-      Options.set
+      ['acrylic', 'acrylic panel', 'resin']
     end
 
-    module Options
-      def self.set
-        ['acrylic', 'acrylic panel', 'resin']
+    module Assocs
+      def self.assocs
+        [FlatMountingType::StandardMounting]
       end
     end
   end
 
   class Metal < FlatMaterialType
     def self.set
-      Options.set
+      ['metal', 'metal panel', 'aluminum', 'aluminum panel']
     end
 
-    module Options
-      def self.set
-        ['metal', 'metal panel', 'aluminum', 'aluminum panel']
+    module Assocs
+      def self.assocs
+        [FlatMountingType::StandardMounting]
       end
     end
   end
 
   class MetalBox < FlatMaterialType
     def self.set
-      Options.set
-    end
-
-    module Options
-      def self.set
-        ['metal box']
-      end
+      ['metal box']
     end
   end
 
   class WoodBox < FlatMaterialType
     def self.set
-      Options.set
-    end
-
-    module Options
-      def self.set
-        ['wood box']
-      end
+      ['wood box']
     end
   end
 
   class PhotographyPaper < FlatMaterialType
     def self.set
-      Options.set
+      ['paper', 'photography paper', 'archival grade paper']
     end
 
-    module Options
-      def self.set
-        ['paper', 'photography paper', 'archival grade paper']
+    module Assocs
+      def self.assocs
+        [FlatMountingType::StandardMounting]
       end
     end
   end
 
   class AnimationPaper < FlatMaterialType
     def self.set
-      Options.set
+      ['paper', 'animation paper']
     end
 
-    module Options
-      def self.set
-        ['paper', 'animation paper']
+    module Assocs
+      def self.assocs
+        [FlatMountingType::StandardMounting]
       end
     end
   end
 
   class Sericel < FlatMaterialType
     def self.set
-      Options.set
+      ['sericel', 'sericel with background', 'sericel with lithographic background']
     end
 
-    module Options
-      def self.set
-        ['sericel', 'sericel with background', 'sericel with lithographic background']
+    module Assocs
+      def self.assocs
+        [FlatMountingType::SericelMounting]
       end
     end
   end
