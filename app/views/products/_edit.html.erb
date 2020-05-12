@@ -1,0 +1,28 @@
+<%= form_with model: product, url: url, scope: form_scope(product), id: dom_ref(product, :edit) do |f| %>
+  <div class="form-row align-items-center">
+    <div class="col-5">
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text">type:</span>
+        </div>
+        <%= f.select :type, types(Product), {prompt: "- select type -"}, {class: "form-control"} %>
+      </div>
+    </div>
+
+    <div class="col-7">
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text">name:</span>
+        </div>
+        <%= f.text_field :product_name, placeholder: "name", class: "form-control" %>
+        <div class="input-group-append">
+          <button class="btn btn-sm btn-outline-primary" type="submit">edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row toggle-field-group" id="<%= dom_ref(product, :form, :fields) %>">
+    <%= render "products/fields_for", product: product, f: f %>
+  </div>
+<% end %>

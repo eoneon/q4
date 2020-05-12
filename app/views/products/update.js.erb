@@ -1,0 +1,2 @@
+$("#<%= dom_ref(@product, :edit) %>").replaceWith("<%= j render 'products/edit', product: @product, url: product_path(@product) %>");
+$("#<%= dom_ref(@product, :index) %>").html("<%= j render 'products/index', origin: @product %>");

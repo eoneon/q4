@@ -33,6 +33,10 @@ module STI
     to_base_class.name
   end
 
+  def base_dir
+    base_type.underscore.pluralize
+  end
+
   #=> ["materials", "mountings"]
   def scoped_assoc_names
     to_class.scoped_assoc_names(to_base_class).map{|assoc| assoc}

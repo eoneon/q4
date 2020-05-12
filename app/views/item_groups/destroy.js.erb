@@ -1,1 +1,1 @@
-$("#<%= dom_ref(@product_item, :index) %>").html("<%= j render 'product_items/index', origin: @product_item %>");
+$("#<%= dom_ref(@origin, :index) %>").html('<%= j render "#{@origin.base_dir}/index", origin: @origin %>');

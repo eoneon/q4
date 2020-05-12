@@ -1,0 +1,28 @@
+<div class="card border border-dark mb-1" id="<%= dom_ref(target, :show) %>">
+  <div class="card-header py-0" id="<%= dom_ref(target, :header) %>">
+    <div class="row align-items-center bg-light">
+
+      <div class="col-auto mr-0 mx-0 pr-0">
+        <%= render "item_groups/sorter", item_group: item_group %>
+      </div>
+
+      <div class="col-auto mr-0 mx-0 pr-0">
+        <button class="caret-toggle btn btn-lg bg-transparent ml-1 my-1 pl-2 py-0" data-toggle="collapse" data-target="#<%= dom_ref(target, :body) %>" type="button"><%= (fa_icon "caret-right") %></button>
+      </div>
+
+      <div class="col-9 mt-3">
+        <%= render 'products/edit', product: target, url: product_path(target)%>
+      </div>
+
+      <div class="col-1">
+        <%= render "products/field_toggle", product: target, delete_url: item_group_path(item_group) %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-1 collapse" id="<%= dom_ref(target, :body) %>">
+    <div id='<%= dom_ref(target, :index) %>'>
+      <%= render "products/index", origin: target %>
+    </div>
+  </div>
+</div>
