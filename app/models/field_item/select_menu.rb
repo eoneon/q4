@@ -8,8 +8,11 @@ class SelectMenu < FieldItem
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  def self.builder(f_hsh)
-    select_menu = where(field_name: f_hsh[:field_name]).first_or_create
-    f_hsh[:options].map {|opt| assoc_unless_included(opt)}
+  validates :field_name, uniqueness: true
+  
+  def self.builder(f)
+    select_menu = where(field_name: f[:field_name]).first_or_create
+    f[:options].map {|opt| select_menu.assoc_unless_included(opt)}
+    select_menu
   end
 end

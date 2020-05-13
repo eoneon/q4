@@ -19,7 +19,8 @@ module Context
 
     def build_and_assoc_set(product_item, klass)
       if klass.set.first.class == String
-        assoc_unless_included(product_item, build_select_field(klass))
+        #assoc_unless_included(product_item, build_select_field(klass))
+        product_item.assoc_unless_included(build_select_field(klass))
       else
         build_product_item_set(product_item, klass)
       end
@@ -29,14 +30,15 @@ module Context
     def build_product_item_set(product_item, klass)
       klass.set.each do |target_class|
         target = build_product_item(target_class)
-        assoc_unless_included(product_item, target)
+        #assoc_unless_included(product_item, target)
+        product_item.assoc_unless_included(target)
       end
       product_item
     end
 
-    def assoc_unless_included(origin, target)
-      origin.target_collection(target) << target unless origin.target_included?(target)
-    end
+    # def assoc_unless_included(origin, target)
+    #   origin.target_collection(target) << target unless origin.target_included?(target)
+    # end
 
     def build_select_field(klass)
       select_field = SelectField.where(field_name: "#{decamelize(klass.slice_class(-1))}-options").first_or_create
@@ -46,7 +48,7 @@ module Context
     def build_options(select_field, opt_set)
       opt_set.each do |opt_name|
         opt = Option.where(field_name: opt_name).first_or_create
-        assoc_unless_included(select_field, opt)
+        select_field.assoc_unless_included(opt)
       end
       select_field
     end
