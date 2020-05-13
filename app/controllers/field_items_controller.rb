@@ -1,4 +1,15 @@
 class FieldItemsController < ApplicationController
+  def index
+    @field_items = FieldItem.all
+  end
+
+  def show
+    @field_item = FieldItem.find(params[:id])
+    respond_to do |format|
+      format.js
+    end
+  end
+  
   def create
     @field_item = FieldItem.new(field_item_params)
     @field_item.save

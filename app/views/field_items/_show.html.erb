@@ -1,0 +1,21 @@
+<div class="card border border-dark" id="<%= dom_ref(field_item, :show) %>">
+  <div class="card-header py-0" id="<%= dom_ref(field_item, :header) %>">
+    <div class="row align-items-center bg-light">
+
+      <div class="col-11 mt-3 pr-0">
+        <%= render 'field_items/edit', field_item: field_item, url: field_item_path(field_item) %>
+      </div>
+
+      <div class="col-1">
+        <%= render "field_items/field_toggle", field_item: field_item, delete_url: field_item_path(field_item, method: "delete") %>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card-body p-1" id="<%= dom_ref(field_item, :body) %>">
+    <div id='<%= dom_ref(field_item, :index) %>'>
+      <%= render "product_items/index", origin: field_item %>
+    </div>
+  </div>
+</div>

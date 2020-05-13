@@ -1,0 +1,7 @@
+<%= form_with model: FieldItem.new, id: "field_item-new" do |f| %>
+  <div class="form-inline">
+    <%= f.select :type, FieldItem.types, {prompt: "- select type -"}, {class: "form-control form-control-sm mr-sm-2"} %>
+    <%= f.text_field :field_name, placeholder: "name", class: "form-control form-control-sm mr-sm-2" %>
+    <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">submit</button>
+  </div>
+<% end %>

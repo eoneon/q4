@@ -56,6 +56,10 @@ module STI
     self.target_collection(target).include?(target)
   end
 
+  def assoc_unless_included(target)
+    self.target_collection(target) << target unless self.target_included?(target)
+  end
+
   class_methods do
     #controller methods ########################################################
 
@@ -103,6 +107,10 @@ module STI
         set << hsh={scope: file_name.to_sym, type: to_type(file_name), text: to_text(file_name)}
       end
       set
+    end
+
+    def types
+      type_search.map{|h| h[:type]}
     end
 
     def to_type(file_name)

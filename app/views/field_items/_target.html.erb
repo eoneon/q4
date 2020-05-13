@@ -15,7 +15,7 @@
       </div>
 
       <div class="col-1">
-        <%= render "field_items/field_toggle", field_item: target, delete_url: item_group_path(item_group) %>
+        <%= render "field_items/field_toggle", field_item: target, delete_url: item_group_path(item_group, method: "delete") %>
       </div>
     </div>
   </div>
