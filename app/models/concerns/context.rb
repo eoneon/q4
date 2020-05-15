@@ -5,6 +5,10 @@ module Context
 
   class_methods do
 
+    def select_menu_group(field_name, options)
+      SelectMenu.builder(f={field_name: field_name, options: options})
+    end
+
     def select_field_group(field_name, options)
       SelectField.builder(f={field_name: field_name, options: options})
     end
