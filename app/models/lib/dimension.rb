@@ -21,7 +21,7 @@ class Dimension
 
   module FieldGroup
     def self.builder(dimension_set)
-      FieldSet.builder(f={field_name: arr_to_text(dimension_set), options: options(dimension_set)})
+      FieldSet.builder(f={field_name: Dimension.arr_to_text(dimension_set), options: options(dimension_set)})
     end
 
     def self.options(dimension_set)
@@ -56,14 +56,14 @@ class Dimension
       %w[diameter weight]
     end
 
-    def self.arr_to_text(arr)
-      if arr.length == 2
-        arr.join(" & ")
-      elsif arr.length > 2
-        [arr[0..-3].join(", "), arr[-2, 2].join(" & ")].join(", ")
-      else
-        arr[0]
-      end
-    end
+    # def self.arr_to_text(arr)
+    #   if arr.length == 2
+    #     arr.join(" & ")
+    #   elsif arr.length > 2
+    #     [arr[0..-3].join(", "), arr[-2, 2].join(" & ")].join(", ")
+    #   else
+    #     arr[0]
+    #   end
+    # end
   end
 end

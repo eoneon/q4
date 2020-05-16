@@ -1,38 +1,39 @@
 class Category
   include Context
 
+  class Original < Category
+    def self.builder
+      radio_button(field_class_name)
+    end
+  end
+
   class OneOfAKind < Category
+    def self.builder
+      radio_button(field_class_name)
+    end
   end
 
   class UniqueVariation < Category
+    def self.builder
+      radio_button(field_class_name)
+    end
   end
 
   class LimitedEdition < Category
-    def self.set
-      Options.set
-    end
-
-    module Options
-      def self.set
-        ['limited edition', 'sold out limited edition']
-      end
+    def self.builder
+      select_field_group(field_class_name, Option.builder(['limited edition', 'sold out limited edition']))
     end
   end
+
   class HandMade < Category
+    def self.builder
+      radio_button(field_class_name)
+    end
   end
 
   class HandBlownGlass < Category
-  end
-
-  class UniqueVariation < Category
-    def self.set
-      Options.set
-    end
-
-    module Options
-      def self.set
-        ['unique variation']
-      end
+    def self.builder
+      radio_button(field_class_name)
     end
   end
 

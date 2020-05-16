@@ -69,5 +69,15 @@ module Context
       name_set.join(delim)
     end
 
+    def arr_to_text(arr)
+      if arr.length == 2
+        arr.join(" & ")
+      elsif arr.length > 2
+        [arr[0..-3].join(", "), arr[-2, 2].join(" & ")].join(", ")
+      else
+        arr[0]
+      end
+    end
+
   end
 end
