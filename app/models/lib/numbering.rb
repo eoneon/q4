@@ -36,7 +36,7 @@ class Numbering
   module ProofOption
     def self.builder(field_class_name)
       if field_class_name == 'proof edition'
-        set.reject {|i| i.blank?}.map {|proof| "from #{format_vowel('a', proof)} #{proof} edition"}
+        set.reject {|i| i.blank?}.map {|proof| "from #{Numbering.format_vowel('a', proof)} #{proof} edition"}
       else
         set.map{|opt| [opt, field_class_name].reject {|i| i.nil?}.join(" ").strip}
       end
@@ -44,10 +44,6 @@ class Numbering
 
     def self.set
       ['', 'AP', 'EA', 'CP', 'GP', 'PP', 'IP', 'HC', 'TC']
-    end
-
-    def self.format_vowel(vowel, word)
-      %w[a e i o u].include?(word.first.downcase) && word.split('-').first != 'one' ? 'an' : 'a'
     end
   end
 end

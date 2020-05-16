@@ -31,6 +31,10 @@ module Context
       TextField.builder(f={field_name: field_name})
     end
 
+    def text_area_field(field_name)
+      TextField.builder(f={field_name: field_name})
+    end
+
     #abbreviated builder methods for readability ####################################################################
 
     def build_name(name_set)
@@ -40,6 +44,10 @@ module Context
     # parse scope chain relative to self #######################################
     def field_class_name
       decamelize(klass_name)
+    end
+
+    def search_hsh
+      h={kind: slice_class(0).underscore, sub_kind: klass_name.underscore}
     end
 
     def klass_name
@@ -63,6 +71,7 @@ module Context
       klass.methods(false).include?(method)
     end
 
+    # text formatting methods ##################################################
     def decamelize(camel_word, *delim)
       delim = delim.empty? ? ' ' : delim.first
       name_set = camel_word.to_s.underscore.split('_')
@@ -77,6 +86,10 @@ module Context
       else
         arr[0]
       end
+    end
+
+    def format_vowel(vowel, word)
+      %w[a e i o u].include?(word.first.downcase) && word.split('-').first != 'one' ? 'an' : 'a'
     end
 
   end
