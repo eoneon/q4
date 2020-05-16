@@ -1,69 +1,53 @@
 class Numbering
   include Context
-
+  #Numbering.builder
   def self.builder
-    SelectMenu.builder(field_name: decamelize(self.slice_class(0)), options: self.subclasses.map {|klass| klass.builder})
+    select_menu_group(decamelize(self.slice_class(0)), self.subclasses.map {|klass| klass.builder})
   end
 
   class Numbered < Numbering
     def self.builder
-      klass_name = decamelize(self.slice_class(-1))
-      f={field_name: klass_name, options: [Edition.select_field(klass_name), NumberField.builder(f={field_name:'edition_number'}), NumberField.builder(f={field_name:'edition_size'})]}
-      FieldSet.builder(f)
+      select_field = select_field_group("#{field_class_name.sub('numbered', 'numbering')}", Option.builder(ProofOption.builder(field_class_name)))
+      field_set_group(field_class_name, [select_field, number_field('edition_number'), number_field('edition_size')])
     end
   end
 
   class RomanNumbered < Numbering
     def self.builder
-      klass_name = decamelize(self.slice_class(-1))
-      f={field_name: klass_name, options: [Edition.select_field(klass_name), TextField.builder(f={field_name:'edition_number'}), TextField.builder(f={field_name:'edition_size'})]}
-      FieldSet.builder(f)
+      select_field = select_field_group("#{field_class_name.sub('numbered', 'numbering')}", Option.builder(ProofOption.builder(field_class_name)))
+      field_set_group(field_class_name, [select_field, text_field('edition_number'), text_field('edition_size')])
     end
   end
 
   class JapaneseNumbered < Numbering
     def self.builder
-      Edition.select_field(decamelize(self.slice_class(-1)))
+      select_field_group("#{field_class_name.sub('numbered', 'numbering')}", Option.builder(ProofOption.builder(field_class_name)))
     end
   end
 
   class ProofEdition < Numbering
     def self.builder
-      Edition.select_field(decamelize(self.slice_class(-1)))
+      select_field_group("#{field_class_name.sub('numbered', 'numbering')}", Option.builder(ProofOption.builder(field_class_name)))
     end
   end
 
   ##############################################################################
 
-  module Edition
-    def self.select_field(klass_name)
-      SelectField.builder(f={field_name: select_field_name(klass_name), options: Option.builder(Proof.build_option_names(klass_name))})
+  module ProofOption
+    def self.builder(field_class_name)
+      if field_class_name == 'proof edition'
+        set.reject {|i| i.blank?}.map {|proof| "from #{format_vowel('a', proof)} #{proof} edition"}
+      else
+        set.map{|opt| [opt, field_class_name].reject {|i| i.nil?}.join(" ").strip}
+      end
     end
 
-    def self.select_field_name(klass_name)
-      "#{klass_name.sub('numbered', 'numbering')}-options"
-    end
-  end
-
-  module Proof
     def self.set
       ['', 'AP', 'EA', 'CP', 'GP', 'PP', 'IP', 'HC', 'TC']
     end
 
-    def self.build_option_names(klass_name)
-      if klass_name == 'proof edition'
-        set.reject {|i| i.blank?}.map {|proof| "from #{format_vowel('a', proof)} #{proof} edition"}
-      else
-        set.map{|opt| [opt, klass_name].reject {|i| i.nil?}.join(" ").strip}
-      end
-    end
-
     def self.format_vowel(vowel, word)
-      if %w[a e i o u].include?(word.first.downcase) && word.split('-').first != 'one'
-        'an'
-      else
-        'a'
-      end
+      %w[a e i o u].include?(word.first.downcase) && word.split('-').first != 'one' ? 'an' : 'a'
     end
   end
 end

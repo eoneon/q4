@@ -23,6 +23,14 @@ module Context
       RadioButton.builder(f={field_name: field_name})
     end
 
+    def number_field(field_name)
+      NumberField.builder(f={field_name: field_name})
+    end
+
+    def text_field(field_name)
+      TextField.builder(f={field_name: field_name})
+    end
+
     #abbreviated builder methods for readability ####################################################################
 
     def build_name(name_set)
