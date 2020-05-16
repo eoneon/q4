@@ -5,13 +5,25 @@ module Context
 
   class_methods do
 
+    #abbreviated subclass builder methods for readability ###############################
+    #these could theoretically be added to FieldItem superclass and then just have non-applicable subclasses like Option just overwright with their own method
     def select_menu_group(field_name, options)
       SelectMenu.builder(f={field_name: field_name, options: options})
+    end
+
+    def field_set_group(field_name, options)
+      FieldSet.builder(f={field_name: field_name, options: options})
     end
 
     def select_field_group(field_name, options)
       SelectField.builder(f={field_name: field_name, options: options})
     end
+
+    def radio_button(field_name)
+      RadioButton.builder(f={field_name: field_name})
+    end
+
+    #abbreviated builder methods for readability ####################################################################
 
     def build_name(name_set)
       name_set.uniq.reject {|i| i.blank?}.join(" ")

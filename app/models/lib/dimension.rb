@@ -3,29 +3,24 @@ class Dimension
   #Dimension::FlatDimension.builder
   class FlatDimension < Dimension
     def self.builder
-      klass_name = decamelize(self.slice_class(-1))
-      SelectMenu.builder(h={field_name: klass_name.pluralize, options: [Set.width_height, Set.image_diameter].map{|set| Set.builder(set)}})
+      select_menu_group(field_class_name.pluralize, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set)})
     end
   end
 
   class BoxDimension < Dimension
     def self.builder
-      klass_name = decamelize(self.slice_class(-1))
-      SelectMenu.builder(h={field_name: klass_name.pluralize, options: [Set.width_height_depth].map{|set| Set.builder(set)}})
+      select_menu_group(field_class_name.pluralize, [FieldGroup.width_height_depth].map{|set| FieldGroup.builder(set)})
     end
   end
 
-  class SculptureDimension < Dimension
+  class DepthDimension < Dimension
     def self.builder
-      klass_name = decamelize(self.slice_class(-1))
-      SelectMenu.builder(h={field_name: klass_name.pluralize, options: [Set.width_height_depth, Set.width_height_depth_weight, Set.diameter_height_weight, Set.diameter_weight].map{|set| Set.builder(set)}})
+      select_menu_group(field_class_name.pluralize, [FieldGroup.width_height_depth, FieldGroup.width_height_depth_weight, FieldGroup.diameter_height_weight, FieldGroup.diameter_weight].map{|set| FieldGroup.builder(set)})
     end
   end
 
-  module Set
+  module FieldGroup
     def self.builder(dimension_set)
-      #options = dimension_set.map {|field_name| NumberField.builder(f={field_name: field_name})}
-      #FieldSet.builder(f={field_name: arr_to_text(dimension_set), options: options})
       FieldSet.builder(f={field_name: arr_to_text(dimension_set), options: options(dimension_set)})
     end
 
@@ -51,6 +46,10 @@ class Dimension
 
     def self.diameter_height_weight
       %w[diameter height weight]
+    end
+
+    def self.diameter_height
+      %w[diameter height]
     end
 
     def self.diameter_weight

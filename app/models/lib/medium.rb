@@ -40,7 +40,8 @@ class Medium
 
   class Giclee < Medium
     def self.builder
-      select_field_group(field_class_name, Option.builder(['giclee']))
+      radio_button(field_class_name)
+      #select_field_group(field_class_name, Option.builder(['giclee']))
     end
   end
 
@@ -88,7 +89,8 @@ class Medium
 
   class ProductionCel < Medium
     def self.builder
-      select_field_group(field_class_name, Option.builder(['original hand painted production sericel']))
+      radio_button('original hand painted production sericel')
+      #select_field_group(field_class_name, Option.builder(['original hand painted production sericel']))
     end
   end
 
