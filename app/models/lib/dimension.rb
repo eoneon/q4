@@ -3,19 +3,19 @@ class Dimension
   #Dimension::FlatDimension.builder
   class FlatDimension < Dimension
     def self.builder
-      select_menu_group(field_class_name.pluralize, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set)})
+      select_menu(field_class_name.pluralize, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set)}, search_hsh)
     end
   end
 
   class BoxDimension < Dimension
     def self.builder
-      select_menu_group(field_class_name.pluralize, [FieldGroup.width_height_depth].map{|set| FieldGroup.builder(set)})
+      select_menu(field_class_name.pluralize, [FieldGroup.width_height_depth].map{|set| FieldGroup.builder(set)}, search_hsh)
     end
   end
 
   class DepthDimension < Dimension
     def self.builder
-      select_menu_group(field_class_name.pluralize, [FieldGroup.width_height_depth, FieldGroup.width_height_depth_weight, FieldGroup.diameter_height_weight, FieldGroup.diameter_weight].map{|set| FieldGroup.builder(set)})
+      select_menu(field_class_name.pluralize, [FieldGroup.width_height_depth, FieldGroup.width_height_depth_weight, FieldGroup.diameter_height_weight, FieldGroup.diameter_weight].map{|set| FieldGroup.builder(set)}, search_hsh)
     end
   end
 
@@ -55,15 +55,5 @@ class Dimension
     def self.diameter_weight
       %w[diameter weight]
     end
-
-    # def self.arr_to_text(arr)
-    #   if arr.length == 2
-    #     arr.join(" & ")
-    #   elsif arr.length > 2
-    #     [arr[0..-3].join(", "), arr[-2, 2].join(" & ")].join(", ")
-    #   else
-    #     arr[0]
-    #   end
-    # end
   end
 end

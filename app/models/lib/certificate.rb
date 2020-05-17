@@ -1,61 +1,67 @@
 class Certificate
   include Context
 
+  def self.field_name
+    "#{field_class_name} COA"
+  end
+
   class Standard < Certificate
     def self.builder
-      select_field_group(field_class_name, Option.builder(['COA', 'LOA']))
+      select_field(field_name, Option.builder(['COA', 'LOA']), search_hsh)
     end
   end
 
   class PeterMax < Certificate
     def self.builder
-      select_field_group(field_class_name, Option.builder(['COA', 'LOA', 'COA from Peter Max Studios']))
+      select_field(field_name, Option.builder(['COA', 'LOA', 'COA from Peter Max Studios']), search_hsh)
     end
   end
 
   class PsaDna < Certificate
     def self.builder
-      select_field_group(field_class_name, Option.builder(['COA', 'LOA', 'PSA/DNA']))
+      select_field(field_name, Option.builder(['COA', 'LOA', 'PSA/DNA']), search_hsh)
     end
   end
 
   class Britto < Certificate
     def self.builder
-      select_field_group(field_class_name, Option.builder(['COA', 'LOA', 'stamped inverso']))
+      select_field(field_name, Option.builder(['COA', 'LOA', 'stamped inverso']), search_hsh)
     end
   end
 
-  #Certificate::Animation.builder
+  #Certificate::Standard.builder Certificate::Animation.builder Certificate::Animation::AnimationSeal.builder
   class Animation < Certificate
     def self.builder
-      select_menu_group(field_class_name, FieldGroup.builder.flatten)
+      select_menu(field_name, FieldSetOption.builder, search_hsh)
     end
 
-    class AnimationSeal < Certificate
+    class AnimationSeal < Animation
       def self.builder
-        select_field_group(field_class_name, Option.builder(['Warner Bros.', 'Looney Tunes', 'Hanna Barbera']))
+        select_field(field_class_name, Option.builder(['Warner Bros.', 'Looney Tunes', 'Hanna Barbera']), search_hsh)
       end
     end
 
-    class SportsSeal < Certificate
+    class SportsSeal < Animation
       def self.builder
-        select_field_group(field_class_name, Option.builder(['NFL', 'NBA', 'MLB', 'NHL']))
+        select_field(field_class_name, Option.builder(['NFL', 'NBA', 'MLB', 'NHL']), search_hsh)
       end
     end
 
-    class AnimationCertificate < Certificate
+    class AnimationCertificate < Animation
       def self.builder
-        select_field_group(field_class_name, Option.builder(['COA', 'LOA', 'COA from Linda Jones Enterprises']))
+        select_field(field_class_name, Option.builder(['COA', 'LOA', 'COA from Linda Jones Enterprises']), search_hsh)
       end
     end
 
-    module FieldGroup
+    module FieldSetOption
       def self.builder
-        option_sets.each do |options|
-          FieldSet.builder(f={field_name: Certificate.arr_to_text(options.map(&:field_name)), options: options})
+        set=[]
+        option_sets.each do |option_set|
+          set << FieldSet.builder(f={field_name: Certificate.arr_to_text(option_set.map(&:field_name)), options: option_set})
         end
+        set.flatten
       end
-
+      #sets of select_fields [select_field, select_field, select_field]
       def self.option_sets
         [[AnimationSeal.builder, SportsSeal.builder, AnimationCertificate.builder], [AnimationSeal.builder, AnimationCertificate.builder], [SportsSeal.builder, AnimationCertificate.builder], [SportsSeal.builder, AnimationSeal.builder], [AnimationSeal.builder], [AnimationCertificate.builder]]
       end

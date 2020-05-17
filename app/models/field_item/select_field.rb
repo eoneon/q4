@@ -4,6 +4,7 @@ class SelectField < FieldItem
 
   def self.builder(f)
     select_field = SelectField.where(field_name: f[:field_name]).first_or_create
+    update_tags(select_field, f[:tags])
     f[:options].map {|opt| select_field.assoc_unless_included(opt)}
     select_field
   end

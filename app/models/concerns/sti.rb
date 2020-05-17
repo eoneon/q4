@@ -61,7 +61,7 @@ module STI
   end
 
   class_methods do
-    #controller methods ########################################################
+  #controller methods ########################################################
 
     #param ex: target_hsh={:item_name => "canvas, paper, wood, metal"}
     def update_targets(target_hsh)
@@ -85,6 +85,25 @@ module STI
         set << where(k.to_sym => name.strip).first_or_create
       end
       set
+    end
+
+    #build methods: normalize hstore field ########################################################
+    # def update_tags(obj, tag_hsh)
+    #   tag_hsh, tags = tag_hsh.stringify_keys, obj.tags
+    #   return if tag_hsh.blank? || tag_hsh == tags
+    #   obj.tags = assign_or_merge(tags, tag_hsh)
+    #   obj.save
+    # end
+
+    def update_tags(obj, tag_hsh)
+      #tag_hsh, tags = tag_hsh.stringify_keys, obj.tags
+      return if tag_hsh.blank? || tag_hsh.stringify_keys == obj.tags
+      obj.tags = assign_or_merge(obj.tags, tag_hsh.stringify_keys)
+      obj.save
+    end
+
+    def assign_or_merge(h, h2)
+      h.nil? ? h2 : h.merge(h2)
     end
 
     #class context methods, i.e., Medium, Material,...##########################

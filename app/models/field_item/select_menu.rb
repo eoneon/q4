@@ -9,9 +9,10 @@ class SelectMenu < FieldItem
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
   validates :field_name, uniqueness: true
-  
+
   def self.builder(f)
     select_menu = where(field_name: f[:field_name]).first_or_create
+    update_tags(select_menu, f[:tags])
     f[:options].map {|opt| select_menu.assoc_unless_included(opt)}
     select_menu
   end

@@ -7,35 +7,38 @@ module Context
 
     #abbreviated subclass builder methods for readability ###############################
     #these could theoretically be added to FieldItem superclass and then just have non-applicable subclasses like Option just overwright with their own method
-    def select_menu_group(field_name, options)
-      SelectMenu.builder(f={field_name: field_name, options: options})
+    def select_menu(field_name, options, tags=nil)
+      SelectMenu.builder(f={field_name: field_name, options: options, tags: tags})
     end
 
-    def field_set_group(field_name, options)
-      FieldSet.builder(f={field_name: field_name, options: options})
+    def field_set(field_name, options, tags=nil)
+      FieldSet.builder(f={field_name: field_name, options: options, tags: tags})
     end
 
-    def select_field_group(field_name, options)
-      SelectField.builder(f={field_name: field_name, options: options})
+    def select_field(field_name, options, tags=nil)
+      SelectField.builder(f={field_name: field_name, options: options, tags: tags})
     end
 
-    def radio_button(field_name)
-      RadioButton.builder(f={field_name: field_name})
+    def radio_button(field_name, tags=nil)
+      RadioButton.builder(f={field_name: field_name, tags: tags})
     end
 
-    def number_field(field_name)
-      NumberField.builder(f={field_name: field_name})
+    def number_field(field_name, tags=nil)
+      NumberField.builder(f={field_name: field_name, tags: tags})
     end
 
-    def text_field(field_name)
-      TextField.builder(f={field_name: field_name})
+    def text_field(field_name, tags=nil)
+      TextField.builder(f={field_name: field_name, tags: tags})
     end
 
-    def text_area_field(field_name)
-      TextField.builder(f={field_name: field_name})
+    def text_area_field(field_name, tags=nil)
+      TextField.builder(f={field_name: field_name, tags: tags})
     end
 
     #abbreviated builder methods for readability ####################################################################
+    def builder
+      self.subclasses.map {|klass| klass.builder}
+    end
 
     def build_name(name_set)
       name_set.uniq.reject {|i| i.blank?}.join(" ")
@@ -69,6 +72,27 @@ module Context
     # utility methods ##########################################################
     def method_exists?(klass, method)
       klass.methods(false).include?(method)
+    end
+
+    # array parsing methods ####################################################
+    def include_any?(arr_x, arr_y)
+      arr_x.any? {|x| arr_y.include?(x)}
+    end
+
+    def include_all?(arr_x, arr_y)
+      arr_x.all? {|x| arr_y.include?(x)}
+    end
+
+    def exclude_all?(arr_x, arr_y)
+      arr_x.all? {|x| arr_y.exclude?(x)}
+    end
+
+    def include_none?(arr_x, arr_y)
+      arr_x.all? {|x| arr_y.exclude?(x)}
+    end
+
+    def include_pat?(str, pat)
+      str.index(/#{pat}/)
     end
 
     # text formatting methods ##################################################

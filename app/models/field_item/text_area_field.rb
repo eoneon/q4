@@ -1,7 +1,9 @@
 class TextAreaField < FieldItem
   validates :type, :field_name, presence: true
-  
+
   def self.builder(f)
-    TextAreaField.where(field_name: f[:field_name]).first_or_create
+    text_area_field = TextAreaField.where(field_name: f[:field_name]).first_or_create
+    update_tags(text_field, f[:tags])
+    text_area_field
   end
 end
