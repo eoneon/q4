@@ -1,9 +1,5 @@
 class Mounting
   include Context
-  #Mounting.builder
-  def self.builder
-    self.subclasses.map {|klass| klass.builder}
-  end
 
   class StandardMounting < Mounting
     def self.builder

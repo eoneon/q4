@@ -1,6 +1,6 @@
 class Numbering
   include Context
-  #Numbering.builder
+  
   def self.builder
     select_menu(decamelize(self.slice_class(0)), self.subclasses.map {|klass| klass.builder}, search_hsh)
   end

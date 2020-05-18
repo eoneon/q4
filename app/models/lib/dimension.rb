@@ -1,6 +1,6 @@
 class Dimension
   include Context
-  #Dimension::FlatDimension.builder
+  
   class FlatDimension < Dimension
     def self.builder
       select_menu(field_class_name.pluralize, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set)}, search_hsh)

@@ -50,7 +50,7 @@ module Context
     end
 
     def search_hsh
-      h={kind: slice_class(0).underscore, sub_kind: klass_name.underscore}
+      h={kind: slice_class(-2).underscore, sub_kind: klass_name.underscore}
     end
 
     def klass_name
