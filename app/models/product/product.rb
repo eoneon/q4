@@ -14,4 +14,11 @@ class Product < ApplicationRecord
   has_many :text_fields, through: :item_groups, source: :target, source_type: "TextField"
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
+
+  def self.builder(f)
+    product = self.where(product_name: f[:product_name]).first_or_create
+    update_tags(product, f[:tags])
+    f[:options].map {|opt| product.assoc_unless_included(opt)}
+    product
+  end
 end

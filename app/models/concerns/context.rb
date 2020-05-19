@@ -4,6 +4,9 @@ module Context
   extend ActiveSupport::Concern
 
   class_methods do
+    def product(type, product_name, options, tags=nil)
+      type.constantize.builder(p={product_name: product_name, options: options, tags: tags})
+    end
 
     #abbreviated subclass builder methods for readability ###############################
     #these could theoretically be added to FieldItem superclass and then just have non-applicable subclasses like Option just overwright with their own method
@@ -51,6 +54,11 @@ module Context
 
     def search_hsh
       h={kind: slice_class(-2).underscore, sub_kind: klass_name.underscore}
+    end
+
+    def tags_hsh(kind_idx, sub_kind_idx)
+      set = self.to_s.split('::').map{|klass| klass.underscore}
+      h={kind: set[kind_idx], sub_kind: set[sub_kind_idx]}
     end
 
     def klass_name

@@ -1,55 +1,234 @@
 class Medium
   include Context
+  #Medium::PaintMedia::PaintingOnPaper.builder
 
-  class Paint < Medium
-    def self.builder
-      select_field('paint-media', options, search_hsh)
+  #compound media ##############################################################
+  class PaintMedia < Medium
+    class Painting < PaintMedia
+      def self.builder
+        select_field('paint-media', options, search_hsh)
+      end
+
+      def self.options
+        OptionSet.builder(['painting', 'oil', 'acrylic', 'mixed media'], tags_hsh(0,1))
+      end
     end
 
-    def self.options
-      Option.builder(['painting', 'oil', 'acrylic', 'mixed media'].map {|opt_name| build_name([opt_name, 'painting'])}, search_hsh)
-    end
-  end
+    class PaintingOnPaper < PaintMedia
+      def self.builder
+        select_field('paint-media (paper only)', options, search_hsh)
+      end
 
-  class PaperSpecificPaint < Medium
-    def self.builder
-      select_field('paint-media (paper only)', options, search_hsh)
+      def self.options
+        OptionSet.builder(['watercolor', 'pastel', 'guache', 'sumi ink'], tags_hsh(0,1))
+      end
     end
 
-    def self.options
-      Option.builder(['watercolor', 'pastel', 'guache', 'sumi ink'].map {|opt_name| build_name([opt_name, 'painting'])}, search_hsh)
+    module OptionSet
+      def self.builder(set, tags)
+        Option.builder(set.map {|opt_name| Medium.build_name([opt_name, 'painting'])}, tags)
+      end
     end
+
   end
 
   class DrawingMedia < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
+    class Drawing < DrawingMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], tags_hsh(0,1))
+      end
     end
 
-    def self.options
-      Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], search_hsh)
+    class MixedMediaDrawing < DrawingMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['pen and ink drawing', 'pencil drawing'], tags_hsh(0,1))
+      end
+    end
+
+    class BasicDrawing < DrawingMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['drawing'], search_hsh)
+      end
+    end
+  end
+
+  class EtchingMedia < Medium
+    class Etching < EtchingMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], tags_hsh(0,1))
+      end
+    end
+
+    class BasicEtching < EtchingMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags_hsh(0,1))
+      end
+    end
+  end
+
+  class ReliefMedia < Medium
+    class Relief < ReliefMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], tags_hsh(0,1))
+      end
+    end
+
+    class BasicRelief < ReliefMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['relief', 'mixed media relief', 'linocut'], tags_hsh(0,1))
+      end
     end
   end
 
   class MixedMedia < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
+    class BasicMixedMedia < MixedMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['mixed media'], tags_hsh(0,1))
+      end
     end
 
-    def self.options
-      Option.builder(['mixed media', 'acrylic mixed media', 'monotype'], search_hsh)
+    class AcrylicMixedMedia < MixedMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['mixed media acrylic'], tags_hsh(0,1))
+      end
+    end
+
+    class Monotype < MixedMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['monotype'], tags_hsh(0,1))
+      end
     end
   end
 
-  class Serigraph < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
+  class SilkscreenMedia < Medium
+    class Serigraph < SilkscreenMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['serigraph'], tags_hsh(0,1))
+      end
     end
 
-    def self.options
-      Option.builder(['serigraph', 'silkscreen', 'hand pulled serigraph', 'hand pulled silkscreen'], search_hsh)
+    class Silkscreen < SilkscreenMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['silkscreen'], tags_hsh(0,1))
+      end
     end
   end
+
+  class LithographMedia < Medium
+    class Lithograph < LithographMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], tags_hsh(0,1))
+      end
+    end
+
+    class BasicLithograph < LithographMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['lithograph'], tags_hsh(0,1))
+      end
+    end
+  end
+
+  class SericelMedia < Medium
+    class Sericel < SericelMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], tags_hsh(0,1))
+      end
+    end
+
+    class BasicSericel < SericelMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['sericel', 'hand painted sericel'], tags_hsh(0,1))
+      end
+    end
+  end
+
+  class PhotoMedia < Medium
+    class StandardPhoto < PhotoMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['photograph', 'photolithograph', 'archival photograph'], tags_hsh(0,1))
+      end
+    end
+
+    class SingleExposurePhoto < PhotoMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['single exposure photograph'], tags_hsh(0,1))
+      end
+    end
+  end
+
+  #simple media ################################################################
 
   class Giclee < Medium
     def self.builder
@@ -61,93 +240,25 @@ class Medium
     end
   end
 
-  class Lithograph < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
-
-    def self.options
-      Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], search_hsh)
-    end
-  end
-
-  class Etching < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
-
-    def self.options
-      Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], search_hsh)
-    end
-  end
-
-  class Relief < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
-
-    def self.options
-      Option.builder(['relief', 'linocut', 'woodblock print', 'block print'], search_hsh)
-    end
-  end
-
-  class Photography < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
-
-    def self.options
-      Option.builder(['photograph', 'photolithograph', 'archival photograph', 'single exposure photograph'], search_hsh)
-    end
-  end
-
   class PrintMedia < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
+    class BasicPrint < PrintMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
+
+      def self.options
+        Option.builder(['print', 'fine art print', 'vintage style print'], tags_hsh(0,1))
+      end
     end
 
-    def self.options
-      Option.builder(['print', 'fine art print', 'vintage style print'], search_hsh)
-    end
-  end
+    class Poster < PrintMedia
+      def self.builder
+        select_field(field_class_name, options, search_hsh)
+      end
 
-  class Poster < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
-
-    def self.options
-      Option.builder(['poster', 'vintage poster'], search_hsh)
-    end
-  end
-
-  class Sericel < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
-
-    def self.options
-      Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], search_hsh)
-    end
-  end
-
-  class ProductionCel < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
-
-    def self.options
-      Option.builder(['sericel', 'hand painted sericel'], search_hsh)
-    end
-  end
-
-  class ProductionDrawing < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
-
-    def self.options
-      Option.builder(['drawing'], search_hsh)
+      def self.options
+        Option.builder(['poster', 'vintage poster', 'concert poster'], tags_hsh(0,1))
+      end
     end
   end
 
@@ -164,7 +275,7 @@ class Medium
       end
     end
 
-    class Coloring < Embellishment
+    class Colored < Embellishment
       def self.builder
         select_field(field_class_name, options, search_hsh)
       end
@@ -207,7 +318,7 @@ class Medium
     end
 
     def self.options
-      Option.builder(['remarque', 'hand drawn remarque', 'hand colored remarque', 'hand drawn and colored remarque'], search_hsh)
+      Option.builder(['remarque', 'hand drawn remarque', 'hand colored remarque', 'hand drawn and colored remarque'], tags_hsh(0,0))
     end
   end
 

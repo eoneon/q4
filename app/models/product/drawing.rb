@@ -1,0 +1,2 @@
+class Drawing < Product
+end

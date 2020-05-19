@@ -7,7 +7,7 @@ class Material
     end
 
     def self.options
-      [Canvas.builder, Paper.builder, Wood.builder, WoodBox.builder, Metal.builder, MetalBox.builder]
+      [Canvas.builder, WrappedCanvas.builder, Paper.builder, Wood.builder, WoodBox.builder, Metal.builder, MetalBox.builder]
     end
   end
 
