@@ -1,23 +1,23 @@
 class Category
   include Context
 
-  class Original < Category
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
+  class OriginalMedia < Category
+    class Original < OriginalMedia
+      def self.builder
+        radio_button(field_class_name, tags_hsh(0,1))
+      end
     end
 
-    def self.options
-      Option.builder(['original'], search_hsh)
-    end
-  end
-
-  class OneOfAKind < Category
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
+    class OriginalProduction < OriginalMedia
+      def self.builder
+        radio_button(field_class_name, tags_hsh(0,1))
+      end
     end
 
-    def self.options
-      Option.builder(['one-of-a-kind'], search_hsh)
+    class OneOfAKind < OriginalMedia
+      def self.builder
+        radio_button(decamelize(klass_name, '-'), tags_hsh(0,1))
+      end
     end
   end
 

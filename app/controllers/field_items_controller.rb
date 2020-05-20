@@ -1,6 +1,7 @@
 class FieldItemsController < ApplicationController
   def index
-    @field_items = FieldItem.all
+    @field_items = FieldSet.where("tags -> 'kind' = 'medium'") #where("tags ? :key", key: "medium")
+    #where("tags -> 'medium' = \'#{render_as}\'")
   end
 
   def show
@@ -9,7 +10,7 @@ class FieldItemsController < ApplicationController
       format.js
     end
   end
-  
+
   def create
     @field_item = FieldItem.new(field_item_params)
     @field_item.save

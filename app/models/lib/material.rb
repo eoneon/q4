@@ -39,6 +39,13 @@ class Material
     end
   end
 
+  # class PrintMediaPaper < Material
+  #   def self.builder
+  #     select_field = select_field(field_class_name, Option.builder(['paper', 'deckle edge paper', 'rice paper', 'arches paper', 'sommerset paper', 'mother of pearl paper']), search_hsh)
+  #     field_set(field_class_name, FieldSetOption::Standard.builder(select_field), search_hsh)
+  #   end
+  # end
+
   class PhotographyPaper < Material
     def self.builder
       select_field = select_field(field_class_name, Option.builder(['paper', 'photography paper', 'archival grade paper']), search_hsh)

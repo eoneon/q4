@@ -1,112 +1,205 @@
 class Medium
   include Context
-  #Medium::PaintMedia::PaintingOnPaper.builder
+  #Medium::OriginalCategory::DrawingMedia::Drawing.builder
+  #Medium::OriginalCategory::DrawingMedia::MixedMediaDrawing.builder
 
   #compound media ##############################################################
-  class PaintMedia < Medium
-    class Painting < PaintMedia
-      def self.builder
-        select_field('paint-media', options, search_hsh)
+  class OriginalCategory < Medium
+
+    def self.category_radio_button
+      Category::OriginalMedia::Original.builder
+    end
+
+    class PaintMedia < OriginalCategory
+      class Painting < PaintMedia
+        def self.builder
+          select_field = select_field('paint-media', options, search_hsh)
+          select_menu = Material::StandardMaterial.builder
+          select_menu(field_class_name, [category_radio_button,select_field,select_menu], search_hsh)
+        end
+
+        def self.options
+          OptionSet.builder(['painting', 'oil', 'acrylic', 'mixed media'], tags_hsh(0,1))
+        end
       end
 
-      def self.options
-        OptionSet.builder(['painting', 'oil', 'acrylic', 'mixed media'], tags_hsh(0,1))
+      class PaintingOnPaper < PaintMedia
+        def self.builder
+          select_field = select_field('paint-media (paper only)', options, search_hsh)
+          select_menu = Material::Paper.builder
+          select_menu(field_class_name, [category_radio_button,select_field,select_menu], search_hsh)
+        end
+
+        def self.options
+          OptionSet.builder(['watercolor', 'pastel', 'guache', 'sumi ink'], tags_hsh(0,1))
+        end
+      end
+
+      module OptionSet
+        def self.builder(set, tags)
+          Option.builder(set.map {|opt_name| Medium.build_name([opt_name, 'painting'])}, tags)
+        end
+      end
+
+    end
+
+    class DrawingMedia < OriginalCategory
+      def self.material_select_menu
+        Material::Paper.builder
+      end
+
+      class Drawing < DrawingMedia
+        def self.builder
+          select_field = select_field(field_class_name, options, search_hsh)
+          #select_menu = Material::Paper.builder #
+          select_menu(field_class_name, [category_radio_button, select_field, material_select_menu], search_hsh)
+        end
+
+        def self.options
+          Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], tags_hsh(0,1))
+        end
+      end
+
+      class MixedMediaDrawing < DrawingMedia
+        def self.builder
+          select_field = select_field(field_class_name, options, search_hsh)
+          #select_menu = Material::Paper.builder
+          select_menu(field_class_name, [Embellishment::Colored.builder, category_radio_button, select_field, material_select_menu, Leafing.builder], search_hsh)
+        end
+
+        def self.options
+          Option.builder(['pen and ink drawing', 'pencil drawing'], tags_hsh(0,1))
+        end
       end
     end
 
-    class PaintingOnPaper < PaintMedia
-      def self.builder
-        select_field('paint-media (paper only)', options, search_hsh)
-      end
+  end #end of OriginalCategory
 
-      def self.options
-        OptionSet.builder(['watercolor', 'pastel', 'guache', 'sumi ink'], tags_hsh(0,1))
-      end
+  class OriginalProductionCategory < Medium
+
+    def self.category_radio_button
+      Category::OriginalMedia::OriginalProduction.builder
     end
 
-    module OptionSet
-      def self.builder(set, tags)
-        Option.builder(set.map {|opt_name| Medium.build_name([opt_name, 'painting'])}, tags)
-      end
-    end
-
-  end
-
-  class DrawingMedia < Medium
-    class Drawing < DrawingMedia
+    class BasicDrawing < OriginalProductionCategory
       def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], tags_hsh(0,1))
-      end
-    end
-
-    class MixedMediaDrawing < DrawingMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['pen and ink drawing', 'pencil drawing'], tags_hsh(0,1))
-      end
-    end
-
-    class BasicDrawing < DrawingMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
+        select_field = select_field(field_class_name, options, search_hsh)
+        select_menu = Material::AnimationPaper.builder
+        select_menu(field_class_name, [category_radio_button,select_field,select_menu], search_hsh)
       end
 
       def self.options
         Option.builder(['drawing'], search_hsh)
       end
     end
+
+    class BasicSericel < OriginalProductionCategory
+      def self.builder
+        select_field = select_field(field_class_name, options, search_hsh)
+        select_menu = Material::Sericel.builder
+        select_menu(field_class_name, [category_radio_button,select_field,select_menu], search_hsh)
+      end
+
+      def self.options
+        Option.builder(['sericel', 'hand painted sericel'], search_hsh)
+      end
+    end
+  end #end of OriginalProductionCategory
+
+  ##############################################################################
+  class StandardPrintCategory < Medium
   end
 
-  class EtchingMedia < Medium
-    class Etching < EtchingMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
+  ##############################################################################
+  #Medium::PrintOnPaper::EtchingMedia::Etching.builder
+  class PrintOnPaper < Medium
+    def self.embellishment_select_field
+      Embellishment::Colored.builder
+    end
+
+    def self.material_select_menu
+      Material::Paper.builder
+    end
+
+    def self.leafing_select_menu
+      Leafing.builder
+    end
+
+    class LithographMedia < PrintOnPaper
+      class Lithograph < LithographMedia
+        def self.builder
+          select_field = select_field(field_class_name, options, search_hsh)
+          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
+        end
+
+        def self.options
+          Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], tags_hsh(0,1))
+        end
       end
 
-      def self.options
-        Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], tags_hsh(0,1))
+      class BasicLithograph < LithographMedia
+        def self.builder
+          select_field = select_field(field_class_name, options, search_hsh)
+          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
+        end
+
+        def self.options
+          Option.builder(['lithograph'], tags_hsh(0,1))
+        end
       end
     end
 
-    class BasicEtching < EtchingMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
+    class EtchingMedia < PrintOnPaper
+      class Etching < EtchingMedia
+        def self.builder
+          select_field = select_field(field_class_name, options, search_hsh)
+          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
+        end
+
+        def self.options
+          Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], tags_hsh(0,1))
+        end
       end
 
-      def self.options
-        Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags_hsh(0,1))
+      class BasicEtching < EtchingMedia
+        def self.builder
+          select_field = select_field(field_class_name, options, search_hsh)
+          select_menu(embellishment_select_field, select_field, material_select_menu, leafing_select_menu)
+        end
+
+        def self.options
+          Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags_hsh(0,1))
+        end
       end
     end
+
+    class ReliefMedia < PrintOnPaper
+      class Relief < ReliefMedia
+        def self.builder
+          select_field = select_field(field_class_name, options, search_hsh)
+          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], search_hsh)
+        end
+
+        def self.options
+          Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], tags_hsh(0,1))
+        end
+      end
+
+      class BasicRelief < ReliefMedia
+        def self.builder
+          select_field = select_field(field_class_name, options, search_hsh)
+          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], search_hsh)
+        end
+
+        def self.options
+          Option.builder(['relief', 'mixed media relief', 'linocut'], tags_hsh(0,1))
+        end
+      end
+    end
+
   end
 
-  class ReliefMedia < Medium
-    class Relief < ReliefMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], tags_hsh(0,1))
-      end
-    end
-
-    class BasicRelief < ReliefMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['relief', 'mixed media relief', 'linocut'], tags_hsh(0,1))
-      end
-    end
-  end
+  ##############################################################################
 
   class MixedMedia < Medium
     class BasicMixedMedia < MixedMedia
@@ -158,28 +251,6 @@ class Medium
 
       def self.options
         Option.builder(['silkscreen'], tags_hsh(0,1))
-      end
-    end
-  end
-
-  class LithographMedia < Medium
-    class Lithograph < LithographMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], tags_hsh(0,1))
-      end
-    end
-
-    class BasicLithograph < LithographMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['lithograph'], tags_hsh(0,1))
       end
     end
   end
