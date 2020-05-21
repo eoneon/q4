@@ -1,21 +1,25 @@
 class Dimension
   include Context
-  
+
+  def self.tags
+    tags_hsh(0,-1)
+  end
+
   class FlatDimension < Dimension
     def self.builder
-      select_menu(field_class_name.pluralize, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set)}, search_hsh)
+      select_menu(field_class_name.pluralize, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set)}, tags)
     end
   end
 
   class BoxDimension < Dimension
     def self.builder
-      select_menu(field_class_name.pluralize, [FieldGroup.width_height_depth].map{|set| FieldGroup.builder(set)}, search_hsh)
+      select_menu(field_class_name.pluralize, [FieldGroup.width_height_depth].map{|set| FieldGroup.builder(set)}, tags)
     end
   end
 
   class DepthDimension < Dimension
     def self.builder
-      select_menu(field_class_name.pluralize, [FieldGroup.width_height_depth, FieldGroup.width_height_depth_weight, FieldGroup.diameter_height_weight, FieldGroup.diameter_weight].map{|set| FieldGroup.builder(set)}, search_hsh)
+      select_menu(field_class_name.pluralize, [FieldGroup.width_height_depth, FieldGroup.width_height_depth_weight, FieldGroup.diameter_height_weight, FieldGroup.diameter_weight].map{|set| FieldGroup.builder(set)}, tags)
     end
   end
 

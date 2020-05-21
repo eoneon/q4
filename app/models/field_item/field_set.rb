@@ -11,7 +11,7 @@ class FieldSet < FieldItem
   #validates :field_name, uniqueness: true
 
   def self.builder(f)
-    field_set = FieldSet.where(field_name: f[:field_name]).first_or_create
+    field_set = FieldSet.where(field_name: f[:field_name], tags: id_tags(f[:tags])).first_or_create
     update_tags(field_set, f[:tags])
     f[:options].map {|opt| field_set.assoc_unless_included(opt)}
     field_set

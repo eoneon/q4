@@ -95,8 +95,9 @@ module STI
     end
 
     def id_tags(tags, h={})
+
       unless tags.nil?
-        %w[kind sub_kind].map{|k| h[k] = tags[k] if tags.has_key?(k)}.reject {|k,v| v.nil?}
+        %w[kind sub_kind].map{|k| h[k] = tags.stringify_keys[k] if tags.stringify_keys.has_key?(k)}.reject {|k,v| v.nil?}
       end
       h
     end

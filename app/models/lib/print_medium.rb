@@ -106,7 +106,11 @@ class PrintMedium
   ##############################################################################
   #PrintMedium::FSO::MixedPrintOnPaper.builder
   class FSO < PrintMedium
-    def self.option_set(*idx_set)
+    def self.field_name(klass, material_class)
+      [klass.field_class_name, 'on', material_class.field_class_name].join(" ")
+    end
+
+    def self.media_set(*idx_set)
       if idx_set.empty?
         set.map{|a| a[1..-1]}.flatten
       elsif idx_set.count == 1
@@ -117,13 +121,14 @@ class PrintMedium
     end
 
     class MixedPrintOnPaperOnly < FSO
-      def self.field_name(field_class_name)
-        "#{field_class_name} on paper"
+      def self.options
+        MixedOnPaper.option_set(media_set)
+        #media_set.map{|klass| f={field_name: field_name(klass, Material::Paper), options: [Medium::Embellishment::Colored.builder, klass.builder, Material::Paper.builder], tags:  h={kind: 'medium', sub_kind: klass.klass_name.underscore}}
       end
 
-      def self.builder
-        option_set.map{|klass| field_set(field_name(klass.field_class_name), [Medium::Embellishment::Colored.builder, klass.builder, Material::Paper.builder], h={kind: 'medium', sub_kind: klass.klass_name.underscore})}
-      end
+      # def self.builder
+      #   media_set.map{|klass| field_set(field_name(klass, Material::Paper), [Medium::Embellishment::Colored.builder, klass.builder, Material::Paper.builder], h={kind: 'medium', sub_kind: klass.klass_name.underscore})}
+      # end
 
       def self.set
         [
@@ -137,13 +142,14 @@ class PrintMedium
     end
 
     class MixedPrintOnPaper < FSO
-      def self.field_name(field_class_name)
-        "#{field_class_name} on paper"
+      def self.options
+        MixedOnPaper.option_set(media_set)
+        #media_set.map{|klass| f={field_name: field_name(klass, Material::Paper), options: [Medium::Embellishment::Colored.builder, klass.builder, Material::Paper.builder], tags:  h={kind: 'medium', sub_kind: klass.klass_name.underscore}}
       end
 
-      def self.builder
-        option_set.map{|klass| field_set(field_name(klass.field_class_name), [Medium::Embellishment::Colored.builder, klass.builder, Material::Paper.builder], h={kind: 'medium', sub_kind: klass.klass_name.underscore})}
-      end
+      # def self.builder
+      #   media_set.map{|klass| field_set(field_name(klass, Material::Paper), [Medium::Embellishment::Colored.builder, klass.builder, Material::Paper.builder], h={kind: 'medium', sub_kind: klass.klass_name.underscore})}
+      # end
 
       def self.set
         [
@@ -159,9 +165,73 @@ class PrintMedium
           ]
         ]
       end
-    end #end of PrintOnPaper
+    end #end of MixedPrintOnPaper
+
+    class BasicMixedPrintOnPaper < FSO
+      def self.options
+        MixedOnPaper.option_set(media_set)
+        #media_set.map{|klass| f={field_name: field_name(klass, Material::Paper), options: [Medium::Embellishment::Colored.builder, klass.builder, Material::Canvas.builder], tags:  h={kind: 'medium', sub_kind: klass.klass_name.underscore}}
+      end
+      # def self.builder
+      #   media_set.map{|klass| field_set(field_name(klass, Material::Paper), [Medium::Embellishment::Colored.builder, klass.builder, Material::Paper.builder], h={kind: 'medium', sub_kind: klass.klass_name.underscore})}
+      # end
+
+      def self.set
+        [
+          [0,
+            SFO::EtchingMedia::BasicEtching,
+            SFO::ReliefMedia::BasicRelief
+          ]
+        ]
+      end
+    end #end of BasicMixedPrintOnPaper
+
+    class MixedPrintOnCanvas < FSO
+      def self.options
+        MixedOnStandardMaterial.option_set(MixedPrintOnPaper.media_set, [Material::Canvas, Material::WrappedCanvas])
+        #MixedPrintOnPaper.media_set.map{|klass| f={field_name: field_name(klass, Material::Canvas), options: [Medium::Embellishment::Embellished.builder, klass.builder, Material::Canvas.builder], tags:  h={kind: 'medium', sub_kind: klass.klass_name.underscore}}
+      end
+      # def self.builder
+      #   MixedPrintOnPaper.media_set.map{|klass| field_set(field_name(klass, Material::Canvas), [Medium::Embellishment::Embellished.builder, klass.builder, Material::Canvas.builder], h={kind: 'medium', sub_kind: klass.klass_name.underscore})}
+      # end
+    end #end of MixedPrintOnCanvas
+
+    class HandPulledPrintOnPaper < FSO
+      #MixedPrintOnPaper
+      def self.options
+        MixedOnPaper.option_set(MixedPrintOnPaper.media_set(0))
+        #MixedPrintOnPaper.media_set.map{|klass| f={field_name: field_name(klass, Material::Canvas), options: [Medium::Embellishment::Embellished.builder, klass.builder, Material::Canvas.builder], tags:  h={kind: 'medium', sub_kind: klass.klass_name.underscore}}
+      end
+
+    end #end of HandPulledPrintOnPaper
+
+    class HandPulledPrintOnCanvas < FSO
+      #MixedPrintOnPaper
+      def self.options
+        MixedOnStandardMaterial.option_set(MixedPrintOnPaper.media_set(0), [Material::Canvas, Material::WrappedCanvas])
+        #MixedPrintOnPaper.media_set.map{|klass| f={field_name: field_name(klass, Material::Canvas), options: [Medium::Embellishment::Embellished.builder, klass.builder, Material::Canvas.builder], tags:  h={kind: 'medium', sub_kind: klass.klass_name.underscore}}
+      end
+
+    end #end of HandPulledPrintOnPaper
 
   end
 
+  module MixedOnPaper
+    def self.option_set(media_set)
+      media_set.map{|medium_klass| f={field_name: field_name(medium_klass, Material::Paper), options: [Medium::Embellishment::Colored, medium_klass, Material::Paper, Medium::Leafing, Medium::Remarque], tags:  h={kind: 'medium', sub_kind: medium_klass.klass_name.underscore}}.flatten
+    end
+  end
+
+  module MixedOnStandardMaterial
+    def self.option_set(media_set, material_set)
+      material_set.map{|material_class| media_set.map{|medium_klass| f={field_name: field_name(medium_klass, material_class), options: [Medium::Embellishment::Embellished, medium_klass, material_class], tags:  h={kind: 'medium', sub_kind: medium_klass.klass_name.underscore}}}}.flatten
+    end
+  end
+
+  module CategoryAndNumbering
+    def self.option_set(medium_option_set, category=nil)
+      #
+    end
+  end
 
 end
