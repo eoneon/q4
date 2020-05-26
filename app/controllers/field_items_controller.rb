@@ -1,6 +1,6 @@
 class FieldItemsController < ApplicationController
   def index
-    @field_items = FieldSet.where("tags -> 'kind' = 'medium'") #where("tags ? :key", key: "medium")
+    @field_items = FieldSet.where("tags -> 'kind' = 'print_medium'") #where("tags ? :key", key: "medium")
     #where("tags -> 'medium' = \'#{render_as}\'")
   end
 

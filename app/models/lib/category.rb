@@ -1,63 +1,71 @@
 class Category
   include Context
 
+  def self.tags
+    tags_hsh(0,-1)
+  end
+
   class OriginalMedia < Category
+    def self.tags
+      tags_hsh(0,1)
+    end
+    
     class Original < OriginalMedia
       def self.builder
-        radio_button(field_class_name, tags_hsh(0,1))
+        radio_button(field_class_name, tags)
       end
     end
 
     class OriginalProduction < OriginalMedia
       def self.builder
-        radio_button(field_class_name, tags_hsh(0,1))
+        radio_button(field_class_name, tags)
       end
     end
 
     class OneOfAKind < OriginalMedia
       def self.builder
-        radio_button(decamelize(klass_name, '-'), tags_hsh(0,1))
+        radio_button(decamelize(klass_name, '-'), tags)
       end
     end
   end
 
   class UniqueVariation < Category
     def self.builder
-      select_field(field_class_name, options, search_hsh)
+      select_field(field_class_name, options, tags)
     end
 
     def self.options
-      Option.builder([field_class_name], search_hsh)
+      Option.builder([field_class_name], tags)
     end
   end
 
   class LimitedEdition < Category
     def self.builder
-      select_field(field_class_name, options, search_hsh)
+      select_field(field_class_name, options, tags)
     end
 
     def self.options
-      Option.builder(['limited edition', 'sold out limited edition'], search_hsh)
+      Option.builder(['limited edition', 'sold out limited edition'], tags)
     end
   end
 
   class HandMadeCeramic < Category
     def self.builder
-      select_field(field_class_name, options, search_hsh)
+      select_field(field_class_name, options, tags)
     end
 
     def self.options
-      Option.builder([field_class_name], search_hsh)
+      Option.builder([field_class_name], tags)
     end
   end
 
   class HandBlownGlass < Category
     def self.builder
-      select_field(field_class_name, options, search_hsh)
+      select_field(field_class_name, options, tags)
     end
 
     def self.options
-      Option.builder([field_class_name], search_hsh)
+      Option.builder([field_class_name], tags)
     end
   end
 

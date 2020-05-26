@@ -65,6 +65,10 @@ module Context
       slice_class(-1)
     end
 
+    def split_class
+      self.to_s.split('::')
+    end
+
     def slice_class(i=nil)
       i.nil? ? self.to_s : self.to_s.split('::')[i]
     end

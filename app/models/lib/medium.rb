@@ -107,153 +107,153 @@ class Medium
   end #end of OriginalProductionCategory
 
   ##############################################################################
-  class StandardPrintCategory < Medium
-  end
+  # class StandardPrintCategory < Medium
+  # end
 
   ##############################################################################
   #Medium::PrintOnPaper::EtchingMedia::Etching.builder
-  class PrintOnPaper < Medium
-    def self.embellishment_select_field
-      Embellishment::Colored.builder
-    end
+  # class PrintOnPaper < Medium
+  #   def self.embellishment_select_field
+  #     Embellishment::Colored.builder
+  #   end
+  #
+  #   def self.material_select_menu
+  #     Material::Paper.builder
+  #   end
+  #
+  #   def self.leafing_select_menu
+  #     Leafing.builder
+  #   end
 
-    def self.material_select_menu
-      Material::Paper.builder
-    end
+    # class LithographMedia < PrintOnPaper
+    #   class Lithograph < LithographMedia
+    #     def self.builder
+    #       select_field = select_field(field_class_name, options, search_hsh)
+    #       select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
+    #     end
+    #
+    #     def self.options
+    #       Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], tags_hsh(0,1))
+    #     end
+    #   end
+    #
+    #   class BasicLithograph < LithographMedia
+    #     def self.builder
+    #       select_field = select_field(field_class_name, options, search_hsh)
+    #       select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
+    #     end
+    #
+    #     def self.options
+    #       Option.builder(['lithograph'], tags_hsh(0,1))
+    #     end
+    #   end
+    # end
 
-    def self.leafing_select_menu
-      Leafing.builder
-    end
+    # class EtchingMedia < PrintOnPaper
+    #   class Etching < EtchingMedia
+    #     def self.builder
+    #       select_field = select_field(field_class_name, options, search_hsh)
+    #       select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
+    #     end
+    #
+    #     def self.options
+    #       Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], tags_hsh(0,1))
+    #     end
+    #   end
+    #
+    #   class BasicEtching < EtchingMedia
+    #     def self.builder
+    #       select_field = select_field(field_class_name, options, search_hsh)
+    #       select_menu(embellishment_select_field, select_field, material_select_menu, leafing_select_menu)
+    #     end
+    #
+    #     def self.options
+    #       Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags_hsh(0,1))
+    #     end
+    #   end
+    # end
 
-    class LithographMedia < PrintOnPaper
-      class Lithograph < LithographMedia
-        def self.builder
-          select_field = select_field(field_class_name, options, search_hsh)
-          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
-        end
-
-        def self.options
-          Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], tags_hsh(0,1))
-        end
-      end
-
-      class BasicLithograph < LithographMedia
-        def self.builder
-          select_field = select_field(field_class_name, options, search_hsh)
-          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
-        end
-
-        def self.options
-          Option.builder(['lithograph'], tags_hsh(0,1))
-        end
-      end
-    end
-
-    class EtchingMedia < PrintOnPaper
-      class Etching < EtchingMedia
-        def self.builder
-          select_field = select_field(field_class_name, options, search_hsh)
-          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
-        end
-
-        def self.options
-          Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], tags_hsh(0,1))
-        end
-      end
-
-      class BasicEtching < EtchingMedia
-        def self.builder
-          select_field = select_field(field_class_name, options, search_hsh)
-          select_menu(embellishment_select_field, select_field, material_select_menu, leafing_select_menu)
-        end
-
-        def self.options
-          Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags_hsh(0,1))
-        end
-      end
-    end
-
-    class ReliefMedia < PrintOnPaper
-      class Relief < ReliefMedia
-        def self.builder
-          select_field = select_field(field_class_name, options, search_hsh)
-          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], search_hsh)
-        end
-
-        def self.options
-          Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], tags_hsh(0,1))
-        end
-      end
-
-      class BasicRelief < ReliefMedia
-        def self.builder
-          select_field = select_field(field_class_name, options, search_hsh)
-          select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], search_hsh)
-        end
-
-        def self.options
-          Option.builder(['relief', 'mixed media relief', 'linocut'], tags_hsh(0,1))
-        end
-      end
-    end
-
-  end
+  #   class ReliefMedia < PrintOnPaper
+  #     class Relief < ReliefMedia
+  #       def self.builder
+  #         select_field = select_field(field_class_name, options, search_hsh)
+  #         select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], search_hsh)
+  #       end
+  #
+  #       def self.options
+  #         Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], tags_hsh(0,1))
+  #       end
+  #     end
+  #
+  #     class BasicRelief < ReliefMedia
+  #       def self.builder
+  #         select_field = select_field(field_class_name, options, search_hsh)
+  #         select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], search_hsh)
+  #       end
+  #
+  #       def self.options
+  #         Option.builder(['relief', 'mixed media relief', 'linocut'], tags_hsh(0,1))
+  #       end
+  #     end
+  #   end
+  #
+  # end
 
   ##############################################################################
 
-  class MixedMedia < Medium
-    class BasicMixedMedia < MixedMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['mixed media'], tags_hsh(0,1))
-      end
-    end
-
-    class AcrylicMixedMedia < MixedMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['mixed media acrylic'], tags_hsh(0,1))
-      end
-    end
-
-    class Monotype < MixedMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['monotype'], tags_hsh(0,1))
-      end
-    end
-  end
-
-  class SilkscreenMedia < Medium
-    class Serigraph < SilkscreenMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['serigraph'], tags_hsh(0,1))
-      end
-    end
-
-    class Silkscreen < SilkscreenMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['silkscreen'], tags_hsh(0,1))
-      end
-    end
-  end
+  # class MixedMedia < Medium
+  #   class BasicMixedMedia < MixedMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['mixed media'], tags_hsh(0,1))
+  #     end
+  #   end
+  #
+  #   class AcrylicMixedMedia < MixedMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['mixed media acrylic'], tags_hsh(0,1))
+  #     end
+  #   end
+  #
+  #   class Monotype < MixedMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['monotype'], tags_hsh(0,1))
+  #     end
+  #   end
+  # end
+  #
+  # class SilkscreenMedia < Medium
+  #   class Serigraph < SilkscreenMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['serigraph'], tags_hsh(0,1))
+  #     end
+  #   end
+  #
+  #   class Silkscreen < SilkscreenMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['silkscreen'], tags_hsh(0,1))
+  #     end
+  #   end
+  # end
 
   class SericelMedia < Medium
     class Sericel < SericelMedia
@@ -277,119 +277,149 @@ class Medium
     end
   end
 
-  class PhotoMedia < Medium
-    class StandardPhoto < PhotoMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['photograph', 'photolithograph', 'archival photograph'], tags_hsh(0,1))
-      end
-    end
-
-    class SingleExposurePhoto < PhotoMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['single exposure photograph'], tags_hsh(0,1))
-      end
-    end
-  end
+  # class PhotoMedia < Medium
+  #   class StandardPhoto < PhotoMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['photograph', 'photolithograph', 'archival photograph'], tags_hsh(0,1))
+  #     end
+  #   end
+  #
+  #   class SingleExposurePhoto < PhotoMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['single exposure photograph'], tags_hsh(0,1))
+  #     end
+  #   end
+  # end
 
   #simple media ################################################################
 
-  class Giclee < Medium
-    def self.builder
-      select_field(field_class_name, options, search_hsh)
-    end
+  # class Giclee < Medium
+  #   def self.builder
+  #     select_field(field_class_name, options, search_hsh)
+  #   end
+  #
+  #   def self.options
+  #     Option.builder(['giclee'], search_hsh)
+  #   end
+  # end
 
-    def self.options
-      Option.builder(['giclee'], search_hsh)
-    end
-  end
-
-  class PrintMedia < Medium
-    class BasicPrint < PrintMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['print', 'fine art print', 'vintage style print'], tags_hsh(0,1))
-      end
-    end
-
-    class Poster < PrintMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
-      end
-
-      def self.options
-        Option.builder(['poster', 'vintage poster', 'concert poster'], tags_hsh(0,1))
-      end
-    end
-  end
+  # class PrintMedia < Medium
+  #   class BasicPrint < PrintMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['print', 'fine art print', 'vintage style print'], tags_hsh(0,1))
+  #     end
+  #   end
+  #
+  #   class Poster < PrintMedia
+  #     def self.builder
+  #       select_field(field_class_name, options, search_hsh)
+  #     end
+  #
+  #     def self.options
+  #       Option.builder(['poster', 'vintage poster', 'concert poster'], tags_hsh(0,1))
+  #     end
+  #   end
+  # end
 
   ##############################################################################
 
   class Embellishment < Medium
+    def self.tags
+      tags_hsh(-2,-1)
+    end
+
     class Embellished < Embellishment
       def self.builder
-        select_field(field_class_name, options, search_hsh)
+        select_field(field_class_name, options, tags)
       end
 
       def self.options
-        Option.builder(['hand embellished', 'hand painted', 'artist embellished'], search_hsh)
+        Option.builder(['hand embellished', 'hand painted', 'artist embellished'], tags)
       end
     end
 
     class Colored < Embellishment
       def self.builder
-        select_field(field_class_name, options, search_hsh)
+        select_field(field_class_name, options, tags)
       end
 
       def self.options
-        Option.builder(['hand colored', 'hand watercolored', 'hand colored (pencil)', 'hand tinted'], search_hsh)
+        Option.builder(['hand colored', 'hand watercolored', 'hand colored (pencil)', 'hand tinted'], tags)
       end
     end
   end
-
+  #Medium::Leafing.tags
   class Leafing < Medium
+    def self.tags
+      tags_hsh(-1,-1)
+    end
+
     def self.builder
       select_menu(field_class_name, [GoldLeaf.builder, SilverLeaf.builder], search_hsh)
     end
 
     class GoldLeaf < Leafing
+      def self.tags
+        tags_hsh(-2,-1)
+      end
+
       def self.builder
-        select_field(field_class_name, options, search_hsh)
+        select_field(field_class_name, options, tags)
       end
 
       def self.options
-        Option.builder(['goldleaf', 'hand laid goldleaf'], search_hsh)
+        Option.builder(['goldleaf', 'hand laid goldleaf'], tags)
       end
     end
 
     class SilverLeaf < Leafing
+      def self.tags
+        tags_hsh(-2,-1)
+      end
+
       def self.builder
-        select_field(field_class_name, options, search_hsh)
+        select_field(field_class_name, options, tags)
       end
 
       def self.options
-        Option.builder(['silverleaf', 'hand laid silverleaf'], search_hsh)
+        Option.builder(['silverleaf', 'hand laid silverleaf'], tags)
       end
     end
   end
 
   class Remarque < Medium
+    def self.tags
+      tags_hsh(-1,-1)
+    end
+
     def self.builder
-      select_field(field_class_name, options, search_hsh)
+      select_field(field_class_name, options, tags)
     end
 
     def self.options
-      Option.builder(['remarque', 'hand drawn remarque', 'hand colored remarque', 'hand drawn and colored remarque'], tags_hsh(0,0))
+      Option.builder(['remarque', 'hand drawn remarque', 'hand colored remarque', 'hand drawn and colored remarque'], tags)
+    end
+  end
+
+  class HandPulled < Medium
+    def self.tags
+      tags_hsh(-1,-1)
+    end
+
+    def self.builder
+      radio_button(field_class_name, tags)
     end
   end
 
