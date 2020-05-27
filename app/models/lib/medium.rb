@@ -1,37 +1,27 @@
 class Medium
   include Context
-  #Medium::OriginalCategory::DrawingMedia::Drawing.builder
-  #Medium::OriginalCategory::DrawingMedia::MixedMediaDrawing.builder
 
-  #compound media ##############################################################
-  class OriginalCategory < Medium
-
-    def self.category_radio_button
-      Category::OriginalMedia::Original.builder
+  class SFO < Medium
+    def self.tags
+      tags_hsh(0,-2)
     end
 
-    class PaintMedia < OriginalCategory
-      class Painting < PaintMedia
-        def self.builder
-          select_field = select_field('paint-media', options, search_hsh)
-          select_menu = Material::StandardMaterial.builder
-          select_menu(field_class_name, [category_radio_button,select_field,select_menu], search_hsh)
-        end
+    def self.builder
+      select_field(field_class_name, options, tags_hsh(0,-2))
+    end
 
+    ############################################################################
+
+    class PaintingMedia < SFO
+      class Painting < PaintingMedia
         def self.options
-          OptionSet.builder(['painting', 'oil', 'acrylic', 'mixed media'], tags_hsh(0,1))
+          OptionSet.builder(['painting', 'oil', 'acrylic', 'mixed media'], tags)
         end
       end
 
-      class PaintingOnPaper < PaintMedia
-        def self.builder
-          select_field = select_field('paint-media (paper only)', options, search_hsh)
-          select_menu = Material::Paper.builder
-          select_menu(field_class_name, [category_radio_button,select_field,select_menu], search_hsh)
-        end
-
+      class PaintingOnPaper < PaintingMedia
         def self.options
-          OptionSet.builder(['watercolor', 'pastel', 'guache', 'sumi ink'], tags_hsh(0,1))
+          OptionSet.builder(['watercolor', 'pastel', 'guache', 'sumi ink'], tags)
         end
       end
 
@@ -40,386 +30,404 @@ class Medium
           Option.builder(set.map {|opt_name| Medium.build_name([opt_name, 'painting'])}, tags)
         end
       end
-
     end
 
-    class DrawingMedia < OriginalCategory
-      def self.material_select_menu
-        Material::Paper.builder
-      end
-
+    class DrawingMedia < SFO
       class Drawing < DrawingMedia
-        def self.builder
-          select_field = select_field(field_class_name, options, search_hsh)
-          #select_menu = Material::Paper.builder #
-          select_menu(field_class_name, [category_radio_button, select_field, material_select_menu], search_hsh)
-        end
-
         def self.options
-          Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], tags_hsh(0,1))
+          Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], tags_hsh(0,-2))
         end
       end
 
-      class MixedMediaDrawing < DrawingMedia
-        def self.builder
-          select_field = select_field(field_class_name, options, search_hsh)
-          #select_menu = Material::Paper.builder
-          select_menu(field_class_name, [Embellishment::Colored.builder, category_radio_button, select_field, material_select_menu, Leafing.builder], search_hsh)
-        end
-
+      class BasicDrawing < DrawingMedia
         def self.options
           Option.builder(['pen and ink drawing', 'pencil drawing'], tags_hsh(0,1))
         end
       end
     end
 
-  end #end of OriginalCategory
-
-  class OriginalProductionCategory < Medium
-
-    def self.category_radio_button
-      Category::OriginalMedia::OriginalProduction.builder
-    end
-
-    class BasicDrawing < OriginalProductionCategory
-      def self.builder
-        select_field = select_field(field_class_name, options, search_hsh)
-        select_menu = Material::AnimationPaper.builder
-        select_menu(field_class_name, [category_radio_button,select_field,select_menu], search_hsh)
+    class ProductionMedia < SFO
+      class Drawing < ProductionMedia
+        def self.options
+          Option.builder(['drawing'], tags_hsh(0,-2))
+        end
       end
 
+      class Sericel < ProductionMedia
+        def self.options
+          SericelMedia::BasicSericel.options
+        end
+      end
+    end
+
+    ############################################################################
+
+    class LithographMedia < SFO
+      class Lithograph < LithographMedia
+        def self.options
+          Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], tags_hsh(0,-2))
+        end
+      end
+
+      class BasicLithograph < LithographMedia
+        def self.options
+          Option.builder(['lithograph'], tags_hsh(0,1))
+        end
+      end
+    end
+
+    class EtchingMedia < SFO
+      class Etching < EtchingMedia
+        def self.options
+          Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], tags_hsh(0,-2))
+        end
+      end
+
+      class BasicEtching < EtchingMedia
+        def self.options
+          Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags_hsh(0,-2))
+        end
+      end
+    end
+
+    class ReliefMedia < SFO
+      class Relief < ReliefMedia
+        def self.options
+          Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], tags_hsh(0,-2))
+        end
+      end
+
+      class BasicRelief < ReliefMedia
+        def self.options
+          Option.builder(['relief', 'mixed media relief', 'linocut'], tags_hsh(0,-2))
+        end
+      end
+    end
+
+    class SilkscreenMedia < SFO
+      class Serigraph < SilkscreenMedia
+        def self.options
+          Option.builder(['serigraph'], tags_hsh(0,-2))
+        end
+      end
+
+      class Silkscreen < SilkscreenMedia
+        def self.options
+          Option.builder(['silkscreen'], tags_hsh(0,-2))
+        end
+      end
+    end
+
+    class Giclee < SFO
       def self.options
-        Option.builder(['drawing'], search_hsh)
+        Option.builder(['giclee'], tags_hsh(0,-2))
       end
     end
 
-    class BasicSericel < OriginalProductionCategory
-      def self.builder
-        select_field = select_field(field_class_name, options, search_hsh)
-        select_menu = Material::Sericel.builder
-        select_menu(field_class_name, [category_radio_button,select_field,select_menu], search_hsh)
+    class MixedMedia < SFO
+      class BasicMixedMedia < MixedMedia
+        def self.options
+          Option.builder(['mixed media'], tags_hsh(0,-2))
+        end
       end
 
-      def self.options
-        Option.builder(['sericel', 'hand painted sericel'], search_hsh)
-      end
-    end
-  end #end of OriginalProductionCategory
-
-  ##############################################################################
-  # class StandardPrintCategory < Medium
-  # end
-
-  ##############################################################################
-  #Medium::PrintOnPaper::EtchingMedia::Etching.builder
-  # class PrintOnPaper < Medium
-  #   def self.embellishment_select_field
-  #     Embellishment::Colored.builder
-  #   end
-  #
-  #   def self.material_select_menu
-  #     Material::Paper.builder
-  #   end
-  #
-  #   def self.leafing_select_menu
-  #     Leafing.builder
-  #   end
-
-    # class LithographMedia < PrintOnPaper
-    #   class Lithograph < LithographMedia
-    #     def self.builder
-    #       select_field = select_field(field_class_name, options, search_hsh)
-    #       select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
-    #     end
-    #
-    #     def self.options
-    #       Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], tags_hsh(0,1))
-    #     end
-    #   end
-    #
-    #   class BasicLithograph < LithographMedia
-    #     def self.builder
-    #       select_field = select_field(field_class_name, options, search_hsh)
-    #       select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
-    #     end
-    #
-    #     def self.options
-    #       Option.builder(['lithograph'], tags_hsh(0,1))
-    #     end
-    #   end
-    # end
-
-    # class EtchingMedia < PrintOnPaper
-    #   class Etching < EtchingMedia
-    #     def self.builder
-    #       select_field = select_field(field_class_name, options, search_hsh)
-    #       select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], tags_hsh(0,-1))
-    #     end
-    #
-    #     def self.options
-    #       Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], tags_hsh(0,1))
-    #     end
-    #   end
-    #
-    #   class BasicEtching < EtchingMedia
-    #     def self.builder
-    #       select_field = select_field(field_class_name, options, search_hsh)
-    #       select_menu(embellishment_select_field, select_field, material_select_menu, leafing_select_menu)
-    #     end
-    #
-    #     def self.options
-    #       Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags_hsh(0,1))
-    #     end
-    #   end
-    # end
-
-  #   class ReliefMedia < PrintOnPaper
-  #     class Relief < ReliefMedia
-  #       def self.builder
-  #         select_field = select_field(field_class_name, options, search_hsh)
-  #         select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], search_hsh)
-  #       end
-  #
-  #       def self.options
-  #         Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], tags_hsh(0,1))
-  #       end
-  #     end
-  #
-  #     class BasicRelief < ReliefMedia
-  #       def self.builder
-  #         select_field = select_field(field_class_name, options, search_hsh)
-  #         select_menu(field_class_name, [embellishment_select_field, select_field, material_select_menu, leafing_select_menu], search_hsh)
-  #       end
-  #
-  #       def self.options
-  #         Option.builder(['relief', 'mixed media relief', 'linocut'], tags_hsh(0,1))
-  #       end
-  #     end
-  #   end
-  #
-  # end
-
-  ##############################################################################
-
-  # class MixedMedia < Medium
-  #   class BasicMixedMedia < MixedMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['mixed media'], tags_hsh(0,1))
-  #     end
-  #   end
-  #
-  #   class AcrylicMixedMedia < MixedMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['mixed media acrylic'], tags_hsh(0,1))
-  #     end
-  #   end
-  #
-  #   class Monotype < MixedMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['monotype'], tags_hsh(0,1))
-  #     end
-  #   end
-  # end
-  #
-  # class SilkscreenMedia < Medium
-  #   class Serigraph < SilkscreenMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['serigraph'], tags_hsh(0,1))
-  #     end
-  #   end
-  #
-  #   class Silkscreen < SilkscreenMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['silkscreen'], tags_hsh(0,1))
-  #     end
-  #   end
-  # end
-
-  class SericelMedia < Medium
-    class Sericel < SericelMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
+      class AcrylicMixedMedia < MixedMedia
+        def self.options
+          Option.builder(['mixed media acrylic'], tags_hsh(0,-2))
+        end
       end
 
-      def self.options
-        Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], tags_hsh(0,1))
+      class Monotype < MixedMedia
+        def self.options
+          Option.builder(['monotype'], tags_hsh(0,-2))
+        end
       end
     end
 
-    class BasicSericel < SericelMedia
-      def self.builder
-        select_field(field_class_name, options, search_hsh)
+    class PhotoMedia < SFO
+      class Photograph < PhotoMedia
+        def self.options
+          Option.builder(['photograph', 'photolithograph', 'archival photograph'], tags_hsh(0,-2))
+        end
       end
 
-      def self.options
-        Option.builder(['sericel', 'hand painted sericel'], tags_hsh(0,1))
+      class SingleExposurePhoto < PhotoMedia
+        def self.options
+          Option.builder(['single exposure photograph'], tags_hsh(0,1))
+        end
       end
     end
+
+    class PrintMedia < SFO
+      class BasicPrint < PrintMedia
+        def self.options
+          Option.builder(['print', 'fine art print', 'vintage style print'], tags_hsh(0,-2))
+        end
+      end
+
+      class Poster < PrintMedia
+        def self.options
+          Option.builder(['poster', 'vintage poster', 'concert poster'], tags_hsh(0,-2))
+        end
+      end
+    end
+
+    class SericelMedia < SFO
+      class Sericel < SericelMedia
+        def self.options
+          Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], tags_hsh(0,-2))
+        end
+      end
+
+      class BasicSericel < SericelMedia
+        def self.options
+          Option.builder(['sericel', 'hand painted sericel'], tags_hsh(0,-2))
+        end
+      end
+    end
+
   end
 
-  # class PhotoMedia < Medium
-  #   class StandardPhoto < PhotoMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['photograph', 'photolithograph', 'archival photograph'], tags_hsh(0,1))
-  #     end
-  #   end
-  #
-  #   class SingleExposurePhoto < PhotoMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['single exposure photograph'], tags_hsh(0,1))
-  #     end
-  #   end
-  # end
-
-  #simple media ################################################################
-
-  # class Giclee < Medium
-  #   def self.builder
-  #     select_field(field_class_name, options, search_hsh)
-  #   end
-  #
-  #   def self.options
-  #     Option.builder(['giclee'], search_hsh)
-  #   end
-  # end
-
-  # class PrintMedia < Medium
-  #   class BasicPrint < PrintMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['print', 'fine art print', 'vintage style print'], tags_hsh(0,1))
-  #     end
-  #   end
-  #
-  #   class Poster < PrintMedia
-  #     def self.builder
-  #       select_field(field_class_name, options, search_hsh)
-  #     end
-  #
-  #     def self.options
-  #       Option.builder(['poster', 'vintage poster', 'concert poster'], tags_hsh(0,1))
-  #     end
-  #   end
-  # end
-
   ##############################################################################
-
-  class Embellishment < Medium
-    def self.tags
-      tags_hsh(-2,-1)
-    end
-
-    class Embellished < Embellishment
-      def self.builder
-        select_field(field_class_name, options, tags)
-      end
-
-      def self.options
-        Option.builder(['hand embellished', 'hand painted', 'artist embellished'], tags)
-      end
-    end
-
-    class Colored < Embellishment
-      def self.builder
-        select_field(field_class_name, options, tags)
-      end
-
-      def self.options
-        Option.builder(['hand colored', 'hand watercolored', 'hand colored (pencil)', 'hand tinted'], tags)
-      end
-    end
-  end
-  #Medium::Leafing.tags
-  class Leafing < Medium
-    def self.tags
-      tags_hsh(-1,-1)
-    end
-
+  #set = Medium::FSO.builder
+  class FSO < Medium
     def self.builder
-      select_menu(field_class_name, [GoldLeaf.builder, SilverLeaf.builder], search_hsh)
+      #set=[]
+      [StandardPrint, NumberedPrint::LimitedEdition, NumberedPrint::UniqueVariation, OneOfAKindPrint].each do |option_group|
+        option_group.options.each do |option_set|
+          field_set(build_name(option_set), build_options(option_set), build_tags(option_set))
+        end
+      end
+      #set
     end
 
-    class GoldLeaf < Leafing
-      def self.tags
-        tags_hsh(-2,-1)
-      end
+    ############################################################################
 
-      def self.builder
-        select_field(field_class_name, options, tags)
+    def self.build_name(options, name_set=[])
+      options.each do |klass|
+        kind, name = klass.tags[:kind], decamelize(klass.klass_name)
+        name_set << build_name_set(option_names(options), kind, name)
       end
+      name_set.join(" ")
+    end
 
-      def self.options
-        Option.builder(['goldleaf', 'hand laid goldleaf'], tags)
+    def self.build_name_set(opt_names, kind, name)
+      if kind == 'material'
+        "on #{name}"
+      elsif %w[leafing remarque].include?(kind)
+        leafing_and_remarque(opt_names, kind, name)
+      elsif name == "one of a kind"
+        name.split(" ").join("-")
+      elsif kind != 'numbering'
+        name
       end
     end
 
-    class SilverLeaf < Leafing
-      def self.tags
-        tags_hsh(-2,-1)
+    def self.leafing_and_remarque(opt_names, kind, name)
+      if include_all?(%w[leafing remarque], opt_names)
+        kind == 'leafing' ? "with #{name}" : "and #{name}"
+      else
+        "with #{name}"
       end
+    end
 
-      def self.builder
-        select_field(field_class_name, options, tags)
+    ############################################################################
+
+    def self.build_options(options)
+      options.map{|klass| klass.builder}.flatten
+    end
+
+    ############################################################################
+
+    def self.media_set(*idx_set)
+      if idx_set.empty?
+        set.map{|a| a[1..-1]}.flatten
+      elsif idx_set.count == 1
+        set.assoc(idx_set[0])[1..-1]
+      elsif idx_set.count > 1
+        idx_set.map{|i| set.assoc(i)[1..-1]}.flatten
       end
+    end
 
+    def self.option_names(options)
+      options.map{|klass| klass.tags[:kind]}
+    end
+
+    def self.build_tags(option_set, tags={})
+      option_set.each do |klass|
+        if klass.tags[:kind] == 'medium'
+          tags.merge!(klass.tags)
+        else
+          tags.merge!(h={:"#{klass.tags[:kind]}" => klass.tags[:sub_kind]})
+        end
+      end
+      tags
+    end
+
+    ############################################################################
+
+    #Medium::FSO::StandardPrint.options
+    class StandardPrint < FSO
       def self.options
-        Option.builder(['silverleaf', 'hand laid silverleaf'], tags)
+        [MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint].map{|option_group| option_group.options.map{|option_set| option_set}}[0]
+      end
+    end
+    #Medium::FSO::NumberedPrint::LimitedEdition.options
+    class NumberedPrint < FSO
+      class LimitedEdition < NumberedPrint
+        def self.options
+          StandardPrint.options.map {|option_set| insert_build(option_set, Category::LimitedEdition, Numbering)}
+        end
+      end
+      #Medium::FSO::NumberedPrint::UniqueVariation.options
+      class UniqueVariation < NumberedPrint
+        def self.options
+          [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly].map {|option_group| option_group.options.map {|option_set| insert_build(option_set, Category::UniqueVariation, Numbering)}}[0]
+        end
+      end
+    end
+    #Medium::FSO::OneOfAKindPrint.options
+    class OneOfAKindPrint < FSO
+      def self.options
+        [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly, MixedMediaOnPaper].map {|option_group| option_group.options.map {|option_set| prepend_build(option_set, Category::OriginalMedia::OneOfAKind)}}[0]
+      end
+    end
+    #Medium::FSO::OriginalPainting.options
+    class OriginalPainting < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::PaintingMedia::Painting], material_set: Material::StandardMaterial.options, prepend_set: [Category::OriginalMedia::Original])
+      end
+    end
+
+    class OriginalPaintingOnPaper < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::PaintingMedia::PaintingOnPaper], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original])
+      end
+    end
+
+    class OriginalDrawing < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::DrawingMedia::Drawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original])
+      end
+    end
+
+    class OriginalMixedMediaDrawing < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::DrawingMedia::BasicDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original], append_set: [SubMedium::Leafing])
+      end
+    end
+
+    class OriginalProductionDrawing < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::ProductionMedia::Drawing], material_set: [Material::AnimationPaper], prepend_set: [Category::OriginalMedia::OriginalProduction])
+      end
+    end
+
+    class OriginalProductionSericel < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::ProductionMedia::Sericel], material_set: [Material::Sericel], prepend_set: [Category::OriginalMedia::OriginalProduction])
+      end
+    end
+
+    class SericelPrint < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::SericelMedia::Sericel], material_set: [Material::Sericel])
+      end
+    end
+
+    class PhotoPrint < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::PhotoMedia::Photograph, SFO::PhotoMedia::SingleExposurePhoto], material_set: [Material::PhotographyPaper])
+      end
+    end
+
+    class MixedMediaOnPaper < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::MixedMedia::Monotype, SFO::MixedMedia::AcrylicMixedMedia], material_set: [Material::Paper])
+      end
+    end
+
+    class PrintOnPaperWithRemarque < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::PrintMedia::Poster], material_set: [Material::Paper], append_set: [SubMedium::SFO::Remarque])
+      end
+    end
+
+    class PrintOnCanvas < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::MixedMedia::AcrylicMixedMedia], material_set: [Material::Canvas, Material::WrappedCanvas])
+      end
+    end
+
+    class MixedPrintOnPaperOnly < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::LithographMedia::Lithograph, SFO::EtchingMedia::Etching, SFO::ReliefMedia::Relief], material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+      end
+    end
+
+    class BasicMixedPrintOnPaper < FSO
+      def self.options
+        FieldSetOption.builder(media_set: [SFO::EtchingMedia::BasicEtching, SFO::ReliefMedia::BasicRelief], material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+      end
+    end
+
+    ############################################################################
+
+    class MixedPrintOnPaper < FSO
+      def self.options
+        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+      end
+
+      def self.set
+        [
+          [0,
+            SFO::SilkscreenMedia::Serigraph,
+            SFO::SilkscreenMedia::Silkscreen
+          ],
+
+          [1,
+            SFO::Giclee,
+            SFO::MixedMedia::BasicMixedMedia,
+            SFO::PrintMedia::BasicPrint
+          ]
+        ]
+      end
+    end #end of MixedPrintOnPaper
+
+    ############################################################################
+
+    class MixedPrintOnCanvas < FSO
+      def self.options
+        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Colored])
+      end
+    end
+
+    class MixedPrintOnStandardMaterial < FSO
+      def self.options
+        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic], prepend_set: [SubMedium::SFO::Embellishment::Embellished], append_set: [SubMedium::SFO::Remarque])
+      end
+    end #end of MixedPrintOnCanvas
+
+    class HandPulledPrintOnPaper < FSO
+      def self.options
+        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set(0), material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled], append_set: [SubMedium::SFO::Remarque])
+      end
+    end
+
+    class HandPulledPrintOnCanvas < FSO
+      def self.options
+        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set(0), material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Embellished, SubMedium::RBF::HandPulled])
       end
     end
   end
 
-  class Remarque < Medium
-    def self.tags
-      tags_hsh(-1,-1)
-    end
-
-    def self.builder
-      select_field(field_class_name, options, tags)
-    end
-
-    def self.options
-      Option.builder(['remarque', 'hand drawn remarque', 'hand colored remarque', 'hand drawn and colored remarque'], tags)
-    end
-  end
-
-  class HandPulled < Medium
-    def self.tags
-      tags_hsh(-1,-1)
-    end
-
-    def self.builder
-      radio_button(field_class_name, tags)
+  module FieldSetOption
+    def self.builder(media_set:, material_set:, prepend_set: [], append_set: [], set: [])
+      media_set, material_set, prepend_set, append_set = [media_set, material_set, prepend_set, append_set].map{|arg| Medium.arg_as_arr(arg)}
+      media_set.product(material_set).each do |option_set|
+        set << Medium.insert_build(option_set, prepend_set, append_set)
+      end
+      set
     end
   end
 

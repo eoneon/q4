@@ -38,7 +38,7 @@ module Context
       TextField.builder(f={field_name: field_name, tags: tags})
     end
 
-    #abbreviated builder methods for readability ####################################################################
+    #abbreviated builder methods for readability ###############################
     def builder
       self.subclasses.map {|klass| klass.builder}
     end
@@ -79,6 +79,30 @@ module Context
 
     def base_type_class
       base_type.constantize
+    end
+
+    #insert with map prepend/append ############################################
+    def insert_build(option_set, prepend_set, append_set)
+      option_set = prepend_build(option_set, prepend_set)
+      option_set = append_build(option_set, append_set)
+      option_set.flatten
+    end
+
+    def prepend_build(option_set, prepend_set)
+      prepend_set = arg_as_arr(prepend_set)
+      puts "prepend_set: #{prepend_set}, option_set: #{option_set}"
+      prepend_set.reverse.map {|v| option_set.prepend(v)}.flatten if prepend_set.any?
+      option_set
+    end
+
+    def append_build(option_set, append_set)
+      append_set = arg_as_arr(append_set)
+      append_set.map {|v| option_set.append(v)}.flatten if append_set.any?
+      option_set
+    end
+
+    def arg_as_arr(arg)
+      arg.class == Array ? arg : [arg]
     end
 
     # utility methods ##########################################################
