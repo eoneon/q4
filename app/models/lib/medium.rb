@@ -192,13 +192,11 @@ class Medium
   #set = Medium::FSO.builder
   class FSO < Medium
     def self.builder
-      #set=[]
       [StandardPrint, NumberedPrint::LimitedEdition, NumberedPrint::UniqueVariation, OneOfAKindPrint].each do |option_group|
         option_group.options.each do |option_set|
           field_set(build_name(option_set), build_options(option_set), build_tags(option_set))
         end
       end
-      #set
     end
 
     ############################################################################
@@ -269,7 +267,13 @@ class Medium
     #Medium::FSO::StandardPrint.options
     class StandardPrint < FSO
       def self.options
-        [MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint].map{|option_group| option_group.options.map{|option_set| option_set}}[0]
+        set=[]
+        [OriginalPainting, OriginalPaintingOnPaper, OriginalDrawing, OriginalMixedMediaDrawing, OriginalProductionDrawing, OriginalProductionSericel, MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint].each do |option_group|
+          option_group.options.each do |option_set|
+            set << option_set
+          end
+        end
+        set
       end
     end
     #Medium::FSO::NumberedPrint::LimitedEdition.options
@@ -282,14 +286,26 @@ class Medium
       #Medium::FSO::NumberedPrint::UniqueVariation.options
       class UniqueVariation < NumberedPrint
         def self.options
-          [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly].map {|option_group| option_group.options.map {|option_set| insert_build(option_set, Category::UniqueVariation, Numbering)}}[0]
+          set=[]
+          [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly].each do |option_group|
+            option_group.options.each do |option_set|
+              set << insert_build(option_set, Category::UniqueVariation, Numbering)
+            end
+          end
+          set
         end
       end
     end
     #Medium::FSO::OneOfAKindPrint.options
     class OneOfAKindPrint < FSO
       def self.options
-        [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly, MixedMediaOnPaper].map {|option_group| option_group.options.map {|option_set| prepend_build(option_set, Category::OriginalMedia::OneOfAKind)}}[0]
+        set=[]
+        [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly, MixedMediaOnPaper].each do |option_group|
+          option_group.options.each do |option_set|
+            set << prepend_build(option_set, Category::OriginalMedia::OneOfAKind)
+          end
+        end
+        set
       end
     end
     #Medium::FSO::OriginalPainting.options
@@ -313,7 +329,7 @@ class Medium
 
     class OriginalMixedMediaDrawing < FSO
       def self.options
-        FieldSetOption.builder(media_set: [SFO::DrawingMedia::BasicDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original], append_set: [SubMedium::Leafing])
+        FieldSetOption.builder(media_set: [SFO::DrawingMedia::BasicDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original], append_set: [SubMedium::SMO::Leafing])
       end
     end
 
@@ -372,10 +388,11 @@ class Medium
     end
 
     ############################################################################
-
+    # Medium::FSO::MixedPrintOnPaper.media_set
+    # Medium::FSO::MixedPrintOnPaper.options
     class MixedPrintOnPaper < FSO
       def self.options
-        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+        FieldSetOption.builder(media_set: media_set, material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
       end
 
       def self.set
@@ -395,7 +412,8 @@ class Medium
     end #end of MixedPrintOnPaper
 
     ############################################################################
-
+    # Medium::FSO::MixedPrintOnPaper.media_set
+    # Medium::FSO::MixedPrintOnPaper.options
     class MixedPrintOnCanvas < FSO
       def self.options
         FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Colored])
@@ -425,6 +443,7 @@ class Medium
     def self.builder(media_set:, material_set:, prepend_set: [], append_set: [], set: [])
       media_set, material_set, prepend_set, append_set = [media_set, material_set, prepend_set, append_set].map{|arg| Medium.arg_as_arr(arg)}
       media_set.product(material_set).each do |option_set|
+        puts "#{option_set}"
         set << Medium.insert_build(option_set, prepend_set, append_set)
       end
       set
