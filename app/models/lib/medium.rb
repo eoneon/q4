@@ -7,8 +7,9 @@ class Medium
   def self.tags
     if split_class.include?('SFO')
       tags_hsh(2,-1)
+    #elsif idx = split_class.index('FSO')
     elsif split_class.include?('FSO')
-      tags_hsh(0,-1)
+      tags_hsh(0,2)
     end
   end
 
@@ -33,7 +34,7 @@ class Medium
     end
 
     def self.builder
-      select_field(decamelize(klass_name, '-'), options, tags)
+      select_field(field_name, options, tags)
     end
 
     ############################################################################
@@ -65,7 +66,7 @@ class Medium
         end
       end
 
-      class BasicDrawing < DrawingMedia
+      class MixedMediaDrawing < DrawingMedia
         def self.options
           Option.builder(['pen and ink drawing', 'pencil drawing'], tags)
         end
@@ -109,7 +110,7 @@ class Medium
         end
       end
 
-      class BasicEtching < EtchingMedia
+      class MixedMediaEtching < EtchingMedia
         def self.options
           Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags)
         end
@@ -123,7 +124,7 @@ class Medium
         end
       end
 
-      class BasicRelief < ReliefMedia
+      class MixedMediaRelief < ReliefMedia
         def self.options
           Option.builder(['relief', 'mixed media relief', 'linocut'], tags)
         end
@@ -151,7 +152,7 @@ class Medium
     end
 
     class MixedMedia < SFO
-      class BasicMixedMedia < MixedMedia
+      class StandardMixedMedia < MixedMedia
         def self.options
           Option.builder(['mixed media'], tags)
         end
@@ -224,7 +225,15 @@ class Medium
         kind, name = klass.tags[:kind], decamelize(klass.klass_name)
         name_set << build_name_set(option_names(options), kind, name)
       end
-      name_set.join(" ")
+      format_field_set_name(name_set.join(" "))
+    end
+
+    def self.format_field_set_name(words)
+      if word = ['paper only', 'basic', 'standard'].detect{|word| words.index(word)}
+        words.sub(word, "(#{word})")
+      else
+        words
+      end
     end
 
     def self.build_name_set(opt_names, kind, name)
@@ -348,7 +357,7 @@ class Medium
 
     class OriginalMixedMediaDrawing < FSO
       def self.options
-        FieldSetOption.builder(media_set: [SFO::DrawingMedia::BasicDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original], append_set: [SubMedium::SMO::Leafing])
+        FieldSetOption.builder(media_set: [SFO::DrawingMedia::MixedMediaDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original], append_set: [SubMedium::SMO::Leafing])
       end
     end
 
@@ -402,7 +411,7 @@ class Medium
 
     class BasicMixedPrintOnPaper < FSO
       def self.options
-        FieldSetOption.builder(media_set: [SFO::EtchingMedia::BasicEtching, SFO::ReliefMedia::BasicRelief], material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+        FieldSetOption.builder(media_set: [SFO::EtchingMedia::MixedMediaEtching, SFO::ReliefMedia::MixedMediaRelief], material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
       end
     end
 
@@ -423,7 +432,7 @@ class Medium
 
           [1,
             SFO::GicleeMedia,
-            SFO::MixedMedia::BasicMixedMedia,
+            SFO::MixedMedia::StandardMixedMedia,
             SFO::PrintMedia::BasicPrint
           ]
         ]
