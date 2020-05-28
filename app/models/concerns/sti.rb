@@ -61,8 +61,33 @@ module STI
   end
 
   class_methods do
-  #controller methods ########################################################
 
+    #search methods ########################################################
+    def build_query(**tags)
+      #[field_params(kind, name), tag_params(tags)].compact.join(" AND ")
+      tag_params(tags).join(" AND ")
+      #where("tags -> 'medium' = \'#{render_as}\'")
+    end
+
+    # def field_params(kind, name)
+    #   return if kind.nil? && name.nil?
+    #   build_query_params(h={"kind" => kind, "name" => name}.compact)
+    # end
+
+    def tag_params(tags)
+      return if tags.empty?
+      build_query_params(tags, "tags-> ")
+    end
+
+    def build_query_params(hstore=nil)
+      p_hsh.to_a.map {|kv| "#{hstore}\'#{kv[0]}\' = \'#{kv[-1]}\'"}.join(" AND ")
+    end
+
+    # def build_query_params(p_hsh, hstore=nil)
+    #   p_hsh.to_a.map {|kv| "#{hstore}\'#{kv[0]}\' = \'#{kv[-1]}\'"}.join(" AND ")
+    # end
+
+    #controller methods ########################################################
     #param ex: target_hsh={:item_name => "canvas, paper, wood, metal"}
     def update_targets(target_hsh)
       set=[]
