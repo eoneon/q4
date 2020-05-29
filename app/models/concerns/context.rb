@@ -82,22 +82,33 @@ module Context
     end
 
     #insert with map prepend/append ############################################
-    def insert_build(option_set, prepend_set, append_set)
-      option_set = prepend_build(option_set, prepend_set)
-      option_set = append_build(option_set, append_set)
-      option_set.flatten
+    # def option_set_build(option_set, prepend_set, append_set)
+    #   option_set = prepend_build(option_set, prepend_set)
+    #   option_set = append_build(option_set, append_set)
+    #   option_set.flatten
+    # end
+    #[[idx, klass]]
+    def option_set_build(options:, prepend_set: [], append_set: [], insert_set: [])
+      options = insert_build(options, insert_set) if insert_set.any?
+      options = prepend_build(options, prepend_set)
+      options = append_build(options, append_set)
+      options.flatten
     end
 
-    def prepend_build(option_set, prepend_set)
+    def insert_build(set, insert_set)
+      insert_set.map {|a| set.insert(a[0], a[1])}.flatten if insert_set.any?
+    end
+
+    def prepend_build(set, prepend_set)
       prepend_set = arg_as_arr(prepend_set)
-      prepend_set.reverse.map {|v| option_set.prepend(v)}.flatten if prepend_set.any?
-      option_set
+      prepend_set.reverse.map {|v| set.prepend(v)}.flatten if prepend_set.any?
+      set
     end
 
-    def append_build(option_set, append_set)
+    def append_build(set, append_set)
       append_set = arg_as_arr(append_set)
-      append_set.map {|v| option_set.append(v)}.flatten if append_set.any?
-      option_set
+      append_set.map {|v| set.append(v)}.flatten if append_set.any?
+      set
     end
 
     def arg_as_arr(arg)
