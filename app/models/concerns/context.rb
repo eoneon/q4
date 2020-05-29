@@ -80,14 +80,8 @@ module Context
     def base_type_class
       base_type.constantize
     end
-
+    
     #insert with map prepend/append ############################################
-    # def option_set_build(option_set, prepend_set, append_set)
-    #   option_set = prepend_build(option_set, prepend_set)
-    #   option_set = append_build(option_set, append_set)
-    #   option_set.flatten
-    # end
-    #[[idx, klass]]
     def option_set_build(options:, prepend_set: [], append_set: [], insert_set: [])
       options = insert_build(options, insert_set) if insert_set.any?
       options = prepend_build(options, prepend_set)

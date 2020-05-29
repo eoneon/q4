@@ -1,9 +1,6 @@
 class Medium
   include Context
-  #Medium::SFO.subclasses.map {|klass| klass.subclasses.any? ? klass.subclasses.map{|sklass| sklass.field_name} : klass.field_name}
-  #Medium::SFO::PaintingMedia.tags -> select_field  => {:kind=>"painting_media", :sub_kind=>"painting"}
-  #Medium::SFO::PaintingMedia.field_class_name
-  #Medium::SFO::PaintingMedia::StandardPainting.field_name
+
   def self.tags
     if split_class.include?('SFO')
       tags_hsh(2,-1)
@@ -37,7 +34,6 @@ class Medium
     end
 
     ############################################################################
-    #%w[painting media standard painting].uniq
     class PaintingMedia < SFO
       class StandardPainting < PaintingMedia
         def self.options
@@ -210,11 +206,13 @@ class Medium
   #set = Medium::FSO.builder
   class FSO < Medium
     def self.builder
+      set=[]
       [OriginalPainting, OriginalPaintingPaperOnly, OriginalDrawing, OriginalMixedMediaDrawing, OriginalProductionDrawing, OriginalProductionSericel, OneOfAKindPrint, NumberedPrint::LimitedEdition, NumberedPrint::UniqueVariation, StandardPrint].each do |option_group|
         option_group.options.each do |opt_hsh|
-          field_set(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh[:options], opt_hsh[:tags]))
+          field_set(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh))
         end
       end
+      set
     end
 
     ############################################################################
@@ -282,24 +280,16 @@ class Medium
       options.map{|klass| klass.tags[:kind]}
     end
 
-    def self.build_tags(option_set, tags={})
-      option_set.each do |klass|
-        if klass.tags[:kind] == 'medium'
-          tags.merge!(klass.tags)
-        else
-          tags.merge!(h={:"#{klass.tags[:kind]}" => klass.tags[:sub_kind]})
-        end
-      end
-      tags
+    def self.build_tags(opt_hsh)
+      opt_hsh[:options].map{|klass| opt_hsh[:tags][klass.tags["kind"].to_sym] = klass.tags["sub_kind"]}
+      opt_hsh[:tags].compact
     end
 
     ############################################################################
     def self.options
       option_sets.map{|option_set| h={field_name: build_name(option_set), options: build_options(option_set), tags: tags}}
     end
-    #Medium::FSO::StandardPrint.options
-    #Medium::FSO::StandardPrint.build_field_set_hsh
-    #StandardPrint-> MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint
+
     class StandardPrint < FSO
       def self.option_sets
         set=[]
