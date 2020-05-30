@@ -8,13 +8,28 @@ class FieldSet < FieldItem
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  def self.media_kind
-    FieldSet.where("tags -> 'kind' = 'medium'")
+  # Product.product_categories.each do |h|
+  #   scope h[:scope_name], -> {h[:scope]}
+  # end
+
+  # FieldSet.filter_search(FieldSet.media_set, 'sub_medium', "standard_painting")
+  # FieldSet.submedia_set("standard_painting")
+  # FieldSet.filter_tag(set, 'material')
+  def self.media_set
+    FieldSet.search([["kind", "medium"]])
   end
 
-  def self.media_sub_kind
-    media_kind.pluck(:tags).map{|h| h["sub_kind"]}.uniq
-  end  
+  def self.submedia_set(v)
+    filter_search(media_set, 'sub_medium',v)
+  end
+
+  def self.media_tags
+    filter_tag(media_set, 'sub_kind')
+  end
+
+  def self.filter_tag(set, k)
+    set.map{|i| i.tags[k]}.uniq
+  end
 
   def self.builder(f)
     #field_set = FieldSet.where(field_name: f[:field_name], tags: id_tags(f[:tags])).first_or_create

@@ -8,8 +8,12 @@ class Medium
       tags_hsh(0,2)
     end
   end
-
+  # Medium::SFO.sub_media
   class SFO < Medium
+    def self.sub_media
+      flat_class_set(self)
+    end
+
     def self.field_name
       class_set = split_class[split_class.index('SFO')+1..-1] #.map{|name| decamelize(name)}.flatten.uniq
       if class_set.count == 1
@@ -207,12 +211,17 @@ class Medium
   class FSO < Medium
     def self.builder
       set=[]
+      @sub_media = Medium::SFO.sub_media.map{|i| i.tags[:sub_kind]}
       [OriginalPainting, OriginalPaintingPaperOnly, OriginalDrawing, OriginalMixedMediaDrawing, OriginalProductionDrawing, OriginalProductionSericel, OneOfAKindPrint, NumberedPrint::LimitedEdition, NumberedPrint::UniqueVariation, StandardPrint].each do |option_group|
         option_group.options.each do |opt_hsh|
           field_set(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh))
         end
       end
       set
+    end
+
+    def self.sub_media
+      flat_class_set(self) - StandardPrint.class_set
     end
 
     ############################################################################
@@ -280,8 +289,19 @@ class Medium
       options.map{|klass| klass.tags[:kind]}
     end
 
+    # def self.build_tags(opt_hsh)
+    #   opt_hsh[:options].map{|klass| opt_hsh[:tags][klass.tags["kind"].to_sym] = klass.tags["sub_kind"]}
+    #   opt_hsh[:tags].compact
+    # end
+
     def self.build_tags(opt_hsh)
-      opt_hsh[:options].map{|klass| opt_hsh[:tags][klass.tags["kind"].to_sym] = klass.tags["sub_kind"]}
+      opt_hsh[:options].each do |klass|
+        if @sub_media.include?(klass.tags["sub_kind"])
+          opt_hsh[:tags][:sub_medium] = klass.tags["sub_kind"]
+        else
+          opt_hsh[:tags][klass.tags["kind"].to_sym] = klass.tags["sub_kind"]
+        end
+      end
       opt_hsh[:tags].compact
     end
 
@@ -293,13 +313,18 @@ class Medium
     class StandardPrint < FSO
       def self.option_sets
         set=[]
-        [MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint].each do |option_group|
+        #[MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint].each do |option_group|
+        class_set.each do |option_group|
           option_group.option_sets.each do |option_set|
             set << option_set
           end
         end
         set
       end
+    end
+
+    def self.class_set
+      [MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint]
     end
     #Medium::FSO::NumberedPrint::LimitedEdition.options
     class NumberedPrint < FSO

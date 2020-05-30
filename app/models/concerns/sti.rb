@@ -63,29 +63,18 @@ module STI
   class_methods do
 
     #search methods ########################################################
-    def build_query(**tags)
-      #[field_params(kind, name), tag_params(tags)].compact.join(" AND ")
-      tag_params(tags).join(" AND ")
-      #where("tags -> 'medium' = \'#{render_as}\'")
+    def search(kv_sets)
+      #self.where(kv_sets.to_a.map{|kv_set| "tags -> \'#{kv_set[0]}\' = \'#{kv_set[1]}\'"}.join(" AND "))
+      self.where(kv_sets.to_a.map{|kv_set| build_query(kv_set[0],kv_set[1])}.join(" AND "))
     end
 
-    # def field_params(kind, name)
-    #   return if kind.nil? && name.nil?
-    #   build_query_params(h={"kind" => kind, "name" => name}.compact)
-    # end
-
-    def tag_params(tags)
-      return if tags.empty?
-      build_query_params(tags, "tags-> ")
+    def filter_search(set,k,v)
+      set.where(build_query(k,v))
     end
 
-    def build_query_params(hstore=nil)
-      p_hsh.to_a.map {|kv| "#{hstore}\'#{kv[0]}\' = \'#{kv[-1]}\'"}.join(" AND ")
+    def build_query(k,v)
+      "tags -> \'#{k}\' = \'#{v}\'"
     end
-
-    # def build_query_params(p_hsh, hstore=nil)
-    #   p_hsh.to_a.map {|kv| "#{hstore}\'#{kv[0]}\' = \'#{kv[-1]}\'"}.join(" AND ")
-    # end
 
     #controller methods ########################################################
     #param ex: target_hsh={:item_name => "canvas, paper, wood, metal"}
