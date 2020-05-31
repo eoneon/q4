@@ -198,7 +198,7 @@ class Medium
       end
     end
 
-    class SericelMedia < SFO
+    class Sericel < SFO
       def self.options
         Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], tags)
       end
@@ -208,11 +208,14 @@ class Medium
 
   ##############################################################################
   #set = Medium::FSO.builder
+  # Medium::FSO.sub_media
+  # Medium::FSO.StandardPrint.media_set
   class FSO < Medium
     def self.builder
       set=[]
       @sub_media = Medium::SFO.sub_media.map{|i| i.tags[:sub_kind]}
-      [OriginalPainting, OriginalPaintingPaperOnly, OriginalDrawing, OriginalMixedMediaDrawing, OriginalProductionDrawing, OriginalProductionSericel, OneOfAKindPrint, NumberedPrint::LimitedEdition, NumberedPrint::UniqueVariation, StandardPrint].each do |option_group|
+      #[OriginalPainting, OriginalPaintingPaperOnly, OriginalDrawing, OriginalMixedMediaDrawing, OriginalProductionDrawing, OriginalProductionSericel, OneOfAKindPrint, NumberedPrint::LimitedEdition, NumberedPrint::UniqueVariation, StandardPrint].each do |option_group|
+      [OriginalPainting, OriginalDrawing, OriginalMixedMediaDrawing, OriginalProductionDrawing, OriginalProductionSericel, OneOfAKindPrint, NumberedPrint::LimitedEdition, NumberedPrint::UniqueVariation, StandardPrint].each do |option_group|
         option_group.options.each do |opt_hsh|
           field_set(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh))
         end
@@ -221,13 +224,14 @@ class Medium
     end
 
     def self.sub_media
-      flat_class_set(self) - StandardPrint.class_set
+      flat_class_set(self) #- StandardPrint.media_set
     end
 
     ############################################################################
 
     def self.build_name(options, name_set=[])
       options.each do |klass|
+        puts "!@ #{klass}"
         kind, name = klass.tags[:kind], decamelize(klass.klass_name)
         name_set << build_name_set(option_names(options), kind, name)
       end
@@ -296,6 +300,7 @@ class Medium
 
     def self.build_tags(opt_hsh)
       opt_hsh[:options].each do |klass|
+        #if @sub_media.include?(klass.tags["sub_kind"])
         if @sub_media.include?(klass.tags["sub_kind"])
           opt_hsh[:tags][:sub_medium] = klass.tags["sub_kind"]
         else
@@ -309,49 +314,60 @@ class Medium
     def self.options
       option_sets.map{|option_set| h={field_name: build_name(option_set), options: build_options(option_set), tags: tags}}
     end
-
+    # Medium::FSO::StandardPrint.option_sets .map{|klass| klass.media_set} # Medium::FSO::StandardPrint.media_set
     class StandardPrint < FSO
+      def self.media_set
+        LimitedEditionPrint.media_group + BasicPrintMedia.subclasses
+      end
+
+      def self.option_sets
+        media_set.map{|klass| klass.option_sets}.flatten(1)
+      end
+      #   set=[]
+      #   media_set.map{|klass| klass.media_set}.each do |media_group|
+      #     media_group.each do |option_set|
+      #       set << option_set
+      #     end
+      #   end
+      #   set
+      # end
+      # Medium::FSO::StandardPrint.option_sets
+      # => [[Medium::SFO::LithographMedia::Lithograph, Medium::SFO::EtchingMedia::Etching, Medium::SFO::ReliefMedia::Relief], [Medium::SFO::SilkscreenMedia::Serigraph, Medium::SFO::SilkscreenMedia::Silkscreen, Medium::SFO::Giclee, Medium::SFO::MixedMedia::StandardMixedMedia, Medium::SFO::PrintMedia::BasicPrint], [Medium::SFO::SilkscreenMedia::Serigraph, Medium::SFO::SilkscreenMedia::Silkscreen, Medium::SFO::Giclee, Medium::SFO::MixedMedia::StandardMixedMedia, Medium::SFO::PrintMedia::BasicPrint], [Medium::SFO::SilkscreenMedia::Serigraph, Medium::SFO::SilkscreenMedia::Silkscreen, Medium::SFO::Giclee, Medium::SFO::MixedMedia::StandardMixedMedia, Medium::SFO::PrintMedia::BasicPrint], [Medium::SFO::SilkscreenMedia::Serigraph, Medium::SFO::SilkscreenMedia::Silkscreen], [Medium::SFO::SilkscreenMedia::Serigraph, Medium::SFO::SilkscreenMedia::Silkscreen], [Medium::SFO::PhotographMedia::Photograph, Medium::SFO::PhotographMedia::SingleExposurePhotograph], [Medium::SFO::SericelMedia]]
+    end
+
+    #Medium::FSO::LimitedEditionPrint.option_sets Medium::FSO::LimitedEditionPrint.media_set
+    class LimitedEditionPrint < FSO
+      def self.media_set
+        media_group.map{|klass| klass.option_sets}.flatten(1)
+      end
+
+      def self.media_group
+        [MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint]
+      end
+
+      def self.option_sets
+        #StandardPrint.option_sets.map {|option_set| option_set_build(options: option_set, append_set: Numbering, insert_set: [[ltd_idx(option_set), Category::LimitedEdition]])}
+        media_set.map {|option_set| option_set_build(options: option_set, append_set: Numbering, insert_set: [[ltd_idx(option_set), Category::LimitedEdition]])}
+      end
+    end
+    #Medium::FSO::UniqueVariation.options
+    class UniqueVariationPrint < FSO
       def self.option_sets
         set=[]
-        #[MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint].each do |option_group|
-        class_set.each do |option_group|
+        [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly].each do |option_group|
           option_group.option_sets.each do |option_set|
-            set << option_set
+            set << option_set_build(options: option_set, append_set: Numbering, insert_set: [[ltd_idx(option_set), Category::UniqueVariation]])
           end
         end
         set
       end
     end
 
-    def self.class_set
-      [MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint]
-    end
-    #Medium::FSO::NumberedPrint::LimitedEdition.options
-    class NumberedPrint < FSO
-      class LimitedEdition < NumberedPrint
-        def self.option_sets
-          #StandardPrint.option_sets.map {|option_set| option_set_build(option_set, Category::LimitedEdition, Numbering)}
-          StandardPrint.option_sets.map {|option_set| option_set_build(options: option_set, append_set: Numbering, insert_set: [[ltd_idx(option_set), Category::LimitedEdition]])}
-        end
-      end
-      #Medium::FSO::NumberedPrint::UniqueVariation.options
-      class UniqueVariation < NumberedPrint
-        def self.option_sets
-          set=[]
-          [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly].each do |option_group|
-            option_group.option_sets.each do |option_set|
-              set << option_set_build(options: option_set, append_set: Numbering, insert_set: [[ltd_idx(option_set), Category::UniqueVariation]])
-            end
-          end
-          set
-        end
-      end
-    end
     #Medium::FSO::OneOfAKindPrint.options
     class OneOfAKindPrint < FSO
       def self.option_sets
         set=[]
-        [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly, MixedMediaOnPaper].each do |option_group|
+        [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly, MixedMediaOnPaper, MixedMediaPrintOnPaper].each do |option_group|
           option_group.option_sets.each do |option_set|
             set << prepend_build(option_set, Category::OriginalMedia::OneOfAKind)
           end
@@ -361,80 +377,192 @@ class Medium
     end
     #Medium::FSO::OriginalPainting.options
     class OriginalPainting < FSO
-      def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::PaintingMedia::StandardPainting], material_set: Material::StandardMaterial.options, prepend_set: [Category::OriginalMedia::Original])
+      class OriginalPaintingStandard < OriginalPainting
+        def self.option_sets
+          FieldSetOption.builder(media_set: SFO::PaintingMedia::StandardPainting, material_set: Material::StandardMaterial.options, prepend_set: Category::OriginalMedia::Original)
+        end
+      end
+
+      class OriginalPaintingPaperOnly < OriginalPainting
+        def self.option_sets
+          FieldSetOption.builder(media_set: SFO::PaintingMedia::PaintingPaperOnly, material_set: Material::Paper, prepend_set: Category::OriginalMedia::Original)
+        end
       end
     end
 
-    class OriginalPaintingPaperOnly < FSO
-      def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::PaintingMedia::PaintingPaperOnly], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original])
-      end
-    end
+    # class OriginalPainting < FSO
+    #   def self.option_sets
+    #     FieldSetOption.builder(media_set: [SFO::PaintingMedia::StandardPainting], material_set: Material::StandardMaterial.options, prepend_set: [Category::OriginalMedia::Original])
+    #   end
+    # end
+
+    # class OriginalPaintingPaperOnly < FSO
+    #   def self.option_sets
+    #     FieldSetOption.builder(media_set: [SFO::PaintingMedia::PaintingPaperOnly], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original])
+    #   end
+    # end
 
     class OriginalDrawing < FSO
-      def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::DrawingMedia::StandardDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original])
+      class DrawingStandard < OriginalDrawing
+        def self.option_sets
+          FieldSetOption.builder(media_set: SFO::DrawingMedia::StandardDrawing, material_set: Material::Paper, prepend_set: Category::OriginalMedia::Original)
+        end
+      end
+
+      class OriginalMixedMediaDrawing < OriginalDrawing
+        def self.option_sets
+          FieldSetOption.builder(media_set: SFO::DrawingMedia::MixedMediaDrawing, material_set: Material::Paper, prepend_set: Category::OriginalMedia::Original, append_set: SubMedium::SMO::Leafing)
+        end
       end
     end
 
-    class OriginalMixedMediaDrawing < FSO
-      def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::DrawingMedia::MixedMediaDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original], append_set: [SubMedium::SMO::Leafing])
+    # class OriginalDrawing < FSO
+    #   def self.option_sets
+    #     FieldSetOption.builder(media_set: [SFO::DrawingMedia::StandardDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original])
+    #   end
+    # end
+
+    # class OriginalMixedMediaDrawing < FSO
+    #   def self.option_sets
+    #     FieldSetOption.builder(media_set: [SFO::DrawingMedia::MixedMediaDrawing], material_set: [Material::Paper], prepend_set: [Category::OriginalMedia::Original], append_set: [SubMedium::SMO::Leafing])
+    #   end
+    # end
+
+    class OriginalProductionMedia < FSO
+      class OriginalProductionDrawing < OriginalProductionMedia
+        def self.option_sets
+          FieldSetOption.builder(media_set: SFO::ProductionMedia::ProductionDrawing, material_set: Material::AnimationPaper, prepend_set: Category::OriginalMedia::OriginalProduction)
+        end
+      end
+
+      class OriginalProductionSericel < OriginalProductionMedia
+        def self.option_sets
+          FieldSetOption.builder(media_set: SFO::ProductionMedia::ProductionSericel, material_set: Material::Sericel, prepend_set: Category::OriginalMedia::OriginalProduction)
+        end
       end
     end
 
-    class OriginalProductionDrawing < FSO
-      def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::ProductionMedia::ProductionDrawing], material_set: [Material::AnimationPaper], prepend_set: [Category::OriginalMedia::OriginalProduction])
-      end
-    end
+    # class OriginalProductionDrawing < FSO
+    #   def self.option_sets
+    #     FieldSetOption.builder(media_set: [SFO::ProductionMedia::ProductionDrawing], material_set: [Material::AnimationPaper], prepend_set: [Category::OriginalMedia::OriginalProduction])
+    #   end
+    # end
 
-    class OriginalProductionSericel < FSO
-      def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::ProductionMedia::ProductionSericel], material_set: [Material::Sericel], prepend_set: [Category::OriginalMedia::OriginalProduction])
-      end
-    end
+    # class OriginalProductionSericel < FSO
+    #   def self.option_sets
+    #     FieldSetOption.builder(media_set: [SFO::ProductionMedia::ProductionSericel], material_set: [Material::Sericel], prepend_set: [Category::OriginalMedia::OriginalProduction])
+    #   end
+    # end
+
+    ############################################################################
 
     class SericelPrint < FSO
+      def self.media_set
+        [SFO::Sericel]
+      end
+
       def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::SericelMedia], material_set: [Material::Sericel])
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Sericel)
       end
     end
 
     class PhotoPrint < FSO
+      def self.media_set
+        [SFO::PhotographMedia::Photograph, SFO::PhotographMedia::SingleExposurePhotograph]
+      end
+
       def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::PhotographMedia::Photograph, SFO::PhotographMedia::SingleExposurePhotograph], material_set: [Material::PhotographyPaper])
+        FieldSetOption.builder(media_set: media_set, material_set: Material::PhotographyPaper)
       end
     end
 
     class MixedMediaOnPaper < FSO
+      def self.media_set
+        [SFO::MixedMedia::Monotype, SFO::MixedMedia::AcrylicMixedMedia]
+      end
+
       def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::MixedMedia::Monotype, SFO::MixedMedia::AcrylicMixedMedia], material_set: [Material::Paper])
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper)
       end
     end
 
-    class PrintOnPaperWithRemarque < FSO
-      def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::PrintMedia::Poster], material_set: [Material::Paper], append_set: [SubMedium::SFO::Remarque])
+    ############################################################################
+    class BasicPrintMedia < FSO
+      class Poster < BasicPrintMedia
+        def self.media_set
+          [SFO::PrintMedia::Poster]
+        end
+
+        def self.option_sets
+          FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: SubMedium::SFO::Remarque)
+        end
+      end
+
+      class BasicPrintOnPaper < BasicPrintMedia
+        def self.media_set
+          [SFO::PrintMedia::BasicPrint]
+        end
+
+        def self.option_sets
+          FieldSetOption.builder(media_set: media_set, material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic], prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: SubMedium::SFO::Remarque)
+        end
+      end
+
+      class BasicPrintStandardMaterial < BasicPrintMedia
+        def self.media_set
+          [SFO::PrintMedia::BasicPrint]
+        end
+
+        def self.option_sets
+          FieldSetOption.builder(media_set: media_set, material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic], append_set: SubMedium::SFO::Remarque)
+        end
       end
     end
+    ############################################################################
+    # class PrintOnPaperWithRemarque < FSO
+    #   def self.media_set
+    #     [SFO::PrintMedia::Poster]
+    #   end
+    #
+    #   def self.option_sets
+    #     FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: SubMedium::SFO::Remarque)
+    #   end
+    # end
 
     class PrintOnCanvas < FSO
+      def self.media_set
+        [SFO::MixedMedia::AcrylicMixedMedia]
+      end
+
       def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::MixedMedia::AcrylicMixedMedia], material_set: [Material::Canvas, Material::WrappedCanvas])
+        FieldSetOption.builder(media_set: media_set, material_set: [Material::Canvas, Material::WrappedCanvas])
       end
     end
-
+    # Medium::FSO::MixedPrintOnPaperOnly.media_set
     class MixedPrintOnPaperOnly < FSO
-      def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::LithographMedia::Lithograph, SFO::EtchingMedia::Etching, SFO::ReliefMedia::Relief], material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+      def self.media_set
+        [SFO::LithographMedia::Lithograph, SFO::EtchingMedia::Etching, SFO::ReliefMedia::Relief]
       end
-    end
 
-    class BasicMixedPrintOnPaper < FSO
       def self.option_sets
-        FieldSetOption.builder(media_set: [SFO::EtchingMedia::MixedMediaEtching, SFO::ReliefMedia::MixedMediaRelief], material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: SubMedium::SFO::Remarque)
+      end
+
+      # def self.option_sets
+      #   FieldSetOption.builder(media_set: [SFO::LithographMedia::Lithograph, SFO::EtchingMedia::Etching, SFO::ReliefMedia::Relief], material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+      # end
+    end
+    #MixedMediaPrintOnPaper
+    class MixedMediaPrintOnPaper < FSO
+      def self.media_set
+        [SFO::EtchingMedia::MixedMediaEtching, SFO::ReliefMedia::MixedMediaRelief]
+      end
+
+      # def self.option_sets
+      #   FieldSetOption.builder(media_set: [SFO::EtchingMedia::MixedMediaEtching, SFO::ReliefMedia::MixedMediaRelief], material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SFO::Remarque])
+      # end
+      def self.option_sets
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: SubMedium::SFO::Remarque)
       end
     end
 
@@ -466,26 +594,49 @@ class Medium
     # Medium::FSO::MixedPrintOnPaper.media_set
     # Medium::FSO::MixedPrintOnPaper.options
     class MixedPrintOnCanvas < FSO
+      def self.media_set
+        MixedPrintOnPaper.media_set
+      end
+
+      # def self.option_sets
+      #   FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Colored])
+      # end
+
       def self.option_sets
-        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Colored])
+        FieldSetOption.builder(media_set: media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: SubMedium::SFO::Embellishment::Colored)
       end
     end
 
     class MixedPrintOnStandardMaterial < FSO
+      def self.media_set
+        MixedPrintOnPaper.media_set
+      end
+
+      # def self.option_sets
+      #   FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic], prepend_set: [SubMedium::SFO::Embellishment::Embellished], append_set: [SubMedium::SFO::Remarque])
+      # end [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic]
       def self.option_sets
-        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set, material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic], prepend_set: [SubMedium::SFO::Embellishment::Embellished], append_set: [SubMedium::SFO::Remarque])
+        FieldSetOption.builder(media_set: media_set, material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic], prepend_set: SubMedium::SFO::Embellishment::Embellished, append_set: SubMedium::SFO::Remarque)
       end
     end #end of MixedPrintOnCanvas
 
     class HandPulledPrintOnPaper < FSO
+      def self.media_set
+        MixedPrintOnPaper.media_set(0)
+      end
+
       def self.option_sets
-        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set(0), material_set: [Material::Paper], prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled], append_set: [SubMedium::SFO::Remarque])
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled], append_set: SubMedium::SFO::Remarque)
       end
     end
 
     class HandPulledPrintOnCanvas < FSO
+      def self.media_set
+        MixedPrintOnPaper.media_set(0)
+      end
+
       def self.option_sets
-        FieldSetOption.builder(media_set: MixedPrintOnPaper.media_set(0), material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Embellished, SubMedium::RBF::HandPulled])
+        FieldSetOption.builder(media_set: media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Embellished, SubMedium::RBF::HandPulled])
       end
     end
   end

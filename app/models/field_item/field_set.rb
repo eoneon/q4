@@ -15,16 +15,23 @@ class FieldSet < FieldItem
   # FieldSet.filter_search(FieldSet.media_set, 'sub_medium', "standard_painting")
   # FieldSet.submedia_set("standard_painting")
   # FieldSet.filter_tag(set, 'material')
+  # FieldSet.filter_tag(set, 'material')
+  # FieldSet.search([["sub_kind", "limited_edition"]])
   def self.media_set
     FieldSet.search([["kind", "medium"]])
   end
 
   def self.submedia_set(v)
-    filter_search(media_set, 'sub_medium',v)
+    filter_search(media_set, 'sub_medium', v)
   end
 
   def self.media_tags
     filter_tag(media_set, 'sub_kind')
+  end
+
+  def self.submedia_tags
+  #  Medium::FSO.sub_media.map{|klass| klass_name.underscore}
+    filter_tag(media_set, 'sub_medium')
   end
 
   def self.filter_tag(set, k)
