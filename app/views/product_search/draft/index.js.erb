@@ -1,0 +1,9 @@
+$("#product-category-index").html("<%= j render 'product_categories/index', dropdown_item: @dropdown_item %>");
+if ($("h1").attr("data-medium-category").length) {
+  var medium_category = "#"+$("h1").attr("data-medium-category");
+  var product_id = "#"+$("input:hidden[name='product_id']").val();
+  if ($(product_id).length && !$(product_id).hasClass("active")){
+    $(product_id).addClass("active");
+    $(medium_category)[0].click();
+  }
+}

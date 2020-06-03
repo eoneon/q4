@@ -1,0 +1,3 @@
+<% @search_inputs[:hidden].each do |input_hsh| %>
+  <%= hidden_field_tag "hidden[#{input_hsh[:field_name]}]", input_hsh[:field_value] %>
+<% end %>

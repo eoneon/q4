@@ -1,0 +1,10 @@
+<div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown">
+    <span>medium category</span>
+  </button>
+  <div class="dropdown-menu">
+    <% FieldSet.input_set('medium_category').each do |opt_hsh| %>
+      <button class="dropdown-item" id="<%= opt_hsh[:opt_tag] %>" type="button" data-value="<%= opt_hsh[:value] %>"><%= opt_hsh[:text] %></button>
+    <% end %>
+  </div>
+</div>

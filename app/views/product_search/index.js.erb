@@ -1,0 +1,6 @@
+var form = $("#search-form");
+var selected_opts = <%= raw @selected %>
+$(form).html("<%=  j render 'product_search/form', search_set: @search_set, search_inputs: @search_inputs %>");
+$(selected_opts).each(function(i, opt_set){
+  $(opt_set[0]).find('option').eq(opt_set[1]).attr('selected', true);
+});
