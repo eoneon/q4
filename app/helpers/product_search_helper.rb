@@ -1,8 +1,7 @@
 module ProductSearchHelper
 
-  def search_input_options(opt_name, tag_group)
-    #tag_group.map{|opt_hsh| [opt_hsh[:text], opt_hsh[:value]]}.prepend(["-- select #{split_join(opt_name, '_')}--", ""])
-    tag_group.map{|opt_hsh| [opt_hsh[:text], opt_hsh[:value]]}.prepend(["-- select #{split_join(opt_name, '_')}--", "all"])
+  def search_input_options(field_name, opt_set)
+    opt_set.map{|opt_hsh| [opt_hsh[:text], opt_hsh[:value]]}.prepend(["-- select #{split_join(field_name, '_')}--", "all"])
   end
 
   def split_join(snake_word, delim=' ')

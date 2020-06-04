@@ -2,10 +2,10 @@
   <div class="input-group align-items-center rounded-border bg-white">
     <div class="input-group-prepend">
       <div class="input-group-text bg-transparent rounded-left-border border-0">
-        <span><%= (fa_icon "search") %></span>
+        <button class="btn btn-sm text-sm font-weight-light text-secondary bg-transparent reset-select" data-target="<%= field_name %>" type="button"><%= (fa_icon "repeat") %></button>
       </div>
     </div>
-    <%= select_tag "product_search[#{opt_name}]", options_for_select(search_input_options(opt_name, tag_group)), {class: "form-control border-0 search-select"} %>
+    <%= select_tag "product_search[#{field_name}]", options_for_select(search_input_options(field_name, opt_set)), {class: "form-control border-0 search-select"} %>
     <div class="input-group-append">
       <div class="input-group-text bg-transparent border-top-0 border-right-0 border-bottom-0">
       </div>

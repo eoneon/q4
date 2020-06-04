@@ -55,7 +55,18 @@ $(document).ready(function(){
     var v = $(this).val();
     var form = $(this).closest("form");
     $('#'+$(this).attr("id").replace("product_search", "hidden")).val(v);
-    //$("#search-form").find('select option').eq(idx).val();
+    $(form).submit();
+  });
+
+  //#SEARCH: handler for submitting search form: on dropdown selection
+  $("body").on("click", ".reset-select", function(){
+    var id = $(this).attr("data-target");
+    var form = $(this).closest("form");
+    $("#product_search_"+id+"").val("all"); //("option").attr('selected', true);
+    $("#hidden"+id+"").val("all");
+    //var v = "#product_search_"+id+""; //.attr("product_search_'+id+'")
+    //var v = $('#'+$(this).attr("product_search_"+id+""));
+    //console.log(v)
     $(form).submit();
   });
 

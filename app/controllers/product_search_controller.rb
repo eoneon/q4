@@ -1,8 +1,8 @@
 class ProductSearchController < ApplicationController
   def index
     @search_set = search_set
-    @search_inputs = FieldSet.search_inputs(@search_set, selected_hsh) #puts "3 selected_hsh: #{selected_hsh}"
-    #puts "selected_hsh: #{selected_hsh}"
+    @input_group = FieldSet.search_inputs(@search_set, selected_hsh) #puts "3 selected_hsh: #{selected_hsh}"
+
     respond_to do |format|
       format.js
       format.html
@@ -31,13 +31,12 @@ class ProductSearchController < ApplicationController
     if search_params
       params[:hidden].reject {|k,v| tags.exclude?(k)} #if params[:product_search].present?
     else
-      #tags.map{|tag_param| [tag_param, 0]}.to_h #.stringify_keys
       tags.map{|tag_param| [tag_param, 'all']}.to_h
     end
   end
 
 end
 
-# puts "4(a) hidden_inputs: #{@search_inputs[:hidden]}"
-# puts "4(b) inputs: #{@search_inputs[:inputs]}"
+# puts "4(a) hidden_inputs: #{@input_group[:hidden]}"
+# puts "4(b) inputs: #{@input_group[:inputs]}"
 # puts "5 selected: #{@selected}"

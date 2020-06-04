@@ -23,7 +23,6 @@ class FieldSet < FieldItem
   end
 
   def self.selected(hidden_inputs)
-    #hidden_inputs.map {|h| ["#product_search_#{h[:input_name]}", h[:input_value].to_i]}
     hidden_inputs.map {|h| ["#product_search_#{h[:input_name]}", h[:input_value]]}
   end
 
@@ -40,7 +39,7 @@ class FieldSet < FieldItem
     end
     set.reject {|h| h[:input_value].nil?} #set.reject {|h| h[:input_value] == nil}
   end
-  #rename: tag_set
+  
   def self.tag_set(search_set) # FieldSet.tag_set(@product_search).map{|tag_param| [:"#{tag_param}", 0]}}.to_h
     tag_set = search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
     ["medium_category", "medium", "material", "hand_pulled"].keep_if {|tag| tag_set.include?(tag)}
