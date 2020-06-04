@@ -52,14 +52,20 @@ $(document).ready(function(){
 
   //#SEARCH: handler for submitting search form: on dropdown selection
   $("body").on("change", ".search-select", function(){
-    var idx = $(this).prop("selectedIndex");
+    var v = $(this).val();
     var form = $(this).closest("form");
-    $('#'+$(this).attr("id").replace("product_search", "hidden")).val(idx);
+    $('#'+$(this).attr("id").replace("product_search", "hidden")).val(v);
+    //$("#search-form").find('select option').eq(idx).val();
     $(form).submit();
-    //$(form).find(".form").attr("data-search", idx);
-    //$(form).find('select :nth-child('+idx+')').attr('selected', true);
-    //console.log(input);
   });
+
+  //#SEARCH: (draft) handler for submitting search form: on dropdown selection
+  // $("body").on("change", ".search-select", function(){
+  //   var idx = $(this).prop("selectedIndex");
+  //   var form = $(this).closest("form");
+  //   $('#'+$(this).attr("id").replace("product_search", "hidden")).val(idx);
+  //   $(form).submit();
+  // });
 
   //#SEARCH: handler for submitting search form: on dropdown selection
   //$("input:hidden[name='product_id']").val(id);

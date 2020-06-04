@@ -1,5 +1,4 @@
 <%= form_with url: product_search_index_url, method: :get, id: 'search-form' do |f| %>
-<%#= form_with url: '/product_search', method: :get, id: 'search-form' do |f| %>
   <div class="form">
     <div id="hidden_tags">
       <%= render "product_search/hidden_tags", hidden_inputs: @search_inputs[:hidden]  %>
