@@ -12,8 +12,6 @@ class FieldSet < FieldItem
     FieldSet.kv_set_search([["kind", "medium"]])
   end
 
-  # FieldSet.tag_form_inputs(FieldSet.media_set, h={"hidden"=>{"medium_category"=>"4", "medium"=>"0", "material"=>"0", "hand_pulled"=>"0"}})
-  # FieldSet.tag_inputs(FieldSet.media_set, 'medium_category')
   def self.search_inputs(search_set, selected_hsh, inputs=[])
     hidden_inputs = hidden_inputs(search_set, selected_hsh)
     hidden_inputs.map{|h| h[:input_name]}.each do |input_name|
@@ -22,34 +20,34 @@ class FieldSet < FieldItem
     h={hidden: hidden_inputs, inputs: inputs, selected: selected(hidden_inputs)}
   end
 
-  def self.selected(hidden_inputs)
-    hidden_inputs.map {|h| ["#product_search_#{h[:input_name]}", h[:input_value]]}
-  end
-
-  def self.tag_inputs(search_set, input_name, set=[])
-    filter_tag(search_set, input_name).each do |tag|
-      set << h={opt_name: input_name, text: format_text_tag(tag), value: tag}
-    end
-    set
-  end
-
   def self.hidden_inputs(search_set, selected_hsh, set=[]) # FieldSet.hidden_inputs(FieldSet.media_set, h={"hidden"=>{"medium_category"=>"4", "medium"=>"0", "material"=>"0", "hand_pulled"=>"0"}})
     tag_set(search_set).each do |tag|
       set << h={input_name: tag, input_value: selected_hsh[tag]}
     end
     set.reject {|h| h[:input_value].nil?} #set.reject {|h| h[:input_value] == nil}
   end
-  
+
   def self.tag_set(search_set) # FieldSet.tag_set(@product_search).map{|tag_param| [:"#{tag_param}", 0]}}.to_h
     tag_set = search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
     ["medium_category", "medium", "material", "hand_pulled"].keep_if {|tag| tag_set.include?(tag)}
   end
 
   def self.format_text_tag(tag) # FieldSet.medium_category_tags.map{|tag| FieldSet.format_text_tag(tag)}
-    tag = tag.pluralize.split('_')
-    prefix = tag[0..-2]
-    prefix = prefix.join('_') == "one_of_a_kind" ? prefix.join('-') : prefix.join(' ') #prefix = tag[0..-2].join('_') == "one_of_a_kind" ? tag[0..-2].join('-') : tag[0..-2].join(' ')
-    [prefix, tag[-1]].join(' ')
+    tag = [['paper_only', '(paper only)'], ['standard', ''], ['limited_edition', 'ltd ed'], ['one_of_a_kind', 'one-of-a-kind']].map{|set| tag.sub(set[0], set[1])}[0]
+    tag = tag.split('_')
+    [tag[0..-2], tag[-1]].join(' ')
+  end
+
+  def self.tag_inputs(search_set, input_name, set=[])
+    filter_tag(search_set, input_name).each do |tag|
+      #puts "tag: #{tag}"
+      set << h={opt_name: input_name, opt_text: format_text_tag(tag), opt_value: tag}
+    end
+    set
+  end
+
+  def self.selected(hidden_inputs)
+    hidden_inputs.map {|h| ["#product_search_#{h[:input_name]}", h[:input_value]]}
   end
 
   def self.filter_tag(set, k)

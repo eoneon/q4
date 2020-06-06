@@ -10,8 +10,8 @@
       <div class="card-header p-1">
         <%= render "product_search/form", search_set: @search_set, input_group: @input_group %>
       </div>
-      <div class="card-body p-1">
-        <%#= render 'product_items/aside', product_items: @product_items %>
+      <div class="card-body p-1" id="tab-pane">
+        <%= render 'field_items/aside', field_items: @search_set %>
       </div>
     </div>
   </div>

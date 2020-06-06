@@ -63,10 +63,7 @@ $(document).ready(function(){
     var id = $(this).attr("data-target");
     var form = $(this).closest("form");
     $("#product_search_"+id+"").val("all"); //("option").attr('selected', true);
-    $("#hidden"+id+"").val("all");
-    //var v = "#product_search_"+id+""; //.attr("product_search_'+id+'")
-    //var v = $('#'+$(this).attr("product_search_"+id+""));
-    //console.log(v)
+    $("#hidden_"+id+"").val("all");
     $(form).submit();
   });
 

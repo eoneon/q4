@@ -4,7 +4,6 @@
       <%= render "product_search/hidden_tags", hidden_inputs: @input_group[:hidden]  %>
     </div>
     <% @input_group[:inputs].each do |opt_group| %>
-      <%#= render "product_search/input_field", opt_name: input_hsh[0][:opt_name], input_hsh: input_hsh %>
       <%= render "product_search/input_field", field_name: opt_group[0][:opt_name], opt_set: opt_group %>
     <% end %>
   </div>

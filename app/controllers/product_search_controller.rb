@@ -36,7 +36,3 @@ class ProductSearchController < ApplicationController
   end
 
 end
-
-# puts "4(a) hidden_inputs: #{@input_group[:hidden]}"
-# puts "4(b) inputs: #{@input_group[:inputs]}"
-# puts "5 selected: #{@selected}"
