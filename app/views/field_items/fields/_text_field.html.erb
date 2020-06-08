@@ -1,3 +1,8 @@
-<%= f.fields_for :tags, OpenStruct.new(origin.tags) do |ff| %>
-  <%= ff.text_field target.field_name, placeholder: target.field_name, class: "form-control" %>
-<% end %>
+<div class="input-group input-group-sm mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text"><%= field.field_name %></span>
+  </div>
+  <%= f.fields_for :tags, OpenStruct.new(origin.tags) do |ff| %>
+    <%= ff.text_field field.field_name, placeholder: field.field_name, class: "form-control" %>
+  <% end %>
+</div>

@@ -10,7 +10,7 @@ class ArtistField
   end
 
   def self.builder
-    field_set(field_name, [ArtistName, YearsActive].map{|klass| klass.builder}, tags)
+    field_set(field_name, [ArtistName, YearsActive, ArtistId].map{|klass| klass.builder}, tags)
   end
 
   class ArtistName < ArtistField
@@ -19,7 +19,7 @@ class ArtistField
     end
 
     def self.options
-      %w[first_name middle_name last_name artist_id].map{|name| text_field(name, tags)}
+      %w[first_name middle_name last_name].map{|name| text_field(name, tags)}
     end
   end
 
@@ -30,6 +30,12 @@ class ArtistField
 
     def self.options
       %w[yob dob].map{|name| text_field(name, tags)}
+    end
+  end
+
+  class ArtistId < ArtistField
+    def self.builder
+      number_field(field_name, tags)
     end
   end
 

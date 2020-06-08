@@ -1,0 +1,10 @@
+<div class="input-group input-group-sm mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text"><%= field.field_name %></span>
+  </div>
+  <% field.targets.each do |target| %>
+    <%= f.fields_for :tags, OpenStruct.new(origin.tags) do |ff| %>
+      <%= render "field_items/#{field_folder(field)}/#{target.type.underscore}", origin: origin, field: target, f: ff  %>
+    <% end %>
+  <% end %>
+</div>

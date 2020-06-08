@@ -2,9 +2,7 @@
   <div class="form-inline align-items-center" id="<%= dom_tag(artist, :form, :fields) %>">
     <button class="btn btn-sm btn-outline-primary" type="submit"><%= (fa_icon "plus") %></button>
     <% FieldSet.find_by(field_name: 'artist-field').targets.each do |field| %>
-      <%# field.targets.each do |target| %>
-        <%= render "field_items/fields/#{field.type.underscore}", origin: artist, field: field, f: f  %>
-      <%# end %>
+      <%= render "field_items/#{field_folder(field)}/#{field.type.underscore}", origin: artist, field: field, f: f %>
     <% end %>
   </div>
 <% end %>
