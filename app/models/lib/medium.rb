@@ -10,7 +10,7 @@ class Medium
       h.merge!(hsh={medium_category: h[:sub_kind]})
     end
   end
-  # Medium::SFO.sub_media
+  
   class SFO < Medium
     def self.sub_media
       flat_class_set(self)

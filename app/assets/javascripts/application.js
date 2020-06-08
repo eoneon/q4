@@ -23,6 +23,15 @@ $(document).ready(function(){
     $(this).closest(".card").siblings().find(".card-body.show").toggleClass("show hide");
   });
 
+  $("body").on("click", ".form-toggle", function(){
+    var target = $(this).attr("data-target");
+    if (!$(target).hasClass("show")){
+      $(target).siblings().removeClass("show");
+      $(target).addClass("show");
+      console.log(target)
+    }
+  });
+
   //CRUD SHOW
   $("body").on("click", "#tab-index a.list-group-item", function(e){
     var item_id = '#'+$(this).attr("id");

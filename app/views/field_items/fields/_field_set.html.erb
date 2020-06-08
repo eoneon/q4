@@ -1,0 +1,7 @@
+<div class="field"><br>
+  <%= field.field_name %>
+
+  <% field.targets.each do |target| %>
+    <%= render "field_items/fields/#{target.type.underscore}", origin: origin, target: target, f: f  %>
+  <% end %>
+</div>

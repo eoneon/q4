@@ -1,0 +1,10 @@
+<%= form_with model: Artist.new, id: "artist-new" do |f| %>
+  <div class="form-row">
+    <div class="input-group input-group-sm">
+      <%= f.text_field :artist_name, placeholder: "artist name", class: "form-control form-control-sm" %>
+      <div class="input-group-append mr-2">
+        <button class="btn btn-sm btn-outline-primary" type="submit"><%= (fa_icon "plus") %></button>
+      </div>
+    </div>
+  </div>
+<% end %>

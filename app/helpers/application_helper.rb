@@ -11,7 +11,11 @@ module ApplicationHelper
     end
   end
 
-  # def label_tag(obj)
-  #   obj.type
-  # end
+  def dom_tag(obj, *tags)
+    tags.map{|tag| tag.to_s}.prepend(format_obj(obj)).join("-")
+  end
+
+  def format_obj(obj)
+    [obj.class.name.underscore, obj.id].join("-")
+  end
 end

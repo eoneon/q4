@@ -20,6 +20,10 @@ module STI
     item_groups.order(:sort)
   end
 
+  def targets
+    sorted_targets.map{|item_group| item_group.target}
+  end
+
   #AR obj: to_class -> expand re: Q3/models/concerns/build_set.rb
   def to_class
     self.class.name.constantize

@@ -1,0 +1,8 @@
+<% field.targets.each do |target| %>
+  <%= render "field_items/fields/#{target.type}", origin: origin, f: f  %>
+  <% if target.type == 'TextField' %>
+    <%= f.fields_for :tags, OpenStruct.new(origin.tags) do |ff| %>
+      <%= ff.text_field target.field_name, class: "form-control" %>
+    <% end %>
+  <% end %>
+<% end %>

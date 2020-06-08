@@ -1,6 +1,8 @@
 class FieldItemsController < ApplicationController
   def index
-    @field_items = FieldSet.media_set #where("tags -> 'kind' = 'medium'") #where("tags ? :key", key: "medium")
+    #@field_items = FieldSet.media_set
+    @field_items = FieldSet.where("tags -> 'kind' = 'artist'")
+    #where("tags -> 'kind' = 'medium'") #where("tags ? :key", key: "medium")
     #where("tags -> 'medium' = \'#{render_as}\'")
     #@field_items = FieldSet.where("tags ? :key", key: "print_medium")
     #@field_items = FieldSet.all

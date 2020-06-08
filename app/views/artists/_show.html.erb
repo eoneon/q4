@@ -1,0 +1,17 @@
+<div class="card border border-dark" id="<%= dom_tag(artist, :show) %>">
+  <div class="card-header py-0" id="<%= dom_tag(artist, :header) %>">
+    <div class="row align-items-center bg-light">
+
+      <div class="col-11 mt-3 pr-0">
+        <%= render 'artists/edit', artist: artist, url: artist_path(artist) %>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card-body p-1" id="<%#= dom_ref(artist, :body) %>">
+    <div id='<%#= dom_ref(artist, :index) %>'>
+      <%#= render "product_items/index", origin: field_item %>
+    </div>
+  </div>
+</div>

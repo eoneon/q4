@@ -1,4 +1,5 @@
 class FieldSet < FieldItem
+  #has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"

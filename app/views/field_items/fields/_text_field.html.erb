@@ -1,0 +1,3 @@
+<%= f.fields_for :tags, OpenStruct.new(origin.tags) do |ff| %>
+  <%= ff.text_field target.field_name, placeholder: target.field_name, class: "form-control" %>
+<% end %>
