@@ -1,13 +1,7 @@
 <%= form_with url: search_artists_url, method: :get, id: "artist-search" do |f| %>
   <div class="form-row">
-    <div class="input-group input-group-sm">
-      <%= f.collection_select :id, Artist.all, :id, :artist_name, include_blank: true, class: "form-control form-control-sm col-12" %>
-      <%#= select_tag "artist[id]", options_for_select(Artist.all.pluck(:id, :artist_name)), include_blank: true, class: "form-control form-control-sm" %>
-
-      <div class="input-group-append mr-2">
-        <button class="btn btn-sm btn-outline-primary" type="submit"><%= (fa_icon "search") %></button>
-      </div>
+    <div class="input-group input-group-sm mr-2">
+      <%= f.collection_select :id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control form-control-sm artist-search" %>
     </div>
-
   </div>
 <% end %>

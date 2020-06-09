@@ -26,9 +26,9 @@ $(document).ready(function(){
   $("body").on("click", ".form-toggle", function(){
     var target = $(this).attr("data-target");
     if (!$(target).hasClass("show")){
+      $(this).addClass("active").siblings().removeClass("active");
       $(target).siblings().removeClass("show");
       $(target).addClass("show");
-      console.log(target)
     }
   });
 
@@ -42,6 +42,16 @@ $(document).ready(function(){
       e.preventDefault();
       $(item_card_id).remove();
       $(item_id).removeClass("active");
+    }
+  });
+
+  //CRUD SHOW SEARCH
+  $("body").on("change", ".artist-search", function(){
+    var v = $(this).val();
+    if (v.length) {
+      $(this).closest("form").submit();
+    } else {
+      $('#show-card > .card').remove();
     }
   });
 
