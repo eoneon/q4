@@ -1,0 +1,2 @@
+$("#invoice-show").replaceWith("<%= j render 'invoices/nav_bar', invoice: @invoice %>");
+$("table").html("<%= j render 'items/table', invoice: @invoice %>");

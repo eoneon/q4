@@ -1,0 +1,7 @@
+<div class="form-inline" id="new-skus">
+  <%= form_with model: Item.new, url: create_skus_invoice_item_path(invoice), method: :get do |f| %>
+    <%= f.number_field :start_sku, placeholder: "start sku", class: "form-control form-control-sm mr-sm-2" %>
+    <%= f.number_field :end_sku, placeholder: "end sku", class: "form-control form-control-sm mr-sm-2" %>
+    <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">submit</button>
+  <% end %>
+</div>

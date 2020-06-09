@@ -1,0 +1,38 @@
+<div class="row justify-content-center">
+  <h1 id="sku" data-medium-category="<%= html_tag(i: @item.medium_category, tag: 'fk', delim: '_') %>">
+    Sku: <span id="sku-header"><%= @item.sku %></span><span id="item-product"></span>
+  </h1>
+</div>
+
+<div class="collapse">
+  <%#= render "product_categories/form", dropdown_item: @item.product_category %>
+</div>
+
+
+<div class="row justify-content-center">
+  <h4><span><%= @item.invoice.supplier.name %></span> inv: <span><%= @item.invoice.invoice_number %></span></h4>
+</div>
+<hr>
+
+<div class="row justify-content-center">
+  <div class="col-5">
+    <div class="col" id="">
+      <%#= render "product_categories/dropdown" %>
+    </div>
+
+    <div class="col" id="">
+      <div id="product-category-index">
+      </div>
+    </div>
+  </div>
+
+  <div class="col-7">
+    <%#= render "items/product", item: @item %>
+
+    <div id="show-card">
+      <%= render "items/edit", invoice: @item.invoice, item: @item %>
+      <%#= render "item_products/form", item: @item %>
+      <%#= render "item_elements/form", item: @item %>
+    </div>
+  </div>
+</div>

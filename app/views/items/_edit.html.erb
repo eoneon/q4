@@ -1,0 +1,7 @@
+<div class="form-inline" id="edit-item">
+  <%= form_with model: item, url: invoice_item_path(invoice, item) do |f| %>
+    <%= f.number_field :sku, placeholder: "sku", class: "form-control form-control-sm mr-sm-2" %>
+    <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
+    <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+  <% end %>
+</div>

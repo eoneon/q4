@@ -1,0 +1,13 @@
+<tr>
+  <td>
+    <a href="<%= edit_invoice_item_path(item) %>" class="btn btn-link" type="button">
+      <%= item.id %>
+    </a>
+    <button class="btn btn-sm btn-outline-info float-right" type="button" data-toggle="collapse" data-target="#collapseItemForm#{<%= item.id %>}">
+      Edit
+    </button>
+    <div class="collapse" id="collapseItemForm#{<%= item.id %>}">
+      <%= render 'items/form', invoice: item.invoice, item: item %>
+    </div>
+  </td>
+</tr>
