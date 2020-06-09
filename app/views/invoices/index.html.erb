@@ -1,0 +1,14 @@
+<h1>Invoice List</h1><br>
+
+<div>
+  <%= render 'invoices/form', supplier: @supplier, invoice: Invoice.new %>
+</div>
+
+<table class="table table-striped table-hover">
+  <thead>
+    <th>Invoices Name</th>
+  </thead>
+  <tbody>
+    <%= render @supplier.invoices %>
+  </tbody>
+</table>

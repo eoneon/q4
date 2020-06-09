@@ -1,0 +1,24 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+  <a class="navbar-brand"><%= supplier.supplier_name %></a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" data-toggle="collapse" href="#<%= dom_tag(supplier, :edit) %>"><span class="text-secondary">edit</span><span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="<%= supplier_path(supplier) %>" data-method="delete" data-remote="true" data-confirm="Are you sure?"><span class="text-secondary">delete</span><span class="sr-only">(current)</span></a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="collapse" id="<%= dom_tag(supplier, :edit) %>">
+    <%= render 'suppliers/edit', supplier: supplier %>
+  </div>
+
+  <%= render 'invoices/form', supplier: supplier, invoice: Invoice.new %>
+</nav>

@@ -1,0 +1,18 @@
+<div class="row justify-content-center">
+  <h1>Supplier List</h1>
+</div>
+<hr>
+
+<div class="row">
+  <div class="col-4">
+    <div class="">
+      <%= render 'suppliers/form', supplier: Supplier.new %>
+    </div>
+    <%= render "suppliers/tab_index", suppliers: @suppliers %>
+  </div>
+
+  <div class="col-8">
+    <div id="show-card">
+    </div>
+  </div>
+</div>

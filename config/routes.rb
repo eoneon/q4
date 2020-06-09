@@ -1,4 +1,17 @@
 Rails.application.routes.draw do
+  resources :suppliers do
+    resources :invoices
+  end
+
+  resources :invoices do
+    resources :items, except: [:index]
+    resources :skus, only: [:create] do
+      member do
+        post :destroy
+      end
+    end
+  end
+  
   resources :products
   resources :field_items
   resources :artists do

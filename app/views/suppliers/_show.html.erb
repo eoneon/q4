@@ -1,0 +1,15 @@
+<div class="card pb-0" id="<%= dom_tag(supplier, :show) %>">
+  <%= render 'suppliers/nav_bar', supplier: @supplier %>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">invoice #</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <%= render 'suppliers/table_body', invoices: @supplier.invoices %>
+    </tbody>
+  </table>
+</div>

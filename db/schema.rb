@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200606012535) do
+ActiveRecord::Schema.define(version: 20200609211604) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,6 +31,15 @@ ActiveRecord::Schema.define(version: 20200606012535) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "invoices", force: :cascade do |t|
+    t.string "invoice_name"
+    t.integer "invoice_number"
+    t.bigint "supplier_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["supplier_id"], name: "index_invoices_on_supplier_id"
+  end
+
   create_table "item_groups", force: :cascade do |t|
     t.string "origin_type"
     t.bigint "origin_id"
@@ -42,6 +51,14 @@ ActiveRecord::Schema.define(version: 20200606012535) do
     t.integer "sort"
     t.index ["origin_type", "origin_id"], name: "index_item_groups_on_origin_type_and_origin_id"
     t.index ["target_type", "target_id"], name: "index_item_groups_on_target_type_and_target_id"
+  end
+
+  create_table "items", force: :cascade do |t|
+    t.integer "sku"
+    t.integer "retail"
+    t.hstore "tags"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "product_items", force: :cascade do |t|
@@ -60,4 +77,11 @@ ActiveRecord::Schema.define(version: 20200606012535) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "suppliers", force: :cascade do |t|
+    t.string "supplier_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_foreign_key "invoices", "suppliers"
 end

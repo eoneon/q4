@@ -30,7 +30,7 @@ class FieldSet < FieldItem
 
   def self.tag_set(search_set) # FieldSet.tag_set(@product_search).map{|tag_param| [:"#{tag_param}", 0]}}.to_h
     tag_set = search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
-    ["medium_category", "medium", "material", "hand_pulled"].keep_if {|tag| tag_set.include?(tag)}
+    %w[medium_category medium material].keep_if {|tag| tag_set.include?(tag)}
   end
 
   def self.format_text_tag(tag) # FieldSet.medium_category_tags.map{|tag| FieldSet.format_text_tag(tag)}
