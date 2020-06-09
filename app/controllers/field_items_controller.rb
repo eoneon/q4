@@ -1,11 +1,7 @@
 class FieldItemsController < ApplicationController
   def index
-    #@field_items = FieldSet.media_set
-    @field_items = FieldSet.where("tags -> 'kind' = 'artist'")
-    #where("tags -> 'kind' = 'medium'") #where("tags ? :key", key: "medium")
-    #where("tags -> 'medium' = \'#{render_as}\'")
-    #@field_items = FieldSet.where("tags ? :key", key: "print_medium")
-    #@field_items = FieldSet.all
+    @field_items = FieldSet.media_set
+    #@field_items = FieldSet.where("tags -> 'kind' = 'artist'")
   end
 
   def show
@@ -70,3 +66,8 @@ class FieldItemsController < ApplicationController
     @field_item.to_class.assoc_names.map{|assoc| assoc.to_sym}
   end
 end
+
+#where("tags -> 'kind' = 'medium'") #where("tags ? :key", key: "medium")
+#where("tags -> 'medium' = \'#{render_as}\'")
+#@field_items = FieldSet.where("tags ? :key", key: "print_medium")
+#@field_items = FieldSet.all
