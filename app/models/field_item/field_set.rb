@@ -9,28 +9,43 @@ class FieldSet < FieldItem
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
+  # def self.input_group
+  #   search_set = FieldSet.media_set
+  #   #selected_hsh = FieldSet.search_tags(media_set).map{|tag_param| [tag_param, 'all']}.to_h
+  #   input_group = FieldSet.search_inputs(search_set, FieldSet.search_tags(search_set).map{|tag_param| [tag_param, 'all']}.to_h)
+  #   #h={search_set: media_set, input_group: input_group}
+  # end
+
   def self.media_set
     FieldSet.kv_set_search([["kind", "medium"]])
   end
 
-  def self.search_inputs(search_set, selected_hsh, inputs=[])
+  def self.search_inputs(search_set, selected_hsh, scope, inputs=[])
     hidden_inputs = hidden_inputs(search_set, selected_hsh)
     hidden_inputs.map{|h| h[:input_name]}.each do |input_name|
       inputs << tag_inputs(search_set, input_name)
     end
-    h={hidden: hidden_inputs, inputs: inputs, selected: selected(hidden_inputs)}
+    h={hidden: hidden_inputs, inputs: inputs, selected: set_selected(hidden_inputs, scope)}
   end
 
   def self.hidden_inputs(search_set, selected_hsh, set=[]) # FieldSet.hidden_inputs(FieldSet.media_set, h={"hidden"=>{"medium_category"=>"4", "medium"=>"0", "material"=>"0", "hand_pulled"=>"0"}})
-    tag_set(search_set).each do |tag|
+    search_tags(search_set).each do |tag|
       set << h={input_name: tag, input_value: selected_hsh[tag]}
     end
     set.reject {|h| h[:input_value].nil?} #set.reject {|h| h[:input_value] == nil}
   end
 
-  def self.tag_set(search_set) # FieldSet.tag_set(@product_search).map{|tag_param| [:"#{tag_param}", 0]}}.to_h
-    tag_set = search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
+  def self.search_tags(search_set) # FieldSet.search_tags(@product_search).map{|tag_param| [:"#{tag_param}", 0]}}.to_h
+    tag_set = tag_set(search_set) #search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
     %w[medium_category medium material].keep_if {|tag| tag_set.include?(tag)}
+  end
+
+  def self.filtered_tags(tag_set, filter_set)
+    filter_set.keep_if {|tag| tag_set.include?(tag)}
+  end
+
+  def self.tag_set(search_set)
+    search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
   end
 
   def self.format_text_tag(tag) # FieldSet.medium_category_tags.map{|tag| FieldSet.format_text_tag(tag)}
@@ -49,6 +64,10 @@ class FieldSet < FieldItem
 
   def self.selected(hidden_inputs)
     hidden_inputs.map {|h| ["#product_search_#{h[:input_name]}", h[:input_value]]}
+  end
+
+  def self.set_selected(hidden_inputs, scope='product_search')
+    hidden_inputs.map {|h| ["##{scope}_#{h[:input_name]}", h[:input_value]]}
   end
 
   def self.filter_tag(set, k)

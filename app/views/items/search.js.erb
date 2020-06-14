@@ -1,0 +1,8 @@
+var form = $("#search-form");
+var selected_opts = <%= raw @input_group[:selected] %>
+$(form).html("<%= j render 'items/search', search_set: @search_set, input_group: @input_group %>");
+$("#tab-pane").html("<%= j render 'items/aside', field_items: @search_set %>");
+
+$(selected_opts).each(function(i, opt_set){
+  $(opt_set[0]).find('option[value="'+opt_set[1]+'"]').attr('selected', true);
+});

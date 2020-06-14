@@ -1,6 +1,8 @@
 class ItemsController < ApplicationController
   def show
     @item = Item.find(params[:id])
+    @search_set = search_set
+    @input_group = input_group
   end
 
   def create
@@ -14,12 +16,28 @@ class ItemsController < ApplicationController
   end
 
   def update
+    @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
-    #item_product(@item.element_id("kind", "product"), params[:product_id])
+    set_product
+    @search_set = search_set
+    @input_group = input_group
+
 
     respond_to do |format|
       format.js
+    end
+  end
+
+  def search
+    @search_set = search_set
+    @input_group = input_group
+    puts "search_set: #{@search_set}"
+    puts "input_group: #{@input_group}"
+
+    respond_to do |format|
+      format.js
+      format.html
     end
   end
 
@@ -42,16 +60,27 @@ class ItemsController < ApplicationController
     params.require(:item).permit!
   end
 
-  # def item_product(product_id, params_product_id)
-  #   if params_product_id.to_i == product_id.to_i
-  #     @item.save
-  #   elsif params_product_id.present? && product_id.blank?
-  #     @item.elements << Element.find(params_product_id)
-  #   elsif params_product_id.blank? && product_id.present?
-  #     @item.elements.destroy(Element.find(product_id))
-  #   elsif params_product_id.present? && product_id.present?
-  #     @item.elements.destroy(Element.find(product_id))
-  #     @item.elements << Element.find(params_product_id)
-  #   end
-  # end
+  def set_product
+    if product_id = @item.product_id
+      reset_product(product_id)
+    else
+      @product = FieldSet.find(params[:hidden][:product_id])
+      @item.field_sets << @product
+    end
+  end
+
+  def reset_product(product_id)
+    if params[:hidden][:product_id].blank?
+      destroy_assoc(product_id)
+    elsif product_id != params[:hidden][:product_id]
+      destroy_assoc(product_id)
+      @product = FieldSet.find(params[:hidden][:product_id])
+      @item.field_sets << @product unless @item.field_sets.include?(@product)
+    end
+  end
+
+  def destroy_assoc(product_id)
+    @item.item_groups.where(target_id: product_id).first.destroy
+  end
+
 end

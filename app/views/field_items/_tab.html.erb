@@ -1,7 +1,7 @@
-<a class="list-group-item list-group-item-action py-1" id="<%= dom_ref(field_item, :tab, :item) %>" href="<%= field_item_path(field_item) %>" data-remote="true" data-toggle="list">
+<a class="list-group-item list-group-item-action py-1 pl-2" id="<%= dom_ref(field_item, :tab, :item) %>" href="<%= field_item_path(field_item) %>" data-remote="true" data-toggle="list">
   <div class="row">
     <div class="col item-name">
-      <%= field_item.field_name %>
+      <span class="text-sm font-weight-light"><%= field_item.field_name %></span>
     </div>
   </div>
 </a>

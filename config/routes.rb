@@ -11,7 +11,13 @@ Rails.application.routes.draw do
       end
     end
   end
-  
+
+  resources :items, only: [:search] do
+    collection do
+      get :search
+    end
+  end
+
   resources :products
   resources :field_items
   resources :artists do

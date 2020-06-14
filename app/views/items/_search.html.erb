@@ -1,0 +1,12 @@
+<%= form_with url: search_items_url, method: :get, id: 'search-form' do |f| %>
+  <div class="form" data-selected="<%#= @input_group[:selected] %>">
+    <div id="hidden_tags">
+      <% @input_group[:hidden].each do |input_hsh| %>
+        <%= hidden_field_tag "hidden[search][#{input_hsh[:input_name]}]", input_hsh[:input_value] %>
+      <% end %>
+    </div>
+    <% @input_group[:inputs].each do |opt_group| %>
+      <%= render "items/input_field", field_name: opt_group[0][:opt_name], opt_set: opt_group %>
+    <% end %>
+  </div>
+<% end %>

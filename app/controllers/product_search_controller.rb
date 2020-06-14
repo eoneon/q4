@@ -27,12 +27,17 @@ class ProductSearchController < ApplicationController
   end
 
   def selected_hsh
-    tags = FieldSet.tag_set(@search_set) #puts "2 tags: #{tags}"
+    #tags = FieldSet.search_tags(@search_set)
+    tags = FieldSet.tag_set(@search_set)
     if search_params
       params[:hidden].reject {|k,v| tags.exclude?(k)} #if params[:product_search].present?
     else
       tags.map{|tag_param| [tag_param, 'all']}.to_h
     end
   end
+
+  # def tag_set
+  #   FieldSet.search_tags(@search_set)
+  # end
 
 end

@@ -6,11 +6,11 @@
 
 <div class="row">
   <div class="col-5">
-    <div class="card border border-secondary p-1">
-      <div class="card-header p-1">
+    <div class="card border border-secondary mb-2">
+      <div class="card-header">
         <%= render "product_search/form", search_set: @search_set, input_group: @input_group %>
       </div>
-      <div class="card-body p-1" id="tab-pane">
+      <div class="card-body" id="tab-pane">
         <%= render 'field_items/aside', field_items: @search_set %>
       </div>
     </div>

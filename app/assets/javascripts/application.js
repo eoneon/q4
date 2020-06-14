@@ -69,23 +69,66 @@ $(document).ready(function(){
     $(this).closest(".toggle-field").toggleClass("show collapse");
   });
 
+  //CRUD ITEM-PRODUCT #update
+  $("body").on("click", "#product-index button.list-group-item", function(e){
+    var product_id = $('#hidden_product_id').val();
+    var id = $(this).attr("id");
+    toggleTab(id, e);
+    if (product_id == id){
+      id = "";
+    } else {
+      id
+    }
+    $('#hidden_product_id').val(id);
+    $("#edit-item").submit();
+  });
+
   //#SEARCH: handler for submitting search form: on dropdown selection
+  // $("body").on("change", ".search-select", function(){
+  //   var v = $(this).val();
+  //   var form = $(this).closest("form");
+  //   $('#'+$(this).attr("id").replace("product_search", "hidden")).val(v);
+  //   $(form).submit();
+  // });
+
   $("body").on("change", ".search-select", function(){
     var v = $(this).val();
     var form = $(this).closest("form");
-    $('#'+$(this).attr("id").replace("product_search", "hidden")).val(v);
+    $('#'+$(this).attr("id").replace("items_search", "hidden_search")).val(v);
     $(form).submit();
   });
 
   //#SEARCH: handler for submitting search form: on dropdown selection
   $("body").on("click", ".reset-select", function(){
-    var id = $(this).attr("data-target");
+    var input_name = $(this).attr("data-target");
+    //console.log("#item_search_"+input_name+"")
     var form = $(this).closest("form");
-    $("#product_search_"+id+"").val("all"); //("option").attr('selected', true);
-    $("#hidden_"+id+"").val("all");
+    $("#items_search_"+input_name+"").val("all"); //("option").attr('selected', true);
+    $("#hidden_search_"+input_name+"").val("all");
     $(form).submit();
   });
 
+  $(function(e) {
+    //console.log("app.js")
+    var id = $('#hidden_product_id').val();
+    if (id.length){
+      $('#'+id).addClass("active");
+      var input_vals = $("#search-form").find("input:hidden");
+      $(input_vals).each(function(i, input){
+        var v = $(input).val();
+        $('option[value="'+v+'"]').attr('selected', true);
+      });
+    }
+  });
+
+  function toggleTab(id, e) {
+    if ($('#'+id).hasClass("active")) {
+      e.stopPropagation();
+      e.preventDefault();
+      $('#'+id).removeClass("active");
+    }
+  }
+});
   //#SEARCH: (draft) handler for submitting search form: on dropdown selection
   // $("body").on("change", ".search-select", function(){
   //   var idx = $(this).prop("selectedIndex");
@@ -124,5 +167,3 @@ $(document).ready(function(){
   //     card_obj['tab-item'].filter("a").addClass("active");
   //   }
   // }
-
-});
