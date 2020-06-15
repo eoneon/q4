@@ -1,0 +1,10 @@
+<%= form_with url: search_artists_url, method: :get, id: "artist-search" do |f| %>
+  <div class="form">
+    <div class="input-group input-group-sm border border-secondary rounded">
+      <div class="input-group-prepend">
+        <button class="btn btn-sm btn-secondary text-sm text-light font-weight-light reset-select" data-target="artist-add" type="button"><%= (fa_icon "repeat") %></button>
+      </div>
+      <%= f.collection_select :id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control border-0 artist-add" %>
+    </div>
+  </div>
+<% end %>

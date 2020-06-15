@@ -11,6 +11,10 @@
 
 <div class="row justify-content-center">
   <div class="col-5">
+    <div class="card border border-secondary px-3 py-2 mb-2">
+      <%= render "items/artist" %>
+    </div>
+
     <div class="card border border-secondary mb-2">
       <div class="card-header">
         <%= render "items/search", search_set: @search_set, input_group: @input_group %>
@@ -25,7 +29,7 @@
     <%#= render "items/product", item: @item %>
 
     <div id="show-card">
-      <%= render "items/edit", invoice: @item.invoice, item: @item %>
+      <%= render "items/edit", invoice: @item.invoice, item: @item, product: @product, artist: @artist %>
     </div>
   </div>
 </div>

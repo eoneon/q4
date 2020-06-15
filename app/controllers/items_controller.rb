@@ -3,6 +3,8 @@ class ItemsController < ApplicationController
     @item = Item.find(params[:id])
     @search_set = search_set
     @input_group = input_group
+    @product = @item.product
+    @artist = @item.artist
   end
 
   def create
@@ -19,10 +21,8 @@ class ItemsController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
-    set_product
-    @search_set = search_set
-    @input_group = input_group
-
+    update_product
+    @item.save
 
     respond_to do |format|
       format.js
@@ -32,8 +32,6 @@ class ItemsController < ApplicationController
   def search
     @search_set = search_set
     @input_group = input_group
-    puts "search_set: #{@search_set}"
-    puts "input_group: #{@input_group}"
 
     respond_to do |format|
       format.js
@@ -60,27 +58,46 @@ class ItemsController < ApplicationController
     params.require(:item).permit!
   end
 
+  def update_product
+    @product = @item.product
+    @artist = @item.artist
+    set_product
+    set_artist
+    @search_set = search_set
+    @input_group = input_group
+  end
+
   def set_product
-    if product_id = @item.product_id
-      reset_product(product_id)
-    else
+    if @product.present? && params[:hidden][:product_id].blank?
+      destroy_assoc(@product.id)
+      @product = nil
+    elsif @product.present? && (params[:hidden][:product_id] != @product.id)
+      destroy_assoc(@product.id)
+      @product = FieldSet.find(params[:hidden][:product_id])
+      @item.field_sets << @product unless @item.field_sets.include?(@product)
+    elsif @product.blank? && params[:hidden][:product_id].present?
       @product = FieldSet.find(params[:hidden][:product_id])
       @item.field_sets << @product
     end
   end
 
-  def reset_product(product_id)
-    if params[:hidden][:product_id].blank?
-      destroy_assoc(product_id)
-    elsif product_id != params[:hidden][:product_id]
-      destroy_assoc(product_id)
-      @product = FieldSet.find(params[:hidden][:product_id])
-      @item.field_sets << @product unless @item.field_sets.include?(@product)
+  def set_artist
+    if @artist.present? && params[:hidden][:artist_id].blank?
+      puts "here: wtf"
+      destroy_assoc(@artist.id)
+      @artist = nil
+    elsif @artist.present? && (params[:hidden][:artist_id] != @artist.id)
+      destroy_assoc(@artist.id)
+      @artist = Artist.find(params[:hidden][:artist_id])
+      @item.artists << @artist unless @item.artists.include?(@artist)
+    elsif @artist.blank? && params[:hidden][:artist_id].present?
+      @artist = Artist.find(params[:hidden][:artist_id])
+      @item.artists << @artist
     end
   end
 
-  def destroy_assoc(product_id)
-    @item.item_groups.where(target_id: product_id).first.destroy
+  def destroy_assoc(assoc_id)
+    @item.item_groups.where(target_id: assoc_id).first.destroy
   end
 
 end

@@ -74,12 +74,16 @@ $(document).ready(function(){
     var product_id = $('#hidden_product_id').val();
     var id = $(this).attr("id");
     toggleTab(id, e);
-    if (product_id == id){
-      id = "";
-    } else {
-      id
-    }
-    $('#hidden_product_id').val(id);
+    $('#hidden_product_id').val(toggleAttr(product_id, id));
+    $("#edit-item").submit();
+  });
+
+  //CRUD ITEM-PRODUCT #update
+  $("body").on("change", ".artist-add", function(e){
+    var id = $(this).val();
+    var artist_id = $('#hidden_artist_id').val();
+    //toggleTab(id, e);
+    $('#hidden_artist_id').val(toggleAttr(artist_id, id));
     $("#edit-item").submit();
   });
 
@@ -101,23 +105,34 @@ $(document).ready(function(){
   //#SEARCH: handler for submitting search form: on dropdown selection
   $("body").on("click", ".reset-select", function(){
     var input_name = $(this).attr("data-target");
-    //console.log("#item_search_"+input_name+"")
     var form = $(this).closest("form");
-    $("#items_search_"+input_name+"").val("all"); //("option").attr('selected', true);
+    $("#items_search_"+input_name+"").val("all");
     $("#hidden_search_"+input_name+"").val("all");
     $(form).submit();
   });
 
   $(function(e) {
-    //console.log("app.js")
-    var id = $('#hidden_product_id').val();
-    if (id.length){
-      $('#'+id).addClass("active");
+    var product_id = $('#hidden_product_id').val();
+    if (product_id.length){
+      $('#'+product_id).addClass("active");
       var input_vals = $("#search-form").find("input:hidden");
       $(input_vals).each(function(i, input){
         var v = $(input).val();
         $('option[value="'+v+'"]').attr('selected', true);
       });
+    }
+  });
+
+  $(function(e) {
+    var artist_id = $('#hidden_artist_id').val();
+    console.log(artist_id.length)
+    if (artist_id.length){
+      // //$('#'+artist_id).addClass("active");
+      // var input_vals = $("#search-form").find("input:hidden");
+      // $(input_vals).each(function(i, input){
+      //   var v = $(input).val();
+        $('.artist-add option[value="'+artist_id+'"]').attr('selected', true);
+      // });
     }
   });
 
@@ -127,6 +142,15 @@ $(document).ready(function(){
       e.preventDefault();
       $('#'+id).removeClass("active");
     }
+  }
+
+  function toggleAttr(v, v2) {
+    if (v == v2){
+      var id = "";
+    } else {
+      var id = v2;
+    }
+    return id
   }
 });
   //#SEARCH: (draft) handler for submitting search form: on dropdown selection

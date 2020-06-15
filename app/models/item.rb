@@ -3,6 +3,7 @@ class Item < ApplicationRecord
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
+  has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
   def product
@@ -12,5 +13,13 @@ class Item < ApplicationRecord
 
   def product_id
     product.id if product
+  end
+
+  def artist
+    artists.first
+  end
+
+  def artist_id
+    artist.id if artist
   end
 end
