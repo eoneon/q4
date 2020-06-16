@@ -25,11 +25,11 @@ class Dimension
 
   module FieldGroup
     def self.builder(dimension_set)
-      FieldSet.builder(f={field_name: Dimension.arr_to_text(dimension_set), options: options(dimension_set)})
+      FieldSet.builder(f={field_name: Dimension.arr_to_text(dimension_set), options: options(dimension_set), tags: h={kind: 'dimension'}})
     end
 
     def self.options(dimension_set)
-      dimension_set.map {|field_name| NumberField.builder(f={field_name: field_name})}
+      dimension_set.map {|field_name| NumberField.builder(f={field_name: field_name, tags: h={kind: 'dimension'}})}
     end
 
     def self.width_height

@@ -6,6 +6,8 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
+  attribute :product
+
   def product
     field_set = field_sets.detect{|field_set| field_set["tags"].keys.include?('medium')}
     field_set if field_set

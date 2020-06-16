@@ -1,0 +1,8 @@
+<div class="input-group input-group-sm mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text"><%= f_hsh[:label] %></span>
+  </div>
+  <%= f.fields_for :product do |ff| %>
+    <%= ff.text_field f_hsh[:method], placeholder: f_hsh[:label], class: "form-control" %>
+  <% end %>
+</div>

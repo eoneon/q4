@@ -1,0 +1,7 @@
+<div class="col-2">
+  <div class="input-group input-group-sm mb-3">
+    <%= f.fields_for :product do |ff| %>
+      <%= ff.number_field f_hsh[:method], placeholder: f_hsh[:label], class: "form-control" %>
+    <% end %>
+  </div>
+</div>

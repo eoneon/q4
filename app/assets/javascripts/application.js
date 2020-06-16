@@ -113,7 +113,7 @@ $(document).ready(function(){
 
   $(function(e) {
     var product_id = $('#hidden_product_id').val();
-    if (product_id.length){
+    if (product_id != undefined && product_id.length){
       $('#'+product_id).addClass("active");
       var input_vals = $("#search-form").find("input:hidden");
       $(input_vals).each(function(i, input){
@@ -125,8 +125,8 @@ $(document).ready(function(){
 
   $(function(e) {
     var artist_id = $('#hidden_artist_id').val();
-    console.log(artist_id.length)
-    if (artist_id.length){
+    //console.log(artist_id.length)
+    if (artist_id != undefined && artist_id.length){
       // //$('#'+artist_id).addClass("active");
       // var input_vals = $("#search-form").find("input:hidden");
       // $(input_vals).each(function(i, input){
