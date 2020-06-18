@@ -8,7 +8,9 @@
     <% if product %>
       <% product_fields(product).each do |f_hsh| %>
         <div class="row">
-          <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh %>
+          <%#= f.fields_for f_hsh[:render_as].pluralize.to_sym do |ff| %>
+            <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh %>
+          <%# end %>
         </div>
       <% end %>
     <% end %>

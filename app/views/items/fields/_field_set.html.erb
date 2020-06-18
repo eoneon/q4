@@ -1,3 +1,5 @@
 <% build_field_set_group(f_hsh[:collection]).each do |ff_hsh| %>
-  <%= render "items/fields/#{ff_hsh[:render_as]}", f: f, f_hsh: ff_hsh %>
+  <%= f.fields_for :field_sets do |ff| %>
+    <%= render "items/fields/#{ff_hsh[:render_as]}", f: ff, f_hsh: ff_hsh %>
+  <% end %>
 <% end %>

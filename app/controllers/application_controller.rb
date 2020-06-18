@@ -59,4 +59,37 @@ class ApplicationController < ActionController::Base
   def str_to_class(assoc)
     assoc.to_s.singularize.classify.constantize
   end
+
+  ##############################################################################
+
+  def update_assocs(origin, target, params_target_id)
+    if target.present? && params_target_id.blank?
+      remove_assoc(origin, target)
+    elsif target.present? && (params_target_id != target.id)
+      replace_assoc(origin, target, params_target_id)
+    elsif target.blank? && params_target_id.present?
+      add_assoc(origin, target, params_target_id)
+    end
+  end
+
+  def remove_assoc(origin, target)
+    puts "1 item: #{@item}, target: #{@item.product}, params_id: #{params[:hidden][:product_id]}"
+    origin.item_groups.where(target_id: target.id).first.destroy
+    target = nil
+    a, b = origin, target
+  end
+
+  def replace_assoc(origin, target, params_target_id)
+    puts "2 item: #{@item}, target: #{@item.product}, params_id: #{params[:hidden][:product_id]}"
+    remove_assoc(origin, target)
+    add_assoc(origin, target, params_target_id)
+    a, b = origin, target
+  end
+
+  def add_assoc(origin, target, params_target_id)
+    puts "3 item: #{@item}, target: #{@item.product}, params_id: #{params[:hidden][:product_id]}"
+    target = target.to_class.find(params_target_id)
+    origin.assoc_unless_included(target)
+    a, b = origin, target
+  end
 end

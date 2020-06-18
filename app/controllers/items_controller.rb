@@ -55,16 +55,21 @@ class ItemsController < ApplicationController
   private
 
   def item_params
-    params.require(:item).permit!
+    params.require(:item).permit(:sku)
   end
 
   def update_product
     @product = @item.product
     @artist = @item.artist
     set_product
+    #@item, @product = update_assocs(@item, @item.product, params[:hidden][:product_id])
     set_artist
     @search_set = search_set
     @input_group = input_group
+  end
+
+  def format_target(target)
+    target.nil? ? :field_set : target
   end
 
   def set_product
@@ -83,10 +88,10 @@ class ItemsController < ApplicationController
 
   def set_artist
     if @artist.present? && params[:hidden][:artist_id].blank?
-      puts "here: wtf"
       destroy_assoc(@artist.id)
       @artist = nil
     elsif @artist.present? && (params[:hidden][:artist_id] != @artist.id)
+      #puts "#{@artist.present? == (params[:hidden][:artist_id] != @artist.id)}"
       destroy_assoc(@artist.id)
       @artist = Artist.find(params[:hidden][:artist_id])
       @item.artists << @artist unless @item.artists.include?(@artist)

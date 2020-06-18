@@ -3,7 +3,7 @@
     <div class="input-group-prepend">
       <span class="input-group-text"><%= f_hsh[:label] %></span>
     </div>
-    <%= f.fields_for :product do |ff| %>
+    <%= f.fields_for :select_menus do |ff| %>
       <%= ff.collection_select f_hsh[:method], f_hsh[:collection], :id, :field_name, {include_blank: true}, {class: "form-control"} %>
     <% end %>
   </div>
