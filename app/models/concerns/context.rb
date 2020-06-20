@@ -4,12 +4,15 @@ module Context
   extend ActiveSupport::Concern
 
   class_methods do
-    def product(type, product_name, options, tags=nil)
-      type.constantize.builder(p={product_name: product_name, options: options, tags: tags})
-    end
+    # def product(type, product_name, options, tags=nil)
+    #   type.constantize.builder(p={product_name: product_name, options: options, tags: tags})
+    # end
 
     #abbreviated subclass builder methods for readability ###############################
-    #these could theoretically be added to FieldItem superclass and then just have non-applicable subclasses like Option just overwright with their own method
+    def standard_product(field_name, options, tags=nil)
+      StandardProduct.builder(f={field_name: field_name, options: options, tags: tags})
+    end
+
     def select_menu(field_name, options, tags=nil)
       SelectMenu.builder(f={field_name: field_name, options: options, tags: tags})
     end

@@ -67,21 +67,14 @@ module STI
   class_methods do
 
     #search methods ########################################################
-    # def search(kv_sets, set=self)
-    #   set.where(kv_sets.to_a.map{|kv_set| build_query(kv_set[0],kv_set[1])}.join(" AND "))
-    # end
 
     def kv_set_search(kv_sets, set=self)
-      if kv_sets.empty? #kv_sets.reject {|kv_set| kv_set.empty?}.empty?
+      if kv_sets.empty?
         kv_sets
       else
         set.where(kv_sets.to_a.map{|kv_set| build_query(kv_set[0],kv_set[1])}.join(" AND "))
       end
     end
-
-    # def filter_search(set,k,v)
-    #   set.where(build_query(k,v))
-    # end
 
     def kv_search(set,k,v)
       set.where(build_query(k,v))
@@ -90,14 +83,6 @@ module STI
     def build_query(k,v)
       "tags -> \'#{k}\' = \'#{v}\'"
     end
-
-    # def build_query(k,v)
-    #   if v == :all
-    #     "tags ? :key", key: "\'#{k}\'"
-    #   else
-    #     "tags -> \'#{k}\' = \'#{v}\'"
-    #   end
-    # end
 
     #controller methods ########################################################
     #param ex: target_hsh={:item_name => "canvas, paper, wood, metal"}

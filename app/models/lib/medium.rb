@@ -10,7 +10,7 @@ class Medium
       h.merge!(hsh={medium_category: h[:sub_kind]})
     end
   end
-  
+
   class SFO < Medium
     def self.sub_media
       flat_class_set(self)
@@ -216,7 +216,8 @@ class Medium
       @sub_media = Medium::SFO.sub_media.map{|i| i.tags[:sub_kind]}
       Medium::FSO::ProductGroup.sub_media.each do |option_group|
         option_group.options.each do |opt_hsh|
-          field_set(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh))
+          #field_set(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh))
+          standard_product(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh))
         end
       end
       set

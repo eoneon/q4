@@ -15,10 +15,19 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  def self.builder(f)
-    product = self.where(product_name: f[:product_name]).first_or_create
-    update_tags(product, f[:tags])
-    f[:options].map {|opt| product.assoc_unless_included(opt)}
-    product
+  # def self.builder(f)
+  #   product = self.where(product_name: f[:product_name]).first_or_create
+  #   update_tags(product, f[:tags])
+  #   f[:options].map {|opt| product.assoc_unless_included(opt)}
+  #   product
+  # end
+
+  def self.ordered_types
+    set=[]
+    product_types = Product.file_set[1..-1] 
+    (1..product_types.count).each do |i|
+      set << product_types.detect{|type| type.classify.constantize.type_order == i}
+    end
+    set
   end
 end
