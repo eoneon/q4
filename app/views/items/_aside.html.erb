@@ -1,7 +1,7 @@
 <div class="list-group" id="product-index" role="tablist">
   <% field_items.each do |field_item| %>
     <button type="button" class="list-group-item list-group-item-action py-1" id="<%= field_item.id %>" data-toggle="list">
-      <span class="text-sm font-weight-light item-name"><%= field_item.field_name %></span>
+      <span class="text-sm font-weight-light item-name"><%= field_item.product_name %></span>
     </button>
   <% end %>
 </div>

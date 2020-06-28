@@ -67,6 +67,44 @@ module STI
   class_methods do
 
     #search methods ########################################################
+    def tags_search(tag_params: [], default_set: nil, **param_rules)
+      #tag_params = valid_params(tag_params, param_rules)
+      tag_params = tag_params.reject {|tag_set| tag_set[-1] == 'all' || tag_set[-1].empty?}
+      if tag_params.empty?
+        alt_search(self, default_set)
+      else
+        self.where(tag_params.to_a.map{|params| build_query(params[0], params[1])}.join(" AND "))
+      end
+    end
+
+    def alt_search(set, default_set)
+      default_set.nil? ? [] : set.public_send(default_set)
+    end
+
+    def valid_params(tag_params, param_rules)
+      if !param_rules.empty?
+        param_rules.each {|method, test_set| public_send(method, tag_params, test_set)}
+      end
+      tag_params
+    end
+
+    def permit_keys(tag_params, permitted_keys)
+      tag_params.keep_if! {|tag_set| permitted_keys.include?(tag_set[-1]) || !tag_set[-1].empty?}
+    end
+
+    def invalid_vals(tag_params, invalid_vals)
+      tag_params.reject! {|tag_set| invalid_vals.include?(tag_set[-1]) || tag_set[-1].empty?}
+    end
+
+    def permit_vals(tag_params, test_set)
+      tag_params.keep_if {|tag_set| test_set.include?(tag_set[0]) || !tag_set[-1].empty?}
+    end
+
+    def valid_vals(tag_params, vals)
+      tag_params.reject {|tag_set| vals.include?(tag_set[-1]) || tag_set[-1].empty?}
+    end
+
+    #############################################
 
     def kv_set_search(kv_sets, set=self)
       if kv_sets.empty?

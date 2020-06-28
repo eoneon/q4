@@ -1,4 +1,20 @@
 module ProductsHelper
+  def default_product(product)
+    product ? product.type : Product.ordered_types.first
+  end
+
+  def product_type(product)
+    product.type if product
+  end
+
+  def product_id(product)
+    product.id if product
+  end
+
+  def product_tags(product)
+    product.tags if product
+  end
+
   def render_types
     ['SelectField', 'FieldSet', 'SelectMenu']
   end

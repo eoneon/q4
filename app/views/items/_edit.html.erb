@@ -1,5 +1,6 @@
 <%= form_with model: item, url: invoice_item_path(invoice, item), id: "edit-item" do |f| %>
   <div class="form">
+    <%= hidden_field_tag "hidden[type]", default_product(product) %>
     <%= hidden_field_tag "hidden[product_id]", product.try(:id) %>
     <%= hidden_field_tag "hidden[artist_id]", artist.try(:id) %>
     <%= f.number_field :sku, placeholder: "sku", class: "form-control form-control-sm mr-sm-2" %>
@@ -8,9 +9,7 @@
     <% if product %>
       <% product_fields(product).each do |f_hsh| %>
         <div class="row">
-          <%#= f.fields_for f_hsh[:render_as].pluralize.to_sym do |ff| %>
-            <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh %>
-          <%# end %>
+          <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh %>
         </div>
       <% end %>
     <% end %>

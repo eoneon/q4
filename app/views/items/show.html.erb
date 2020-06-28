@@ -17,10 +17,10 @@
 
     <div class="card border border-secondary mb-2">
       <div class="card-header">
-        <%= render "items/search", search_set: @search_set, input_group: @input_group %>
+        <%= render "items/search", search_set: @products, input_group: @input_group %>
       </div>
       <div class="card-body" id="tab-pane">
-        <%= render 'items/aside', field_items: @search_set %>
+        <%= render 'items/aside', field_items: @products %>
       </div>
     </div>
   </div>

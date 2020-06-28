@@ -1,10 +1,14 @@
 class ItemsController < ApplicationController
+
   def show
     @item = Item.find(params[:id])
-    @search_set = search_set
-    @input_group = input_group
     @product = @item.product
     @artist = @item.artist
+
+    @products = products
+    puts "!: #{search_params}"
+    #puts "wtf: #{search_params.each {|k,v| v.prepend(k.to_s)}.values}"
+    @input_group = input_group
   end
 
   def create
@@ -21,8 +25,8 @@ class ItemsController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
-    update_product
     @item.save
+    update_product
 
     respond_to do |format|
       format.js
@@ -30,8 +34,12 @@ class ItemsController < ApplicationController
   end
 
   def search
-    @search_set = search_set
-    @input_group = input_group
+    @item = item
+    @product = product
+    #product_items_on_search
+    @products = products
+    #@input_group = input_group
+    puts "huh: #{@search_input_group}"
 
     respond_to do |format|
       format.js
@@ -58,33 +66,27 @@ class ItemsController < ApplicationController
     params.require(:item).permit(:sku)
   end
 
+  def product
+    Product.find(params[:hidden][:search][:product_id]) if params[:hidden][:search][:product_id]
+  end
+
+  def item
+    Item.find(params[:hidden][:search][:item_id]) if params[:hidden][:search][:item_id]
+  end
+
   def update_product
-    @product = @item.product
+    #@product = @item.product
     @artist = @item.artist
-    set_product
-    #@item, @product = update_assocs(@item, @item.product, params[:hidden][:product_id])
+    #set_product
+    @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
     set_artist
-    @search_set = search_set
+    @products = products
     @input_group = input_group
   end
 
-  def format_target(target)
-    target.nil? ? :field_set : target
-  end
-
-  def set_product
-    if @product.present? && params[:hidden][:product_id].blank?
-      destroy_assoc(@product.id)
-      @product = nil
-    elsif @product.present? && (params[:hidden][:product_id] != @product.id)
-      destroy_assoc(@product.id)
-      @product = FieldSet.find(params[:hidden][:product_id])
-      @item.field_sets << @product unless @item.field_sets.include?(@product)
-    elsif @product.blank? && params[:hidden][:product_id].present?
-      @product = FieldSet.find(params[:hidden][:product_id])
-      @item.field_sets << @product
-    end
-  end
+  # def format_target(target)
+  #   target.nil? ? :field_set : target
+  # end
 
   def set_artist
     if @artist.present? && params[:hidden][:artist_id].blank?
@@ -106,3 +108,17 @@ class ItemsController < ApplicationController
   end
 
 end
+
+# def set_product
+#   if @product.present? && params[:hidden][:product_id].blank?
+#     destroy_assoc(@product.id)
+#     @product = nil
+#   elsif @product.present? && (params[:hidden][:product_id] != @product.id)
+#     destroy_assoc(@product.id)
+#     @product = FieldSet.find(params[:hidden][:product_id])
+#     @item.field_sets << @product unless @item.field_sets.include?(@product)
+#   elsif @product.blank? && params[:hidden][:product_id].present?
+#     @product = FieldSet.find(params[:hidden][:product_id])
+#     @item.field_sets << @product
+#   end
+# end

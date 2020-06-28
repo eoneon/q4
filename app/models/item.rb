@@ -14,9 +14,15 @@ class Item < ApplicationRecord
   attribute :options
   attribute :select_menus
 
+  # def product
+  #   field_set = field_sets.detect{|field_set| field_set["tags"].keys.include?('medium')}
+  #   field_set if field_set
+  # end
+
   def product
-    field_set = field_sets.detect{|field_set| field_set["tags"].keys.include?('medium')}
-    field_set if field_set
+    if product = targets.detect{|target| target.base_type == 'Product'}
+      product
+    end
   end
 
   # def standard_product
