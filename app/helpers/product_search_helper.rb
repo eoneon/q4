@@ -1,13 +1,32 @@
 module ProductSearchHelper
   def search_input_options(field_name, opt_set)
+    #opt_set.map{|opt_hsh| [opt_hsh[:opt_text], opt_hsh[:opt_value]]}.prepend(["-- select #{split_join(field_name, '_')}--", "all"])
+    opt_set.map{|opt| [opt[:text], opt[:value]]}.prepend(["-- select #{split_join(field_name, '_')}--", "all"])
+  end
+
+  def build_inputs(field_name, opt_set)
     opt_set.map{|opt_hsh| [opt_hsh[:opt_text], opt_hsh[:opt_value]]}.prepend(["-- select #{split_join(field_name, '_')}--", "all"])
   end
 
-  def radio_option_group(input_name, set=[])
+  #def radio_option_group(input_name, set=[])
+  def radio_option_group(input_name, checked, set=[])
     Product.ordered_types.each do |type|
-      set << h={name: input_name, label: format_product_type(type), value: type}
+      #set << h={name: input_name, label: format_product_type(type), value: type}
+      set << h={name: input_name, label: format_product_type(type), value: type, checked: checked_type(type, checked)}
     end
     set
+  end
+
+  def checked_type(type, checked)
+    if type==checked
+      true
+    else
+      false
+    end
+  end
+
+  def active_btn(id, product_id)
+    'active' if id == product_id
   end
 
   def format_product_type(type)

@@ -90,9 +90,9 @@ $(document).ready(function(){
   });
 
   $("body").on("change", "select.search-select", function(){
-    var v = $(this).val();
+    // var v = $(this).val();
     var form = $(this).closest("form");
-    $('#'+$(this).attr("id").replace("items_search", "hidden_search")).val(v);
+    // $('#'+$(this).attr("id").replace("items_search", "hidden_search")).val(v);
     //$('#'+$(this).attr("id").replace("items_search", "hidden_previous")).val(v);
     $(form).submit();
   });
@@ -114,21 +114,21 @@ $(document).ready(function(){
   });
 
   //page load
-  $(function(e) {
-    var type = $('#hidden_search_type').val();
-    $("input[name='items[search][type]']").prop('checked', false)
-    $("input[name='items[search][type]'][value='"+type+"']").prop('checked', true);
-    var product_id = $('#hidden_product_id').val();
-    if (product_id != undefined && product_id.length){
-      $('#'+product_id).addClass("active");
-
-      var input_vals = $("#search-form").find("input:hidden");
-      $(input_vals).each(function(i, input){
-        var v = $(input).val();
-        $('option[value="'+v+'"]').attr('selected', true);
-      });
-    }
-  });
+  // $(function(e) {
+  //   var type = $('#hidden_search_type').val();
+  //   $("input[name='items[search][type]']").prop('checked', false)
+  //   $("input[name='items[search][type]'][value='"+type+"']").prop('checked', true);
+  //   var product_id = $('#hidden_product_id').val();
+  //   if (product_id != undefined && product_id.length){
+  //     $('#'+product_id).addClass("active");
+  //
+  //     var input_vals = $("#search-form").find("input:hidden");
+  //     $(input_vals).each(function(i, input){
+  //       var v = $(input).val();
+  //       $('option[value="'+v+'"]').attr('selected', true);
+  //     });
+  //   }
+  // });
 
   $(function(e) {
     var artist_id = $('#hidden_artist_id').val();

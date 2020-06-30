@@ -6,9 +6,11 @@ class ItemsController < ApplicationController
     @artist = @item.artist
 
     @products = products
-    puts "!: #{search_params}"
+    puts "selected_search_tag_inputs: #{search_input_group}"
     #puts "wtf: #{search_params.each {|k,v| v.prepend(k.to_s)}.values}"
-    @input_group = input_group
+    #@input_group = input_group
+    @input_group = search_input_group
+    #puts "input_group: #{@input_group}"
   end
 
   def create
@@ -39,7 +41,7 @@ class ItemsController < ApplicationController
     #product_items_on_search
     @products = products
     #@input_group = input_group
-    puts "huh: #{@search_input_group}"
+    @input_group = search_input_group
 
     respond_to do |format|
       format.js
@@ -67,7 +69,7 @@ class ItemsController < ApplicationController
   end
 
   def product
-    Product.find(params[:hidden][:search][:product_id]) if params[:hidden][:search][:product_id]
+    Product.find(params[:hidden][:search][:product_id]) if !params[:hidden][:search][:product_id].blank?
   end
 
   def item

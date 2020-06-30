@@ -6,12 +6,12 @@ class ApplicationController < ActionController::Base
   #show ########################################################################
   def search_input_group
     #h={type: product_type, inputs: search_tag_inputs, selected: selected_search_tag_inputs}
-    h={type: product_type, inputs: search_tag_inputs}
+    h={type: product_type, inputs: search_tag_inputs, selected: selected_search_tag_inputs}
   end
 
-  def prev_selected
-    h={type: product_type, inputs: selected_search_tag_inputs}
-  end
+  # def prev_selected
+  #   h={type: product_type, inputs: selected_search_tag_inputs}
+  # end
 
   def products
     to_class(product_type).tags_search(product_args)
@@ -20,40 +20,66 @@ class ApplicationController < ActionController::Base
   def product_args
     case
     when action_name == 'show' then h = {tag_params: search_params, default_set: :product_group}.compact
-    when action_name == 'search' then h={tag_params: search_params} #to_class(product_type).filter_keys.map{|k| [k, build_tag_value(k)]}
+    when action_name == 'search' then {tag_params: search_params, default_set: :product_group}.compact
+    #when action_name == 'search' then {tag_params: search_params, default_set: :product_group}.compact
     end
   end
 
+  #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
+  #case 2: nil
   def search_params
     case
-    when action_name == 'show' && @product then search_params_from_search_keys_for_show_with_product
+    when (action_name == 'show' && @product) || (action_name == 'search' && revert_to_product_type) then derive_search_params
     when action_name == 'show' && !@product then nil
-    when action_name == 'search' then to_class(product_type).filter_keys.map{|k| [k, build_tag_value(k)]}
+    when action_name == 'search' then derive_search_tag_inputs
+    #when action_name == 'search' &&  then derive_search_tag_inputs
     end
   end
 
+  def revert_to_product_type
+    @product && (params[:items][:search][:type] != params[:hidden][:search][:type]) && (params[:items][:search][:type] == @product.type)
+  end
+
+  # tag_search_field_group(search_keys, @products)
   def search_tag_inputs
+    args={search_keys: search_keys, products: @products}.compact
+    to_class(product_type).tag_search_field_group(args).transform_values{|opts| opts.map{|opt| h={text: format_text_tag(opt), value: opt}}}
+  end
+
+  #this is really: selected_search_tag_inputs
+  #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
+  #case 2: [["medium_category", "all"], ["medium", "all"], ["material", "all"]]
+  def selected_search_tag_inputs
     case
-    when action_name == 'show' && @product then search_tag_inputs
-    when action_name == 'show' && !@product then search_tag_inputs.keys.map{|k| [k, 'all']}
-    when action_name == 'search' then to_class(product_type).filter_keys.map{|k| [k, build_tag_value(k)]}
+    when (action_name == 'show' && @product) || (action_name == 'search' && revert_to_product_type) then search_params.to_h
+    when action_name == 'show' && !@product then derive_search_tag_inputs.to_h
+    when action_name == 'search' then derive_search_tag_inputs.to_h
     end
   end
 
+  # case 1: ["medium_category", "medium", "material"]
   def search_keys
     case
     when action_name == 'show' && @product then to_class(product_type).valid_search_keys([@product])
-    when action_name == 'show' && !@product then to_class(product_type).filter_keys.map{|k| [k, build_tag_value(k)]}
-    when action_name == 'search' then to_class(product_type).filter_keys.map{|k| [k, build_tag_value(k)]}
+    when action_name == 'show' && !@product then derive_search_keys
+    when action_name == 'search' then derive_search_keys
     end
   end
 
-  def search_params_from_search_keys_for_show_with_product
-    to_class(product_type).tag_search_field_group(search_keys, [@product]).each {|k,v| v.prepend(k.to_s)}.values
+  def derive_search_params
+    to_class(product_type).tag_search_field_group(search_keys: search_keys, products: [@product]).each {|k,v| v.prepend(k.to_s)}.values
+  end
+
+  def derive_search_keys
+    to_class(product_type).filter_keys #.map{|k| [k, build_tag_value(k)]}
+  end
+
+  def derive_search_tag_inputs
+    to_class(product_type).filter_keys.map{|k| [k, build_tag_value(k)]}
   end
 
   def build_tag_value(k)
-    if params[:items][:search].keys.include?(k) #params[:items][:search][:tags].keys.include?(k)
+    if params[:items] && params[:items][:search].keys.include?(k) #params[:items][:search][:tags].keys.include?(k)
       params[:items][:search][k] #params[:items][:search][:tags][k]
     else
       'all'
@@ -61,7 +87,7 @@ class ApplicationController < ActionController::Base
   end
 
   def product_type
-    if params[:items]
+    if params[:items] && !params[:items][:search][:type].blank?
       params[:items][:search][:type]
     elsif @product && action_name == 'show'
       @product.type
@@ -72,6 +98,12 @@ class ApplicationController < ActionController::Base
 
   def default_product_type
     Product.ordered_types.first
+  end
+
+  def format_text_tag(tag_value)
+    tag_value = [['paper_only', '(paper only)'], ['standard', ''], ['limited_edition', 'ltd ed'], ['one_of_a_kind', 'one-of-a-kind']].map{|set| tag_value.sub(set[0], tag_value[1])}[0]
+    tag_value = tag_value.split('_')
+    [tag_value[0..-2], tag_value[-1]].join(' ')
   end
   # def selected_search_tag_inputs
   #   if @product

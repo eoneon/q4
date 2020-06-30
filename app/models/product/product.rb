@@ -16,8 +16,8 @@ class Product < ApplicationRecord
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
   scope :product_group, -> {self.all}
-
-  def self.tag_search_field_group(search_keys, products=product_group, h={})
+  #StandardProduct.tag_search_field_group(StandardProduct.filter_keys)
+  def self.tag_search_field_group(search_keys:, products: product_group, h: {})
     search_keys.map{|search_key| h[:"#{search_key}"] = search_values(products, search_key)}
     h
   end
