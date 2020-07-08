@@ -1,0 +1,12 @@
+<div class="card-header">
+  <%= render "items/search", input_group: input_group %>
+</div>
+<div class="card-body" id="tab-pane">
+  <div class="list-group" id="product-index" role="tablist">
+    <% products.each do |product| %>
+      <button type="button" class="list-group-item list-group-item-action py-1 <%= active_btn(product.id, input_group[:product_id]) %>" id="<%= product.id %>" data-toggle="list">
+        <span class="text-sm font-weight-light item-name"><%= product.product_name %></span>
+      </button>
+    <% end %>
+  </div>
+</div>

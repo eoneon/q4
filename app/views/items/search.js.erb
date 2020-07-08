@@ -1,6 +1,11 @@
-var form = $("#search-form");
-$(form).html("<%= j render 'items/search', item: @item, products: @products, input_group: @input_group %>");
-$("#tab-pane").html("<%= j render 'items/aside', field_items: @products, product: @product %>");
+$("#search-card").html("<%= j render 'items/search_card', products: @products, input_group: @input_group %>");
+//$("#search-form").html("<%= j render 'items/search', item: @item, products: @products, input_group: @input_group %>");
+//$("#tab-pane").html("<%= j render 'items/aside', products: @products, product_id: @input_group[:product_id] %>");
+
+//$("#search-form").html("<%= j render 'items/search', item: @item, products: @products, input_group: @input_group %>");
+//$("#tab-pane").html("<%= j render 'items/aside', products: @products, product: @product %>");
+
+//$(form).html("<%= j render 'items/search', item: @item, products: @products, input_group: @input_group %>");
 // if (tab_id != undefined){
 //   $('#'+tab_id).addClass("active");
 // }

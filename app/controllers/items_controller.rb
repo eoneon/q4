@@ -6,11 +6,7 @@ class ItemsController < ApplicationController
     @artist = @item.artist
 
     @products = products
-    puts "selected_search_tag_inputs: #{search_input_group}"
-    #puts "wtf: #{search_params.each {|k,v| v.prepend(k.to_s)}.values}"
-    #@input_group = input_group
     @input_group = search_input_group
-    #puts "input_group: #{@input_group}"
   end
 
   def create
@@ -27,8 +23,12 @@ class ItemsController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
+    @artist = @item.artist
+    @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
+    set_artist
+    @products = products
+    @input_group = search_input_group
     @item.save
-    update_product
 
     respond_to do |format|
       format.js
@@ -38,9 +38,7 @@ class ItemsController < ApplicationController
   def search
     @item = item
     @product = product
-    #product_items_on_search
     @products = products
-    #@input_group = input_group
     @input_group = search_input_group
 
     respond_to do |format|
@@ -76,18 +74,15 @@ class ItemsController < ApplicationController
     Item.find(params[:hidden][:search][:item_id]) if params[:hidden][:search][:item_id]
   end
 
-  def update_product
-    #@product = @item.product
-    @artist = @item.artist
-    #set_product
-    @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
-    set_artist
-    @products = products
-    @input_group = input_group
-  end
-
-  # def format_target(target)
-  #   target.nil? ? :field_set : target
+  # def update_product
+  #   #@product = @item.product
+  #   @artist = @item.artist
+  #   #set_product
+  #   @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
+  #   set_artist
+  #   @products = products
+  #   @input_group = search_input_group
+  #   puts "@product: #{@product.try(:id)}"
   # end
 
   def set_artist

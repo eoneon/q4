@@ -15,13 +15,14 @@
       <%= render "items/artist" %>
     </div>
 
-    <div class="card border border-secondary mb-2">
-      <div class="card-header">
-        <%= render "items/search", item: @item, product: @product, input_group: @input_group %>
-      </div>
-      <div class="card-body" id="tab-pane">
-        <%= render 'items/aside', field_items: @products, product: @product %>
-      </div>
+    <div class="card border border-secondary mb-2" id="search-card">
+      <%= render "items/search_card", products: @products, input_group: @input_group %>
+      <!-- <div class="card-header"> -->
+        <%#= render "items/search", item: @item, product: @product, input_group: @input_group %>
+      <!-- </div> -->
+      <!-- <div class="card-body" id="tab-pane"> -->
+        <%#= render 'items/aside', field_items: @products, product: @product %>
+      <!-- </div> -->
     </div>
   </div>
 

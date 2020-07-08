@@ -1,13 +1,19 @@
 $("#edit-item").html("<%= j render 'items/edit', invoice: @invoice, item: @item, product: @product, artist: @artist %>");
-$("#search-form").html("<%= j render 'items/search', products: @products, input_group: @input_group %>");
-var tab_id = $("#product-index").find("button.active").attr("id");
-var selected_opts = <%= raw @input_group[:selected] %>
+$("#search-card").html("<%= j render 'items/search_card', products: @products, input_group: @input_group %>");
 
-$(selected_opts).each(function(i, opt_set){
-  $(opt_set[0]).find('option[value="'+opt_set[1]+'"]').attr('selected', true);
-});
+// $("#search-form").html("<%= j render 'items/search', item: @item, products: @products, input_group: @input_group %>");
+// $("#tab-pane").html("<%= j render 'items/aside', products: @products, product_id: @input_group[:product_id] %>");
 
-$("#tab-pane").html("<%= j render 'items/aside', field_items: @products %>");
-if (tab_id != undefined){
-  $('#'+tab_id).addClass("active");
-}
+//$("#search-card").html("<%= j render 'items/search_card', item: @item, products: @products, product: @product, input_group: @input_group %>");
+// $("#search-form").html("<%= j render 'items/search', products: @products, input_group: @input_group %>");
+// var tab_id = $("#product-index").find("button.active").attr("id");
+// var selected_opts = <%= raw @input_group[:selected] %>
+//
+// $(selected_opts).each(function(i, opt_set){
+//   $(opt_set[0]).find('option[value="'+opt_set[1]+'"]').attr('selected', true);
+// });
+//
+// $("#tab-pane").html("<%= j render 'items/aside', field_items: @products %>");
+// if (tab_id != undefined){
+//   $('#'+tab_id).addClass("active");
+// }

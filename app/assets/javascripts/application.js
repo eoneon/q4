@@ -17,6 +17,7 @@
 //= require_tree .
 
 $(document).ready(function(){
+
   $("body").on("click", ".caret-toggle", function(){
     $(this).find("i").toggleClass("fa-caret-right fa-caret-down");
     $(this).closest(".card").siblings().find("i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
@@ -74,7 +75,7 @@ $(document).ready(function(){
     var product_id = $('#hidden_product_id').val();
     var type = $('#hidden_search_type').val();
     var id = $(this).attr("id");
-    toggleTab(id, e);
+    //toggleTab(id, e);
     $('#hidden_product_id').val(toggleAttr(product_id, id));
     $('#hidden_type').val(type);
     $("#edit-item").submit();
