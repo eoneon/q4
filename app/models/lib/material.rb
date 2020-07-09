@@ -111,29 +111,34 @@ class Material
     module Standard
       def self.builder(select_field)
         [select_field, Dimension::FlatDimension.builder, Mounting::StandardMounting.builder]
+        #[select_field, Dimension::FlatDimension.builder('material'), Mounting::StandardMounting.builder('mounting')]
       end
     end
 
     module Canvas
       def self.builder(select_field)
         [select_field, Dimension::FlatDimension.builder, Mounting::CanvasMounting.builder]
+        #[select_field, Dimension::FlatDimension.builder('material'), Mounting::CanvasMounting.builder('mounting')]
       end
     end
 
     module Sericel
       def self.builder(select_field)
         [select_field, Dimension::FlatDimension.builder, Mounting::SericelMounting.builder]
+        #[select_field, Dimension::FlatDimension.builder('material'), Mounting::SericelMounting.builder('mounting')]
       end
     end
 
     module WrappedCanvas
       def self.builder(select_field)
         [select_field, Dimension::FieldGroup.builder(Dimension::FieldGroup.width_height)]
+        #[select_field, Dimension::FieldGroup.builder(Dimension::FieldGroup.width_height, 'material')]
       end
     end
 
     module Boxed
       def self.builder(select_field)
+        #[select_field, Dimension::FieldGroup.builder(Dimension::FieldGroup.width_height_depth, 'material')]
         [select_field, Dimension::FieldGroup.builder(Dimension::FieldGroup.width_height_depth)]
       end
     end
@@ -141,6 +146,7 @@ class Material
     module Sculpture
       def self.builder(select_field)
         [select_field, Dimension::DepthDimension.builder, Mounting::SculptureMounting.builder]
+        #[select_field, Dimension::DepthDimension.builder('material'), Mounting::SculptureMounting.builder('mounting')]
       end
     end
   end

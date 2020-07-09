@@ -4,9 +4,6 @@ module Context
   extend ActiveSupport::Concern
 
   class_methods do
-    # def product(type, product_name, options, tags=nil)
-    #   type.constantize.builder(p={product_name: product_name, options: options, tags: tags})
-    # end
 
     #abbreviated subclass builder methods for readability ###############################
     def standard_product(field_name, options, tags=nil)
@@ -17,29 +14,57 @@ module Context
       SelectMenu.builder(f={field_name: field_name, options: options, tags: tags})
     end
 
+    # def select_menu(field_name, kind, options, tags=nil)
+    #   SelectMenu.builder(f={field_name: field_name, kind: kind, options: options, tags: tags})
+    # end
+
     def field_set(field_name, options, tags=nil)
       FieldSet.builder(f={field_name: field_name, options: options, tags: tags})
     end
+
+    # def field_set(field_name, kind, options, tags=nil)
+    #   FieldSet.builder(f={field_name: field_name, kind: kind, options: options, tags: tags})
+    # end
 
     def select_field(field_name, options, tags=nil)
       SelectField.builder(f={field_name: field_name, options: options, tags: tags})
     end
 
+    # def select_field(field_name, kind, options, tags=nil)
+    #   SelectField.builder(f={field_name: field_name, kind: kind, options: options, tags: tags})
+    # end
+
     def radio_button(field_name, tags=nil)
       RadioButton.builder(f={field_name: field_name, tags: tags})
     end
+
+    # def radio_button(field_name, kind, tags=nil)
+    #   RadioButton.builder(f={field_name: field_name, kind: kind, tags: tags})
+    # end
 
     def number_field(field_name, tags=nil)
       NumberField.builder(f={field_name: field_name, tags: tags})
     end
 
+    # def number_field(field_name, kind, tags=nil)
+    #   NumberField.builder(f={field_name: field_name, kind: kind, tags: tags})
+    # end
+
     def text_field(field_name, tags=nil)
       TextField.builder(f={field_name: field_name, tags: tags})
     end
 
+    # def text_field(field_name, kind, tags=nil)
+    #   TextField.builder(f={field_name: field_name, kind: kind, tags: tags})
+    # end
+
     def text_area_field(field_name, tags=nil)
       TextField.builder(f={field_name: field_name, tags: tags})
     end
+
+    # def text_area_field(field_name, kind, tags=nil)
+    #   TextField.builder(f={field_name: field_name, kind: kind, tags: tags})
+    # end
 
     #abbreviated builder methods for readability ###############################
     def builder
@@ -55,9 +80,9 @@ module Context
       decamelize(klass_name)
     end
 
-    def search_hsh
-      h={kind: slice_class(-2).underscore, sub_kind: klass_name.underscore}
-    end
+    # def search_hsh
+    #   h={kind: slice_class(-2).underscore, sub_kind: klass_name.underscore}
+    # end
 
     def tags_hsh(kind_idx, sub_kind_idx)
       set = self.to_s.split('::').map{|klass| klass.underscore}

@@ -7,4 +7,10 @@ class RadioButton < FieldItem
     update_tags(radio_button, f[:tags])
     radio_button
   end
+
+  # def self.builder(f)
+  #   radio_button = RadioButton.where(field_name: f[:field_name], kind: f[:kind], tags: id_tags(f[:tags])).first_or_create
+  #   update_tags(radio_button, f[:tags])
+  #   radio_button
+  # end
 end

@@ -14,31 +14,18 @@ class Item < ApplicationRecord
   attribute :options
   attribute :select_menus
 
-  # def product
-  #   field_set = field_sets.detect{|field_set| field_set["tags"].keys.include?('medium')}
-  #   field_set if field_set
-  # end
-
   def product
-    if product = targets.detect{|target| target.base_type == 'Product'}
+    if product = targets.detect{|target| target.class.method_defined?(:type) && target.base_type == 'Product'}
       product
     end
   end
-
-  # def standard_product
-  #   standard_products.first if standard_products.any?
-  # end
 
   def product_id
     product.id if product
   end
 
-  # def artist
-  #   artists.first if artists.any?
-  # end
-
   def artist
-    artists.first
+    artists.first if artists.any?
   end
 
   def artist_id

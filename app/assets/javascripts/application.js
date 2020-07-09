@@ -81,7 +81,7 @@ $(document).ready(function(){
     $("#edit-item").submit();
   });
 
-  //CRUD ITEM-PRODUCT #update
+  //CRUD ITEM-ARTIST #update
   $("body").on("change", ".artist-add", function(e){
     var id = $(this).val();
     var artist_id = $('#hidden_artist_id').val();

@@ -64,6 +64,10 @@ module STI
     self.target_collection(target) << target unless self.target_included?(target)
   end
 
+  # def assoc_unless_included_with_result(target)
+  #   self.target_collection(target) << target unless self.target_included?(target)
+  # end
+
   class_methods do
 
     #search methods ########################################################

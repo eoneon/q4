@@ -9,13 +9,6 @@ class FieldSet < FieldItem
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  # def self.input_group
-  #   search_set = FieldSet.media_set
-  #   #selected_hsh = FieldSet.search_tags(media_set).map{|tag_param| [tag_param, 'all']}.to_h
-  #   input_group = FieldSet.search_inputs(search_set, FieldSet.search_tags(search_set).map{|tag_param| [tag_param, 'all']}.to_h)
-  #   #h={search_set: media_set, input_group: input_group}
-  # end
-
   def self.media_set
     FieldSet.kv_set_search([["kind", "medium"]])
   end
@@ -56,7 +49,6 @@ class FieldSet < FieldItem
 
   def self.tag_inputs(search_set, input_name, set=[])
     filter_tag(search_set, input_name).each do |tag|
-      #puts "tag: #{tag}"
       set << h={opt_name: input_name, opt_text: format_text_tag(tag), opt_value: tag}
     end
     set
@@ -80,4 +72,11 @@ class FieldSet < FieldItem
     f[:options].map {|opt| field_set.assoc_unless_included(opt)}
     field_set
   end
+
+  # def self.builder(f)
+  #   field_set = FieldSet.where(field_name: f[:field_name], kind: f[:kind]).first_or_create
+  #   update_tags(field_set, f[:tags])
+  #   f[:options].map {|opt| field_set.assoc_unless_included(opt)}
+  #   field_set
+  # end
 end

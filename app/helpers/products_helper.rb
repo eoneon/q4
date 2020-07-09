@@ -15,6 +15,8 @@ module ProductsHelper
     public_send(f.type.underscore + '_group', f)
   end
 
+  ##############################################################################
+
   def select_field_group(f)
     h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.options}
   end
@@ -31,6 +33,8 @@ module ProductsHelper
     h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.targets}
   end
 
+  #tags
+
   def number_field_group(f)
     h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.tags["kind"])}
   end
@@ -38,6 +42,8 @@ module ProductsHelper
   def text_field_group(f)
     h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.tags["kind"])}
   end
+
+  ##############################################################################
 
   def default_product(product)
     product ? product.type : Product.ordered_types.first
@@ -58,12 +64,4 @@ module ProductsHelper
   def render_types
     ['SelectField', 'FieldSet', 'SelectMenu']
   end
-
-  # def labelize()
-  # end
 end
-
-
-# def product_tags(filtered_fields)
-#   filtered_fields.map{|f| f.tags["kind"]}
-# end
