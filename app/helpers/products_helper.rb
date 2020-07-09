@@ -18,11 +18,13 @@ module ProductsHelper
   ##############################################################################
 
   def select_field_group(f)
-    h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.options}
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.options}
   end
 
+
   def field_set_group(f)
-    h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.targets}
+    #h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.targets}
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets}
   end
 
   def build_field_set_group(fields)
@@ -30,17 +32,38 @@ module ProductsHelper
   end
 
   def select_menu_group(f)
-    h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.targets}
+    #h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.targets}
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets} #maybe use f.kind for: label
   end
 
-  #tags
+  #tags ########################################################################
 
   def number_field_group(f)
-    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.tags["kind"])}
+    #h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.tags["kind"])}
+    h={render_as: f.type.underscore, label: labelize(f), method: name_method(f)}
   end
 
   def text_field_group(f)
-    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.tags["kind"])}
+    h={render_as: f.type.underscore, label: labelize(f), method: name_method(f)}
+  end
+
+  ##############################################################################
+
+  def labelize(f)
+    label = delim_format(words: f.field_name, split_delims: ['_'])
+    if render_types.include?(f.type.underscore)
+      label
+    elsif f.kind == 'dimension'
+      reject_words(label, %w[material mounting])
+    end
+  end
+
+  def name_method(f)
+    if render_types.include?(f.type.underscore)
+      fk_id(f.kind)
+    else
+      delim_format(words: f.field_name, join_delim: '_', split_delims: [' ', '-'])
+    end
   end
 
   ##############################################################################

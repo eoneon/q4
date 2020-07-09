@@ -8,9 +8,9 @@ module ProductItemsHelper
     obj.base_type.underscore.to_sym
   end
 
-  def fk_id(assoc)
-    [assoc.singularize, 'id'].join("_")
-  end
+  # def fk_id(assoc)
+  #   [assoc.singularize, 'id'].join("_")
+  # end
 
   def type_options(p_item, assoc)
     str_to_class(assoc).all - p_item.scoped_target_collection(assoc) - [p_item]

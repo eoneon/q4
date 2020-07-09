@@ -15,7 +15,24 @@ module ApplicationHelper
     tags.map{|tag| tag.to_s}.prepend(format_obj(obj)).join("-")
   end
 
+  def fk_id(word)
+    [word.singularize, 'id'].join("_")
+  end
+
   def format_obj(obj)
     [obj.class.name.underscore, obj.id].join("-")
   end
+
+  def reject_words(words, reject_set)
+    words.split(" ").reject{|word| reject_set.include?(word)}.join(" ")
+  end
+
+  def delim_format(words:, join_delim: ' ', split_delims: [])
+    return words if split_delims.none?
+    split_delims.each do |delim|
+      words = words.split(delim).join(join_delim)
+    end
+    words
+  end
+
 end
