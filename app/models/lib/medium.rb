@@ -17,7 +17,7 @@ class Medium
     end
 
     def self.field_name
-      class_set = split_class[split_class.index('SFO')+1..-1] #.map{|name| decamelize(name)}.flatten.uniq
+      class_set = split_class[split_class.index('SFO')+1..-1]
       if class_set.count == 1
         decamelize(class_set[0], '-')
       elsif class_set.count == 2
@@ -36,26 +36,26 @@ class Medium
     end
 
     def self.builder
-      select_field(field_name, options, tags)
+      select_field(field_name, field_kind, options, tags)
     end
 
     ############################################################################
     class PaintingMedia < SFO
       class StandardPainting < PaintingMedia
         def self.options
-          OptionSet.builder(['painting', 'oil', 'acrylic', 'mixed media'], tags)
+          OptionSet.builder(['painting', 'oil', 'acrylic', 'mixed media'], field_kind, tags)
         end
       end
 
       class PaintingPaperOnly < PaintingMedia
         def self.options
-          OptionSet.builder(['watercolor', 'pastel', 'guache', 'sumi ink'], tags)
+          OptionSet.builder(['watercolor', 'pastel', 'guache', 'sumi ink'], field_kind, tags)
         end
       end
 
       module OptionSet
-        def self.builder(set, tags)
-          Option.builder(set.map {|opt_name| Medium.build_name([opt_name, 'painting'])}, tags)
+        def self.builder(set, field_kind, tags)
+          Option.builder(set.map {|opt_name| Medium.build_name([opt_name, 'painting'])}, field_kind, tags)
         end
       end
     end
@@ -63,13 +63,13 @@ class Medium
     class DrawingMedia < SFO
       class StandardDrawing < DrawingMedia
         def self.options
-          Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], tags)
+          Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], field_kind, tags)
         end
       end
 
       class MixedMediaDrawing < DrawingMedia
         def self.options
-          Option.builder(['pen and ink drawing', 'pencil drawing'], tags)
+          Option.builder(['pen and ink drawing', 'pencil drawing'], field_kind, tags)
         end
       end
     end
@@ -77,13 +77,13 @@ class Medium
     class ProductionMedia < SFO
       class ProductionDrawing < ProductionMedia
         def self.options
-          Option.builder(['drawing'], tags)
+          Option.builder(['drawing'], field_kind, tags)
         end
       end
 
       class ProductionSericel < ProductionMedia
         def self.options
-          Option.builder(['hand painted production cel'], tags)
+          Option.builder(['hand painted production cel'], field_kind, tags)
         end
       end
     end
@@ -93,13 +93,13 @@ class Medium
     class LithographMedia < SFO
       class Lithograph < LithographMedia
         def self.options
-          Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], tags)
+          Option.builder(['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph'], field_kind, tags)
         end
       end
 
       class BasicLithograph < LithographMedia
         def self.options
-          Option.builder(['lithograph'], tags)
+          Option.builder(['lithograph'], field_kind, tags)
         end
       end
     end
@@ -107,13 +107,13 @@ class Medium
     class EtchingMedia < SFO
       class Etching < EtchingMedia
         def self.options
-          Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], tags)
+          Option.builder(['etching', 'etching (black)', 'etching (sepia)', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'], field_kind, tags)
         end
       end
 
       class MixedMediaEtching < EtchingMedia
         def self.options
-          Option.builder(['etching', 'etching (black)', 'etching (sepia)'], tags)
+          Option.builder(['etching', 'etching (black)', 'etching (sepia)'], field_kind, tags)
         end
       end
     end
@@ -121,13 +121,13 @@ class Medium
     class ReliefMedia < SFO
       class Relief < ReliefMedia
         def self.options
-          Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], tags)
+          Option.builder(['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'], field_kind, tags)
         end
       end
 
       class MixedMediaRelief < ReliefMedia
         def self.options
-          Option.builder(['relief', 'mixed media relief', 'linocut'], tags)
+          Option.builder(['relief', 'mixed media relief', 'linocut'], field_kind, tags)
         end
       end
     end
@@ -135,39 +135,39 @@ class Medium
     class SilkscreenMedia < SFO
       class Serigraph < SilkscreenMedia
         def self.options
-          Option.builder(['serigraph'], tags)
+          Option.builder(['serigraph'], field_kind, tags)
         end
       end
 
       class Silkscreen < SilkscreenMedia
         def self.options
-          Option.builder(['silkscreen'], tags)
+          Option.builder(['silkscreen'], field_kind, tags)
         end
       end
     end
 
     class Giclee < SFO
       def self.options
-        Option.builder(['giclee'], tags)
+        Option.builder(['giclee'], field_kind, tags)
       end
     end
 
     class MixedMedia < SFO
       class StandardMixedMedia < MixedMedia
         def self.options
-          Option.builder(['mixed media'], tags)
+          Option.builder(['mixed media'], field_kind, tags)
         end
       end
 
       class AcrylicMixedMedia < MixedMedia
         def self.options
-          Option.builder(['mixed media acrylic'], tags)
+          Option.builder(['mixed media acrylic'], field_kind, tags)
         end
       end
 
       class Monotype < MixedMedia
         def self.options
-          Option.builder(['monotype'], tags)
+          Option.builder(['monotype'], field_kind, tags)
         end
       end
     end
@@ -175,13 +175,13 @@ class Medium
     class PhotographMedia < SFO
       class Photograph < PhotographMedia
         def self.options
-          Option.builder(['photograph', 'photolithograph', 'archival photograph'], tags)
+          Option.builder(['photograph', 'photolithograph', 'archival photograph'], field_kind, tags)
         end
       end
 
       class SingleExposurePhotograph < PhotographMedia
         def self.options
-          Option.builder(['single exposure photograph'], tags)
+          Option.builder(['single exposure photograph'], field_kind, tags)
         end
       end
     end
@@ -189,20 +189,20 @@ class Medium
     class PrintMedia < SFO
       class BasicPrint < PrintMedia
         def self.options
-          Option.builder(['print', 'fine art print', 'vintage style print'], tags)
+          Option.builder(['print', 'fine art print', 'vintage style print'], field_kind, tags)
         end
       end
 
       class Poster < PrintMedia
         def self.options
-          Option.builder(['poster', 'vintage poster', 'concert poster'], tags)
+          Option.builder(['poster', 'vintage poster', 'concert poster'], field_kind, tags)
         end
       end
     end
 
     class Sericel < SFO
       def self.options
-        Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], tags)
+        Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], field_kind, tags)
       end
     end
 
@@ -216,7 +216,6 @@ class Medium
       @sub_media = Medium::SFO.sub_media.map{|i| i.tags[:sub_kind]}
       Medium::FSO::ProductGroup.sub_media.each do |option_group|
         option_group.options.each do |opt_hsh|
-          #field_set(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh))
           standard_product(opt_hsh[:field_name], opt_hsh[:options], build_tags(opt_hsh))
         end
       end
