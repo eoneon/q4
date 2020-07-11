@@ -11,19 +11,45 @@ module STI
 
   #subclass methods ############################################################
 
-  def remove_dependent_item_groups
-    ItemGroup.where(origin_id: self.id).or(ItemGroup.where(target_id: self.id)).destroy_all
+  #collection methods ##########################################################
+  def scoped_sti_targets_by_type(scope:, rel: :has_one, reject_set: [])
+    target_set = scoped_type_targets(scope, reject_set) 
+    child_set(target_set, rel) if target_set.any?
   end
 
-  #get ALL targets; add sort order later: should be named: all_targets->targets
-  def sorted_targets
-    item_groups.order(:sort)
+  def scoped_type_targets(scope, reject_set=[])
+    targets.keep_if {|target| sti_obj?(target) && reject_obj?(reject_set, target) && target.base_type == scope}
+  end
+
+  def sti_obj?(obj)
+    obj.class.method_defined?(:type)
+  end
+
+  def reject_obj?(reject_set, obj)
+    reject_set.empty? || reject_set.exclude?(obj.type)
+  end
+
+  def child_set(target_set, rel)
+    if rel == :has_one
+      target_set[0]
+    else
+      target_set
+    end
   end
 
   def targets
     sorted_targets.map{|item_group| item_group.target}
   end
 
+  def sorted_targets
+    item_groups.order(:sort)
+  end
+
+  def remove_dependent_item_groups
+    ItemGroup.where(origin_id: self.id).or(ItemGroup.where(target_id: self.id)).destroy_all
+  end
+
+  #AR class methods
   #AR obj: to_class -> expand re: Q3/models/concerns/build_set.rb
   def to_class
     self.class.name.constantize

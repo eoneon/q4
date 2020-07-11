@@ -3,33 +3,18 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # def update_product
-  #   #@product = @item.product
-  #   #@artist = @item.artist
-  #   #set_product
-  #   @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
-  #   set_artist
-  #   @products = products
-  #   @input_group = search_input_group
-  #   puts "@product: #{@product.try(:id)}"
-  # end
-
   #show ########################################################################
   def search_input_group
     h={type: product_type, inputs: search_tag_inputs, selected: selected_search_tag_inputs, item_id: @item.try(:id), product_id: @product.try(:id)}
   end
 
   def products
-    to_class(product_type).tags_search(product_args)
+    to_class(product_type).tags_search(h = {tag_params: search_params, default_set: :product_group}.compact)
   end
 
-  def product_args
-    h = {tag_params: search_params, default_set: :product_group}.compact
-    # case
-    # when action_name == 'show' then h = {tag_params: search_params, default_set: :product_group}.compact
-    # when action_name == 'search' then h = {tag_params: search_params, default_set: :product_group}.compact
-    # end
-  end
+  # def product_args
+  #   h = {tag_params: search_params, default_set: :product_group}.compact
+  # end
 
   #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
   #case 2: nil
@@ -44,10 +29,6 @@ class ApplicationController < ActionController::Base
   def revert_to_product_type
     @product && (params[:items][:search][:type] != params[:hidden][:search][:type]) && (params[:items][:search][:type] == @product.type)
   end
-
-  # def new_product
-  #   @product && params[:items] && params[:items][:product_id] && params[:items][:product_id] != @product.id
-  # end
 
   # tag_search_field_group(search_keys, @products)
   def search_tag_inputs
@@ -116,6 +97,7 @@ class ApplicationController < ActionController::Base
   end
 
   def update_assocs(origin, target, params_target_type, params_target_id)
+    #puts "re: #{params_target_type}, sku: #{origin.sku}, skip_update_assocs 1: #{params_target_id.blank?} && #{target.blank?} = #{params_target_id.blank? && target.blank?}, skip_update_assocs 2: #{params_target_id.class.name} == #{target.try(:id).class.name} = #{params_target_id == target.try(:id)}"
     if skip_update_assocs(origin, target, params_target_type, params_target_id)
       a, b = origin, target
     elsif target.present? && params_target_id.blank?
@@ -128,7 +110,7 @@ class ApplicationController < ActionController::Base
   end
 
   def skip_update_assocs(origin, target, params_target_type, params_target_id)
-    (params_target_id.blank? && target.blank?) || (params_target_id == target.try(:id))
+    (params_target_id.blank? && target.blank?) || (params_target_id.to_i == target.try(:id))
   end
 
   def remove_assoc(origin, target)
@@ -143,11 +125,8 @@ class ApplicationController < ActionController::Base
   end
 
   def add_assoc(origin, target, params_target_type, params_target_id)
-    puts "add_assoc step for #{params_target_type}"
     target = to_class(params_target_type).find(params_target_id)
-    puts "#{target}"
     origin.assoc_unless_included(target)
-    puts "wtf #{origin}"
     a, b = origin, target
   end
 
@@ -166,3 +145,14 @@ class ApplicationController < ActionController::Base
   end
 
 end
+
+# def update_product
+#   #@product = @item.product
+#   #@artist = @item.artist
+#   #set_product
+#   @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
+#   set_artist
+#   @products = products
+#   @input_group = search_input_group
+#   puts "@product: #{@product.try(:id)}"
+# end

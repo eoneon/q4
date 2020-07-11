@@ -15,6 +15,10 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
+  def field_targets
+    scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many, reject_set: ['radio_button'])
+  end
+
   scope :product_group, -> {self.all}
   #StandardProduct.tag_search_field_group(StandardProduct.filter_keys)
   def self.tag_search_field_group(search_keys:, products: product_group, h: {})

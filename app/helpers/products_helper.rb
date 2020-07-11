@@ -21,7 +21,6 @@ module ProductsHelper
     h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.options}
   end
 
-
   def field_set_group(f)
     #h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.targets}
     h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets}
