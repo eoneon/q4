@@ -70,6 +70,10 @@ $(document).ready(function(){
     $(this).closest(".toggle-field").toggleClass("show collapse");
   });
 
+  $("body").on("change", ".field-param", function(){
+    $("#edit-item").submit();
+  });
+
   //CRUD ITEM-PRODUCT #update
   $("body").on("click", "#product-index button.list-group-item", function(e){
     var product_id = $('#hidden_product_id').val();

@@ -10,57 +10,29 @@ module Context
       StandardProduct.builder(f={field_name: field_name, options: options, tags: tags})
     end
 
-    # def select_menu(field_name, options, tags=nil)
-    #   SelectMenu.builder(f={field_name: field_name, options: options, tags: tags})
-    # end
-
     def select_menu(field_name, kind, options, tags=nil)
       SelectMenu.builder(f={field_name: field_name, kind: kind, options: options, tags: tags})
     end
-
-    # def field_set(field_name, options, tags=nil)
-    #   FieldSet.builder(f={field_name: field_name, options: options, tags: tags})
-    # end
 
     def field_set(field_name, kind, options, tags=nil)
       FieldSet.builder(f={field_name: field_name, kind: kind, options: options, tags: tags})
     end
 
-    # def select_field(field_name, options, tags=nil)
-    #   SelectField.builder(f={field_name: field_name, options: options, tags: tags})
-    # end
-
     def select_field(field_name, kind, options, tags=nil)
       SelectField.builder(f={field_name: field_name, kind: kind, options: options, tags: tags})
     end
-
-    # def radio_button(field_name, tags=nil)
-    #   RadioButton.builder(f={field_name: field_name, tags: tags})
-    # end
 
     def radio_button(field_name, kind, tags=nil)
       RadioButton.builder(f={field_name: field_name, kind: kind, tags: tags})
     end
 
-    # def number_field(field_name, tags=nil)
-    #   NumberField.builder(f={field_name: field_name, tags: tags})
-    # end
-
     def number_field(field_name, kind, tags=nil)
       NumberField.builder(f={field_name: field_name, kind: kind, tags: tags})
     end
 
-    # def text_field(field_name, tags=nil)
-    #   TextField.builder(f={field_name: field_name, tags: tags})
-    # end
-
     def text_field(field_name, kind, tags=nil)
       TextField.builder(f={field_name: field_name, kind: kind, tags: tags})
     end
-
-    # def text_area_field(field_name, tags=nil)
-    #   TextField.builder(f={field_name: field_name, tags: tags})
-    # end
 
     def text_area_field(field_name, kind, tags=nil)
       TextField.builder(f={field_name: field_name, kind: kind, tags: tags})

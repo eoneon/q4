@@ -3,8 +3,8 @@
     <div class="input-group-prepend">
       <span class="input-group-text"><%= f_hsh[:label] %></span>
     </div>
-    <%= f.fields_for :select_menus do |ff| %>
-      <%= ff.collection_select f_hsh[:method], f_hsh[:collection], :id, :field_name, {include_blank: true}, {class: "form-control"} %>
+    <%= f.fields_for :field_sets do |ff| %>
+      <%= ff.collection_select f_hsh[:method], f_hsh[:collection], :id, :field_name, {include_blank: true, selected: f_hsh[:selected]}, {class: "form-control field-param"} %>
     <% end %>
   </div>
 </div>

@@ -4,7 +4,7 @@
       <span class="input-group-text"><%= f_hsh[:label] %></span>
     </div>
     <%= f.fields_for :options do |ff| %>
-      <%= ff.collection_select f_hsh[:method], f_hsh[:collection], :id, :field_name, {include_blank: true}, {class: "form-control"} %>
+      <%= ff.collection_select f_hsh[:method], f_hsh[:collection], :id, :field_name, {include_blank: true, selected: f_hsh[:selected]}, {class: "form-control field-param"} %>
     <% end %>
   </div>
 </div>

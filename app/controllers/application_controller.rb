@@ -97,7 +97,6 @@ class ApplicationController < ActionController::Base
   end
 
   def update_assocs(origin, target, params_target_type, params_target_id)
-    #puts "re: #{params_target_type}, sku: #{origin.sku}, skip_update_assocs 1: #{params_target_id.blank?} && #{target.blank?} = #{params_target_id.blank? && target.blank?}, skip_update_assocs 2: #{params_target_id.class.name} == #{target.try(:id).class.name} = #{params_target_id == target.try(:id)}"
     if skip_update_assocs(origin, target, params_target_type, params_target_id)
       a, b = origin, target
     elsif target.present? && params_target_id.blank?
@@ -130,10 +129,39 @@ class ApplicationController < ActionController::Base
     a, b = origin, target
   end
 
+  #update product field selections #############################################
+  def set_default_values_for_product
+    product.field_targets.each do |f|
+      default_values_for_product(f)
+    end
+  end
+
+  def default_values_for_product(f)
+    if f.type == 'SelectField'
+      default_value_for_select_field(f)
+    elsif f.type == 'SelectMenu'
+      default_value_for_select_menu(f)
+    elsif f.type == 'FieldSet'
+      f.targets.map{|ff| default_values_for_product(ff)}
+    end
+  end
+
+  def default_value_for_select_field(f)
+    @item.options << f.options.first
+  end
+
+  def default_value_for_select_menu(f)
+    @item.field_sets << f.field_sets.first
+  end
+
+  def remove_field_targets
+    #@item.field_targets.destroy_all
+  end
+
   ##############################################################################
 
   def to_class(type)
-    type.constantize
+    type.classify.constantize
   end
 
   def str_to_class(assoc)
@@ -144,6 +172,83 @@ class ApplicationController < ActionController::Base
     %w[medium_category medium material]
   end
 
+  ##############################################################################
+  def update_fields
+    #@item.field_params
+    i_params, f_params = @item.field_params, field_params
+    #puts "i_params: #{i_params}, f_params: #{f_params}"
+    i_params.keys.each do |f_type|
+      cascade_field_update(i_params, f_params, f_type)
+    end
+  end
+
+  def cascade_field_update(i_params, f_params, f_type)
+    i_params[f_type].keys.each do |k|
+      #if k.class.name == 'Hash'
+      if i_params[f_type][k].class.name == 'Hash'
+        #puts "Hash: #{k}"
+        cascade_field_update(i_params[f_type], f_params[f_type], k)
+      else
+        #puts "f_params: #{f_params}"
+        #puts "#{i_params[f_type][k]}, #{f_params[f_type][k]}"
+        update_field_assoc(i_params[f_type][k], f_params[f_type][k], f_type.singularize)
+      end
+    end
+  end
+
+  def update_field_assoc(id, param_id, f_type)
+    return if skip_field_update(id, param_id)
+    if id.present? && param_id.blank?
+      remove_field(id)
+    elsif id.present? && (id != param_id.to_i)
+      replace_field(id, param_id)
+    elsif id.blank? && param_id.present?
+      add_field(param_id, f_type)
+    end
+  end
+
+  def remove_field(id)
+    @item.item_groups.where(target_id: id).first.destroy
+  end
+
+  def replace_field(id, param_id)
+    remove_field(id)
+    add_field(param_id, f_type)
+  end
+
+  def add_field(param_id, f_type)
+    target = to_class(f_type).find(param_id)
+    @item.assoc_unless_included(target)
+  end
+
+  def skip_field_update(i_param, f_param)
+    (i_param.blank? && f_param.blank?) || (i_param == f_param.to_i)
+  end
+
+  ##############################################################################
+
+  def field_params
+    h={"options" => opts_hsh, "field_sets" => fs_hsh}
+  end
+
+  def fs_hsh
+    a, b, c = params[:item][:field_sets][:field_sets], params[:item][:field_sets].select{|k,v| k != 'options' && k != 'field_sets'}, []
+    [a, b].each do |hsh|
+      hsh.keys.each do |k|
+        c << [k, hsh[k]]
+      end
+    end
+    c.to_h.merge!(h={'options' => fs_opts_hsh})
+  end
+
+  def fs_opts_hsh
+    params[:item][:field_sets][:options].keys.map{|k| [k, params[:item][:field_sets][:options][k]]}.to_h
+  end
+
+  def opts_hsh
+    params[:item][:options].keys.map{|k| [k, params[:item][:options][k]]}.to_h
+  end
+  ##############################################################################
 end
 
 # def update_product

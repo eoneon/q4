@@ -15,12 +15,79 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
+  scope :product_group, -> {self.all}
+
+  ##############################################################################
+
   def field_targets
-    scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many, reject_set: ['radio_button'])
+    scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many, reject_set: ['RadioButton'])
   end
 
-  scope :product_group, -> {self.all}
-  #StandardProduct.tag_search_field_group(StandardProduct.filter_keys)
+  def field_params
+    fs, fs_opts, opts = [], [], []
+    field_targets.each do |f|
+      if f.type == 'SelectField'
+        opts << build_param(f)
+      elsif f.type == 'FieldSet'
+        #field_set_params(f.targets, fs, fs_opts, opts)
+        field_set_params(f.targets, fs, fs_opts)
+      elsif f.type == 'SelectMenu'
+        fs << build_param(f)
+      end
+    end
+    h={'options' => opts.to_h, 'field_sets' => fs.to_h.merge!(hsh={'options' => fs_opts.to_h})}
+    h
+  end
+
+  # def field_set_params(fields, fs, fs_opts, opts)
+  #   fields.each do |f|
+  #     if f.type == 'SelectField' && f.kind != 'material'
+  #       fs_opts << build_param(f)
+  #     elsif f.type == 'SelectField' && f.kind == 'material'
+  #       opts << build_param(f)
+  #     elsif f.type == 'SelectMenu'
+  #       fs << build_param(f)
+  #     end
+  #   end
+  # end
+
+  def field_set_params(fields, fs, fs_opts)
+    fields.each do |f|
+      if f.type == 'SelectField'
+        fs_opts << build_param(f)
+      elsif f.type == 'SelectMenu'
+        fs << build_param(f)
+      end
+    end
+  end
+
+  def build_param(f)
+    [f.kind+'_id', nil]
+  end
+
+  # def assign_or_merge(h, hsh, k)
+  #   h.empty? ? h = hsh : h.merge(hsh)
+  #   h
+  # end
+  #
+  # def material_field_set
+  #   field_sets.find_by(kind: 'material')
+  # end
+  #
+  # def numbering_field_set
+  #   select_menus.find_by(kind: 'numbering')
+  # end
+  #
+  # def material_fields
+  #   material_field_set.targets if material_field_set
+  # end
+  #
+  # def numbering_fields
+  #   numbering_field_set.targets if numbering_field_set
+  # end
+
+  ##############################################################################
+
   def self.tag_search_field_group(search_keys:, products: product_group, h: {})
     search_keys.map{|search_key| h[:"#{search_key}"] = search_values(products, search_key)}
     h
@@ -81,10 +148,7 @@ class Product < ApplicationRecord
   def self.filter_keys
     %w[medium_category medium material]
   end
-  #filtered search keys
-  # def self.valid_search_keys(search_set, filter_keys)
-  #   filter_keys.keep_if {|k| search_keys(search_set).include?(k)}
-  # end
+
   #all search keys
   def self.search_keys(search_set)
     search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
@@ -105,12 +169,3 @@ class Product < ApplicationRecord
   #   %w[medium_category medium material].keep_if {|tag| tag_set.include?(tag)}
   # end
 end
-
-# def self.search_opt_grp(search_keys, products=product_group, set=[])
-#   search_keys.each do |search_key|
-#     search_values(products, search_key).each do |opt|
-#       set << build_search_opt(search_key, opt)
-#     end
-#   end
-#   set
-# end

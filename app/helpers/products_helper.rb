@@ -1,48 +1,61 @@
 module ProductsHelper
 
-  def product_fields(product, set=[])
-    filtered_fields(product).each do |f|
-      set << build_f_hsh(f)
+  def product_field_params(product, fields, item, vals, set=[])
+    fields.each do |f|
+      cascade_build_f_hsh(f, vals, set)
     end
     set
   end
 
-  def filtered_fields(product)
-    product.targets.keep_if{|target| render_types.include?(target.type)}
+  def cascade_build_f_hsh(f, vals, set)
+    set << build_field(f, vals)
+    #add_nested_field_set(set.last, vals, set) #if f.type == 'FieldSet'
   end
 
-  def build_f_hsh(f)
-    public_send(f.type.underscore + '_group', f)
+  def add_nested_field_set(f_hsh, vals, set)
+    if f_hsh.has_key?(:selected) && f_hsh[:selected].present?
+      cascade_build_f_hsh(f_hsh[:selected], vals, set)
+    end
+  end
+
+  def build_field(f, vals)
+    public_send(f.type.underscore + '_group', f, vals)
+  end
+
+  def selected(f, vals)
+    opt = f.targets.detect{|ff| vals.include?(ff)} if vals && vals.any?
+    opt.id if opt
   end
 
   ##############################################################################
 
-  def select_field_group(f)
-    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.options}
+  def select_field_group(f, vals)
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.options, selected: selected(f, vals)}
   end
 
-  def field_set_group(f)
-    #h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.targets}
-    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets}
+  def field_set_group(f, vals)
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: selected(f, vals)}
   end
 
-  def build_field_set_group(fields)
-    fields.map{|f| build_f_hsh(f)}
+  def build_field_set_group(fields, vals)
+    fields.map{|f| build_field(f, vals)}
   end
 
-  def select_menu_group(f)
-    #h={render_as: f.type.underscore, label: f.tags["kind"], method: fk_id(f.tags["kind"]), collection: f.targets}
-    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets} #maybe use f.kind for: label
+  def select_menu_group(f, vals)
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: selected(f, vals)} #maybe use f.kind for: label
+  end
+
+  def radio_button_group(f, vals)
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind)} #maybe use f.kind for: label
   end
 
   #tags ########################################################################
 
-  def number_field_group(f)
-    #h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.tags["kind"])}
+  def number_field_group(f, vals)
     h={render_as: f.type.underscore, label: labelize(f), method: name_method(f)}
   end
 
-  def text_field_group(f)
+  def text_field_group(f, vals)
     h={render_as: f.type.underscore, label: labelize(f), method: name_method(f)}
   end
 
@@ -65,7 +78,7 @@ module ProductsHelper
     end
   end
 
-  ##############################################################################
+  #might want to kill these ####################################################
 
   def default_product(product)
     product ? product.type : Product.ordered_types.first

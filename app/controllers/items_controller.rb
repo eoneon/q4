@@ -25,10 +25,13 @@ class ItemsController < ApplicationController
     @item.assign_attributes(item_params)
 
     @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
+    update_fields
     @item, @artist = update_assocs(@item, @item.artist, 'Artist', params[:hidden][:artist_id])
 
     @products = products
     @input_group = search_input_group
+
+    #puts "#{field_params}"
     @item.save
 
     respond_to do |format|
@@ -65,6 +68,7 @@ class ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(:sku)
+    #params.require(:item).permit!
   end
 
   def product

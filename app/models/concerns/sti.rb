@@ -13,8 +13,8 @@ module STI
 
   #collection methods ##########################################################
   def scoped_sti_targets_by_type(scope:, rel: :has_one, reject_set: [])
-    target_set = scoped_type_targets(scope, reject_set) 
-    child_set(target_set, rel) if target_set.any?
+    target_set = scoped_type_targets(scope, reject_set)
+    child_set(target_set, rel) #if target_set.any?
   end
 
   def scoped_type_targets(scope, reject_set=[])
@@ -67,7 +67,11 @@ module STI
     base_type.underscore.pluralize
   end
 
-  #=> ["materials", "mountings"]
+  def has_many_assoc_list
+    to_class.assoc_names
+  end
+
+  #=> ["materials", "mountings"] -> need to kill
   def scoped_assoc_names
     to_class.scoped_assoc_names(to_base_class).map{|assoc| assoc}
   end

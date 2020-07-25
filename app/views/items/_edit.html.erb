@@ -1,18 +1,20 @@
 <%= form_with model: item, url: invoice_item_path(invoice, item), id: "edit-item" do |f| %>
   <div class="form">
-    <%#= hidden_field_tag "hidden[type]", default_product(product) %>
     <%= hidden_field_tag "hidden[type]", product.try(:type) %>
     <%= hidden_field_tag "hidden[product_id]", product.try(:id) %>
     <%= hidden_field_tag "hidden[artist_id]", artist.try(:id) %>
     <%= f.number_field :sku, placeholder: "sku", class: "form-control form-control-sm mr-sm-2" %>
     <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
     <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+
     <% if product %>
-      <% product_fields(product).each do |f_hsh| %>
+      <% fields, vals = product.field_targets, item.field_targets %>
+      <% product_field_params(product, fields, item, vals).each do |f_hsh| %>
         <div class="row">
-          <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh %>
+          <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh, opts: vals %>
         </div>
       <% end %>
     <% end %>
+
   </div>
 <% end %>
