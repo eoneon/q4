@@ -176,7 +176,7 @@ class ApplicationController < ActionController::Base
   def update_fields
     #@item.field_params
     i_params, f_params = @item.field_params, field_params
-    #puts "i_params: #{i_params}, f_params: #{f_params}"
+    puts "179: i_params: #{i_params}, f_params: #{f_params}"
     i_params.keys.each do |f_type|
       cascade_field_update(i_params, f_params, f_type)
     end
@@ -184,13 +184,11 @@ class ApplicationController < ActionController::Base
 
   def cascade_field_update(i_params, f_params, f_type)
     i_params[f_type].keys.each do |k|
-      #if k.class.name == 'Hash'
       if i_params[f_type][k].class.name == 'Hash'
-        #puts "Hash: #{k}"
+        #puts "188: i_params: #{i_params[f_type]}, f_params: #{f_params[f_type]}, k: #{k}"
         cascade_field_update(i_params[f_type], f_params[f_type], k)
       else
-        #puts "f_params: #{f_params}"
-        #puts "#{i_params[f_type][k]}, #{f_params[f_type][k]}"
+        #puts "193: i_params: #{i_params[f_type]}, f_params: #{f_params[f_type]}, k: #{k}"
         update_field_assoc(i_params[f_type][k], f_params[f_type][k], f_type.singularize)
       end
     end
@@ -201,7 +199,7 @@ class ApplicationController < ActionController::Base
     if id.present? && param_id.blank?
       remove_field(id)
     elsif id.present? && (id != param_id.to_i)
-      replace_field(id, param_id)
+      replace_field(id, param_id, f_type)
     elsif id.blank? && param_id.present?
       add_field(param_id, f_type)
     end
@@ -211,7 +209,7 @@ class ApplicationController < ActionController::Base
     @item.item_groups.where(target_id: id).first.destroy
   end
 
-  def replace_field(id, param_id)
+  def replace_field(id, param_id, f_type)
     remove_field(id)
     add_field(param_id, f_type)
   end
@@ -239,10 +237,15 @@ class ApplicationController < ActionController::Base
       end
     end
     c.to_h.merge!(h={'options' => fs_opts_hsh})
+    c.to_h.merge!(h={'tags' => fs_tags})
   end
 
   def fs_opts_hsh
     params[:item][:field_sets][:options].keys.map{|k| [k, params[:item][:field_sets][:options][k]]}.to_h
+  end
+
+  def fs_tags
+    params[:item][:field_sets][:field_sets][:tags].keys.map{|k| [k, params[:item][:field_sets][:field_sets][:tags][k]]}.to_h
   end
 
   def opts_hsh

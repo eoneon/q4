@@ -24,15 +24,20 @@ class Item < ApplicationRecord
 
   def build_options_params(product_params)
     product_params["options"].keys.each do |k|
-      product_params["options"][k] = dyno_find_by_kind("options", k)
+      f = dyno_find_by_kind("options", k)
+      product_params["options"][k] = f.try(:id)
     end
     product_params
   end
 
   def build_field_sets_params(product_params)
     product_params["field_sets"].select{|k,v| k != "options"}.keys.each do |k|
+      #"field_sets"=>{"dimension_id"=>9678, "mounting_id"=>nil, "numbering_id"=>nil}
       f = dyno_find_by_kind("field_sets", k)
       product_params["field_sets"][k] = f.try(:id)
+      #if f then f.targets;
+      #if target.type == 'SelectMenu' then add new hash? material, mounting, numbering
+      #add nested tags hash inside above?
     end
     product_params
   end
@@ -41,9 +46,11 @@ class Item < ApplicationRecord
     product_params["field_sets"]["options"].keys.each do |k|
       f = dyno_find_by_kind("options", k)
       product_params["field_sets"]["options"][k] = f.try(:id)
+
       if fs_fields = build_field_sets_fields_params(f)
         build_tag_params(fs_fields, tags_hsh)
       end
+
     end
     product_params
   end

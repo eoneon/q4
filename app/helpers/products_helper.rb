@@ -1,61 +1,99 @@
 module ProductsHelper
 
   def product_field_params(product, fields, item, vals, set=[])
+    cascade_build(fields, vals, set)
+  end
+
+  ##############################################################################
+  #product_fields
+  # def cascade_build(fields, vals, set)
+  #   fields.each do |f|
+  #     if f.type == 'FieldSet'
+  #       build_field_set_group(fields, vals, set)
+  #     else
+  #       cascade_build_f_hsh(f, vals, selected(f, vals), set)
+  #     end
+  #   end
+  #   set
+  # end
+  #
+  # def build_field_set_group(fields, vals, set)
+  #   fields.each do |f|
+  #     build_field(f, selected(f, vals).try(:id))
+  #   end
+  # end
+
+  ##############################################################################
+
+  def cascade_build(fields, vals, set)
     fields.each do |f|
-      cascade_build_f_hsh(f, vals, set)
+      cascade_build_f_hsh(f, vals, selected(f, vals), set)
     end
     set
   end
 
-  def cascade_build_f_hsh(f, vals, set)
-    set << build_field(f, vals)
-    #add_nested_field_set(set.last, vals, set) #if f.type == 'FieldSet'
+  def cascade_build_f_hsh(f, vals, selected, set)
+    #set << build_field(f, selected.try(:id))
+    set << build_field(f, selected)
   end
 
-  def add_nested_field_set(f_hsh, vals, set)
-    if f_hsh.has_key?(:selected) && f_hsh[:selected].present?
-      cascade_build_f_hsh(f_hsh[:selected], vals, set)
-    end
+  def build_field(f, selected)
+    #public_send(f.type.underscore + '_group', f, selected_id)
+    public_send(f.type.underscore + '_group', f, selected)
   end
 
-  def build_field(f, vals)
-    public_send(f.type.underscore + '_group', f, vals)
+  def build_field_set_group(fields, vals)
+    #fields.map{|f| build_field(f, selected(f, vals).try(:id))}
+    fields.map{|f| build_field(f, selected(f, vals))}
   end
 
   def selected(f, vals)
-    opt = f.targets.detect{|ff| vals.include?(ff)} if vals && vals.any?
-    opt.id if opt
+    f.targets.detect{|ff| vals.include?(ff)} if vals && vals.any?
   end
 
   ##############################################################################
 
-  def select_field_group(f, vals)
-    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.options, selected: selected(f, vals)}
+  # def select_field_group(f, selected_id)
+  #   h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.options, selected: selected_id}
+  # end
+  #
+  # def field_set_group(f, selected_id)
+  #   h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: selected_id}
+  # end
+  #
+  # def select_menu_group(f, selected_id)
+  #   h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: selected_id} #maybe use f.kind for: label
+  # end
+  #
+  # def radio_button_group(f, selected_id)
+  #   h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind)} #maybe use f.kind for: label
+  # end
+
+  #
+
+  def select_field_group(f, selected)
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.options, selected: selected}
   end
 
-  def field_set_group(f, vals)
-    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: selected(f, vals)}
+  def field_set_group(f, selected)
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: selected}
   end
 
-  def build_field_set_group(fields, vals)
-    fields.map{|f| build_field(f, vals)}
+  def select_menu_group(f, selected)
+    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: selected} #maybe use f.kind for: label
   end
 
-  def select_menu_group(f, vals)
-    h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: selected(f, vals)} #maybe use f.kind for: label
-  end
-
-  def radio_button_group(f, vals)
+  def radio_button_group(f, selected)
     h={render_as: f.type.underscore, label: f.field_name, method: fk_id(f.kind)} #maybe use f.kind for: label
   end
 
   #tags ########################################################################
 
-  def number_field_group(f, vals)
+  def number_field_group(f, selected)
     h={render_as: f.type.underscore, label: labelize(f), method: name_method(f)}
   end
 
-  def text_field_group(f, vals)
+  def text_field_group(f, selected)
     h={render_as: f.type.underscore, label: labelize(f), method: name_method(f)}
   end
 
