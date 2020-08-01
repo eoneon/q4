@@ -14,6 +14,141 @@ class Item < ApplicationRecord
   attribute :options
   attribute :select_menus
 
+  def self.recursive_merge(merge_from, merge_to)
+    merged_hash = merge_to.clone
+    first_key = merge_from.keys[0]
+    if merge_to.has_key?(first_key)
+      merge_to[first_key].merge!(merge_from) if merged_hash[first_key] != merge_from[first_key]
+      merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
+    else
+      merged_hash[first_key] = merge_from[first_key]
+    end
+    merged_hash
+  end
+
+  # def self.recursive_merge(merge_from, merge_to)
+  #   merged_hash = merge_to.clone
+  #   first_key = merge_from.keys[0]
+  #   if merge_to.has_key?(first_key) && merge_from[first_key] != merge_to[first_key]
+  #     puts "#{1}"
+  #     merge_to[first_key].merge!(merge_from[first_key])
+  #     merge_to[first_key].merge!(merge_from[first_key])
+  #
+  #     merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
+  #   elsif merge_to.has_key?(first_key) && merge_from[first_key] == merge_to[first_key]
+  #     merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
+  #   else
+  #     merged_hash[first_key] = merge_from[first_key]
+  #   end
+  #   merged_hash
+  # end
+
+  def params_merge(params, key_set, hsh)
+    if key_set.count == 1
+      shallow_merge(params, key_set.first, hsh)
+    else
+      nested_merge(params, key_set, hsh)
+    end
+  end
+
+  def shallow_merge(params, k, hsh)
+    if params.has_key?(k)
+      params[k].merge!(hsh)
+    else
+      params.merge!({k => hsh}) #params[k] = hsh
+    end
+  end
+
+  def nested_merge(params, key_set, hsh)
+    p_hsh = key_set[0..-2].inject(params, :fetch)
+    if params.dig(*key_set) #check level during dig; key_set.detect.{|k| }
+      p_hsh[key_set.last].merge!(hsh)
+    else
+      p_hsh[key_set.last] = hsh
+    end
+  end
+
+  def product_params
+    if product
+      #p_fields, i_fields, params = product.field_targets, field_targets, h={'options'=> {}, 'field_sets'=> {}}
+      p_fields, i_fields, params = product.field_targets, field_targets, h={'field_sets'=> {}}
+      p_fields.each do |f|
+        if f.type == 'SelectField'
+          h = field_param(f, 'Option', f.kind, i_fields)
+          params_merge(params, ['options'], h)
+          #params['options'].merge!(h)
+        elsif f.type == 'FieldSet'
+          field_set_params(f.targets, i_fields, params)
+        elsif f.type == 'SelectMenu'
+          select_menu_params(f, i_fields, params, f.targets.first.type)
+        end
+      end
+    end
+    params
+  end
+
+  def field_set_params(fields, i_fields, params)
+    fields.each do |f|
+      if f.type == 'SelectField'
+        h = field_param(f, 'Option', f.kind, i_fields)
+        f.kind == 'material' ? params['options'].merge!(h) : assign_or_merge(params['field_sets'][f.kind], 'options', h)
+      elsif f.type == 'SelectMenu' #dimension, mounting, numbering
+        select_menu_params(f, i_fields, params, f.targets.first.type)
+      elsif f.type != 'FieldSet'
+        h = build_tag_param(f)
+        params['field_sets'][f.kind].has_key?('tags') ? params['field_sets'][f.kind]['tags'].merge!(h) : params['field_sets'][f.kind]['tags'] = h
+      end
+    end
+    params
+  end
+
+  def select_menu_params(f, i_fields, params, target_type)
+    h = field_param(f, target_type, f.kind, i_fields)
+    if target_type == 'FieldSet'
+      assign_or_merge(params['field_sets'], f.kind, h)
+      if ff = params['field_sets'][f.kind][f.kind+'_id']
+        field_set_params(ff.targets, i_fields, params) #ff => dimension::fields_set.targets
+      end
+    else f.type == 'SelectField'
+      assign_or_merge(params['field_sets'], f.kind, h)
+    end
+  end
+
+  def detect_obj(i_fields, type, kind)
+    i_fields.detect{|f| f.type == type && f.kind == kind}
+  end
+
+  def field_param(f, f_type, f_kind, set)
+    h={"#{f.kind}_id" => detect_obj(set, f_type, f_kind)}
+  end
+
+  def assign_or_merge(params, k, hsh)
+    #puts "params1: #{params}"
+    if params.has_key?(k)
+      params.merge!(hsh)
+    else
+      params[k] = hsh
+    end
+    #puts "params2: #{params}"
+  end
+
+  # def assign_or_merge(params, k, hsh)
+  #   #puts "params1: #{params}"
+  #   if params.has_key?(k)
+  #     params.merge!(hsh)
+  #   else
+  #     params[k] = hsh
+  #   end
+  #   #puts "params2: #{params}"
+  # end
+
+  def build_tag_param(f)
+    v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
+    h={f.field_name.split(" ").join("_") => v}
+  end
+
+  ##############################################################################
+
   def field_params
     if product
       product_params = build_options_params(product.field_params)
@@ -116,20 +251,20 @@ class Item < ApplicationRecord
   #   f_params
   # end
 
-  def field_target_params
-    #f_params={'options' => nil, 'field_sets' => h={'field_sets' => nil, 'options' => nil}}
-    f_params={'field_sets' => field_set_params}
-    f_params['field_sets']['options'] = h={'options' => field_set_options_params}
-    f_params
-  end
-
-  def field_set_params
-    %w[dimension mounting numbering].map{|k| [k, field_sets.find_by(kind: k)]}.to_h
-  end
-
-  def field_set_options_params
-    %w[dimension mounting numbering].map{|k| [k, options.find_by(kind: k)]}.to_h
-  end
+  # def field_target_params
+  #   #f_params={'options' => nil, 'field_sets' => h={'field_sets' => nil, 'options' => nil}}
+  #   f_params={'field_sets' => field_set_params}
+  #   f_params['field_sets']['options'] = h={'options' => field_set_options_params}
+  #   f_params
+  # end
+  #
+  # def field_set_params
+  #   %w[dimension mounting numbering].map{|k| [k, field_sets.find_by(kind: k)]}.to_h
+  # end
+  #
+  # def field_set_options_params
+  #   %w[dimension mounting numbering].map{|k| [k, options.find_by(kind: k)]}.to_h
+  # end
 
   # def options_params
   #   %w[dimension mounting numbering].map{|k| [k, options.find_by(kind: k)]}.to_h
@@ -144,3 +279,22 @@ class Item < ApplicationRecord
   end
 
 end
+# def material_field_params(fields, i_fields, params)
+#   fields.each do |f|
+#     if f.type == 'SelectField'
+#       h = field_param(f, 'Option', f.kind, i_fields)
+#       params['options'].merge(h)
+#     elsif f.type == 'SelectMenu' #dimension, mounting
+#       h = field_param(f, 'FieldSet', f.kind, i_fields) #dimension_id, mounting_id
+#       assign_or_merge(params['field_sets'], f.kind, h)
+#       if ff = params['field_sets'][f.kind][f.kind+'_id']
+#         field_set_params(ff.targets, i_fields, params) #ff => dimension::fields_set.targets
+#       #if f.targets.any?
+#         #field_set_params(f.targets.first.targets, i_fields, params) #f.targets.first.targets => sm.targets.first => fs => fs.targets => field_set_fields =>
+#         #field_set_params(f.targets.first.targets, i_fields, params)
+#       end
+#     end
+#   end
+# end
+#params['field_sets'][f.kind].has_key?('tags') ? params['field_sets'][f.kind]['tags'].merge(h) : params['field_sets'][f.kind]['tags'] = h
+#params['field_sets'].has_key?(f.kind) ? params['field_sets'][f.kind].merge(h) : params['field_sets'][f.kind] = h
