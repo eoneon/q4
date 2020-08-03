@@ -14,69 +14,12 @@ class Item < ApplicationRecord
   attribute :options
   attribute :select_menus
 
-  def self.recursive_merge(merge_from, merge_to)
-    merged_hash = merge_to.clone
-    first_key = merge_from.keys[0]
-    if merge_to.has_key?(first_key)
-      merge_to[first_key].merge!(merge_from) if merged_hash[first_key] != merge_from[first_key]
-      merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
-    else
-      merged_hash[first_key] = merge_from[first_key]
-    end
-    merged_hash
-  end
-
-  # def self.recursive_merge(merge_from, merge_to)
-  #   merged_hash = merge_to.clone
-  #   first_key = merge_from.keys[0]
-  #   if merge_to.has_key?(first_key) && merge_from[first_key] != merge_to[first_key]
-  #     puts "#{1}"
-  #     merge_to[first_key].merge!(merge_from[first_key])
-  #     merge_to[first_key].merge!(merge_from[first_key])
-  #
-  #     merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
-  #   elsif merge_to.has_key?(first_key) && merge_from[first_key] == merge_to[first_key]
-  #     merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
-  #   else
-  #     merged_hash[first_key] = merge_from[first_key]
-  #   end
-  #   merged_hash
-  # end
-
-  def params_merge(params, key_set, hsh)
-    if key_set.count == 1
-      shallow_merge(params, key_set.first, hsh)
-    else
-      nested_merge(params, key_set, hsh)
-    end
-  end
-
-  def shallow_merge(params, k, hsh)
-    if params.has_key?(k)
-      params[k].merge!(hsh)
-    else
-      params.merge!({k => hsh}) #params[k] = hsh
-    end
-  end
-
-  def nested_merge(params, key_set, hsh)
-    p_hsh = key_set[0..-2].inject(params, :fetch)
-    if params.dig(*key_set) #check level during dig; key_set.detect.{|k| }
-      p_hsh[key_set.last].merge!(hsh)
-    else
-      p_hsh[key_set.last] = hsh
-    end
-  end
-
   def product_params
     if product
-      #p_fields, i_fields, params = product.field_targets, field_targets, h={'options'=> {}, 'field_sets'=> {}}
-      p_fields, i_fields, params = product.field_targets, field_targets, h={'field_sets'=> {}}
+      p_fields, i_fields, params = product.field_targets, field_targets, {}
       p_fields.each do |f|
         if f.type == 'SelectField'
-          h = field_param(f, 'Option', f.kind, i_fields)
-          params_merge(params, ['options'], h)
-          #params['options'].merge!(h)
+          params_merge(params, ['options'], field_param(f, 'Option', f.kind, i_fields))
         elsif f.type == 'FieldSet'
           field_set_params(f.targets, i_fields, params)
         elsif f.type == 'SelectMenu'
@@ -87,16 +30,70 @@ class Item < ApplicationRecord
     params
   end
 
+  def params_merge(params, key_set, hsh)
+    key_set.each_with_index do |k, i|
+      idx = i == 0 ? 0 : i-1 
+      keys, trigger, key_exist = key_set[0..idx], key_set[-1] == k, nested_keys?(params, key_set[0..i])
+
+      if trigger && !key_exist #unitialized kv pair/hash
+        nested_merge(params, i, keys, {k=>hsh})
+      elsif trigger && key_exist
+        nested_merge(params, i, keys, hsh)
+      elsif !trigger && !key_exist
+        nested_merge(params, i, keys, {k=>{}})
+      end
+    end
+  end
+
+  def nested_keys?(params, keys)
+    params.dig(*keys)
+  end
+
+  def nested_merge(params, i, keys, hsh)
+    if i == 0
+      params.merge!(hsh)
+    else
+      keys.inject(params, :fetch).merge!(hsh)
+    end
+  end
+
+  # def params_merge(params, key_set, hsh)
+  #   params = cascade_init(params, key_set)
+  #   k = key_set.pop(1)
+  #   if key_set.count == 0
+  #     params[k].merge!(hsh)
+  #   else
+  #     key_set.inject(params, :fetch)[k].merge!(hsh)
+  #   end
+  # end
+  #
+  #
+  # def cascade_init(params, key_set)
+  #   key_set.each_with_index do |k, i|
+  #     next if i == 0 && params.has_key?(k)
+  #     if i == 0 && !params.has_key?(k)
+  #       params.merge!({k=>{}})
+  #     elsif !params.dig(*key_set[0..i])
+  #       key_set[0..i-1].inject(params, :fetch)[k] = {}
+  #     end
+  #   end
+  # end
+
   def field_set_params(fields, i_fields, params)
     fields.each do |f|
       if f.type == 'SelectField'
         h = field_param(f, 'Option', f.kind, i_fields)
-        f.kind == 'material' ? params['options'].merge!(h) : assign_or_merge(params['field_sets'][f.kind], 'options', h)
+        key_set = f.kind == 'material' ? ['options'] : ['field_sets', f.kind, 'options']
+        #cascade_init(params, key_set)
+        params_merge(params, key_set, h)
+        #f.kind == 'material' ? params_merge(params, ['options'], h) : params_merge(params, ['field_sets', f.kind, 'options'], h) #assign_or_merge(params['field_sets'][f.kind], 'options', h)
       elsif f.type == 'SelectMenu' #dimension, mounting, numbering
         select_menu_params(f, i_fields, params, f.targets.first.type)
       elsif f.type != 'FieldSet'
         h = build_tag_param(f)
-        params['field_sets'][f.kind].has_key?('tags') ? params['field_sets'][f.kind]['tags'].merge!(h) : params['field_sets'][f.kind]['tags'] = h
+        #cascade_init(params, ['field_sets', f.kind, 'tags'])
+        params_merge(params, ['field_sets', f.kind, 'tags'], h)
+        #params['field_sets'][f.kind].has_key?('tags') ? params['field_sets'][f.kind]['tags'].merge!(h) : params['field_sets'][f.kind]['tags'] = h
       end
     end
     params
@@ -105,12 +102,17 @@ class Item < ApplicationRecord
   def select_menu_params(f, i_fields, params, target_type)
     h = field_param(f, target_type, f.kind, i_fields)
     if target_type == 'FieldSet'
-      assign_or_merge(params['field_sets'], f.kind, h)
+      #cascade_init(params, ['field_sets', f.kind])
+      params_merge(params, ['field_sets', f.kind], h)
+      #assign_or_merge(params['field_sets'], f.kind, h)
+
       if ff = params['field_sets'][f.kind][f.kind+'_id']
         field_set_params(ff.targets, i_fields, params) #ff => dimension::fields_set.targets
       end
     else f.type == 'SelectField'
-      assign_or_merge(params['field_sets'], f.kind, h)
+      #cascade_init(params, ['field_sets', f.kind, 'options'])
+      params_merge(params, ['field_sets', f.kind, 'options'], h)
+      #assign_or_merge(params['field_sets'], f.kind, h)
     end
   end
 
@@ -119,7 +121,7 @@ class Item < ApplicationRecord
   end
 
   def field_param(f, f_type, f_kind, set)
-    h={"#{f.kind}_id" => detect_obj(set, f_type, f_kind)}
+    h={"#{f_kind}_id" => detect_obj(set, f_type, f_kind)}
   end
 
   def assign_or_merge(params, k, hsh)
@@ -279,6 +281,106 @@ class Item < ApplicationRecord
   end
 
 end
+
+# def self.recursive_merge(merge_from, merge_to)
+#   merged_hash = merge_to.clone
+#   first_key = merge_from.keys[0]
+#   if merge_to.has_key?(first_key)
+#     merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
+#   else
+#     merged_hash[first_key] = merge_from[first_key]
+#   end
+#   merged_hash
+# end
+#
+# def self.test(params, key_set, args=[])
+#   key_set.inject(params) do |memo, k|
+#     if !params.dig(*args.append(k))
+#       memo[k] = {}
+#     end
+#     memo
+#   end
+# end
+#
+# def self.test2(params,key_set,args=[])
+#   key_set[0..-2].inject(params) do |h, (k,v)|
+#     if !params.dig(*args.append(k))
+#       params[k] = {}
+#     else
+#       params.fetch(k)
+#     end
+#   end
+# end
+
+# def self.recursive_merge(merge_from, merge_to)
+#   merged_hash = merge_to.clone
+#   first_key = merge_from.keys[0]
+#   if merge_to.has_key?(first_key) && merge_from[first_key] != merge_to[first_key]
+#     puts "#{1}"
+#     merge_to[first_key].merge!(merge_from[first_key])
+#     merge_to[first_key].merge!(merge_from[first_key])
+#
+#     merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
+#   elsif merge_to.has_key?(first_key) && merge_from[first_key] == merge_to[first_key]
+#     merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
+#   else
+#     merged_hash[first_key] = merge_from[first_key]
+#   end
+#   merged_hash
+# end
+
+# def self.cascade_init(params, key_set, args=[])
+#   key_set.each do |k|
+#     if !params.dig(*args.append(k))
+#       params_merge(params, args, {})
+#   	end
+#   end
+#   params
+# end
+
+
+# def self.cascade_init(params, key_set, h, args=[])
+#   key_set.each do |k|
+#     hsh = !params.dig(*args.append(k)) ? {} : h
+#     params_merge(params, args, hsh)
+#   end
+#   params
+# end
+
+# def self.params_merge(params, key_set, hsh)
+#   if key_set.count == 1
+#     shallow_merge(params, key_set.first, hsh)
+#   else
+#     #cascade_init(params, key_set)
+#     nested_merge(params, key_set, hsh)
+#   end
+# end
+
+# def self.shallow_merge(params, k, hsh)
+#   if params.has_key?(k)
+#     params[k].merge!(hsh)
+#   else
+#     params.merge!({k => hsh}) #params[k] = hsh
+#   end
+# end
+#
+# def self.nested_merge(params, key_set, hsh)
+#   #k = key_set.pop(1)
+#   #p_hsh = key_set.inject(params, :fetch)[k].merge!(hsh)
+#   p_hsh = key_set[0..-2].inject(params, :fetch)#{|k,v| {}}
+#   if params.dig(*key_set) #check level during dig; key_set.detect.{|k| }
+#     p_hsh[key_set.last].merge!(hsh)
+#   else
+#     p_hsh[key_set.last] = hsh
+#   end
+# end
+
+# def params_merge(params, key_set, hsh)
+#   k = key_set.pop(1)
+#   key_set.inject(params, :fetch)[k].merge!(hsh)
+# end
+
+
 # def material_field_params(fields, i_fields, params)
 #   fields.each do |f|
 #     if f.type == 'SelectField'
