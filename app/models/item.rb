@@ -14,33 +14,208 @@ class Item < ApplicationRecord
   attribute :options
   attribute :select_menus
 
-  def product_params
-    if product
-      p_fields, i_fields, params = product.field_targets, field_targets, {}
-      p_fields.each do |f|
-        if f.type == 'SelectField'
-          params_merge(params, ['options'], field_param(f, 'Option', f.kind, i_fields))
-        elsif f.type == 'FieldSet'
-          field_set_params(f.targets, i_fields, params)
-        elsif f.type == 'SelectMenu'
-          select_menu_params(f, i_fields, params, f.targets.first.type)
-        end
+  def product_group
+    return if !product
+    p_fields, i_fields, opt_scope, params, inputs = product.field_targets, field_targets, product.select_fields.pluck(:kind) << 'material', {}, {}
+    p_fields.each do |f|
+      if f.type == 'SelectField'
+        select_field_group(f, i_fields, params, inputs, opt_scope)
+      elsif f.type == 'FieldSet'
+        field_set_group(f, i_fields, params, inputs, opt_scope)
+      elsif f.type == 'SelectMenu'
+        select_menu_group(f, i_fields, params, inputs, opt_scope)
       end
     end
-    params
+    {'params'=>params, 'inputs'=>inputs}
   end
+
+  def select_field_group(sf, i_fields, params, inputs, opt_scope)
+    target_type = sf.targets.first.type
+    #opt = detect_obj(i_fields, target_type, sf.kind)
+    opt = detect_obj(i_fields, sf.kind, target_type)
+    #need to sniff out options-context here: product.select_fields.pluck(:kind).append('material')
+
+    #scope_keys = sf.kind == 'material' ? ['options'] : ['field_sets', sf.kind, 'options']
+    scope_keys = scope_keys(sf, target_type, opt_scope)
+    params_merge(params, scope_keys, {sf.kind+'_id'=>opt})
+    #params_merge(inputs, input_scope(f, scope_keys), opt_hsh(sf,opt))
+  end
+
+  def field_set_group(fs, i_fields, params, inputs, opt_scope)
+    fs.targets.each do |f|
+      if f.type == 'SelectField'
+        select_field_group(f, i_fields, params, inputs, opt_scope)
+      elsif f.type == 'SelectMenu' #dimension, mounting, numbering
+        select_menu_group(f, i_fields, params, inputs, opt_scope)
+      elsif f.type != 'FieldSet'
+        tags_group(f, params, inputs)
+      end
+    end
+  end
+
+  def select_menu_group(sm, i_fields, params, inputs, opt_scope)
+    #target_type = sm.targets.first.type
+    # issue: how do you find ff if we don't know if we're lookin for a Fieldset or an Option?? make that arg an array? and then select first?? applicable only for numbering??
+    #ff = detect_obj(i_fields, 'FieldSet', sm.kind)
+    ff = detect_obj(i_fields, sm.kind, 'FieldSet', 'SelectField')
+    params_merge(params, ['field_sets', sm.kind], {sm.kind+'_id'=>ff})
+
+    if ff && ff.type == 'FieldSet'
+      #scope_keys = scope_keys(ff, ff.targets.first.type, opt_scope)
+      field_set_group(ff, i_fields, params, inputs, opt_scope)
+    elsif ff && ff.type == 'SelectField'
+      select_field_group(ff, i_fields, params, inputs, opt_scope)
+      # scope_keys = scope_keys(ff, ff.targets.first.type, opt_scope)
+      # params_merge(params, ['field_sets', f.kind, 'options'], h)
+    end
+    #scope_keys = target_type == 'FieldSet' ? ['field_sets', ff.kind] : ['field_sets', ff.kind, 'options']
+    #puts "test: #{sm.field_name}" #
+    #scope_keys = scope_keys(sm, target_type, opt_scope)
+
+     #if target_type == 'FieldSet'
+    #params_merge(inputs, input_scope(f, scope_keys), opt_hsh(sm,ff))
+  end
+
+  def tags_group(f, params, inputs)
+    v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
+    k = f.field_name.split(" ").join("_")
+    #scope_keys = scope_keys(f, 'tag', opt_scope)
+    #params_merge(params, ['field_sets', f.kind, 'tags'], {k => v})
+    params_merge(params, ['field_sets', f.kind, 'tags'], {k => v})
+    #params_merge(inputs, f.kind, store_hsh(f,k))
+  end
+
+  def scope_keys(f, target_type, opt_scope)
+    if target_type == 'Option' && opt_scope.include?(f.kind)
+      ['options']
+    elsif target_type == 'Option'
+      ['field_sets', f.kind, 'options']
+    elsif target_type == 'FieldSet' || f.type == 'SelectMenu'
+      ['field_sets', f.kind]
+    elsif target_type == 'SelectField'
+      ['field_sets', f.kind, 'options']
+    else
+      ['field_sets', f.kind, 'tags']
+    end
+  end
+
+  def detect_obj(i_fields, kind, *types)
+    i_fields.detect{|f| f.kind == kind && types.include?(f.type)}
+  end
+
+  def input_scope(f, scope_keys)
+    if scope_keys[0] == 'options'
+      scope_keys[0..0]
+    else
+      f.kind
+    end
+  end
+
+  def opt_hsh(f,v)
+    {render_as: render_as(f), label: f.field_name, method: fk_id(f.kind), collection: f.options, selected: v}
+  end
+
+  def store_hsh(f,k)
+    {render_as: render_as(f), label: f.field_name, method: k}
+  end
+
+  def render_as(f)
+    f.type.underscore
+  end
+
+  def fk_id(word)
+    [word.singularize, 'id'].join("_")
+  end
+
+  def name_method(f)
+    if render_types.include?(f.type.underscore)
+      fk_id(f.kind)
+    else
+      delim_format(words: f.field_name, join_delim: '_', split_delims: [' ', '-'])
+    end
+  end
+
+  def collection_field_types
+    ['SelectField', 'FieldSet', 'SelectMenu']
+  end
+
+  ##############################################################################
+
+  # def product_group
+  #   return if !product
+  #   p_fields, i_fields, params = product.field_targets, field_targets, {}
+  #   p_fields.each do |f|
+  #     if f.type == 'SelectField'
+  #       params_merge(params, ['options'], field_param(f, 'Option', f.kind, i_fields))
+  #     elsif f.type == 'FieldSet'
+  #       field_set_params(f.targets, i_fields, params)
+  #     elsif f.type == 'SelectMenu'
+  #       select_menu_params(f, i_fields, params, f.targets.first.type)
+  #     end
+  #   end
+  #   params
+  # end
+  #
+  # def field_set_params(fields, i_fields, params)
+  #   fields.each do |f|
+  #     if f.type == 'SelectField'
+  #       h = field_param(f, 'Option', f.kind, i_fields)
+  #       key_set = f.kind == 'material' ? ['options'] : ['field_sets', f.kind, 'options']
+  #       params_merge(params, key_set, h)
+  #     elsif f.type == 'SelectMenu' #dimension, mounting, numbering
+  #       select_menu_params(f, i_fields, params, f.targets.first.type)
+  #     elsif f.type != 'FieldSet'
+  #       h = build_tag_param(f)
+  #       params_merge(params, ['field_sets', f.kind, 'tags'], h)
+  #     end
+  #   end
+  #   params
+  # end
+  #
+  # def select_menu_params(f, i_fields, params, target_type)
+  #   h = field_param(f, target_type, f.kind, i_fields)
+  #
+  #   if target_type == 'FieldSet'
+  #     params_merge(params, ['field_sets', f.kind], h)
+  #
+  #     if ff = params['field_sets'][f.kind][f.kind+'_id']
+  #       field_set_params(ff.targets, i_fields, params) #ff => dimension::fields_set.targets
+  #     end
+  #
+  #   elsif f.type == 'SelectField'
+  #     params_merge(params, ['field_sets', f.kind, 'options'], h)
+  #   end
+  # end
+
+  # def detect_obj(i_fields, type, kind)
+  #   i_fields.detect{|f| f.type == type && f.kind == kind}
+  # end
+
+  # def field_param(f, f_type, f_kind, set)
+  #   {"#{f_kind}_id" => detect_obj(set, f_type, f_kind)}
+  # end
+
+  def field_param(f, f_type, f_kind, set)
+    {"#{f_kind}_id" => detect_obj(set, f_kind, f_type)}
+  end
+
+  def build_tag_param(f)
+    v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
+    {f.field_name.split(" ").join("_") => v}
+  end
+
+  ##############################################################################
 
   def params_merge(params, key_set, hsh)
     key_set.each_with_index do |k, i|
-      idx = i == 0 ? 0 : i-1 
+      idx = i == 0 ? 0 : i-1
       keys, trigger, key_exist = key_set[0..idx], key_set[-1] == k, nested_keys?(params, key_set[0..i])
-
-      if trigger && !key_exist #unitialized kv pair/hash
-        nested_merge(params, i, keys, {k=>hsh})
+      if trigger && !key_exist
+        nested_merge(params, i, keys, key_exist, k, hsh)
       elsif trigger && key_exist
-        nested_merge(params, i, keys, hsh)
+        nested_merge(params, i, keys, key_exist, k, hsh)
       elsif !trigger && !key_exist
-        nested_merge(params, i, keys, {k=>{}})
+        nested_merge(params, i, keys, key_exist, k, {})
       end
     end
   end
@@ -49,108 +224,20 @@ class Item < ApplicationRecord
     params.dig(*keys)
   end
 
-  def nested_merge(params, i, keys, hsh)
-    if i == 0
-      params.merge!(hsh)
-    else
-      keys.inject(params, :fetch).merge!(hsh)
+  def nested_merge(params, i, keys, key_exist, k, hsh)
+    if i == 0 && !key_exist
+      params[k] = hsh #params.merge!(hsh)
+    elsif i == 0 && key_exist
+      params[k].merge!(hsh)
+    elsif !key_exist #keys.inject(params, :fetch).merge!({k=>hsh})
+      keys.inject(params, :fetch)[k] = hsh
+    elsif key_exist
+      keys.inject(params, :fetch)[k].merge!(hsh)
     end
-  end
-
-  # def params_merge(params, key_set, hsh)
-  #   params = cascade_init(params, key_set)
-  #   k = key_set.pop(1)
-  #   if key_set.count == 0
-  #     params[k].merge!(hsh)
-  #   else
-  #     key_set.inject(params, :fetch)[k].merge!(hsh)
-  #   end
-  # end
-  #
-  #
-  # def cascade_init(params, key_set)
-  #   key_set.each_with_index do |k, i|
-  #     next if i == 0 && params.has_key?(k)
-  #     if i == 0 && !params.has_key?(k)
-  #       params.merge!({k=>{}})
-  #     elsif !params.dig(*key_set[0..i])
-  #       key_set[0..i-1].inject(params, :fetch)[k] = {}
-  #     end
-  #   end
-  # end
-
-  def field_set_params(fields, i_fields, params)
-    fields.each do |f|
-      if f.type == 'SelectField'
-        h = field_param(f, 'Option', f.kind, i_fields)
-        key_set = f.kind == 'material' ? ['options'] : ['field_sets', f.kind, 'options']
-        #cascade_init(params, key_set)
-        params_merge(params, key_set, h)
-        #f.kind == 'material' ? params_merge(params, ['options'], h) : params_merge(params, ['field_sets', f.kind, 'options'], h) #assign_or_merge(params['field_sets'][f.kind], 'options', h)
-      elsif f.type == 'SelectMenu' #dimension, mounting, numbering
-        select_menu_params(f, i_fields, params, f.targets.first.type)
-      elsif f.type != 'FieldSet'
-        h = build_tag_param(f)
-        #cascade_init(params, ['field_sets', f.kind, 'tags'])
-        params_merge(params, ['field_sets', f.kind, 'tags'], h)
-        #params['field_sets'][f.kind].has_key?('tags') ? params['field_sets'][f.kind]['tags'].merge!(h) : params['field_sets'][f.kind]['tags'] = h
-      end
-    end
-    params
-  end
-
-  def select_menu_params(f, i_fields, params, target_type)
-    h = field_param(f, target_type, f.kind, i_fields)
-    if target_type == 'FieldSet'
-      #cascade_init(params, ['field_sets', f.kind])
-      params_merge(params, ['field_sets', f.kind], h)
-      #assign_or_merge(params['field_sets'], f.kind, h)
-
-      if ff = params['field_sets'][f.kind][f.kind+'_id']
-        field_set_params(ff.targets, i_fields, params) #ff => dimension::fields_set.targets
-      end
-    else f.type == 'SelectField'
-      #cascade_init(params, ['field_sets', f.kind, 'options'])
-      params_merge(params, ['field_sets', f.kind, 'options'], h)
-      #assign_or_merge(params['field_sets'], f.kind, h)
-    end
-  end
-
-  def detect_obj(i_fields, type, kind)
-    i_fields.detect{|f| f.type == type && f.kind == kind}
-  end
-
-  def field_param(f, f_type, f_kind, set)
-    h={"#{f_kind}_id" => detect_obj(set, f_type, f_kind)}
-  end
-
-  def assign_or_merge(params, k, hsh)
-    #puts "params1: #{params}"
-    if params.has_key?(k)
-      params.merge!(hsh)
-    else
-      params[k] = hsh
-    end
-    #puts "params2: #{params}"
-  end
-
-  # def assign_or_merge(params, k, hsh)
-  #   #puts "params1: #{params}"
-  #   if params.has_key?(k)
-  #     params.merge!(hsh)
-  #   else
-  #     params[k] = hsh
-  #   end
-  #   #puts "params2: #{params}"
-  # end
-
-  def build_tag_param(f)
-    v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
-    h={f.field_name.split(" ").join("_") => v}
   end
 
   ##############################################################################
-
+  #replaced by product_params ??
   def field_params
     if product
       product_params = build_options_params(product.field_params)
@@ -225,6 +312,7 @@ class Item < ApplicationRecord
     end
   end
 
+  #kill??
   def product_id
     product.id if product
   end
@@ -232,7 +320,7 @@ class Item < ApplicationRecord
   def artist
     artists.first if artists.any?
   end
-
+  #kill??
   def artist_id
     artist.id if artist
   end
