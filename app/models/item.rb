@@ -30,15 +30,15 @@ class Item < ApplicationRecord
   end
 
   def select_field_group(sf, i_fields, params, inputs, opt_scope)
-    target_type = sf.targets.first.type
-    #opt = detect_obj(i_fields, target_type, sf.kind)
-    opt = detect_obj(i_fields, sf.kind, target_type)
-    #need to sniff out options-context here: product.select_fields.pluck(:kind).append('material')
-
-    #scope_keys = sf.kind == 'material' ? ['options'] : ['field_sets', sf.kind, 'options']
-    scope_keys = scope_keys(sf, target_type, opt_scope)
-    params_merge(params, scope_keys, {sf.kind+'_id'=>opt})
-    #params_merge(inputs, input_scope(f, scope_keys), opt_hsh(sf,opt))
+    opt = detect_obj(i_fields, sf.kind, 'Option')
+    #scope_keys = scope_keys(sf, 'Option', opt_scope).map{|k| [k, {}]}.append([sf.kind+'_id',opt])
+    scope_keys = scope_keys(sf, 'Option', opt_scope)
+    scope_set = scope_set(scope_keys, [sf.kind+'_id', opt])
+    params_merge(params, scope_set)
+    #params_merge(params, scope_keys)
+    #params_merge(inputs, input_scope(sf, scope_keys), opt_hsh(sf,opt))
+    #params_merge(params, scope_keys, {sf.kind+'_id'=>opt})
+    #puts "inputs: #{inputs}"
   end
 
   def field_set_group(fs, i_fields, params, inputs, opt_scope)
@@ -54,41 +54,95 @@ class Item < ApplicationRecord
   end
 
   def select_menu_group(sm, i_fields, params, inputs, opt_scope)
-    #target_type = sm.targets.first.type
-    # issue: how do you find ff if we don't know if we're lookin for a Fieldset or an Option?? make that arg an array? and then select first?? applicable only for numbering??
-    #ff = detect_obj(i_fields, 'FieldSet', sm.kind)
     ff = detect_obj(i_fields, sm.kind, 'FieldSet', 'SelectField')
-    params_merge(params, ['field_sets', sm.kind], {sm.kind+'_id'=>ff})
+
+    #puts "ff: #{ff}"
+    scope_set = scope_set(['field_sets', sm.kind], [sm.kind+'_id', ff])
+    #puts "scope_set: #{scope_set}"
+    params_merge(params, scope_set)
+    #params_merge(params, ['field_sets', sm.kind], {sm.kind+'_id'=>ff})
+    #params_merge(inputs, input_scope(sm, [sm.kind]), opt_hsh(sm,ff))
 
     if ff && ff.type == 'FieldSet'
-      #scope_keys = scope_keys(ff, ff.targets.first.type, opt_scope)
       field_set_group(ff, i_fields, params, inputs, opt_scope)
     elsif ff && ff.type == 'SelectField'
       select_field_group(ff, i_fields, params, inputs, opt_scope)
-      # scope_keys = scope_keys(ff, ff.targets.first.type, opt_scope)
-      # params_merge(params, ['field_sets', f.kind, 'options'], h)
     end
-    #scope_keys = target_type == 'FieldSet' ? ['field_sets', ff.kind] : ['field_sets', ff.kind, 'options']
-    #puts "test: #{sm.field_name}" #
-    #scope_keys = scope_keys(sm, target_type, opt_scope)
-
-     #if target_type == 'FieldSet'
-    #params_merge(inputs, input_scope(f, scope_keys), opt_hsh(sm,ff))
   end
 
   def tags_group(f, params, inputs)
     v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
     k = f.field_name.split(" ").join("_")
-    #scope_keys = scope_keys(f, 'tag', opt_scope)
+    scope_set = scope_set(['field_sets', f.kind, 'tags'], [k, v])
+    params_merge(params, scope_set)
     #params_merge(params, ['field_sets', f.kind, 'tags'], {k => v})
-    params_merge(params, ['field_sets', f.kind, 'tags'], {k => v})
-    #params_merge(inputs, f.kind, store_hsh(f,k))
+    #params_merge(inputs, [f.kind], store_hsh(f,k))
   end
+
+  def scope_set(scope_keys, last_set)
+    scope_keys.map{|k| [k, {}]}.append(last_set).transpose
+  end
+
+  # def field_set_group(fs, i_fields, params, inputs, opt_scope)
+  #   fs.targets.each do |f|
+  #     if f.type == 'SelectField'
+  #       select_field_group(f, i_fields, params, inputs, opt_scope)
+  #     elsif f.type == 'SelectMenu' #dimension, mounting, numbering
+  #       select_menu_group(f, i_fields, params, inputs, opt_scope)
+  #     elsif f.type != 'FieldSet'
+  #       tags_group(f, params, inputs)
+  #     end
+  #   end
+  # end
+
+  # def select_field_group(sf, i_fields, params, inputs, opt_scope)
+  #   #target_type = sf.targets.first.type
+  #   opt = detect_obj(i_fields, sf.kind, 'Option')
+  #   scope_keys = scope_keys(sf, 'Option', opt_scope)
+  #
+  #   #params_merge(inputs, input_scope(sf, scope_keys), opt_hsh(sf,opt))
+  #   params_merge(params, scope_keys, {sf.kind+'_id'=>opt})
+  #   #puts "inputs: #{inputs}"
+  # end
+
+
+
+  # def field_set_group(fs, i_fields, params, inputs, opt_scope)
+  #   fs.targets.each do |f|
+  #     if f.type == 'SelectField'
+  #       select_field_group(f, i_fields, params, inputs, opt_scope)
+  #     elsif f.type == 'SelectMenu' #dimension, mounting, numbering
+  #       select_menu_group(f, i_fields, params, inputs, opt_scope)
+  #     elsif f.type != 'FieldSet'
+  #       tags_group(f, params, inputs)
+  #     end
+  #   end
+  # end
+
+  # def select_menu_group(sm, i_fields, params, inputs, opt_scope)
+  #   ff = detect_obj(i_fields, sm.kind, 'FieldSet', 'SelectField')
+  #   params_merge(params, ['field_sets', sm.kind], {sm.kind+'_id'=>ff})
+  #   params_merge(inputs, input_scope(sm, [sm.kind]), opt_hsh(sm,ff))
+  #
+  #   if ff && ff.type == 'FieldSet'
+  #     field_set_group(ff, i_fields, params, inputs, opt_scope)
+  #   elsif ff && ff.type == 'SelectField'
+  #     select_field_group(ff, i_fields, params, inputs, opt_scope)
+  #   end
+  # end
+
+  # def tags_group(f, params, inputs)
+  #   v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
+  #   k = f.field_name.split(" ").join("_")
+  #
+  #   params_merge(params, ['field_sets', f.kind, 'tags'], {k => v})
+  #   params_merge(inputs, [f.kind], store_hsh(f,k))
+  # end
 
   def scope_keys(f, target_type, opt_scope)
     if target_type == 'Option' && opt_scope.include?(f.kind)
       ['options']
-    elsif target_type == 'Option'
+    elsif target_type == 'Option' && !opt_scope.include?(f.kind)
       ['field_sets', f.kind, 'options']
     elsif target_type == 'FieldSet' || f.type == 'SelectMenu'
       ['field_sets', f.kind]
@@ -105,14 +159,14 @@ class Item < ApplicationRecord
 
   def input_scope(f, scope_keys)
     if scope_keys[0] == 'options'
-      scope_keys[0..0]
+      ['options']
     else
-      f.kind
+      [f.kind]
     end
   end
 
   def opt_hsh(f,v)
-    {render_as: render_as(f), label: f.field_name, method: fk_id(f.kind), collection: f.options, selected: v}
+    {render_as: render_as(f), label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: v}
   end
 
   def store_hsh(f,k)
@@ -205,20 +259,100 @@ class Item < ApplicationRecord
   end
 
   ##############################################################################
-
-  def params_merge(params, key_set, hsh)
-    key_set.each_with_index do |k, i|
-      idx = i == 0 ? 0 : i-1
-      keys, trigger, key_exist = key_set[0..idx], key_set[-1] == k, nested_keys?(params, key_set[0..i])
-      if trigger && !key_exist
-        nested_merge(params, i, keys, key_exist, k, hsh)
-      elsif trigger && key_exist
-        nested_merge(params, i, keys, key_exist, k, hsh)
-      elsif !trigger && !key_exist
-        nested_merge(params, i, keys, key_exist, k, {})
+  def params_merge(params, scope_set)
+    scope_keys, scope_values, = scope_set[0], scope_set[1], keys=[]
+    scope_keys.each_with_index do |k, i|
+      if !params.dig(*keys.append(k))
+        if params.has_key?(scope_keys[0])
+          keys[0..i-1].inject(params, :fetch)[k] = scope_values[i]
+        else
+          params[k] = scope_values[i]
+        end
       end
     end
+    params
   end
+  # def params_merge(params, scope_set)
+  #   scope_keys, scope_values = scope_set[0], scope_set[1]
+  #
+  #   scope_keys.each_with_index do |k, i|
+  #     idx = i == 0 ? 0 : i-1
+  #     keys = scope_keys[0..idx]
+  #     #nested_value = params.dig(*scope_keys[0..i])
+  #     nested_value = params.dig(*scope_keys[0..idx])
+  #
+  #     puts "(0) keys: #{keys}, scope_keys: #{scope_keys}, nested_value: #{nested_value}"
+  #     puts "(0) k: #{k}"
+  #     puts "(0) v: #{scope_values[i]}"
+  #     puts "(0) params.dig([0..#{i}]): #{params.dig(*scope_keys[0..i])}"
+  #     puts "(0) params.dig([0..#{idx}]): #{params.dig(*scope_keys[0..idx])}"
+  #     puts "(0) params: #{params}"
+  #
+  #     if i==0 && !nested_value
+  #       puts "(1) if: i==0 && !nested_value"
+  #       params[k] = scope_values[i]
+  #       puts "(1): params: #{params}"
+  #     #elsif i>0 && !nested_value
+  #     elsif !params.dig(*scope_keys[0..idx])
+  #       puts "(2) elsif: i>0 && !nested_value"
+  #       puts "(2) keys.inject(params, :fetch)}: #{keys.inject(params, :fetch)}"
+  #       #keys.inject(params, :fetch)[k] = scope_values[i]
+  #       scope_keys[0..idx-1].inject(params, :fetch).merge!(k=>scope_values[i])
+  #       puts "(2): params: #{params}"
+  #     elsif params.dig(*scope_keys[0..idx])
+  #       puts "(3) elsif: i>0 && nested_value"
+  #       #puts "(3) scope_keys[0..i].inject(params, :fetch)}: #{scope_keys[0..i].inject(params, :fetch)}"
+  #       scope_keys[0..idx].inject(params, :fetch).merge!(k=>scope_values[i])
+  #       puts "(3) params: #{params}"
+  #     end
+  #   end
+  #   params
+  # end
+  # def params_merge(params, scope_sets)
+  #   transposed_set = scope_sets.transpose
+  #   scope_keys, scope_values = transposed_set[0], transposed_set[1]
+  #   # puts "scope_sets: #{scope_sets}"
+  #   # puts "scope_keys: #{scope_keys}"
+  #   # puts "scope_values: #{scope_values}"
+  #
+  #   scope_keys.each_with_index do |k, i|
+  #     puts "params0: #{params}"
+  #     puts "params.dig: #{params.dig(scope_keys[0..i])}"
+  #     puts "i: #{i}"
+  #     if !params.dig(*scope_keys[0..i]) && i==0
+  #       puts "1a params: #{params}"
+  #       puts "1 k: #{k}"
+  #       puts "1 params[k]: #{params[k]}"
+  #       params[k] = scope_values[i]
+  #       puts "1b params: #{params}"
+  #
+  #     elsif !params.dig(*scope_keys[0..i]) && i>0
+  #       puts "2 params: #{params}"
+  #       puts "2 scope_keys: #{scope_keys[0..i-1]}"
+  #       puts "2 k:: #{k}"
+  #       puts "2 scope_values[i]: #{scope_values[i]}"
+  #       scope_keys[0..i-1].inject(params, :fetch)[k] = scope_values[i]
+  #       puts "2b params: #{params}"
+  #
+  #     end
+  #     params
+  #   end
+  #   params
+  # end
+
+  # def params_merge(params, key_set, hsh)
+  #   key_set.each_with_index do |k, i|
+  #     idx = i == 0 ? 0 : i-1
+  #     keys, trigger, key_exist = key_set[0..idx], key_set[-1] == k, nested_keys?(params, key_set[0..i])
+  #     if trigger && !key_exist
+  #       nested_merge(params, i, keys, key_exist, k, hsh)
+  #     elsif trigger && key_exist
+  #       nested_merge(params, i, keys, key_exist, k, hsh)
+  #     elsif !trigger && !key_exist
+  #       nested_merge(params, i, keys, key_exist, k, {})
+  #     end
+  #   end
+  # end
 
   def nested_keys?(params, keys)
     params.dig(*keys)
@@ -236,6 +370,16 @@ class Item < ApplicationRecord
     end
   end
 
+  def recursive_merge(merge_from, merge_to)
+    merged_hash = merge_to.clone
+    first_key = merge_from.keys[0]
+    if merge_to.has_key?(first_key)
+      merged_hash[first_key] = recursive_merge(merge_from[first_key], merge_to[first_key])
+    else
+      merged_hash[first_key] = merge_from[first_key]
+    end
+    merged_hash
+  end
   ##############################################################################
   #replaced by product_params ??
   def field_params
