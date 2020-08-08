@@ -1,5 +1,6 @@
 module ProductsHelper
 
+  #kill
   def product_field_params(product, fields, item, vals, set=[])
     cascade_build(fields, vals, set)
   end
@@ -23,7 +24,7 @@ module ProductsHelper
   #   end
   # end
 
-  ##############################################################################
+  #kill #############################################################################
 
   def cascade_build(fields, vals, set)
     fields.each do |f|

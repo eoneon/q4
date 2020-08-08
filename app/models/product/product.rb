@@ -23,6 +23,7 @@ class Product < ApplicationRecord
     scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many, reject_set: ['RadioButton'])
   end
 
+  #replaced by product_group on item.rb 
   def field_params
     fs, fs_opts, opts = [], [], []
     field_targets.each do |f|

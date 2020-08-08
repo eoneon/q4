@@ -1,0 +1,7 @@
+<%= f.fields_for :"#{scope}" do |ff| %>
+  <div class="row">
+    <% set.each do |f_hsh| %>
+      <%= render "items/fields/#{f_hsh[:render_as]}", f: ff, f_hsh: f_hsh %>
+    <% end %>
+  </div>
+<% end %>

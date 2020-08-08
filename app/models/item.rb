@@ -14,9 +14,28 @@ class Item < ApplicationRecord
   attribute :options
   attribute :select_menus
 
+
+  def field_targets
+    scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
+  end
+
+  def product
+    if product = targets.detect{|target| target.class.method_defined?(:type) && target.base_type == 'Product'}
+      product
+    end
+  end
+
+  def artist
+    artists.first if artists.any?
+  end
+
+  # product_group ##############################################################
+
   def product_group
-    return if !product
-    p_fields, i_fields, opt_scope, params, inputs = product.field_targets, field_targets, product.select_fields.pluck(:kind) << 'material', {}, {'options'=>[], 'field_sets'=>{}}
+    params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
+    return {'params'=>params, 'inputs'=>inputs} if !product
+    p_fields, i_fields, opt_scope = product.field_targets, field_targets, product.select_fields.pluck(:kind) << 'material'
+    #p_fields, i_fields, opt_scope, params, inputs = product.field_targets, field_targets, product.select_fields.pluck(:kind) << 'material', {}, {'options'=>[], 'field_sets'=>{}}
     p_fields.each do |f|
       if f.type == 'SelectField'
         select_field_group(f, i_fields, params, inputs, opt_scope)
@@ -29,6 +48,7 @@ class Item < ApplicationRecord
     {'params'=>params, 'inputs'=>inputs}
   end
 
+  # field-type specific methods ################################################
   def select_field_group(sf, i_fields, params, inputs, opt_scope)
     opt = detect_obj(i_fields, sf.kind, 'Option')
     scope_keys = scope_keys(sf, 'Option', opt_scope)
@@ -41,7 +61,7 @@ class Item < ApplicationRecord
     fs.targets.each do |f|
       if f.type == 'SelectField'
         select_field_group(f, i_fields, params, inputs, opt_scope)
-      elsif f.type == 'SelectMenu' #dimension, mounting, numbering
+      elsif f.type == 'SelectMenu'
         select_menu_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type != 'FieldSet'
         tags_group(f, params, inputs)
@@ -69,6 +89,21 @@ class Item < ApplicationRecord
     scope_set = scope_set(['field_sets', f.kind, 'tags'], [k, v])
     params_merge(params, scope_set)
     form_inputs(inputs, ['field_sets', f.kind], f.kind, store_hsh(f,k))
+  end
+
+  # product_group specific methods #############################################
+  def params_merge(params, scope_set)
+    scope_keys, scope_values, = scope_set[0], scope_set[1], keys=[]
+    scope_keys.each_with_index do |k, i|
+      if !params.dig(*keys.append(k))
+        if params.has_key?(scope_keys[0])
+          keys[0..i-1].inject(params, :fetch)[k] = scope_values[i]
+        else
+          params[k] = scope_values[i]
+        end
+      end
+    end
+    params
   end
 
   def scope_set(scope_keys, last_set)
@@ -131,10 +166,12 @@ class Item < ApplicationRecord
     end
   end
 
+  #previous draft methods ######################################################
   def collection_field_types
     ['SelectField', 'FieldSet', 'SelectMenu']
   end
 
+  #previous draft methods ######################################################
   def field_param(f, f_type, f_kind, set)
     {"#{f_kind}_id" => detect_obj(set, f_kind, f_type)}
   end
@@ -142,22 +179,6 @@ class Item < ApplicationRecord
   def build_tag_param(f)
     v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
     {f.field_name.split(" ").join("_") => v}
-  end
-
-  ##############################################################################
-  
-  def params_merge(params, scope_set)
-    scope_keys, scope_values, = scope_set[0], scope_set[1], keys=[]
-    scope_keys.each_with_index do |k, i|
-      if !params.dig(*keys.append(k))
-        if params.has_key?(scope_keys[0])
-          keys[0..i-1].inject(params, :fetch)[k] = scope_values[i]
-        else
-          params[k] = scope_values[i]
-        end
-      end
-    end
-    params
   end
 
   ##############################################################################
@@ -228,31 +249,18 @@ class Item < ApplicationRecord
     ['NumberField', 'TextField', 'TextAreaField']
   end
 
-  ##############################################################################
 
-  def product
-    if product = targets.detect{|target| target.class.method_defined?(:type) && target.base_type == 'Product'}
-      product
-    end
-  end
 
   #kill??
   def product_id
     product.id if product
   end
 
-  def artist
-    artists.first if artists.any?
-  end
   #kill??
   def artist_id
     artist.id if artist
   end
-
-  def field_targets
-    scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
-  end
-
+  #kill??
   def field_param_key(f)
     [field.kind, field.type.underscore].join('_')
   end

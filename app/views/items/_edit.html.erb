@@ -7,13 +7,15 @@
     <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
     <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
 
-    <% if product %>
-      <% fields, vals = product.field_targets, item.field_targets %>
-      <% product_field_params(product, fields, item, vals).each do |f_hsh| %>
-        <div class="row">
-          <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh, opts: vals %>
-        </div>
+    <% inputs = item.product_group['inputs'] %>
+    <div class="row">
+      <% inputs['options'].each do |f_hsh| %>
+        <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh %>
       <% end %>
+    </div>
+
+    <% inputs['field_sets'].each do |scope, set| %>
+      <%= render "items/fields/fields_for", f: f, scope: scope, set: set %>
     <% end %>
 
   </div>

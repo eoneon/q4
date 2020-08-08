@@ -1,15 +1,7 @@
 <div class="col-3">
   <div class="input-group input-group-sm mb-3">
-    <div class="input-group-prepend">
-      <span class="input-group-text"><%= f_hsh[:label] %></span>
-    </div>
     <%= f.fields_for :field_sets do |ff| %>
       <%= ff.collection_select f_hsh[:method], f_hsh[:collection], :id, :field_name, {include_blank: true, selected: f_hsh[:selected].try(:id)}, {class: "form-control field-param"} %>
-      <% if field_set = f_hsh[:selected] %>
-        <% build_field_set_group(field_set.targets, opts).each do |ff_hsh| %>
-          <%= render "items/fields/#{ff_hsh[:render_as]}", f: ff, f_hsh: ff_hsh, opts: opts %>
-        <% end %>
-      <% end %>
     <% end %>
   </div>
 </div>

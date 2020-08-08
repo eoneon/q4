@@ -1,0 +1,8 @@
+<% if product %>
+  <% fields, vals = product.field_targets, item.field_targets %>
+  <% product_field_params(product, fields, item, vals).each do |f_hsh| %>
+    <div class="row">
+      <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh, opts: vals %>
+    </div>
+  <% end %>
+<% end %>
