@@ -14,8 +14,10 @@
       <% end %>
     </div>
 
-    <% inputs['field_sets'].each do |scope, set| %>
-      <%= render "items/fields/fields_for", f: f, scope: scope, set: set %>
+    <%= f.fields_for :field_sets do |ff| %>
+      <% inputs['field_sets'].each do |scope, set| %>
+        <%= render "items/fields/fields_for", f: ff, scope: scope, set: set %>
+      <% end %>
     <% end %>
 
   </div>
