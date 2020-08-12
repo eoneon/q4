@@ -29,7 +29,7 @@ class Item < ApplicationRecord
     artists.first if artists.any?
   end
 
-  # product_group ##############################################################
+  # product_group ############################################################## Item.find(3).product_group
 
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
@@ -37,13 +37,10 @@ class Item < ApplicationRecord
     p_fields, i_fields, opt_scope = product.field_targets, field_targets, product.select_fields.pluck(:kind) << 'material'
     p_fields.each do |f|
       if f.type == 'SelectField'
-        #scope_keys = ['options']
         select_field_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type == 'FieldSet'
-        #scope_keys = ['field_sets', f.kind]
         field_set_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type == 'SelectMenu'
-        #scope_keys = ['field_sets', f.kind]
         select_menu_group(f, i_fields, params, inputs, opt_scope)
       end
     end
@@ -64,10 +61,8 @@ class Item < ApplicationRecord
       if f.type == 'SelectField'
         select_field_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type == 'SelectMenu'
-        #
         select_menu_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type != 'FieldSet'
-        #
         tags_group(f, params, inputs)
       end
     end
@@ -94,7 +89,6 @@ class Item < ApplicationRecord
     scope_set = scope_set(scope_keys, [k, v])
 
     params_merge(params, scope_set)
-    #form_inputs(inputs, ['field_sets', f.kind], f.kind, store_hsh(f,k))
     form_inputs(inputs, scope_keys[0..1], scope_keys[1], store_hsh(f,k))
   end
 
@@ -130,6 +124,8 @@ class Item < ApplicationRecord
       ['field_sets', f.kind, 'tags']
     elsif f.field_name.split(" ")[0] == 'mounting'
       ['field_sets', 'mounting', 'tags']
+    else
+      ['field_sets', f.kind, 'tags']
     end
   end
 

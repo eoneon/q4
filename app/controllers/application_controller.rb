@@ -172,58 +172,209 @@ class ApplicationController < ActionController::Base
     %w[medium_category medium material]
   end
 
-  ##############################################################################
+  #refactored update_fields ####################################################
   def update_fields
-    #@item.field_params
-    i_params, f_params = @item.field_params, field_params
-    puts "179: i_params: #{i_params}, f_params: #{f_params}"
+    i_params = @item.product_group['params']
+    f_params = {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
+    #puts "i_params: #{i_params}"
     i_params.keys.each do |f_type|
-      cascade_field_update(i_params, f_params, f_type)
-    end
-  end
-
-  def cascade_field_update(i_params, f_params, f_type)
-    i_params[f_type].keys.each do |k|
-      if i_params[f_type][k].class.name == 'Hash'
-        #puts "188: i_params: #{i_params[f_type]}, f_params: #{f_params[f_type]}, k: #{k}"
-        cascade_field_update(i_params[f_type], f_params[f_type], k)
-      else
-        #puts "193: i_params: #{i_params[f_type]}, f_params: #{f_params[f_type]}, k: #{k}"
-        update_field_assoc(i_params[f_type][k], f_params[f_type][k], f_type.singularize)
+      if f_type == 'field_sets'
+        update_field_sets(i_params[f_type], f_params[f_type])
+      elsif f_type == 'options'
+        update_options(i_params[f_type], f_params[f_type])
       end
     end
   end
 
-  def update_field_assoc(id, param_id, f_type)
+  def update_field_sets(fs, params_fs)
+    #puts "params_fs: #{params_fs}"
+    fs.each do |kind_key, kind_hsh|
+      update_kind_hsh(kind_hsh, params_fs[kind_key])
+    end
+  end
+
+  def update_options(opts, params_opts)
+    opts.each do |opts_key, opt|
+      update_fk(opt.try(:id), params_opts[opts_key])
+    end
+  end
+
+  def update_tags(tags, param_tags)
+    tags.each do |tag_key, tag|
+      param_tag = param_tags[tag_key]
+      @item.tags[tag_key] = param_tag unless (tag.blank? && param_tag.blank?) || (tag == param_tag)
+    end
+  end
+
+  def update_kind_hsh(kind_hsh, params_kind_hsh)
+    puts "params_kind_hsh: #{params_kind_hsh}"
+    kind_hsh.each do |k,v|
+      if k.split('_').last == 'id'
+        update_fk(v.try(:id), params_kind_hsh[k])
+      elsif k == 'options'
+        update_options(kind_hsh[k], params_kind_hsh[k])
+      elsif k == 'tags'
+        update_tags(kind_hsh[k], params_kind_hsh[k])
+      end
+    end
+  end
+
+  def update_fk(id, param_id)
+    update_field_assoc(id, param_id)
+  end
+
+  def update_field_assoc(id, param_id)
     return if skip_field_update(id, param_id)
     if id.present? && param_id.blank?
+      #puts "remove_field: #{id}"
       remove_field(id)
     elsif id.present? && (id != param_id.to_i)
-      replace_field(id, param_id, f_type)
+      puts "replace_field => param_id: #{param_id}, id: #{id}"
+      replace_field(id, param_id)
     elsif id.blank? && param_id.present?
-      add_field(param_id, f_type)
+      #puts "add_field: #{param_id}"
+      add_field(param_id)
     end
+  end
+
+  def skip_field_update(id, param_id)
+    #puts "skip_field_update => param_id: #{param_id}, id: #{id}"
+    (id.blank? && param_id.blank?) || (id == param_id.to_i)
   end
 
   def remove_field(id)
     @item.item_groups.where(target_id: id).first.destroy
   end
 
-  def replace_field(id, param_id, f_type)
+  def replace_field(id, param_id)
     remove_field(id)
-    add_field(param_id, f_type)
+    add_field(param_id)
   end
 
-  def add_field(param_id, f_type)
-    target = to_class(f_type).find(param_id)
+  def add_field(param_id)
+    target = FieldItem.find(param_id)
+    target = to_class(target.type).find(param_id)
     @item.assoc_unless_included(target)
   end
+  #depricated update_fields more recent ver ####################################
+  # def update_fields
+  #   i_params = @item.product_group['params']
+  #   f_params = {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
+  #
+  #   i_params.keys.each do |f_type|
+  #     if f_type == 'field_sets'
+  #       update_field_sets(i_params, f_params, f_type)
+  #     elsif f_type == 'options'
+  #       update_options(i_params, f_params, to_set(f_type))
+  #     end
+  #   end
+  # end
+  #
+  # def to_set(v)
+  #   v.class.name == Array ? v : [v]
+  # end
+  #
+  # def update_field_sets(i_params, f_params, f_type)
+  #   i_params[f_type].keys.each do |kind_key|
+  #     update_kind_hsh(i_params, f_params, [f_type, kind_key])
+  #   end
+  # end
+  #
+  # def update_kind_hsh(i_params, f_params, dig_set)
+  #   i_params.dig(*dig_set).keys.each do |k|
+  #     if k.split('_').last == 'id'
+  #       update_fk(i_params, f_params, dig_set.append(k))
+  #     elsif k == 'options'
+  #       update_options(i_params, f_params, dig_set.append(k))
+  #     elsif k == 'tags'
+  #     end
+  #   end
+  # end
+  #
+  # def update_options(i_params, f_params, dig_set)
+  #   i_params.dig(*dig_set).keys.each do |option_key|
+  #     update_fk(i_params, f_params, dig_set.append(option_key))
+  #   end
+  # end
+  #
+  # def update_fk(i_params, f_params, dig_set)
+  #   puts "dig_set: #{dig_set}"
+  #   id = i_params.dig(*dig_set)
+  #   param_id = f_params.dig(*dig_set)
+  #   update_field_assoc(id, param_id)
+  # end
 
-  def skip_field_update(i_param, f_param)
-    (i_param.blank? && f_param.blank?) || (i_param == f_param.to_i)
-  end
+  #depricated update_fields ####################################################
+
+  # def update_fields
+  #   i_params = @item.product_group['params']
+  #   i_params.keys.each do |k|
+  #     cascade_field_update(i_params, [k])
+  #   end
+  # end
+  #
+  # #scope_keys.inject(i_params, :fetch).keys.each do |k|
+  # def cascade_field_update(i_params, scope_keys)
+  #   i_params.dig(*scope_keys).keys.each do |k|
+  #     #if %[field_sets options tags].scope_keys.append(k)
+  #     if i_params.dig(*scope_keys)[k].class.name == 'Hash'
+  #       cascade_field_update(i_params, scope_keys.append(k))
+  #     elsif k.split('_').last == 'id'
+  #       update_field_assoc(i_params.dig(*scope_keys)[k].try(:id), params[:item].dig(*scope_keys)[k])
+  #     # else
+  #     #   update_field_tags(i_params.dig(*scope_keys)[k], params[:item].dig(*scope_keys)[k])
+  #     end
+  #   end
+  # end
+  #
+
+  #
+  # def update_fields
+  #   i_params, f_params = @item.product_group['params'], h={"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]} #item_product.filter{|k,v| %w[options field_sets].include?(k)}
+  #   puts "dig test: #{params[:item].dig(:field_sets)["dimension"]}"
+  #   i_params.keys.each do |f_type|
+  #     cascade_field_update(i_params, f_params, f_type)
+  #   end
+  # end
+  #
+  # def cascade_field_update(i_params, f_params, f_type)
+  #   i_params[f_type].keys.each do |k|
+  #     if i_params[f_type][k].class.name == 'Hash'
+  #       puts "188: i_params: #{i_params[f_type]}, f_params: #{f_params[f_type]}, k: #{k}"
+  #       cascade_field_update(i_params[f_type], f_params[f_type], k)
+  #     else
+  #       puts "193: i_params: #{i_params[f_type]}, f_params: #{f_params[f_type]}, k: #{k}"
+  #       update_field_assoc(i_params[f_type][k].try(:id), f_params[f_type][k], f_type.singularize)
+  #     end
+  #   end
+  # end
+  #
+  # def update_field_assoc(id, param_id, f_type)
+  #   return if skip_field_update(id, param_id)
+  #   if id.present? && param_id.blank?
+  #     remove_field(id)
+  #   elsif id.present? && (id != param_id.to_i)
+  #     replace_field(id, param_id, f_type)
+  #   elsif id.blank? && param_id.present?
+  #     add_field(param_id, f_type)
+  #   end
+  # end
+
+  # def replace_field(id, param_id, f_type)
+  #   remove_field(id)
+  #   add_field(param_id, f_type)
+  # end
+
+  # def add_field(param_id, f_type)
+  #   target = to_class(f_type).find(param_id)
+  #   @item.assoc_unless_included(target)
+  # end
 
   ##############################################################################
+
+  # def field_params
+  #   h={"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
+  # end
 
   def field_params
     h={"options" => opts_hsh, "field_sets" => fs_hsh}
