@@ -4,6 +4,7 @@ class Item < ApplicationRecord
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :standard_products, through: :item_groups, source: :target, source_type: "StandardProduct"
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
+  has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
@@ -30,7 +31,6 @@ class Item < ApplicationRecord
   end
 
   # product_group ############################################################## Item.find(3).product_group
-
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
     return {'params'=>params, 'inputs'=>inputs} if !product
@@ -83,13 +83,13 @@ class Item < ApplicationRecord
   end
 
   def tags_group(f, params, inputs)
-    v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
     k = f.field_name.split(" ").join("_")
+    v = tags.present? && tags.has_key?(k) ? tags[k] : nil
     scope_keys = scope_keys(f, nil, nil)
     scope_set = scope_set(scope_keys, [k, v])
 
     params_merge(params, scope_set)
-    form_inputs(inputs, scope_keys[0..1], scope_keys[1], store_hsh(f,k))
+    form_inputs(inputs, scope_keys[0..1], scope_keys[1], store_hsh(f,k,v))
   end
 
   # product_group specific methods #############################################
@@ -151,8 +151,8 @@ class Item < ApplicationRecord
     {render_as: render_as(f), label: f.field_name, method: fk_id(f.kind), collection: f.targets, selected: set}
   end
 
-  def store_hsh(f,k)
-    {render_as: render_as(f), label: f.field_name, method: k}
+  def store_hsh(f,k,v)
+    {render_as: render_as(f), label: f.field_name, method: k, selected: v}
   end
 
   def render_as(f)
@@ -171,106 +171,105 @@ class Item < ApplicationRecord
     end
   end
 
-  #previous draft methods ######################################################
-  def collection_field_types
-    ['SelectField', 'FieldSet', 'SelectMenu']
-  end
+end
+
 
   #previous draft methods ######################################################
-  def field_param(f, f_type, f_kind, set)
-    {"#{f_kind}_id" => detect_obj(set, f_kind, f_type)}
-  end
-
-  def build_tag_param(f)
-    v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
-    {f.field_name.split(" ").join("_") => v}
-  end
+  # def collection_field_types
+  #   ['SelectField', 'FieldSet', 'SelectMenu']
+  # end
+  #
+  # #previous draft methods ######################################################
+  # def field_param(f, f_type, f_kind, set)
+  #   {"#{f_kind}_id" => detect_obj(set, f_kind, f_type)}
+  # end
+  #
+  # def build_tag_param(f)
+  #   v = tags.present? && tags.has_key(f.field_name) ? tags[f.field_name] : nil
+  #   {f.field_name.split(" ").join("_") => v}
+  # end
 
   ##############################################################################
   #replaced by product_params ??
-  def field_params
-    if product
-      product_params = build_options_params(product.field_params)
-      product_params = build_field_sets_params(product_params)
-      build_field_sets_options_params(product_params)
-    end
-  end
+  # def field_params
+  #   if product
+  #     product_params = build_options_params(product.field_params)
+  #     product_params = build_field_sets_params(product_params)
+  #     build_field_sets_options_params(product_params)
+  #   end
+  # end
+  #
+  # def build_options_params(product_params)
+  #   product_params["options"].keys.each do |k|
+  #     f = dyno_find_by_kind("options", k)
+  #     product_params["options"][k] = f.try(:id)
+  #   end
+  #   product_params
+  # end
+  #
+  # def build_field_sets_params(product_params)
+  #   product_params["field_sets"].select{|k,v| k != "options"}.keys.each do |k|
+  #     #"field_sets"=>{"dimension_id"=>9678, "mounting_id"=>nil, "numbering_id"=>nil}
+  #     f = dyno_find_by_kind("field_sets", k)
+  #     product_params["field_sets"][k] = f.try(:id)
+  #     #if f then f.targets;
+  #     #if target.type == 'SelectMenu' then add new hash? material, mounting, numbering
+  #     #add nested tags hash inside above?
+  #   end
+  #   product_params
+  # end
+  #
+  # def build_field_sets_options_params(product_params, tags_hsh={"tags" => nil})
+  #   product_params["field_sets"]["options"].keys.each do |k|
+  #     f = dyno_find_by_kind("options", k)
+  #     product_params["field_sets"]["options"][k] = f.try(:id)
+  #
+  #     if fs_fields = build_field_sets_fields_params(f)
+  #       build_tag_params(fs_fields, tags_hsh)
+  #     end
+  #
+  #   end
+  #   product_params
+  # end
+  #
+  # def build_tag_params(fs_fields, tags_hsh)
+  #   fs_fields.each do |f|
+  #     tags_hsh["tags"][f.kind].merge(h={f.name => tags[f.name]})
+  #   end
+  #   tags_hsh
+  # end
+  #
+  # def build_field_sets_fields_params(f)
+  #   if f && f.targets.any?
+  #     f.targets.select{|ff| tag_fields.include?(ff.type)}
+  #   end
+  # end
+  #
+  # def dyno_find_by_kind(assoc, k)
+  #   public_send(assoc).find_by(kind: un_id(k))
+  # end
+  #
+  # def un_id(k)
+  #   k.sub('_id','')
+  # end
 
-  def build_options_params(product_params)
-    product_params["options"].keys.each do |k|
-      f = dyno_find_by_kind("options", k)
-      product_params["options"][k] = f.try(:id)
-    end
-    product_params
-  end
-
-  def build_field_sets_params(product_params)
-    product_params["field_sets"].select{|k,v| k != "options"}.keys.each do |k|
-      #"field_sets"=>{"dimension_id"=>9678, "mounting_id"=>nil, "numbering_id"=>nil}
-      f = dyno_find_by_kind("field_sets", k)
-      product_params["field_sets"][k] = f.try(:id)
-      #if f then f.targets;
-      #if target.type == 'SelectMenu' then add new hash? material, mounting, numbering
-      #add nested tags hash inside above?
-    end
-    product_params
-  end
-
-  def build_field_sets_options_params(product_params, tags_hsh={"tags" => nil})
-    product_params["field_sets"]["options"].keys.each do |k|
-      f = dyno_find_by_kind("options", k)
-      product_params["field_sets"]["options"][k] = f.try(:id)
-
-      if fs_fields = build_field_sets_fields_params(f)
-        build_tag_params(fs_fields, tags_hsh)
-      end
-
-    end
-    product_params
-  end
-
-  def build_tag_params(fs_fields, tags_hsh)
-    fs_fields.each do |f|
-      tags_hsh["tags"][f.kind].merge(h={f.name => tags[f.name]})
-    end
-    tags_hsh
-  end
-
-  def build_field_sets_fields_params(f)
-    if f && f.targets.any?
-      f.targets.select{|ff| tag_fields.include?(ff.type)}
-    end
-  end
-
-  def dyno_find_by_kind(assoc, k)
-    public_send(assoc).find_by(kind: un_id(k))
-  end
-
-  def un_id(k)
-    k.sub('_id','')
-  end
-
-  def tag_fields
-    ['NumberField', 'TextField', 'TextAreaField']
-  end
-
-
-
-  #kill??
-  def product_id
-    product.id if product
-  end
-
-  #kill??
-  def artist_id
-    artist.id if artist
-  end
-  #kill??
-  def field_param_key(f)
-    [field.kind, field.type.underscore].join('_')
-  end
-
-end
+  # def tag_fields
+  #   ['NumberField', 'TextField', 'TextAreaField']
+  # end
+  #
+  # #kill??
+  # def product_id
+  #   product.id if product
+  # end
+  #
+  # #kill??
+  # def artist_id
+  #   artist.id if artist
+  # end
+  # #kill??
+  # def field_param_key(f)
+  #   [field.kind, field.type.underscore].join('_')
+  # end
 
 # def field_target_params(h={})
 #   field_targets.each do |field|

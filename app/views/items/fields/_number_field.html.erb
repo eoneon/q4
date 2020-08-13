@@ -1,7 +1,7 @@
 <div class="col-3">
   <div class="input-group input-group-sm mb-3">
     <%= f.fields_for :tags do |ff| %>
-      <%= ff.number_field f_hsh[:method], placeholder: f_hsh[:label], class: "form-control" %>
+      <%= ff.number_field f_hsh[:method], value: f_hsh[:selected],  placeholder: f_hsh[:label], class: "form-control" %>
     <% end %>
   </div>
 </div>

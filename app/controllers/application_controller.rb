@@ -12,10 +12,6 @@ class ApplicationController < ActionController::Base
     to_class(product_type).tags_search(h = {tag_params: search_params, default_set: :product_group}.compact)
   end
 
-  # def product_args
-  #   h = {tag_params: search_params, default_set: :product_group}.compact
-  # end
-
   #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
   #case 2: nil
   def search_params
@@ -96,6 +92,7 @@ class ApplicationController < ActionController::Base
     [tag_value[0..-2], tag_value[-1]].join(' ')
   end
 
+  # update_product #############################################################
   def update_assocs(origin, target, params_target_type, params_target_id)
     if skip_update_assocs(origin, target, params_target_type, params_target_id)
       a, b = origin, target
@@ -129,6 +126,119 @@ class ApplicationController < ActionController::Base
     a, b = origin, target
   end
 
+  # update_product_fields ####################################################
+  def update_fields
+    i_params = @item.product_group['params']
+    f_params = {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
+    i_params.keys.each do |f_type|
+      if f_type == 'field_sets'
+        update_field_sets(i_params[f_type], f_params[f_type])
+      elsif f_type == 'options'
+        update_options(i_params[f_type], f_params[f_type])
+      end
+    end
+  end
+
+  # refactored methods to accomodate setting default product values
+  def field_params
+    {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
+  end
+
+  #################################################################
+  
+  def update_field_sets(fs, params_fs)
+    fs.each do |kind_key, kind_hsh|
+      update_kind_hsh(kind_hsh, params_fs[kind_key])
+    end
+  end
+
+  def update_kind_hsh(kind_hsh, params_kind_hsh)
+    kind_hsh.each do |k,v|
+      if k.split('_').last == 'id'
+        update_fk(v.try(:id), params_kind_hsh[k], params_kind_hsh)
+      elsif k == 'options'
+        update_options(kind_hsh[k], params_kind_hsh[k])
+      elsif k == 'tags'
+        update_tags(kind_hsh[k], params_kind_hsh[k])
+      end
+    end
+  end
+
+  def update_options(opts, params_opts)
+    opts.each do |opts_key, opt|
+      update_fk(opt.try(:id), params_opts[opts_key])
+    end
+  end
+
+  def update_tags(tags, param_tags)
+    tags.each do |tag_key, tag|
+      param_tag = param_tags[tag_key]
+      assign_or_merge(tag_key, param_tag) unless (tag.blank? && param_tag.blank?) || (tag == param_tag)
+    end
+  end
+
+  def assign_or_merge(tag_key, param_tag)
+    if @item.tags
+      @item.tags[tag_key] = param_tag
+    else
+      @item.tags = {tag_key => param_tag}
+    end
+  end
+
+  # CRUD methods for update_fields
+  #def update_fk(id, param_id)
+  def update_fk(id, param_id, f_param={})
+    return if skip_field_update(id, param_id)
+    if id.present? && param_id.blank?
+      #remove_field(id)
+      remove_field(id, f_param)
+    elsif id.present? && (id != param_id.to_i)
+      #replace_field(id, param_id)
+      replace_field(id, param_id, f_param)
+    elsif id.blank? && param_id.present?
+      #add_field(param_id)
+      add_field(param_id, f_param)
+    end
+  end
+
+  def cascade_remove(f_params)
+    f_params.each do |k, v|
+      if k.split('_').last == 'id'
+        f_params[k] = ""
+      elsif k == 'options' || k == 'tags'
+        f_params[k].each {|key, v| f_params[k][key] = ""}
+      end
+    end
+    puts "test! #{f_params}"
+    f_params
+  end
+
+  def skip_field_update(id, param_id)
+    (id.blank? && param_id.blank?) || (id == param_id.to_i)
+  end
+
+  def remove_field(id, f_params)
+  #def remove_field(id)
+    @item.item_groups.where(target_id: id).first.destroy
+    cascade_remove(f_params) if !f_params.empty?
+  end
+
+  def replace_field(id, param_id, f_params)
+  #def replace_field(id, param_id)
+    remove_field(id, f_params)
+    #remove_field(id)
+    #add_field(param_id)
+    add_field(param_id, f_params)
+  end
+
+  #def add_field(param_id)
+  def add_field(param_id, f_params)
+    target = FieldItem.find(param_id)
+    target = to_class(target.type).find(param_id)
+    @item.assoc_unless_included(target)
+    cascade_remove(f_params) if !f_params.empty?
+  end
+
   #update product field selections #############################################
   def set_default_values_for_product
     product.field_targets.each do |f|
@@ -158,8 +268,7 @@ class ApplicationController < ActionController::Base
     #@item.field_targets.destroy_all
   end
 
-  ##############################################################################
-
+  #utility methods #############################################################
   def to_class(type)
     type.classify.constantize
   end
@@ -172,90 +281,12 @@ class ApplicationController < ActionController::Base
     %w[medium_category medium material]
   end
 
-  #refactored update_fields ####################################################
-  def update_fields
-    i_params = @item.product_group['params']
-    f_params = {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
-    #puts "i_params: #{i_params}"
-    i_params.keys.each do |f_type|
-      if f_type == 'field_sets'
-        update_field_sets(i_params[f_type], f_params[f_type])
-      elsif f_type == 'options'
-        update_options(i_params[f_type], f_params[f_type])
-      end
-    end
-  end
+end
 
-  def update_field_sets(fs, params_fs)
-    #puts "params_fs: #{params_fs}"
-    fs.each do |kind_key, kind_hsh|
-      update_kind_hsh(kind_hsh, params_fs[kind_key])
-    end
-  end
+# def update_fk(id, param_id)
+#   update_field_assoc(id, param_id)
+# end
 
-  def update_options(opts, params_opts)
-    opts.each do |opts_key, opt|
-      update_fk(opt.try(:id), params_opts[opts_key])
-    end
-  end
-
-  def update_tags(tags, param_tags)
-    tags.each do |tag_key, tag|
-      param_tag = param_tags[tag_key]
-      @item.tags[tag_key] = param_tag unless (tag.blank? && param_tag.blank?) || (tag == param_tag)
-    end
-  end
-
-  def update_kind_hsh(kind_hsh, params_kind_hsh)
-    puts "params_kind_hsh: #{params_kind_hsh}"
-    kind_hsh.each do |k,v|
-      if k.split('_').last == 'id'
-        update_fk(v.try(:id), params_kind_hsh[k])
-      elsif k == 'options'
-        update_options(kind_hsh[k], params_kind_hsh[k])
-      elsif k == 'tags'
-        update_tags(kind_hsh[k], params_kind_hsh[k])
-      end
-    end
-  end
-
-  def update_fk(id, param_id)
-    update_field_assoc(id, param_id)
-  end
-
-  def update_field_assoc(id, param_id)
-    return if skip_field_update(id, param_id)
-    if id.present? && param_id.blank?
-      #puts "remove_field: #{id}"
-      remove_field(id)
-    elsif id.present? && (id != param_id.to_i)
-      puts "replace_field => param_id: #{param_id}, id: #{id}"
-      replace_field(id, param_id)
-    elsif id.blank? && param_id.present?
-      #puts "add_field: #{param_id}"
-      add_field(param_id)
-    end
-  end
-
-  def skip_field_update(id, param_id)
-    #puts "skip_field_update => param_id: #{param_id}, id: #{id}"
-    (id.blank? && param_id.blank?) || (id == param_id.to_i)
-  end
-
-  def remove_field(id)
-    @item.item_groups.where(target_id: id).first.destroy
-  end
-
-  def replace_field(id, param_id)
-    remove_field(id)
-    add_field(param_id)
-  end
-
-  def add_field(param_id)
-    target = FieldItem.find(param_id)
-    target = to_class(target.type).find(param_id)
-    @item.assoc_unless_included(target)
-  end
   #depricated update_fields more recent ver ####################################
   # def update_fields
   #   i_params = @item.product_group['params']
@@ -376,34 +407,33 @@ class ApplicationController < ActionController::Base
   #   h={"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
   # end
 
-  def field_params
-    h={"options" => opts_hsh, "field_sets" => fs_hsh}
-  end
-
-  def fs_hsh
-    a, b, c = params[:item][:field_sets][:field_sets], params[:item][:field_sets].select{|k,v| k != 'options' && k != 'field_sets'}, []
-    [a, b].each do |hsh|
-      hsh.keys.each do |k|
-        c << [k, hsh[k]]
-      end
-    end
-    c.to_h.merge!(h={'options' => fs_opts_hsh})
-    c.to_h.merge!(h={'tags' => fs_tags})
-  end
-
-  def fs_opts_hsh
-    params[:item][:field_sets][:options].keys.map{|k| [k, params[:item][:field_sets][:options][k]]}.to_h
-  end
-
-  def fs_tags
-    params[:item][:field_sets][:field_sets][:tags].keys.map{|k| [k, params[:item][:field_sets][:field_sets][:tags][k]]}.to_h
-  end
-
-  def opts_hsh
-    params[:item][:options].keys.map{|k| [k, params[:item][:options][k]]}.to_h
-  end
+  # def field_params
+  #   h={"options" => opts_hsh, "field_sets" => fs_hsh}
+  # end
+  #
+  # def fs_hsh
+  #   a, b, c = params[:item][:field_sets][:field_sets], params[:item][:field_sets].select{|k,v| k != 'options' && k != 'field_sets'}, []
+  #   [a, b].each do |hsh|
+  #     hsh.keys.each do |k|
+  #       c << [k, hsh[k]]
+  #     end
+  #   end
+  #   c.to_h.merge!(h={'options' => fs_opts_hsh})
+  #   c.to_h.merge!(h={'tags' => fs_tags})
+  # end
+  #
+  # def fs_opts_hsh
+  #   params[:item][:field_sets][:options].keys.map{|k| [k, params[:item][:field_sets][:options][k]]}.to_h
+  # end
+  #
+  # def fs_tags
+  #   params[:item][:field_sets][:field_sets][:tags].keys.map{|k| [k, params[:item][:field_sets][:field_sets][:tags][k]]}.to_h
+  # end
+  #
+  # def opts_hsh
+  #   params[:item][:options].keys.map{|k| [k, params[:item][:options][k]]}.to_h
+  # end
   ##############################################################################
-end
 
 # def update_product
 #   #@product = @item.product
