@@ -127,9 +127,33 @@ class ApplicationController < ActionController::Base
   end
 
   # update_product_fields ####################################################
-  def update_fields
-    i_params = @item.product_group['params']
-    f_params = {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
+
+
+  #################################################################
+  # def update_fields
+  #   i_params = @item.product_group['params']
+  #   #f_params = {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
+  #   f_params = field_params
+  #   i_params.keys.each do |f_type|
+  #     if f_type == 'field_sets'
+  #       update_field_sets(i_params[f_type], f_params[f_type])
+  #     elsif f_type == 'options'
+  #       update_options(i_params[f_type], f_params[f_type])
+  #     end
+  #   end
+  # end
+
+  # refactored methods to accomodate setting default product values
+  def update_product
+    product_group = @item.product_group
+    if f_params = field_params
+      update_fields(product_group['params'], f_params)
+    else
+      update_default_fields(product_group['inputs'])
+    end
+  end
+
+  def update_fields(i_params, f_params)
     i_params.keys.each do |f_type|
       if f_type == 'field_sets'
         update_field_sets(i_params[f_type], f_params[f_type])
@@ -139,13 +163,101 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # refactored methods to accomodate setting default product values
-  def field_params
-    {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]}
+  def update_default_fields(inputs)
+    inputs.keys.each do |f_type|
+      if f_type == 'field_sets'
+        update_default_field_sets_hsh(inputs['field_sets'])
+        # inputs['field_sets'].each do |kind, f_set|
+        #   f_set.each do |f_hsh|
+        #
+        #     if f_hsh[:render_as] == 'select_menu'
+        #       add_field(f_hsh[:collection][0].id, {})
+        #       add_default(f_hsh[:collection][0].type, f_hsh[:collection][0]) if f_hsh[:collection][0].type == "FieldSet"
+        #     end
+        #   end
+        # end
+
+      elsif f_type == 'options'
+        update_default_options_hsh(inputs['options'])
+      end
+    end
   end
 
-  #################################################################
-  
+  def update_default_options_hsh(options_hsh)
+    options_hsh.each do |f_hsh|
+      add_field(f_hsh[:collection][0].id, {})
+    end
+  end
+
+  def update_default_field_sets_hsh(field_sets_hsh)
+    field_sets_hsh.each do |kind, f_set|
+      f_set.each do |f_hsh|
+        if f_hsh[:render_as] == 'select_menu'
+          target = f_hsh[:collection][0]
+          add_field(target.id, {})
+          add_nested_defaults(target)
+        end
+      end
+    end
+  end
+
+  def add_nested_defaults(origin)
+    if origin.type == "FieldSet"
+      add_default_field_set_targets(origin.targets)
+    elsif origin.type == "SelectField"
+      add_field(origin.id, {}) #<Option>
+      add_field(origin.targets[0].id, {}) #<Option>
+    elsif origin.type == "SelectMenu"
+      add_field(origin.id, {}) #<SelectMenu>
+      if origin.targets[0].type == 'FieldSet'
+        add_field(origin.targets[0].id, {}) #<FieldSet>
+        add_default_field_set_targets(origin.targets[0].targets)
+      elsif origin.targets[0].type == "SelectField"
+        add_field(origin.targets[0].id, {}) #<SelectField>
+        add_field(origin.targets[0].targets[0].id, {}) #<Option>
+      end
+    end
+  end
+
+  def add_default_field_set_targets(targets)
+    targets.each do |target|
+      add_nested_defaults(target)
+    end
+  end
+
+  def add_default(type, target)
+    if type == "SelectField"
+      add_field(target.id, {})
+      add_field(target.targets[0].id, {})
+    elsif type == "SelectMenu"
+      add_field(target.id, {})
+      default_field_set(target.targets[0].targets) if target.targets[0].type == "FieldSet"
+    elsif type == "FieldSet"
+      default_field_set(target.targets)
+    end
+  end
+
+  def default_field_set(targets)
+    targets.each do |target|
+      add_default(target.type, target)
+    end
+  end
+
+  def field_params
+    {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]} unless [:options, :field_sets].detect {|k| !params[:item].has_key?(k)}
+  end
+
+  def remove_product_fields
+    if params[:hidden][:product_id].blank?
+      field_targets = @item.field_targets
+      return if field_targets.empty?
+      field_targets.each do |target|
+        @item.item_groups.where(target_id: target.id, target_type: target.type).first.destroy
+      end
+    end
+  end
+
+  ############################
   def update_field_sets(fs, params_fs)
     fs.each do |kind_key, kind_hsh|
       update_kind_hsh(kind_hsh, params_fs[kind_key])
@@ -209,7 +321,6 @@ class ApplicationController < ActionController::Base
         f_params[k].each {|key, v| f_params[k][key] = ""}
       end
     end
-    puts "test! #{f_params}"
     f_params
   end
 
@@ -237,36 +348,37 @@ class ApplicationController < ActionController::Base
     target = to_class(target.type).find(param_id)
     @item.assoc_unless_included(target)
     cascade_remove(f_params) if !f_params.empty?
+    #!f_params.empty? ? cascade_remove(f_params) : target
   end
 
   #update product field selections #############################################
-  def set_default_values_for_product
-    product.field_targets.each do |f|
-      default_values_for_product(f)
-    end
-  end
-
-  def default_values_for_product(f)
-    if f.type == 'SelectField'
-      default_value_for_select_field(f)
-    elsif f.type == 'SelectMenu'
-      default_value_for_select_menu(f)
-    elsif f.type == 'FieldSet'
-      f.targets.map{|ff| default_values_for_product(ff)}
-    end
-  end
-
-  def default_value_for_select_field(f)
-    @item.options << f.options.first
-  end
-
-  def default_value_for_select_menu(f)
-    @item.field_sets << f.field_sets.first
-  end
-
-  def remove_field_targets
-    #@item.field_targets.destroy_all
-  end
+  # def set_default_values_for_product
+  #   product.field_targets.each do |f|
+  #     default_values_for_product(f)
+  #   end
+  # end
+  #
+  # def default_values_for_product(f)
+  #   if f.type == 'SelectField'
+  #     default_value_for_select_field(f)
+  #   elsif f.type == 'SelectMenu'
+  #     default_value_for_select_menu(f)
+  #   elsif f.type == 'FieldSet'
+  #     f.targets.map{|ff| default_values_for_product(ff)}
+  #   end
+  # end
+  #
+  # def default_value_for_select_field(f)
+  #   @item.options << f.options.first
+  # end
+  #
+  # def default_value_for_select_menu(f)
+  #   @item.field_sets << f.field_sets.first
+  # end
+  #
+  # def remove_field_targets
+  #   #@item.field_targets.destroy_all
+  # end
 
   #utility methods #############################################################
   def to_class(type)
