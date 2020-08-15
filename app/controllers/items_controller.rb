@@ -23,16 +23,16 @@ class ItemsController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
-
+    #puts "test!! #{@item.product.id == params[:hidden][:product_id].to_i}"
     @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
-    remove_product_fields
-    update_product #update_fields
+    #remove_product_fields
+    puts "#{@context}"
+    update_product
     @item, @artist = update_assocs(@item, @item.artist, 'Artist', params[:hidden][:artist_id])
 
     @products = products
     @input_group = search_input_group
 
-    #puts "#{field_params}"
     @item.save
 
     respond_to do |format|
@@ -80,37 +80,26 @@ class ItemsController < ApplicationController
     Item.find(params[:hidden][:search][:item_id]) if params[:hidden][:search][:item_id]
   end
 
-  # def update_product
-  #   #@product = @item.product
-  #   @artist = @item.artist
-  #   #set_product
-  #   @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
-  #   set_artist
-  #   @products = products
-  #   @input_group = search_input_group
-  #   puts "@product: #{@product.try(:id)}"
+end
+
+  # def set_artist
+  #   if @artist.present? && params[:hidden][:artist_id].blank?
+  #     destroy_assoc(@artist.id)
+  #     @artist = nil
+  #   elsif @artist.present? && (params[:hidden][:artist_id] != @artist.id)
+  #     #puts "#{@artist.present? == (params[:hidden][:artist_id] != @artist.id)}"
+  #     destroy_assoc(@artist.id)
+  #     @artist = Artist.find(params[:hidden][:artist_id])
+  #     @item.artists << @artist unless @item.artists.include?(@artist)
+  #   elsif @artist.blank? && params[:hidden][:artist_id].present?
+  #     @artist = Artist.find(params[:hidden][:artist_id])
+  #     @item.artists << @artist
+  #   end
   # end
 
-  def set_artist
-    if @artist.present? && params[:hidden][:artist_id].blank?
-      destroy_assoc(@artist.id)
-      @artist = nil
-    elsif @artist.present? && (params[:hidden][:artist_id] != @artist.id)
-      #puts "#{@artist.present? == (params[:hidden][:artist_id] != @artist.id)}"
-      destroy_assoc(@artist.id)
-      @artist = Artist.find(params[:hidden][:artist_id])
-      @item.artists << @artist unless @item.artists.include?(@artist)
-    elsif @artist.blank? && params[:hidden][:artist_id].present?
-      @artist = Artist.find(params[:hidden][:artist_id])
-      @item.artists << @artist
-    end
-  end
-
-  def destroy_assoc(assoc_id)
-    @item.item_groups.where(target_id: assoc_id).first.destroy
-  end
-
-end
+  # def destroy_assoc(assoc_id)
+  #   @item.item_groups.where(target_id: assoc_id).first.destroy
+  # end
 
 # def set_product
 #   if @product.present? && params[:hidden][:product_id].blank?
