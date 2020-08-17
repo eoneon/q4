@@ -119,24 +119,12 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # def update_assocs(origin, target, params_target_type, params_target_id)
-  #   if skip_update_assocs(origin, target, params_target_type, params_target_id)
-  #     a, b = origin, target
-  #   elsif target.present? && params_target_id.blank?
-  #     remove_assoc(origin, target)
-  #   elsif target.present? && (params_target_id.to_i != target.id)
-  #     replace_assoc(origin, target, params_target_type, params_target_id.to_i)
-  #   elsif target.blank? && params_target_id.present?
-  #     add_assoc(origin, target, params_target_type, params_target_id)
-  #   end
+  # def skip_update_assocs(origin, target, params_target_type, params_target_id)
+  #   (params_target_id.blank? && target.blank?) || (params_target_id.to_i == target.try(:id))
   # end
 
-  def skip_update_assocs(origin, target, params_target_type, params_target_id)
-    (params_target_id.blank? && target.blank?) || (params_target_id.to_i == target.try(:id))
-  end
-
   def remove_assoc(origin, target)
-    remove_item_fields if target.base_type == 'Product'
+    remove_item_fields if target.try(:type) && target.base_type == 'Product'
     origin.item_groups.where(target_id: target.id).first.destroy
     target = nil
     a, b = origin, target
@@ -150,22 +138,13 @@ class ApplicationController < ActionController::Base
   def add_assoc(origin, target, params_target_type, params_target_id)
     target = to_class(params_target_type).find(params_target_id)
     origin.assoc_unless_included(target)
-    update_default_fields(@item.product_group['inputs']) if target.base_type == 'Product'
+    update_default_fields(@item.product_group['inputs']) if target.try(:type) && target.base_type == 'Product'
     a, b = origin, target
   end
 
   # update_product_fields ####################################################
-  # def update_product
-  #   product_group = @item.product_group
-  #   if f_params = field_params
-  #     update_fields(product_group['params'], f_params)
-  #   else
-  #     update_default_fields(product_group['inputs'])
-  #   end
-  # end
-
   def update_product
-    return if [:add, :remove, :replace, nil].include?(@context) #|| !field_params
+    return if [:add, :remove, :replace, nil].include?(@context)
     update_fields(@item.product_group['params'], field_params)
   end
 
@@ -211,7 +190,7 @@ class ApplicationController < ActionController::Base
     if origin.type == "FieldSet"
       add_default_field_set_targets(origin.targets)
     elsif origin.type == "SelectField"
-      add_field(origin.id, {}) #<Option>
+      add_field(origin.id, {}) #<SelectField>
       add_field(origin.targets[0].id, {}) #<Option>
     elsif origin.type == "SelectMenu"
       add_field(origin.id, {}) #<SelectMenu>
@@ -234,19 +213,10 @@ class ApplicationController < ActionController::Base
   def field_params
     {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]} unless [:options, :field_sets].detect {|k| !params[:item].has_key?(k)}
   end
-  #kill
-  def remove_product_fields
-    if params[:hidden][:product_id].blank?
-      field_targets = @item.field_targets
-      return if field_targets.empty?
-      field_targets.each do |target|
-        @item.item_groups.where(target_id: target.id, target_type: target.type).first.destroy
-      end
-    end
-  end
 
   def remove_item_fields
     return if @item.field_targets.empty?
+    @item.tags = nil if @item.tags
     @item.field_targets.each do |target|
       @item.item_groups.where(target_id: target.id, target_type: target.type).first.destroy
     end

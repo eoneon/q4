@@ -7,25 +7,25 @@ class Certificate
 
   class Standard < Certificate
     def self.builder
-      select_field(field_name, field_kind, Option.builder(['COA', 'LOA']), search_hsh)
+      select_field(field_name, field_kind, Option.builder(['LOA', 'COA']), search_hsh)
     end
   end
 
   class PeterMax < Certificate
     def self.builder
-      select_field(field_name, field_kind, Option.builder(['COA', 'LOA', 'COA from Peter Max Studios']), search_hsh)
+      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'COA from Peter Max Studios']), search_hsh)
     end
   end
 
   class PsaDna < Certificate
     def self.builder
-      select_field(field_name, field_kind, Option.builder(['COA', 'LOA', 'PSA/DNA']), search_hsh)
+      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'PSA/DNA']), search_hsh)
     end
   end
 
   class Britto < Certificate
     def self.builder
-      select_field(field_name, field_kind, Option.builder(['COA', 'LOA', 'stamped inverso']), search_hsh)
+      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'stamped inverso']), search_hsh)
     end
   end
 
@@ -49,7 +49,7 @@ class Certificate
 
     class AnimationCertificate < Animation
       def self.builder
-        select_field(field_class_name, field_kind, Option.builder(['COA', 'LOA', 'COA from Linda Jones Enterprises']), search_hsh)
+        select_field(field_class_name, field_kind, Option.builder(['LOA', 'COA', 'COA from Linda Jones Enterprises']), search_hsh)
       end
     end
 

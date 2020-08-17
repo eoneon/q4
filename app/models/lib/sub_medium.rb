@@ -25,14 +25,14 @@ class SubMedium
       end
     end #end of SFO::Embellishment
 
-    class LeafingMedia < SFO
-      class GoldLeaf < LeafingMedia
+    class Leafing < SFO
+      class GoldLeaf < Leafing
         def self.options
           Option.builder(['goldleaf', 'hand laid goldleaf'], tags[:kind], tags)
         end
       end
 
-      class SilverLeaf < LeafingMedia
+      class SilverLeaf < Leafing
         def self.options
           Option.builder(['silverleaf', 'hand laid silverleaf'], tags[:kind], tags)
         end

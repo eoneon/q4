@@ -412,7 +412,7 @@ class Medium
           end
 
           def self.option_sets
-            FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: SubMedium::SFO::Remarque)
+            FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
           end
         end
 
@@ -422,7 +422,7 @@ class Medium
           end
 
           def self.option_sets
-            FieldSetOption.builder(media_set: media_set, material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic], prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: SubMedium::SFO::Remarque)
+            FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
           end
         end
 
@@ -447,7 +447,7 @@ class Medium
       end
 
       def self.option_sets
-        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper)
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: SubMedium::SMO::Leafing)
       end
     end
 
@@ -467,7 +467,7 @@ class Medium
       end
 
       def self.option_sets
-        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: SubMedium::SFO::Remarque)
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
       end
     end
 
@@ -486,7 +486,7 @@ class Medium
     #junk drawer class
     class MixedPrintOnPaper < FSO
       def self.option_sets
-        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: SubMedium::SFO::Remarque)
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
       end
 
       def self.set
@@ -511,7 +511,7 @@ class Medium
       end
 
       def self.option_sets
-        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: SubMedium::SFO::Remarque)
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
       end
     end
 
@@ -533,7 +533,7 @@ class Medium
       end
 
       def self.option_sets
-        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled], append_set: SubMedium::SFO::Remarque)
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled], append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
       end
     end
 

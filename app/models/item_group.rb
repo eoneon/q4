@@ -19,7 +19,7 @@ class ItemGroup < ApplicationRecord
   end
 
   def origin_item_groups
-    origin.item_groups
+    origin.item_groups.where.not(target_type: 'Artist')
   end
 
   def max_sort

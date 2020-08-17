@@ -10,10 +10,10 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  attribute :standard_product
-  attribute :product
-  attribute :options
-  attribute :select_menus
+  # attribute :standard_product
+  # attribute :product
+  # attribute :options
+  # attribute :select_menus
 
 
   def field_targets
