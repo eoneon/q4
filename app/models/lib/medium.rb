@@ -318,13 +318,16 @@ class Medium
       class OriginalPainting < ProductGroup
         class OriginalPaintingStandard < OriginalPainting
           def self.option_sets
-            FieldSetOption.builder(media_set: SFO::PaintingMedia::StandardPainting, material_set: Material::StandardMaterial.options, prepend_set: Category::OriginalMedia::Original)
+            #media_materials_sets = FieldSetOption.builder(media_set: SFO::PaintingMedia::StandardPainting, material_set: Material::StandardMaterial.options, prepend_set: Category::OriginalMedia::Original)
+            media_materials_sets = FieldSetOption.builder(media_set: SFO::PaintingMedia::StandardPainting, material_set: Material::StandardMaterial.options)
+            media_materials_sets.map{|option_set| option_set_build(options: option_set, prepend_set: Category::OriginalMedia::Original, append_set: [Signature::Standard, Certificate::Standard])}
           end
         end
 
         class OriginalPaintingPaperOnly < OriginalPainting
           def self.option_sets
-            FieldSetOption.builder(media_set: SFO::PaintingMedia::PaintingPaperOnly, material_set: Material::Paper, prepend_set: Category::OriginalMedia::Original)
+            media_materials_sets = FieldSetOption.builder(media_set: SFO::PaintingMedia::PaintingPaperOnly, material_set: Material::Paper)
+            media_materials_sets.map{|option_set| option_set_build(options: option_set, prepend_set: Category::OriginalMedia::Original, append_set: [Signature::Standard, Certificate::Standard])}
           end
         end
       end
@@ -332,13 +335,15 @@ class Medium
       class OriginalDrawing < ProductGroup
         class DrawingStandard < OriginalDrawing
           def self.option_sets
-            FieldSetOption.builder(media_set: SFO::DrawingMedia::StandardDrawing, material_set: Material::Paper, prepend_set: Category::OriginalMedia::Original)
+            media_materials_sets = FieldSetOption.builder(media_set: SFO::DrawingMedia::StandardDrawing, material_set: Material::Paper)
+            media_materials_sets.map{|option_set| option_set_build(options: option_set, prepend_set: Category::OriginalMedia::Original, append_set: [Signature::Standard, Certificate::Standard])}
           end
         end
 
         class OriginalMixedMediaDrawing < OriginalDrawing
           def self.option_sets
-            FieldSetOption.builder(media_set: SFO::DrawingMedia::MixedMediaDrawing, material_set: Material::Paper, prepend_set: Category::OriginalMedia::Original, append_set: SubMedium::SMO::Leafing)
+            media_materials_sets = FieldSetOption.builder(media_set: SFO::DrawingMedia::MixedMediaDrawing, material_set: Material::Paper)
+            media_materials_sets.map{|option_set| option_set_build(options: option_set, prepend_set: Category::OriginalMedia::Original, append_set: [SubMedium::SMO::Leafing, Signature::Standard, Certificate::Standard])}
           end
         end
       end
@@ -348,7 +353,8 @@ class Medium
           set=[]
           [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedMediaOnCanvas,  MixedMediaOnPaper, MixedMediaPrintOnPaper, MixedPrintOnPaperOnly].each do |option_group|
             option_group.option_sets.each do |option_set|
-              set << prepend_build(option_set, Category::OriginalMedia::OneOfAKind)
+              set << option_set_build(options: option_set, prepend_set: Category::OriginalMedia::OneOfAKind, append_set: [Signature::Standard, Certificate::Standard])
+              #set << prepend_build(option_set, Category::OriginalMedia::OneOfAKind)
             end
           end
           set
@@ -356,16 +362,18 @@ class Medium
       end
 
       class LimitedEditionPrint < ProductGroup
-        def self.media_set
-          media_group.map{|klass| klass.option_sets}.flatten(1)
-        end
-
         def self.media_group
           [MixedPrintOnPaperOnly, MixedPrintOnPaper, MixedPrintOnCanvas, MixedPrintOnStandardMaterial, HandPulledPrintOnPaper, HandPulledPrintOnCanvas, PhotoPrint, SericelPrint]
         end
 
         def self.option_sets
-          media_set.map {|option_set| option_set_build(options: option_set, append_set: Numbering, insert_set: [[ltd_idx(option_set), Category::LimitedEdition]])}
+          set=[]
+          media_group.each do |option_group|
+            option_group.option_sets.each do |option_set|
+              set << option_set_build(options: option_set, insert_set: [[ltd_idx(option_set), Category::LimitedEdition]], append_set: [Numbering, Signature::Standard, Certificate::Standard])
+            end
+          end
+          set
         end
       end
 
@@ -374,7 +382,8 @@ class Medium
           set=[]
           [HandPulledPrintOnCanvas, HandPulledPrintOnPaper, MixedPrintOnPaperOnly].each do |option_group|
             option_group.option_sets.each do |option_set|
-              set << option_set_build(options: option_set, append_set: Numbering, insert_set: [[ltd_idx(option_set), Category::UniqueVariation]])
+              set << option_set_build(options: option_set, insert_set: [[ltd_idx(option_set), Category::UniqueVariation]], append_set: [Numbering, Signature::Standard, Certificate::Standard])
+              #set << option_set_build(options: option_set, append_set: Numbering, insert_set: [[ltd_idx(option_set), Category::UniqueVariation]])
             end
           end
           set
@@ -396,12 +405,16 @@ class Medium
       end
 
       class StandardPrint < ProductGroup
-        def self.media_set
+        def self.media_group
           LimitedEditionPrint.media_group + BasicPrintMedia.subclasses
         end
 
         def self.option_sets
-          media_set.map{|klass| klass.option_sets}.flatten(1)
+          set=[]
+          media_group.map{|klass| klass.option_sets}.flatten(1).each do |option_set|
+            set << option_set_build(options: option_set, append_set: [Signature::Standard, Certificate::Standard])
+          end
+          set
         end
       end
 
@@ -412,7 +425,7 @@ class Medium
           end
 
           def self.option_sets
-            FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
+            FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: [SubMedium::SFO::Remarque])
           end
         end
 
@@ -447,7 +460,7 @@ class Medium
       end
 
       def self.option_sets
-        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: SubMedium::SMO::Leafing)
+        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
       end
     end
 
@@ -533,7 +546,9 @@ class Medium
       end
 
       def self.option_sets
-        FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled], append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
+        #media_materials_sets = FieldSetOption.builder(media_set: media_set, material_set: Material::Paper, prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled], append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])
+        media_materials_sets = FieldSetOption.builder(media_set: media_set, material_set: Material::Paper)
+        media_materials_sets.map{|option_set| option_set_build(options: option_set, prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled], append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque])}
       end
     end
 
@@ -543,7 +558,9 @@ class Medium
       end
 
       def self.option_sets
-        FieldSetOption.builder(media_set: media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Embellished, SubMedium::RBF::HandPulled])
+        #media_materials_sets = FieldSetOption.builder(media_set: media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Embellished, SubMedium::RBF::HandPulled])
+        media_materials_sets = FieldSetOption.builder(media_set: media_set, material_set: [Material::Canvas, Material::WrappedCanvas], prepend_set: [SubMedium::SFO::Embellishment::Embellished, SubMedium::RBF::HandPulled])
+        media_materials_sets.map{|option_set| option_set_build(options: option_set, prepend_set: [SubMedium::SFO::Embellishment::Colored, SubMedium::RBF::HandPulled])}
       end
     end
 

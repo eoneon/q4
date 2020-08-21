@@ -1,55 +1,59 @@
 class Certificate
   include Context
 
+  def self.tags
+    tags_hsh(0,-1)
+  end
+
   def self.field_name
-    "#{field_class_name} COA"
+    "#{field_class_name} coa"
   end
 
   class Standard < Certificate
     def self.builder
-      select_field(field_name, field_kind, Option.builder(['LOA', 'COA']), search_hsh)
+      select_field(field_name, field_kind, Option.builder(['LOA', 'COA']), tags)
     end
   end
 
   class PeterMax < Certificate
     def self.builder
-      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'COA from Peter Max Studios']), search_hsh)
+      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'COA from Peter Max Studios']), tags)
     end
   end
 
   class PsaDna < Certificate
     def self.builder
-      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'PSA/DNA']), search_hsh)
+      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'PSA/DNA']), tags)
     end
   end
 
   class Britto < Certificate
     def self.builder
-      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'stamped inverso']), search_hsh)
+      select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'stamped inverso']), tags)
     end
   end
 
   #Certificate::Standard.builder Certificate::Animation.builder Certificate::Animation::AnimationSeal.builder
   class Animation < Certificate
     def self.builder
-      select_menu(field_name, field_kind, FieldSetOption.builder, search_hsh)
+      select_menu(field_name, field_kind, FieldSetOption.builder, tags)
     end
 
     class AnimationSeal < Animation
       def self.builder
-        select_field(field_class_name, field_kind, Option.builder(['Warner Bros.', 'Looney Tunes', 'Hanna Barbera']), search_hsh)
+        select_field(field_class_name, field_kind, Option.builder(['Warner Bros.', 'Looney Tunes', 'Hanna Barbera']), tags)
       end
     end
 
     class SportsSeal < Animation
       def self.builder
-        select_field(field_class_name, field_kind, Option.builder(['NFL', 'NBA', 'MLB', 'NHL']), search_hsh)
+        select_field(field_class_name, field_kind, Option.builder(['NFL', 'NBA', 'MLB', 'NHL']), tags)
       end
     end
 
     class AnimationCertificate < Animation
       def self.builder
-        select_field(field_class_name, field_kind, Option.builder(['LOA', 'COA', 'COA from Linda Jones Enterprises']), search_hsh)
+        select_field(field_class_name, field_kind, Option.builder(['LOA', 'COA', 'COA from Linda Jones Enterprises']), tags)
       end
     end
 
