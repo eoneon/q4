@@ -1,6 +1,8 @@
 class MediumTest
   include Context
-  
+
+  # ##################################
+
   def self.cascade_merge(klass, set, opt_hsh={})
     opt_hsh = opt_hsh.merge(klass.opt_hsh) if method_exists?(klass, :opt_hsh)
     return set.append(opt_hsh) if !klass.subclasses.any?
@@ -58,9 +60,13 @@ class MediumTest
   class FSO < MediumTest
 
     class Painting < FSO
+      def self.opt_hsh
+        {append_set: AppendSet::Standard.set}
+      end
+
       class OnPaper < Painting
         def self.opt_hsh
-          PrintMedia::OnPaper.opt_hsh
+          MaterialSet::OnPaper.opt_hsh
         end
 
         class Media < OnPaper
@@ -72,7 +78,7 @@ class MediumTest
 
       class OnCanvas < Painting
         def self.opt_hsh
-          PrintMedia::OnCanvas.opt_hsh
+          MaterialSet::OnCanvas.opt_hsh
         end
 
         class Media < OnCanvas
@@ -84,7 +90,7 @@ class MediumTest
 
       class OnStandardMaterial < Painting
         def self.opt_hsh
-          PrintMedia::OnStandardMaterial.opt_hsh
+          MaterialSet::OnStandardMaterial.opt_hsh
         end
 
         class Media < OnStandardMaterial
@@ -98,9 +104,13 @@ class MediumTest
     #################################
 
     class Drawing < FSO
+      def self.opt_hsh
+        {append_set: AppendSet::Standard.set}
+      end
+
       class OnPaper < Drawing
         def self.opt_hsh
-          PrintMedia::OnPaper.opt_hsh
+          MaterialSet::OnPaper.opt_hsh
         end
 
         class Media < OnPaper
@@ -116,12 +126,12 @@ class MediumTest
     class OneOfAKindPrintMedia < FSO
       class OnPaper < OneOfAKindPrintMedia
         def self.opt_hsh
-          PrintMedia::OnPaper.opt_hsh
+          MaterialSet::OnPaper.opt_hsh
         end
 
         class SubMedia < OnPaper
           def self.opt_hsh
-            {prepend_set: [SubMedium::SFO::Embellishment::Colored, Category::OriginalMedia::OneOfAKind], append_set: [SubMedium::SMO::Leafing]}
+            {prepend_set: [SubMedium::SFO::Embellishment::Colored, Category::OriginalMedia::OneOfAKind], append_set: AppendSet::WithSubMedia.set}
           end
 
           class Media < SubMedia
@@ -130,22 +140,16 @@ class MediumTest
             end
           end
         end
-
-        class AcrylicMixedMedia < OnPaper
-          def self.opt_hsh
-            {prepend_set: Category::OriginalMedia::OneOfAKind, media_set: [SFO::PrintMedia::MixedMedia::Basic, SFO::PrintMedia::MixedMedia::Monotype]}
-          end
-        end
       end
 
       class OnCanvas < OneOfAKindPrintMedia
         def self.opt_hsh
-          PrintMedia::OnCanvas.opt_hsh
+          MaterialSet::OnCanvas.opt_hsh
         end
 
         class SubMedia < OnCanvas
           def self.opt_hsh
-            {prepend_set: [SubMedium::SFO::Embellishment::Embellished, Category::OriginalMedia::OneOfAKind]}
+            {prepend_set: [SubMedium::SFO::Embellishment::Embellished, Category::OriginalMedia::OneOfAKind], append_set: AppendSet::Standard.set}
           end
 
           class Media < SubMedia
@@ -154,10 +158,32 @@ class MediumTest
             end
           end
         end
+      end
+    end
 
-        class AcrylicMixedMedia < OnCanvas
+    #################################
+
+    class OneOfAKindAcrylicMedia < FSO
+      class OnPaper < OneOfAKindAcrylicMedia
+        def self.opt_hsh
+          MaterialSet::OnPaper.opt_hsh
+        end
+
+        class Media < OnPaper
           def self.opt_hsh
-            OnPaper::AcrylicMixedMedia.opt_hsh
+            {prepend_set: Category::OriginalMedia::OneOfAKind, media_set: SFO::PrintMedia::MixedMedia::AcrylicMixedMedia}
+          end
+        end
+      end
+
+      class OnCanvas < OneOfAKindAcrylicMedia
+        def self.opt_hsh
+          MaterialSet::OnCanvas.opt_hsh
+        end
+
+        class Media < OnCanvas
+          def self.opt_hsh
+            OnPaper::Media.opt_hsh
           end
         end
       end
@@ -166,9 +192,27 @@ class MediumTest
     #################################
 
     class OneOfAKindHandPulledPrintMedia < FSO
+      class OnPaper < OneOfAKindHandPulledPrintMedia
+        def self.opt_hsh
+          MaterialSet::OnPaper.opt_hsh
+        end
+
+        class SubMedia < OnPaper
+          def self.opt_hsh
+            {prepend_set: [SubMedium::SFO::Embellishment::Colored, Category::OriginalMedia::OneOfAKind], append_set: AppendSet::Standard.set}
+          end
+
+          class Media < SubMedia
+            def self.opt_hsh
+              {media_set: SFO::PrintMedia::Silkscreen}
+            end
+          end
+        end
+      end
+
       class OnCanvas < OneOfAKindHandPulledPrintMedia
         def self.opt_hsh
-          PrintMedia::OnCanvas.opt_hsh
+          MaterialSet::OnCanvas.opt_hsh
         end
 
         class SubMedia < OnCanvas
@@ -178,7 +222,7 @@ class MediumTest
 
           class Media < SubMedia
             def self.opt_hsh
-              OneOfAKindPrintMedia::OnCanvas::SubMedia::Media.opt_hsh
+              {media_set: SFO::PrintMedia::Silkscreen}
             end
           end
         end
@@ -190,12 +234,12 @@ class MediumTest
     class LimitedEditionPrintMedia < FSO
       class OnPaper < LimitedEditionPrintMedia
         def self.opt_hsh
-          PrintMedia::OnPaper.opt_hsh
+          MaterialSet::OnPaper.opt_hsh
         end
 
         class SubMedia < OnPaper
           def self.opt_hsh
-            {prepend_set: [SubMedium::SFO::Embellishment::Colored, Category::LimitedEdition], append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque, Numbering]}
+            {prepend_set: [SubMedium::SFO::Embellishment::Colored, Category::LimitedEdition], append_set: AppendSet::WithSubMediaAndNumbering.set}
           end
 
           class Media < SubMedia
@@ -208,12 +252,12 @@ class MediumTest
 
       class OnCanvas < LimitedEditionPrintMedia
         def self.opt_hsh
-          PrintMedia::OnCanvas.opt_hsh
+          MaterialSet::OnCanvas.opt_hsh
         end
 
         class SubMedia < OnCanvas
           def self.opt_hsh
-            {prepend_set: [SubMedium::SFO::Embellishment::Embellished, Category::LimitedEdition], append_set: [Numbering]}
+            {prepend_set: [SubMedium::SFO::Embellishment::Embellished, Category::LimitedEdition], append_set: AppendSet::Standard.set}
           end
 
           class Media < SubMedia
@@ -226,20 +270,17 @@ class MediumTest
 
       class OnStandardMaterial < LimitedEditionPrintMedia
         def self.opt_hsh
-          PrintMedia::OnStandardMaterial.opt_hsh
-          #{material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic]}
+          MaterialSet::OnStandardMaterial.opt_hsh
         end
 
         class SubMedia < OnStandardMaterial
           def self.opt_hsh
             LimitedEditionPrintMedia::OnCanvas::SubMedia.opt_hsh
-            #{prepend_set: SubMedium::SFO::Embellishment::Embellished}
           end
 
           class Media < SubMedia
             def self.opt_hsh
               PrintMedia::OnStandardMaterial::SubMedia::Media.opt_hsh
-              #{media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::Basic]}
             end
           end
         end
@@ -251,12 +292,12 @@ class MediumTest
     class LimitedEditionHandPulledPrintMedia < FSO
       class OnPaper < LimitedEditionHandPulledPrintMedia
         def self.opt_hsh
-          PrintMedia::OnPaper.opt_hsh
+          MaterialSet::OnPaper.opt_hsh
         end
 
         class SubMedia < OnPaper
           def self.opt_hsh
-            {prepend_set: [SubMedium::SFO::Embellishment::Colored, Category::LimitedEdition, SubMedium::RBF::HandPulled], append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque, Numbering]}
+            {prepend_set: [SubMedium::SFO::Embellishment::Colored, Category::LimitedEdition, SubMedium::RBF::HandPulled], append_set: AppendSet::WithSubMediaAndNumbering.set}
           end
 
           class Media < SubMedia
@@ -269,12 +310,12 @@ class MediumTest
 
       class OnCanvas < LimitedEditionHandPulledPrintMedia
         def self.opt_hsh
-          PrintMedia::OnCanvas.opt_hsh
+          MaterialSet::OnCanvas.opt_hsh
         end
 
         class SubMedia < OnCanvas
           def self.opt_hsh
-            {prepend_set: SubMedium::SFO::Embellishment::Colored}
+            {prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: AppendSet::WithNumbering.set}
           end
 
           class Media < SubMedia
@@ -295,12 +336,12 @@ class MediumTest
 
       class OnPaper < HandPulledPrintMedia
         def self.opt_hsh
-          PrintMedia::OnPaper.opt_hsh
+          MaterialSet::OnPaper.opt_hsh
         end
 
         class SubMedia < OnPaper
           def self.opt_hsh
-            {prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque]}
+            {prepend_set: [SubMedium::SFO::Embellishment::Colored], append_set: AppendSet::WithSubMedia.set}
           end
 
           class Media < SubMedia
@@ -313,17 +354,17 @@ class MediumTest
 
       class OnCanvas < HandPulledPrintMedia
         def self.opt_hsh
-          PrintMedia::OnCanvas.opt_hsh
+          MaterialSet::OnCanvas.opt_hsh
         end
 
         class SubMedia < OnCanvas
           def self.opt_hsh
-            {prepend_set: SubMedium::SFO::Embellishment::Colored}
+            {prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: AppendSet::Standard.set}
           end
 
           class Media < SubMedia
             def self.opt_hsh
-              {media_set: [SFO::PrintMedia::Silkscreen]}
+              {media_set: SFO::PrintMedia::Silkscreen}
             end
           end
         end
@@ -335,12 +376,12 @@ class MediumTest
     class PrintMedia < FSO
       class OnPaper < PrintMedia
         def self.opt_hsh
-          {material_set: Material::Paper}
+          MaterialSet::OnPaper.opt_hsh
         end
 
         class SubMedia < OnPaper
           def self.opt_hsh
-            {prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque]}
+            {prepend_set: SubMedium::SFO::Embellishment::Colored, append_set: AppendSet::WithSubMedia.set}
           end
 
           class Media < SubMedia
@@ -353,7 +394,7 @@ class MediumTest
 
       class OnCanvas < PrintMedia
         def self.opt_hsh
-          {material_set: [Material::Canvas, Material::WrappedCanvas]}
+          MaterialSet::OnCanvas.opt_hsh
         end
 
         class SubMedia < OnCanvas
@@ -363,7 +404,7 @@ class MediumTest
 
           class Media < SubMedia
             def self.opt_hsh
-              {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::Basic]}
+              {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::Basic], append_set: AppendSet::Standard.set}
             end
           end
         end
@@ -371,23 +412,17 @@ class MediumTest
 
       class OnStandardMaterial < PrintMedia
         def self.opt_hsh
-          {material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic]}
+          MaterialSet::OnStandardMaterial.opt_hsh
         end
 
         class SubMedia < OnStandardMaterial
           def self.opt_hsh
-            {prepend_set: SubMedium::SFO::Embellishment::Embellished}
+            {prepend_set: SubMedium::SFO::Embellishment::Embellished, append_set: AppendSet::Standard.set}
           end
 
           class Media < SubMedia
             def self.opt_hsh
               {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::Basic]}
-            end
-          end
-
-          class LimitedEdition < SubMedia
-            def self.opt_hsh
-              Media.opt_hsh
             end
           end
         end
@@ -487,11 +522,6 @@ class MediumTest
         end
       end
 
-      class Sericel < PrintMedia
-        def self.options
-          Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], field_kind, tags)
-        end
-      end
     end
 
     class PhotographMedia < SFO
@@ -531,6 +561,58 @@ class MediumTest
         def self.options
           Option.builder(['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline'], field_kind, tags)
         end
+      end
+
+      class AnimationCel < SericelMedia
+        def self.options
+          Option.builder(['production cel', 'production cel and matching drawing', 'production cel and two matching drawings', 'production cel and three matching drawings'], field_kind, tags)
+        end
+      end
+    end
+  end
+
+  module MaterialSet
+    module OnPaper
+      def self.opt_hsh
+        {material_set: Material::Paper}
+      end
+    end
+
+    module OnCanvas
+      def self.opt_hsh
+        {material_set: [Material::Canvas, Material::WrappedCanvas]}
+      end
+    end
+
+    module OnStandardMaterial
+      def self.opt_hsh
+        {material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic]}
+      end
+    end
+  end
+
+  module AppendSet
+    module Standard
+      def self.set
+        [Signature::Standard, Certificate::Standard]
+      end
+    end
+
+    module WithNumbering
+      def self.set
+        [Numbering, Signature::Standard, Certificate::Standard]
+      end
+    end
+
+    module WithSubMedia
+      def self.set
+        [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque, Signature::Standard, Certificate::Standard]
+      end
+    end
+
+    module WithSubMediaAndNumbering
+      def self.set
+        [SubMedium::SMO::Leafing, SubMedium::SFO::Remarque, Numbering, Signature::Standard, Certificate::Standard]
       end
     end
   end
