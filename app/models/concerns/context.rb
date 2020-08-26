@@ -42,7 +42,7 @@ module Context
     def builder
       self.subclasses.map {|klass| klass.builder}
     end
-
+    #redundant?
     def build_name(name_set)
       name_set.uniq.reject {|i| i.blank?}.join(" ")
     end
@@ -52,14 +52,10 @@ module Context
       decamelize(klass_name)
     end
 
-    # def search_hsh
-    #   h={kind: slice_class(-2).underscore, sub_kind: klass_name.underscore}
-    # end
-
     def field_kind
       slice_class(0).underscore
     end
-
+    #redundant?
     def tags_hsh(kind_idx, sub_kind_idx)
       set = self.to_s.split('::').map{|klass| klass.underscore}
       h={kind: set[kind_idx], sub_kind: set[sub_kind_idx]}

@@ -57,7 +57,7 @@ class SubMedium
       end
 
       def self.builder
-        select_menu(field_class_name, tags[:kind], [SFO::LeafingMedia::GoldLeaf.builder, SFO::LeafingMedia::SilverLeaf.builder], tags)
+        select_menu(field_class_name, tags[:kind], [SFO::Leafing::GoldLeaf.builder, SFO::Leafing::SilverLeaf.builder], tags)
       end
     end
   end

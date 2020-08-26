@@ -65,14 +65,7 @@ class FieldSet < FieldItem
   def self.filter_tag(set, k)
     set.map{|i| i.tags[k]}.uniq.compact
   end
-
-  # def self.builder(f)
-  #   field_set = FieldSet.where(field_name: f[:field_name]).first_or_create
-  #   update_tags(field_set, f[:tags])
-  #   f[:options].map {|opt| field_set.assoc_unless_included(opt)}
-  #   field_set
-  # end
-
+  
   def self.builder(f)
     field_set = FieldSet.where(field_name: f[:field_name], kind: f[:kind]).first_or_create
     update_tags(field_set, f[:tags])

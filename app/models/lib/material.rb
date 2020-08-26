@@ -10,10 +10,6 @@ class Material
       select_menu(field_class_name, field_kind, options, tags)
     end
 
-    # def self.options
-    #   [Canvas.builder, WrappedCanvas.builder, Paper.builder, Wood.builder, WoodBox.builder, Metal.builder, MetalBox.builder]
-    # end
-
     def self.options
       [Canvas, WrappedCanvas, Paper, Wood, WoodBox, Metal, MetalBox]
     end

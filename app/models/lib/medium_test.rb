@@ -1,20 +1,12 @@
 class MediumTest
   include Context
 
-  # ##################################
-
+  # move these methods to context?
   def self.cascade_merge(klass, set, opt_hsh={})
     opt_hsh = opt_hsh.merge(klass.opt_hsh) if method_exists?(klass, :opt_hsh)
     return set.append(opt_hsh) if !klass.subclasses.any?
     klass.subclasses.each do |target_class|
       cascade_merge(target_class, set, opt_hsh.merge(target_class.opt_hsh))
-    end
-  end
-
-  def self.medium_builder(media_set:, material_set:, prepend_set: [], append_set: [], insert_set: [], set: [])
-    media_set, material_set, prepend_set, append_set, insert_set = [media_set, material_set, prepend_set, append_set, insert_set].map{|arg| arg_as_arr(arg)}
-    media_set.product(material_set).each do |option_set|
-      set << option_set_build(options: option_set, prepend_set: prepend_set, append_set: append_set, insert_set: insert_set)
     end
   end
 
@@ -44,27 +36,110 @@ class MediumTest
     arg.class == Array ? arg : [arg]
   end
 
-  ###################################
+  # tags methods #################### MediumTest::FSO::OriginalPainting.tags_hsh
+  def self.category_set
+    ['Original', 'OneOfAKind', 'LimitedEdition']
+  end
 
-  # MediumTest.option_sets
-  def self.option_sets
+  def self.medium_category_set
+    ['Painting', 'Drawing', 'PrintMedia', 'AcrylicMixedMedia']
+  end
+
+  def self.sub_category_set
+    ['HandPulled']
+  end
+
+  def self.tags_hsh
+    tags = %w[sub_category category medium_category medium material].map{|k| [k, 'n/a']}.to_h
+    if klass_name == 'PrintMedia'
+      tags['category'] = 'PrintMedia'
+      tags['medium_category'] = 'PrintMedia'
+    elsif klass_name == 'HandPulledPrintMedia'
+      tags['sub_category'] = 'HandPulled'
+      tags['category'] = 'PrintMedia'
+      tags['medium_category'] = 'PrintMedia'
+    else
+      tag_keys = category_set + medium_category_set + sub_category_set
+      tag_keys.each do |k|
+        if klass_name.index(k) && category_set.include?(k)
+          tags['category'] = k
+        elsif klass_name.index(k) && medium_category_set.include?(k)
+          tags['medium_category'] = k
+        elsif klass_name.index(k) && sub_category_set.include?(k)
+          tags['sub_category'] = k
+        end
+      end
+      tags
+    end
+    tags
+  end
+
+  # product hash for: StandardProduct
+  # product_name methods
+  def self.product_name(tags, set=[])
+    tags.each do |k,v|
+      next if ['n/a', 'OnPaper', 'Standard', 'PrintMedia'].include?(v)
+      set << build_name(k,v) unless set.include?(decamelize(v))
+    end
+    set.join(' ')
+  end
+
+  def self.build_name(k,v)
+    if v == 'OneOfAKind'
+      'One-of-a-Kind'
+    else
+      words = cap_words(decamelize(v))
+      k == "material" ? "on #{words}" : words
+    end
+  end
+
+  def self.cap_words(words)
+    words.split(' ').map{|word| word.capitalize}.join(' ')
+  end
+  # tags method
+  def self.kv_assign(tags, kv_sets)
+    kv_sets.map{|kv| tags[kv[0]] = kv[1]}.first
+  end
+  # product_options
+  def self.build_options(options)
+    options.map{|klass| klass.builder}.flatten
+  end
+
+  ###################################
+  # a = MediumTest.media_sets  a.flatten(1)  aa = a.flatten(1).map{|set| set.last}
+  def self.media_sets
+    media_groups.map{|h| media_set_builder(h)}.flatten(1)
+  end
+
+  def self.media_set_builder(media_set:, material_set:, prepend_set: [], append_set: [], insert_set: [], set: [], tags: {})
+    media_set, material_set, prepend_set, append_set, insert_set = [media_set, material_set, prepend_set, append_set, insert_set].map{|arg| arg_as_arr(arg)}
+    media_set.product(material_set).each do |option_set|
+      kv_assign(tags, [['medium', option_set[0].klass_name], ['material', option_set[1].klass_name]])
+      options = option_set_build(options: option_set, prepend_set: prepend_set, append_set: append_set, insert_set: insert_set) #.map{|klass| klass.builder}.flatten
+      standard_product(product_name(tags), build_options(options), tags)
+    end
+    set
+  end
+
+  # MediumTest.media_groups
+  def self.media_groups
     set=[]
     FSO.subclasses.each do |klass|
-      cascade_merge(klass, set)
+      cascade_merge(klass, set, {tags: klass.tags_hsh})
     end
-    set.map{|h| medium_builder(h)}
+    set
   end
 
   # FSO #############################
 
   class FSO < MediumTest
 
-    class Painting < FSO
+    class OriginalPainting < FSO
       def self.opt_hsh
         {append_set: AppendSet::Standard.set}
       end
 
-      class OnPaper < Painting
+      class OnPaper < OriginalPainting
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
         end
@@ -76,7 +151,7 @@ class MediumTest
         end
       end
 
-      class OnCanvas < Painting
+      class OnCanvas < OriginalPainting
         def self.opt_hsh
           MaterialSet::OnCanvas.opt_hsh
         end
@@ -88,7 +163,7 @@ class MediumTest
         end
       end
 
-      class OnStandardMaterial < Painting
+      class OnStandardMaterial < OriginalPainting
         def self.opt_hsh
           MaterialSet::OnStandardMaterial.opt_hsh
         end
@@ -103,12 +178,12 @@ class MediumTest
 
     #################################
 
-    class Drawing < FSO
+    class OriginalDrawing < FSO
       def self.opt_hsh
         {append_set: AppendSet::Standard.set}
       end
 
-      class OnPaper < Drawing
+      class OnPaper < OriginalDrawing
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
         end
@@ -136,7 +211,7 @@ class MediumTest
 
           class Media < SubMedia
             def self.opt_hsh
-              {media_set: [SFO::PrintMedia::Silkscreen, SFO::PrintMedia::Etching, SFO::PrintMedia::Relief, SFO::PrintMedia::MixedMedia::Basic, SFO::PrintMedia::MixedMedia::Monotype]}
+              {media_set: [SFO::PrintMedia::Silkscreen, SFO::PrintMedia::Etching, SFO::PrintMedia::Relief, SFO::PrintMedia::MixedMedia::BasicMixedMedia, SFO::PrintMedia::MixedMedia::Monotype]}
             end
           end
         end
@@ -154,7 +229,7 @@ class MediumTest
 
           class Media < SubMedia
             def self.opt_hsh
-              {media_set: [SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::Basic]}
+              {media_set: [SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::BasicMixedMedia]}
             end
           end
         end
@@ -163,8 +238,8 @@ class MediumTest
 
     #################################
 
-    class OneOfAKindAcrylicMedia < FSO
-      class OnPaper < OneOfAKindAcrylicMedia
+    class OneOfAKindAcrylicMixedMedia < FSO
+      class OnPaper < OneOfAKindAcrylicMixedMedia
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
         end
@@ -176,7 +251,7 @@ class MediumTest
         end
       end
 
-      class OnCanvas < OneOfAKindAcrylicMedia
+      class OnCanvas < OneOfAKindAcrylicMixedMedia
         def self.opt_hsh
           MaterialSet::OnCanvas.opt_hsh
         end
@@ -386,7 +461,7 @@ class MediumTest
 
           class Media < SubMedia
             def self.opt_hsh
-              {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::Lithograph, SFO::PrintMedia::Etching, SFO::PrintMedia::Relief, SFO::PrintMedia::MixedMedia::Basic, SFO::PrintMedia::Basic, SFO::PrintMedia::Poster]}
+              {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::Lithograph, SFO::PrintMedia::Etching, SFO::PrintMedia::Relief, SFO::PrintMedia::MixedMedia::BasicMixedMedia, SFO::PrintMedia::BasicPrintMedia, SFO::PrintMedia::Poster]}
             end
           end
         end
@@ -404,7 +479,7 @@ class MediumTest
 
           class Media < SubMedia
             def self.opt_hsh
-              {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::Basic], append_set: AppendSet::Standard.set}
+              {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::BasicMixedMedia], append_set: AppendSet::Standard.set}
             end
           end
         end
@@ -422,7 +497,7 @@ class MediumTest
 
           class Media < SubMedia
             def self.opt_hsh
-              {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::Basic]}
+              {media_set: [SFO::PrintMedia::Giclee, SFO::PrintMedia::Silkscreen, SFO::PrintMedia::MixedMedia::BasicMixedMedia]}
             end
           end
         end
@@ -436,17 +511,36 @@ class MediumTest
   # SFO #############################
 
   class SFO < MediumTest
+    def self.builder
+      select_field(field_name, field_kind, options, tags)
+    end
+
+    def self.field_name
+      decamelize(klass_name).pluralize
+    end
+
+    def self.tags
+      {'title'=> 'n/a', 'description'=> 'n/a'}
+    end
 
     class Painting < SFO
       class Standard < Painting
         def self.options
           Option.builder(['oil painting', 'acrylic painting', 'mixed media painting', 'painting'], field_kind, tags)
         end
+
+        def self.field_name
+          'paint media'
+        end
       end
 
       class OnPaper < Painting
         def self.options
           Option.builder(['watercolor painting', 'pastel painting', 'guache painting', 'sumi ink painting', 'oil painting', 'acrylic painting', 'mixed media painting', 'painting'], field_kind, tags)
+        end
+
+        def self.field_name
+          'paint media (o/p)'
         end
       end
     end
@@ -455,6 +549,10 @@ class MediumTest
       class Standard < Drawing
         def self.options
           Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], field_kind, tags)
+        end
+
+        def self.field_name
+          'drawing media'
         end
       end
     end
@@ -491,7 +589,7 @@ class MediumTest
       end
 
       class MixedMedia < PrintMedia
-        class Basic < MixedMedia
+        class BasicMixedMedia < MixedMedia
           def self.options
             Option.builder(['mixed media'], field_kind, tags)
           end
@@ -510,7 +608,7 @@ class MediumTest
         end
       end
 
-      class Basic < PrintMedia
+      class BasicPrintMedia < PrintMedia
         def self.options
           Option.builder(['print', 'fine art print', 'vintage style print'], field_kind, tags)
         end
