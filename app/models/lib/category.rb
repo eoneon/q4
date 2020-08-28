@@ -12,13 +12,13 @@ class Category
 
     class Original < OriginalMedia
       def self.builder
-        radio_button(field_class_name, field_kind, tags)
+        radio_button(field_name, field_kind, tags)
       end
     end
 
     class OriginalProduction < OriginalMedia
       def self.builder
-        radio_button(field_class_name, field_kind, tags)
+        radio_button(field_name, field_kind, tags)
       end
     end
 
@@ -31,17 +31,17 @@ class Category
 
   class UniqueVariation < Category
     def self.builder
-      select_field(field_class_name, field_kind, options, tags)
+      select_field(field_name, field_kind, options, tags)
     end
 
     def self.options
-      Option.builder([field_class_name], field_kind, tags)
+      Option.builder([field_name], field_kind, tags)
     end
   end
 
   class LimitedEdition < Category
     def self.builder
-      select_field(field_class_name, field_kind, options, tags)
+      select_field(field_name, field_kind, options, tags)
     end
 
     def self.options
@@ -51,21 +51,21 @@ class Category
 
   class HandMadeCeramic < Category
     def self.builder
-      select_field(field_class_name, field_kind, options, tags)
+      select_field(field_name, field_kind, options, tags)
     end
 
     def self.options
-      Option.builder([field_class_name], field_kind, tags)
+      Option.builder([field_name], field_kind, tags)
     end
   end
 
   class HandBlownGlass < Category
     def self.builder
-      select_field(field_class_name, field_kind, options, tags)
+      select_field(field_name, field_kind, options, tags)
     end
 
     def self.options
-      Option.builder([field_class_name], field_kind, tags)
+      Option.builder([field_name], field_kind, tags)
     end
   end
 

@@ -6,7 +6,7 @@ class Certificate
   end
 
   def self.field_name
-    "#{field_class_name} coa"
+    "#{field_name} coa"
   end
 
   class Standard < Certificate
@@ -49,19 +49,19 @@ class Certificate
   #
   #   class AnimationSeal < Animation
   #     def self.builder
-  #       select_field(field_class_name, field_kind, Option.builder(['Warner Bros.', 'Looney Tunes', 'Hanna Barbera']), tags)
+  #       select_field(field_name, field_kind, Option.builder(['Warner Bros.', 'Looney Tunes', 'Hanna Barbera']), tags)
   #     end
   #   end
   #
   #   class SportsSeal < Animation
   #     def self.builder
-  #       select_field(field_class_name, field_kind, Option.builder(['NFL', 'NBA', 'MLB', 'NHL']), tags)
+  #       select_field(field_name, field_kind, Option.builder(['NFL', 'NBA', 'MLB', 'NHL']), tags)
   #     end
   #   end
   #
   #   class AnimationCertificate < Animation
   #     def self.builder
-  #       select_field(field_class_name, field_kind, Option.builder(['LOA', 'COA', 'COA from Linda Jones Enterprises']), tags)
+  #       select_field(field_name, field_kind, Option.builder(['LOA', 'COA', 'COA from Linda Jones Enterprises']), tags)
   #     end
   #   end
   #

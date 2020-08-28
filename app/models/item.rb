@@ -10,12 +10,6 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  # attribute :standard_product
-  # attribute :product
-  # attribute :options
-  # attribute :select_menus
-
-
   def field_targets
     scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
   end
@@ -30,11 +24,12 @@ class Item < ApplicationRecord
     artists.first if artists.any?
   end
 
+  # Item.find(5).field_targets ## h = Item.find(5).product_group['inputs'] ## h['inputs'] ## h['inputs']['field_sets']
   # product_group ############################################################## Item.find(3).product_group
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
     return {'params'=>params, 'inputs'=>inputs} if !product
-    p_fields, i_fields, opt_scope = product.field_targets, field_targets, product.select_fields.pluck(:kind) << 'material'
+    p_fields, i_fields, opt_scope = product.field_targets, field_targets, %w[embellished category medium material]
     p_fields.each do |f|
       if f.type == 'SelectField'
         select_field_group(f, i_fields, params, inputs, opt_scope)

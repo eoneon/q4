@@ -42,13 +42,17 @@ module Context
     def builder
       self.subclasses.map {|klass| klass.builder}
     end
-    #redundant?
-    def build_name(name_set)
-      name_set.uniq.reject {|i| i.blank?}.join(" ")
+
+    def kv_assign(tags, kv_sets)
+      kv_sets.map{|kv| tags[kv[0]] = kv[1]}.first
     end
+    #redundant?
+    # def build_name(name_set)
+    #   name_set.uniq.reject {|i| i.blank?}.join(" ")
+    # end
 
     # parse scope chain relative to self #######################################
-    def field_class_name
+    def field_name
       decamelize(klass_name)
     end
 
@@ -89,31 +93,42 @@ module Context
     end
 
     #insert with map prepend/append ############################################
+    def cascade_merge(klass, set, opt_hsh={})
+      opt_hsh = opt_hsh.merge(klass.opt_hsh) if method_exists?(klass, :opt_hsh)
+      return set.append(opt_hsh) if !klass.subclasses.any?
+      klass.subclasses.each do |target_class|
+        cascade_merge(target_class, set, opt_hsh.merge(target_class.opt_hsh))
+      end
+    end
+
     def option_set_build(options:, prepend_set: [], append_set: [], insert_set: [])
+      options = prepend_build(options, prepend_set) if prepend_set.any?
+      options = append_build(options, append_set) if append_set.any?
       options = insert_build(options, insert_set) if insert_set.any?
-      options = prepend_build(options, prepend_set)
-      options = append_build(options, append_set)
       options.flatten
     end
 
-    def insert_build(set, insert_set)
-      insert_set.map {|a| set.insert(a[0], a[1])}.flatten if insert_set.any?
+    def prepend_build(options, prepend_set)
+      prepend_set.reverse.map {|opt| options.prepend(opt)}.flatten
+      options
     end
 
-    def prepend_build(set, prepend_set)
-      prepend_set = arg_as_arr(prepend_set)
-      prepend_set.reverse.map {|v| set.prepend(v)}.flatten if prepend_set.any?
-      set
+    def append_build(options, append_set)
+      append_set.map {|opt| options.append(opt)}.flatten if append_set.any?
+      options
     end
 
-    def append_build(set, append_set)
-      append_set = arg_as_arr(append_set)
-      append_set.map {|v| set.append(v)}.flatten if append_set.any?
-      set
+    def insert_build(options, insert_set)
+      insert_set.map {|a| options.insert(a[0], a[1])}.flatten if insert_set.any?
+      options
     end
 
     def arg_as_arr(arg)
       arg.class == Array ? arg : [arg]
+    end
+
+    def build_options(options)
+      options.map{|klass| klass.builder}.flatten
     end
 
     # utility methods ##########################################################
@@ -170,6 +185,10 @@ module Context
 
     def format_vowel(vowel, word)
       %w[a e i o u].include?(word.first.downcase) && word.split('-').first != 'one' ? 'an' : 'a'
+    end
+
+    def cap_words(words)
+      words.split(' ').map{|word| word.capitalize}.join(' ')
     end
 
   end

@@ -6,44 +6,24 @@ class Dimension
   end
 
   class FlatDimension < Dimension
-    # def self.builder
-    #   select_menu(field_class_name.pluralize, field_kind, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set)}, tags)
-    # end
-
     def self.builder(origin_kind)
-      select_menu(field_class_name.pluralize, field_kind, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set, origin_kind)}, tags)
+      select_menu(field_name.pluralize, field_kind, [FieldGroup.width_height, FieldGroup.image_diameter].map{|set| FieldGroup.builder(set, origin_kind)}, tags)
     end
   end
 
   class BoxDimension < Dimension
     def self.builder(origin_kind)
-      select_menu(field_class_name.pluralize, field_kind, [FieldGroup.width_height_depth].map{|set| FieldGroup.builder(set, origin_kind)}, tags)
+      select_menu(field_name.pluralize, field_kind, [FieldGroup.width_height_depth].map{|set| FieldGroup.builder(set, origin_kind)}, tags)
     end
-
-    # def self.builder(dimension_type)
-    #   select_menu(field_class_name.pluralize, [FieldGroup.width_height_depth].map{|set| FieldGroup.builder(set, dimension_type)}, tags)
-    # end
   end
 
   class DepthDimension < Dimension
     def self.builder(origin_kind)
-      select_menu(field_class_name.pluralize, field_kind, [FieldGroup.width_height_depth, FieldGroup.width_height_depth_weight, FieldGroup.diameter_height_weight, FieldGroup.diameter_weight].map{|set| FieldGroup.builder(set, origin_kind)}, tags)
+      select_menu(field_name.pluralize, field_kind, [FieldGroup.width_height_depth, FieldGroup.width_height_depth_weight, FieldGroup.diameter_height_weight, FieldGroup.diameter_weight].map{|set| FieldGroup.builder(set, origin_kind)}, tags)
     end
-
-    # def self.builder(dimension_type)
-    #   select_menu(field_class_name.pluralize, field_kind, [FieldGroup.width_height_depth, FieldGroup.width_height_depth_weight, FieldGroup.diameter_height_weight, FieldGroup.diameter_weight].map{|set| FieldGroup.builder(set, dimension_type)}, tags)
-    # end
   end
 
   module FieldGroup
-    # def self.builder(dimension_set, dimension_type)
-    #   FieldSet.builder(f={field_name: Dimension.arr_to_text(dimension_set), kind: field_kind, options: options(dimension_set, dimension_type), tags: h={kind: 'dimension'}})
-    # end
-    #
-    # def self.options(dimension_set, dimension_type)
-    #   dimension_set.map {|field_name| NumberField.builder(f={field_name: field_name, tags: h={kind: 'dimension'}})} #dimension_type + field_name.split('-').join('_')
-    # end
-
     def self.build_name(origin_kind, field_name)
       [origin_kind, field_name].join(" ")
     end

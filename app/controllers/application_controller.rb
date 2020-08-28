@@ -181,6 +181,9 @@ class ApplicationController < ActionController::Base
           target = f_hsh[:collection][0]
           add_field(target.id, {})
           add_nested_defaults(target)
+        elsif f_hsh[:render_as] == 'select_field'
+          target = f_hsh[:collection][0]
+          add_field(target.id, {})
         end
       end
     end
