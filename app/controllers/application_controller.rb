@@ -32,7 +32,6 @@ class ApplicationController < ActionController::Base
     to_class(product_type).tag_search_field_group(args).transform_values{|opts| opts.map{|opt| h={text: format_text_tag(opt), value: opt}}}
   end
 
-  #this is really: selected_search_tag_inputs
   #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
   #case 2: [["medium_category", "all"], ["medium", "all"], ["material", "all"]]
   def selected_search_tag_inputs
@@ -57,7 +56,7 @@ class ApplicationController < ActionController::Base
   end
 
   def derive_search_keys
-    to_class(product_type).filter_keys #.map{|k| [k, build_tag_value(k)]}
+    to_class(product_type).filter_keys
   end
 
   def derive_search_tag_inputs
@@ -119,10 +118,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # def skip_update_assocs(origin, target, params_target_type, params_target_id)
-  #   (params_target_id.blank? && target.blank?) || (params_target_id.to_i == target.try(:id))
-  # end
-
   def remove_assoc(origin, target)
     remove_item_fields if target.try(:type) && target.base_type == 'Product'
     origin.item_groups.where(target_id: target.id).first.destroy
@@ -170,13 +165,18 @@ class ApplicationController < ActionController::Base
 
   def update_default_options_hsh(options_hsh)
     options_hsh.each do |f_hsh|
-      add_field(f_hsh[:collection][0].id, {})
+      add_field(f_hsh[:collection][0].id, {}) unless skip_default_options_update?(f_hsh[:method], f_hsh[:collection].count)
     end
+  end
+
+  def skip_default_options_update?(param_key, count)
+    %w[category_id material_id].exclude?(param_key) || (param_key == 'medium_id' && count != 1)
   end
 
   def update_default_field_sets_hsh(field_sets_hsh)
     field_sets_hsh.each do |kind, f_set|
       f_set.each do |f_hsh|
+        next if %w[dimension numbering signature certificate].exclude?(kind)
         if f_hsh[:render_as] == 'select_menu'
           target = f_hsh[:collection][0]
           add_field(target.id, {})
@@ -266,17 +266,13 @@ class ApplicationController < ActionController::Base
   end
 
   # CRUD methods for update_fields
-  #def update_fk(id, param_id)
   def update_fk(id, param_id, f_param={})
     return if skip_field_update(id, param_id)
     if id.present? && param_id.blank?
-      #remove_field(id)
       remove_field(id, f_param)
     elsif id.present? && (id != param_id.to_i)
-      #replace_field(id, param_id)
       replace_field(id, param_id, f_param)
     elsif id.blank? && param_id.present?
-      #add_field(param_id)
       add_field(param_id, f_param)
     end
   end
@@ -297,20 +293,15 @@ class ApplicationController < ActionController::Base
   end
 
   def remove_field(id, f_params)
-  #def remove_field(id)
     @item.item_groups.where(target_id: id).first.destroy
     cascade_remove(f_params) if !f_params.empty?
   end
 
   def replace_field(id, param_id, f_params)
-  #def replace_field(id, param_id)
     remove_field(id, f_params)
-    #remove_field(id)
-    #add_field(param_id)
     add_field(param_id, f_params)
   end
 
-  #def add_field(param_id)
   def add_field(param_id, f_params)
     target = FieldItem.find(param_id)
     target = to_class(target.type).find(param_id)

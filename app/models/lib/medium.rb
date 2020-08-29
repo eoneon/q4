@@ -1,93 +1,22 @@
 class Medium
   include Context
 
-  # tags methods #################### Medium::FSO::OriginalPainting.tags_hsh
-  def self.category_set
-    ['Original', 'OneOfAKind', 'LimitedEdition']
+  # # tags methods #################### Medium::FSO::OriginalPainting.tags_hsh
+  def self.search_tags
+    %w[sub_category category medium_category medium material].map{|k| [k, 'n/a']}.to_h
   end
-
-  def self.medium_category_set
-    ['Painting', 'Drawing', 'PrintMedia', 'AcrylicMixedMedia']
-  end
-
-  def self.sub_category_set
-    ['HandPulled']
-  end
-
-  def self.tags_hsh
-    tags = %w[sub_category category medium_category medium material].map{|k| [k, 'n/a']}.to_h
-    if klass_name == 'PrintMedia'
-      tags['category'] = 'PrintMedia'
-      tags['medium_category'] = 'PrintMedia'
-    elsif klass_name == 'HandPulledPrintMedia'
-      tags['sub_category'] = 'HandPulled'
-      tags['category'] = 'PrintMedia'
-      tags['medium_category'] = 'PrintMedia'
-    else
-      tag_keys = category_set + medium_category_set + sub_category_set
-      tag_keys.each do |k|
-        if klass_name.index(k) && category_set.include?(k)
-          tags['category'] = k
-        elsif klass_name.index(k) && medium_category_set.include?(k)
-          tags['medium_category'] = k
-        elsif klass_name.index(k) && sub_category_set.include?(k)
-          tags['sub_category'] = k
-        end
-      end
-      tags
-    end
-    tags
-  end
-
-  # product_name methods
-  def self.product_name(tags, set=[])
-    tags.each do |k,v|
-      next if ['n/a', 'OnPaper', 'Standard', 'PrintMedia'].include?(v)
-      set << build_name(k,v) unless set.include?(decamelize(v))
-    end
-    set.join(' ')
-  end
-
-  def self.build_name(k,v)
-    if v == 'OneOfAKind'
-      'One-of-a-Kind'
-    else
-      words = cap_words(decamelize(v))
-      k == "material" ? "on #{words}" : words
-    end
-  end
-
-  ###################################
-  # a = Medium.media_sets
-  def self.media_sets
-    media_groups.map{|h| media_set_builder(h)}.flatten(1)
-  end
-
-  def self.media_set_builder(media_set:, material_set:, prepend_set: [], append_set: [], insert_set: [], set: [], tags: {})
-    media_set, material_set, prepend_set, append_set, insert_set = [media_set, material_set, prepend_set, append_set, insert_set].map{|arg| arg_as_arr(arg)}
-    media_set.product(material_set).each do |option_set|
-      kv_assign(tags, [['medium', option_set[0].klass_name], ['material', option_set[1].klass_name]])
-      options = option_set_build(options: option_set, prepend_set: prepend_set, append_set: append_set, insert_set: insert_set) #.map{|klass| klass.builder}.flatten
-      standard_product(product_name(tags), build_options(options), tags)
-    end
-  end
-
-  # Medium.media_groups
-  def self.media_groups
-    set=[]
-    FSO.subclasses.each do |klass|
-      cascade_merge(klass, set, {tags: klass.tags_hsh})
-    end
-    set
-  end
-
-  # FSO #############################
+  
+  # FSO ############################# Medium::FSO.tags_hsh
 
   class FSO < Medium
 
     class OriginalPainting < FSO
       def self.opt_hsh
         {append_set: AppendSet::Standard.set}
+      end
+
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'Original'], ['medium_category', 'OriginalPainting']])
       end
 
       class OnPaper < OriginalPainting
@@ -97,22 +26,22 @@ class Medium
 
         class Media < OnPaper
           def self.opt_hsh
-            {prepend_set: Category::OriginalMedia::Original, media_set: SFO::Painting::OnPaper}
+            {prepend_set: Category::OriginalMedia::Original, media_set: SFO::Painting::PaintingOnPaper}
           end
         end
       end
 
-      class OnCanvas < OriginalPainting
-        def self.opt_hsh
-          MaterialSet::OnCanvas.opt_hsh
-        end
-
-        class Media < OnCanvas
-          def self.opt_hsh
-            {prepend_set: Category::OriginalMedia::Original, media_set: SFO::Painting::Standard}
-          end
-        end
-      end
+      # class OnCanvas < OriginalPainting
+      #   def self.opt_hsh
+      #     MaterialSet::OnCanvas.opt_hsh
+      #   end
+      #
+      #   class Media < OnCanvas
+      #     def self.opt_hsh
+      #       {prepend_set: Category::OriginalMedia::Original, media_set: SFO::Painting::Standard}
+      #     end
+      #   end
+      # end
 
       class OnStandardMaterial < OriginalPainting
         def self.opt_hsh
@@ -121,7 +50,7 @@ class Medium
 
         class Media < OnStandardMaterial
           def self.opt_hsh
-            OnCanvas::Media.opt_hsh
+            {prepend_set: Category::OriginalMedia::Original, media_set: SFO::Painting::StandardPainting}
           end
         end
       end
@@ -132,6 +61,10 @@ class Medium
     class OriginalDrawing < FSO
       def self.opt_hsh
         {append_set: AppendSet::Standard.set}
+      end
+
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'Original'], ['medium_category', 'OriginalDrawing']])
       end
 
       class OnPaper < OriginalDrawing
@@ -149,8 +82,12 @@ class Medium
 
     #################################
 
-    class OneOfAKindPrintMedia < FSO
-      class OnPaper < OneOfAKindPrintMedia
+    class OneOfAKindMixedMedia < FSO
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'OneOfAKind'], ['medium_category', 'OneOfAKindMixedMedia']])
+      end
+
+      class OnPaper < OneOfAKindMixedMedia
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
         end
@@ -168,7 +105,7 @@ class Medium
         end
       end
 
-      class OnCanvas < OneOfAKindPrintMedia
+      class OnCanvas < OneOfAKindMixedMedia
         def self.opt_hsh
           MaterialSet::OnCanvas.opt_hsh
         end
@@ -190,6 +127,10 @@ class Medium
     #################################
 
     class OneOfAKindAcrylicMixedMedia < FSO
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'OneOfAKind'], ['medium_category', 'OneOfAKindMixedMedia']])
+      end
+
       class OnPaper < OneOfAKindAcrylicMixedMedia
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
@@ -217,8 +158,12 @@ class Medium
 
     #################################
 
-    class OneOfAKindHandPulledPrintMedia < FSO
-      class OnPaper < OneOfAKindHandPulledPrintMedia
+    class OneOfAKindHandPulledMixedMedia < FSO
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'OneOfAKind'], ['sub_category', 'HandPulled'], ['medium_category', 'OneOfAKindHandPulledMixedMedia']])
+      end
+
+      class OnPaper < OneOfAKindHandPulledMixedMedia
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
         end
@@ -236,14 +181,14 @@ class Medium
         end
       end
 
-      class OnCanvas < OneOfAKindHandPulledPrintMedia
+      class OnCanvas < OneOfAKindHandPulledMixedMedia
         def self.opt_hsh
           MaterialSet::OnCanvas.opt_hsh
         end
 
         class SubMedia < OnCanvas
           def self.opt_hsh
-            OneOfAKindPrintMedia::OnCanvas::SubMedia.opt_hsh
+            OneOfAKindMixedMedia::OnCanvas::SubMedia.opt_hsh
           end
 
           class Media < SubMedia
@@ -258,6 +203,10 @@ class Medium
     #################################
 
     class LimitedEditionPrintMedia < FSO
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'LimitedEdition'], ['medium_category', 'LimitedEditionPrintMedia']])
+      end
+
       class OnPaper < LimitedEditionPrintMedia
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
@@ -316,6 +265,10 @@ class Medium
     #################################
 
     class LimitedEditionHandPulledPrintMedia < FSO
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'LimitedEdition'], ['sub_category', 'HandPulled'], ['medium_category', 'LimitedEditionPrintMedia']])
+      end
+
       class OnPaper < LimitedEditionHandPulledPrintMedia
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
@@ -360,6 +313,10 @@ class Medium
         {insert_set: [[1, SubMedium::RBF::HandPulled]]}
       end
 
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'PrintMedia'], ['sub_category', 'HandPulled'], ['medium_category', 'HandPulledPrintMedia']])
+      end
+
       class OnPaper < HandPulledPrintMedia
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
@@ -400,6 +357,10 @@ class Medium
     #################################
 
     class PrintMedia < FSO
+      def self.tags_hsh
+        kv_assign(search_tags, [['category', 'PrintMedia'], ['medium_category', 'PrintMedia']])
+      end
+
       class OnPaper < PrintMedia
         def self.opt_hsh
           MaterialSet::OnPaper.opt_hsh
@@ -475,7 +436,7 @@ class Medium
     end
 
     class Painting < SFO
-      class Standard < Painting
+      class StandardPainting < Painting
         def self.options
           Option.builder(['oil painting', 'acrylic painting', 'mixed media painting', 'painting'], field_kind, tags)
         end
@@ -485,7 +446,7 @@ class Medium
         end
       end
 
-      class OnPaper < Painting
+      class PaintingOnPaper < Painting
         def self.options
           Option.builder(['watercolor painting', 'pastel painting', 'guache painting', 'sumi ink painting', 'oil painting', 'acrylic painting', 'mixed media painting', 'painting'], field_kind, tags)
         end

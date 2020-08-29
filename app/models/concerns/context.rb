@@ -38,18 +38,11 @@ module Context
       TextField.builder(f={field_name: field_name, kind: kind, tags: tags})
     end
 
-    #abbreviated builder methods for readability ###############################
+    #builder methods for lib classes  ##########################################
+    #in use?
     def builder
       self.subclasses.map {|klass| klass.builder}
     end
-
-    def kv_assign(tags, kv_sets)
-      kv_sets.map{|kv| tags[kv[0]] = kv[1]}.first
-    end
-    #redundant?
-    # def build_name(name_set)
-    #   name_set.uniq.reject {|i| i.blank?}.join(" ")
-    # end
 
     # parse scope chain relative to self #######################################
     def field_name
@@ -65,6 +58,7 @@ module Context
       h={kind: set[kind_idx], sub_kind: set[sub_kind_idx]}
     end
 
+    # parse scope chain relative to self #######################################
     def klass_name
       slice_class(-1)
     end
@@ -83,13 +77,6 @@ module Context
 
     def base_type_class
       base_type.constantize
-    end
-
-    def flat_class_set(origin_class, set=[])
-      origin_class.subclasses.each do |klass|
-        set << subclass_dig(klass)
-      end
-      set.flatten
     end
 
     #insert with map prepend/append ############################################
@@ -131,7 +118,19 @@ module Context
       options.map{|klass| klass.builder}.flatten
     end
 
-    # utility methods ##########################################################
+    def kv_assign(tags, kv_sets)
+      kv_sets.map{|kv| tags[kv[0]] = kv[1]}
+      tags
+    end
+
+    # utility methods -> not currently using ###################################
+    def flat_class_set(origin_class, set=[])
+      origin_class.subclasses.each do |klass|
+        set << subclass_dig(klass)
+      end
+      set.flatten
+    end
+
     def subclass_dig(klass)
       if klass.subclasses.any?
         klass.subclasses.map{|sklass| subclass_dig(sklass)}
