@@ -5,7 +5,7 @@ class Medium
   def self.search_tags
     %w[sub_category category medium_category medium material].map{|k| [k, 'n/a']}.to_h
   end
-  
+
   # FSO ############################# Medium::FSO.tags_hsh
 
   class FSO < Medium
@@ -74,7 +74,7 @@ class Medium
 
         class Media < OnPaper
           def self.opt_hsh
-            {prepend_set: Category::OriginalMedia::Original, media_set: SFO::Drawing::Standard}
+            {prepend_set: Category::OriginalMedia::Original, media_set: SFO::Drawing::StandardDrawing}
           end
         end
       end
@@ -266,7 +266,7 @@ class Medium
 
     class LimitedEditionHandPulledPrintMedia < FSO
       def self.tags_hsh
-        kv_assign(search_tags, [['category', 'LimitedEdition'], ['sub_category', 'HandPulled'], ['medium_category', 'LimitedEditionPrintMedia']])
+        kv_assign(search_tags, [['category', 'LimitedEdition'], ['sub_category', 'HandPulled'], ['medium_category', 'LimitedEditionHandPulledPrintMedia']])
       end
 
       class OnPaper < LimitedEditionHandPulledPrintMedia
@@ -458,7 +458,7 @@ class Medium
     end
 
     class Drawing < SFO
-      class Standard < Drawing
+      class StandardDrawing < Drawing
         def self.options
           Option.builder(['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing'], field_kind, tags)
         end

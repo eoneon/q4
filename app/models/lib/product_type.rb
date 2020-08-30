@@ -37,7 +37,7 @@ class ProductType
     if v == 'OneOfAKind'
       'One-of-a-Kind'
     elsif v == 'PaintingOnPaper'
-      'Painting (o/p)'
+      'Painting'
     else
       words = cap_words(decamelize(v)).split(' ').reject{|i| i == 'Standard'}.join(' ')
       k == "material" ? "on #{words}" : words

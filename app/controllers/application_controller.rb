@@ -86,9 +86,7 @@ class ApplicationController < ActionController::Base
   end
 
   def format_text_tag(tag_value)
-    tag_value = [['paper_only', '(paper only)'], ['standard', ''], ['limited_edition', 'ltd ed'], ['one_of_a_kind', 'one-of-a-kind']].map{|set| tag_value.sub(set[0], tag_value[1])}[0]
-    tag_value = tag_value.split('_')
-    [tag_value[0..-2], tag_value[-1]].join(' ')
+    tag_value.underscore.split('_').join(' ').sub('one of a kind', 'One-of-a-Kind').split(' ').map{|w| w.capitalize}.join(' ')
   end
 
   # update_product #############################################################
@@ -165,12 +163,8 @@ class ApplicationController < ActionController::Base
 
   def update_default_options_hsh(options_hsh)
     options_hsh.each do |f_hsh|
-      add_field(f_hsh[:collection][0].id, {}) unless skip_default_options_update?(f_hsh[:method], f_hsh[:collection].count)
+      add_field(f_hsh[:collection][0].id, {}) if %w[category_id material_id].include?(f_hsh[:method]) || f_hsh[:method] == 'medium_id' && f_hsh[:collection].count == 1
     end
-  end
-
-  def skip_default_options_update?(param_key, count)
-    %w[category_id material_id].exclude?(param_key) || (param_key == 'medium_id' && count != 1)
   end
 
   def update_default_field_sets_hsh(field_sets_hsh)
