@@ -39,7 +39,8 @@ class Item < ApplicationRecord
         select_menu_group(f, i_fields, params, inputs, opt_scope)
       end
     end
-    {'params'=>params, 'inputs'=>inputs}
+    {'params'=>params, 'inputs'=>inputs, 'description' => description_hsh(params['options'], params['field_sets'])}
+    #{'params'=>params, 'inputs'=>inputs, 'description' => description_hsh(params)}
   end
 
   # field-type specific methods ################################################
@@ -166,4 +167,140 @@ class Item < ApplicationRecord
     end
   end
 
+  # tagline & description hsh specific methods ver 3 ########################### Item.find(5).product_group['description']
+
+  def media_keys
+    %w[embellished category sub_category medium material]
+  end
+
+  def description_hsh(opt_params, fs_params, hsh={})
+    media_keys.map{|k| media_hsh(opt_params.select{|k,v| !v.nil?}, k, hsh)}
+    fs_params.each do |kind, kind_hsh|
+      case_hsh(kind_hsh, kind, hsh)
+    end
+    hsh
+  end
+
+  def case_hsh(kind_hsh, kind, hsh)
+    return if kind_hsh.has_key?(kind+'_id') && kind_hsh[kind+'_id'].nil?
+    kind_hsh.each do |f_key, f_hsh|
+      next if f_hsh.class != Hash || f_hsh.values.any?{|v| v.blank?}
+      if f_key == 'options'
+        hsh.merge!(field_name_value(kind, f_hsh[kind+'_id'].field_name))
+      elsif f_key == 'tags'
+        tags_hsh(f_hsh, hsh, kind, 'tags')
+      end
+    end
+    hsh
+  end
+
+  def media_hsh(source_hsh, k, hsh)
+    if source_hsh.has_key?(fk_id(k))
+      hsh.merge!(field_name_value(k, source_hsh[fk_id(k)].field_name))
+    elsif product.tags.has_key?(k) && product.tags[k] != 'n/a'
+      hsh.merge!(field_name_value(k, product.tags[k].underscore.split('_').join(' ')))
+    end
+  end
+
+  def tags_hsh(tags_hsh, hsh, *keys)
+    if hsh.has_key?(keys[0])
+      hsh[keys[0]][keys[1]] = tags_hsh
+    else
+      hsh[keys[0]] = {keys[1] => tags_hsh}
+    end
+  end
+
+  def field_name_value(k,v)
+    {k=>{'field_name'=>v}}
+  end
+  
+  # tagline & description hsh specific methods ver 2 ###########################
+  # def media_keys
+  #   %w[embellished category sub_category medium material]
+  # end
+  #
+  # def option_keys
+  #   %w[leafing remarque signature certificate]
+  # end
+  #
+  # def option_and_tag_keys
+  #   %w[mounting numbering]
+  # end
+  #
+  # def tag_keys
+  #   %w[dimension]
+  # end
+
+  # def description_hsh(i_params, hsh={})
+  #   description_keys = media_keys + option_keys + option_and_tag_keys + tag_keys
+  #   description_keys.each do |k|
+  #     if media_keys.include?(k)
+  #       media_hsh(i_params['options'].select{|k,v| !v.nil?}, k, hsh)
+  #     elsif option_keys.include?(k)
+  #       opts_hsh(i_params['field_sets'], hsh, k, 'options', fk_id(k))
+  #     elsif option_and_tag_keys.include?(k)
+  #       opts_and_tags_hsh(i_params['field_sets'], k, hsh)
+  #     elsif tag_keys.include?(k)
+  # 	    tags_hsh(i_params['field_sets'], hsh, k, 'tags')
+  #     end
+  #   end
+  #   hsh
+  # end
+  #
+
+  #
+  # def opts_hsh(source_hsh, hsh, *keys)
+  #   if source_hsh.has_key?(keys[0]) && !source_hsh.dig(*keys).nil?
+  #     hsh.merge!(field_name_value(keys[0], source_hsh.dig(*keys).field_name))
+  #   end
+  # end
+  #
+  # def opts_and_tags_hsh(source_hsh, k, hsh)
+  #   return if source_hsh[k][fk_id(k)].nil? #reject? akin to media_hsh?
+  #   source_hsh[k].each do |f_key, v|
+  #     if f_key == 'options' #&& !source_hsh[k][f_key][fk_id(k)].nil?
+  #       opts_hsh(source_hsh, hsh, k, f_key, fk_id(k))
+  #     elsif f_key == 'tags' #<-- here!
+  #       tags_hsh(source_hsh, hsh, k, f_key)
+  #     end
+  #   end
+  #   hsh
+  # end
+
+
+
+  # tagline & description hsh specific methods #################################
+  # def description_hsh(i_params, hsh={})
+  #   #hsh={'artist'=>{'field_name' => artist.try(:artist_name)}, 'title'=>{'field_name' =>title}}
+  #   option_items_hsh(i_params['options'].select{|k,v| !v.nil?}, hsh)
+  #   field_set_items_hsh(i_params['field_sets'], hsh)
+  # end
+
+  # def option_items_hsh(opt_params, hsh)
+  #   opt_params.each do |k,v|
+  #     hsh.merge!({v.kind =>{'field_name' => v.field_name}})
+  #   end
+  # end
+  #
+  # def field_set_items_hsh(kind_hsh, hsh)
+  #   kind_hsh.each do |kind, param_hsh|
+  #     next if param_hsh.has_key?(fk_id(kind)) && param_hsh[fk_id(kind)].nil?
+  #     param_hsh.each do |param_key, param_value| #dim_id, <obj>
+  #       if param_key == 'options' && !param_hsh[param_key][fk_id(kind)].nil?
+  #         hsh.merge!({kind=>{'field_name'=> param_hsh[param_key][fk_id(kind)].field_name}})
+  #       elsif param_key == 'tags'
+  #         set_hsh(hsh, param_hsh, kind, param_key)
+  #       end
+  #     end
+  #   end
+  #   hsh
+  # end
+  #
+  # def set_hsh(hsh, param_hsh, k, k2)
+  #   if hsh.has_key?(k)
+  #     hsh[k][k2] = param_hsh[k2]
+  #   else
+  #    hsh[k] = {k2 => param_hsh[k2]}
+  #   end
+  # end
 end

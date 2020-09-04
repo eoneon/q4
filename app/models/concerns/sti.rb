@@ -181,7 +181,7 @@ module STI
       set
     end
 
-    #build methods: normalize hstore field ########################################################
+    #build methods: normalize hstore field #####################################
     def update_tags(obj, tag_hsh)
       return if tag_hsh.blank? || tag_hsh.stringify_keys == obj.tags
       obj.tags = assign_or_merge(obj.tags, tag_hsh.stringify_keys)
@@ -197,6 +197,27 @@ module STI
 
     def assign_or_merge(h, h2)
       h.nil? ? h2 : h.merge(h2)
+    end
+
+    #hash methods ##############################################################
+    def nested_assign(kv_set, hsh, keys=[])
+      kv_set.each_with_index do |kv,i|
+        key = has_nested_key?(hsh, keys.append(kv[0]))
+        nested_assign_kv(hsh, keys, key, kv[0], kv[1], i)
+      end
+      hsh
+    end
+
+    def nested_assign_kv(hsh, keys, key, k, v, i)
+      if !key && keys.count == 1
+        hsh[k] = v
+      elsif !key && keys.count > 1
+        keys[0..i-1].inject(hsh, :fetch)[k] = v
+      end
+    end
+
+    def has_nested_key?(hsh, keys)
+      hsh.dig(*keys)
     end
 
     #class context methods, i.e., Medium, Material,...##########################

@@ -3,9 +3,14 @@
     <%= hidden_field_tag "hidden[type]", product.try(:type) %>
     <%= hidden_field_tag "hidden[product_id]", product.try(:id) %>
     <%= hidden_field_tag "hidden[artist_id]", artist.try(:id) %>
-    <%= f.number_field :sku, placeholder: "sku", class: "form-control form-control-sm mr-sm-2" %>
-    <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
-    <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+
+    <div class="col-2">
+      <%= f.number_field :sku, placeholder: "sku", class: "form-control form-control-sm mr-sm-2" %>
+    </div>
+
+    <div class="col-6">
+      <%= f.text_field :title, placeholder: "title", class: "form-control form-control-sm mr-sm-2" %>
+    </div>
 
     <% inputs = item.product_group['inputs'] %>
     <div class="row">
@@ -19,6 +24,9 @@
         <%= render "items/fields/fields_for", f: ff, scope: scope, set: set %>
       <% end %>
     <% end %>
+
+    <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
+    <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
 
   </div>
 <% end %>

@@ -31,18 +31,6 @@ class Medium
         end
       end
 
-      # class OnCanvas < OriginalPainting
-      #   def self.opt_hsh
-      #     MaterialSet::OnCanvas.opt_hsh
-      #   end
-      #
-      #   class Media < OnCanvas
-      #     def self.opt_hsh
-      #       {prepend_set: Category::OriginalMedia::Original, media_set: SFO::Painting::Standard}
-      #     end
-      #   end
-      # end
-
       class OnStandardMaterial < OriginalPainting
         def self.opt_hsh
           MaterialSet::OnStandardMaterial.opt_hsh
