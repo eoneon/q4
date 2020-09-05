@@ -24,7 +24,7 @@ class Item < ApplicationRecord
     artists.first if artists.any?
   end
 
-  # Item.find(5).field_targets ## h = Item.find(5).product_group['inputs'] ## h['inputs'] ## h['inputs']['field_sets']
+  # Item.find(5).field_targets ## h = Item.find(5).product_group['description'] ## h['inputs'] ## h['inputs']['field_sets']
   # product_group ############################################################## Item.find(3).product_group
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
@@ -40,7 +40,6 @@ class Item < ApplicationRecord
       end
     end
     {'params'=>params, 'inputs'=>inputs, 'description' => description_hsh(params['options'], params['field_sets'])}
-    #{'params'=>params, 'inputs'=>inputs, 'description' => description_hsh(params)}
   end
 
   # field-type specific methods ################################################
@@ -167,39 +166,75 @@ class Item < ApplicationRecord
     end
   end
 
-  # tagline & description hsh specific methods ver 3 ########################### Item.find(5).product_group['description']
-
-  def media_keys
-    %w[embellished category sub_category medium material]
-  end
-
+  # tagline & description hsh specific methods ver 3 ########################### h = Item.find(5).product_group['description']
   def description_hsh(opt_params, fs_params, hsh={})
-    media_keys.map{|k| media_hsh(opt_params.select{|k,v| !v.nil?}, k, hsh)}
-    fs_params.each do |kind, kind_hsh|
-      case_hsh(kind_hsh, kind, hsh)
+    item_hsh(hsh)
+    media_hsh(opt_params.select{|k,v| !v.nil?}, hsh)
+    sub_media_hsh(fs_params, hsh)
+    tag_line(hsh, hsh.keys)
+  end
+
+  def item_hsh(hsh)
+    [['artist', artist.try(:artist_name)], ['title', title]].map{|set| hsh.merge!(field_name_value(set[0], set[1]))}
+  end
+
+  def media_hsh(source_hsh, hsh)
+    %w[embellished category sub_category medium material].each do |kind|
+      merge_media_to_hsh(source_hsh, hsh, kind)
     end
     hsh
   end
 
-  def case_hsh(kind_hsh, kind, hsh)
-    return if kind_hsh.has_key?(kind+'_id') && kind_hsh[kind+'_id'].nil?
-    kind_hsh.each do |f_key, f_hsh|
-      next if f_hsh.class != Hash || f_hsh.values.any?{|v| v.blank?}
-      if f_key == 'options'
-        hsh.merge!(field_name_value(kind, f_hsh[kind+'_id'].field_name))
-      elsif f_key == 'tags'
-        tags_hsh(f_hsh, hsh, kind, 'tags')
-      end
+  def merge_media_to_hsh(source_hsh, hsh, kind)
+    if source_hsh.has_key?(kind+'_id')
+      f_hsh_from_source_hsh(source_hsh, hsh, kind)
+    elsif product.tags.has_key?(kind) && product.tags[kind] != 'n/a'
+      f_hsh_from_from_product_hsh(hsh, kind)
+    end
+  end
+
+  #################################################
+
+  def sub_media_hsh(source_hsh, hsh)
+    source_hsh.each do |kind, kind_hsh|
+      merge_options_and_tags_hsh(kind_hsh, hsh, kind)
+      #f_hsh_from_source_hsh(kind_hsh.dig('options'), hsh, kind) if kind_hsh.dig('options') && !kind_hsh.dig('options').values.any?{|v| v.blank?}
+      #tags_hsh(kind_hsh.dig('tags'), hsh, kind, 'tags') if kind_hsh.dig('tags') && !kind_hsh.dig('tags').values.any?{|v| v.blank?}
     end
     hsh
   end
 
-  def media_hsh(source_hsh, k, hsh)
-    if source_hsh.has_key?(fk_id(k))
-      hsh.merge!(field_name_value(k, source_hsh[fk_id(k)].field_name))
-    elsif product.tags.has_key?(k) && product.tags[k] != 'n/a'
-      hsh.merge!(field_name_value(k, product.tags[k].underscore.split('_').join(' ')))
+  def merge_options_and_tags_hsh(kind_hsh, hsh, kind)
+    %w[options tags].each do |f_key|
+      next if !kind_hsh.dig(f_key) || kind_hsh.dig(f_key).values.any?{|v| v.blank?}
+      f_hsh_from_source_hsh(kind_hsh.dig(f_key), hsh, kind) if f_key == 'options'
+      tags_hsh(kind_hsh.dig(f_key), hsh, kind, 'tags') if f_key == 'tags'
     end
+    hsh
+  end
+
+  # def merge_sub_media_to_hsh(source_hsh, hsh, kind)
+  #   source_hsh.each do |f_key, f_hsh|
+  #     next if f_hsh.class != Hash || f_hsh.values.any?{|v| v.blank?}
+  #     sub_media_merge_cases(f_hsh, f_key, kind, hsh)
+  #   end
+  #   hsh
+  # end
+
+  # def sub_media_merge_cases(source_hsh, f_key, kind, hsh)
+  #   if f_key == 'options'
+  #     f_hsh_from_source_hsh(source_hsh, hsh, kind)
+  #   elsif f_key == 'tags'
+  #     tags_hsh(source_hsh, hsh, kind, 'tags')
+  #   end
+  # end
+
+  def f_hsh_from_source_hsh(source_hsh, hsh, k)
+    hsh.merge!(field_name_value(k, source_hsh[fk_id(k)].field_name))
+  end
+
+  def f_hsh_from_from_product_hsh(hsh, k)
+    hsh.merge!(field_name_value(k, product.tags[k].underscore.split('_').join(' ')))
   end
 
   def tags_hsh(tags_hsh, hsh, *keys)
@@ -213,94 +248,48 @@ class Item < ApplicationRecord
   def field_name_value(k,v)
     {k=>{'field_name'=>v}}
   end
-  
-  # tagline & description hsh specific methods ver 2 ###########################
-  # def media_keys
-  #   %w[embellished category sub_category medium material]
-  # end
-  #
-  # def option_keys
-  #   %w[leafing remarque signature certificate]
-  # end
-  #
-  # def option_and_tag_keys
-  #   %w[mounting numbering]
-  # end
-  #
-  # def tag_keys
-  #   %w[dimension]
-  # end
 
-  # def description_hsh(i_params, hsh={})
-  #   description_keys = media_keys + option_keys + option_and_tag_keys + tag_keys
-  #   description_keys.each do |k|
-  #     if media_keys.include?(k)
-  #       media_hsh(i_params['options'].select{|k,v| !v.nil?}, k, hsh)
-  #     elsif option_keys.include?(k)
-  #       opts_hsh(i_params['field_sets'], hsh, k, 'options', fk_id(k))
-  #     elsif option_and_tag_keys.include?(k)
-  #       opts_and_tags_hsh(i_params['field_sets'], k, hsh)
-  #     elsif tag_keys.include?(k)
-  # 	    tags_hsh(i_params['field_sets'], hsh, k, 'tags')
-  #     end
-  #   end
-  #   hsh
-  # end
-  #
+  ##############################################################################
 
-  #
-  # def opts_hsh(source_hsh, hsh, *keys)
-  #   if source_hsh.has_key?(keys[0]) && !source_hsh.dig(*keys).nil?
-  #     hsh.merge!(field_name_value(keys[0], source_hsh.dig(*keys).field_name))
-  #   end
-  # end
-  #
-  # def opts_and_tags_hsh(source_hsh, k, hsh)
-  #   return if source_hsh[k][fk_id(k)].nil? #reject? akin to media_hsh?
-  #   source_hsh[k].each do |f_key, v|
-  #     if f_key == 'options' #&& !source_hsh[k][f_key][fk_id(k)].nil?
-  #       opts_hsh(source_hsh, hsh, k, f_key, fk_id(k))
-  #     elsif f_key == 'tags' #<-- here!
-  #       tags_hsh(source_hsh, hsh, k, f_key)
-  #     end
-  #   end
-  #   hsh
-  # end
+  def tag_line(d_hsh, d_keys, set=[])
+    title_keys.each do |k|
+      set << tag_line_values(k, d_hsh[k]['field_name'], d_hsh.dig(k, 'tags'), d_keys) if d_keys.include?(k)
+    end
+    set #[set, d_keys, d_hsh]
+  end
 
+  def tag_line_values(k, field_name, tags, d_keys)
+    #puts "#{k_hsh}"
+    #field_names = k_hsh['field_name']
 
+    if k == 'artist' && !field_name.blank?
+      "#{field_name},"
+    elsif k == 'title' && !field_name.blank?
+      "\"#{field_name}\""
+    elsif k == 'category' && field_name == 'one of a kind'
+      'One-of-a-Kind'
+    elsif k == 'material'
+      "on #{field_name}"
+    elsif k == 'leafing'
+      "with #{field_name}"
+    elsif k == 'remarque'
+      d_keys.include?('leafing') ? "and #{field_name}" : "with #{field_name}"
+    elsif k == 'numbering'
+      tags ? "#{field_name} #{tags.values.join('/')}" : field_name
+    elsif k == 'signature'
+      d_keys.include?('numbering') ? "and #{field_name}" : field_name
+    elsif k == 'certificate'
+      "with #{field_name}"
+    else
+      field_name
+    end
+  end
 
-  # tagline & description hsh specific methods #################################
-  # def description_hsh(i_params, hsh={})
-  #   #hsh={'artist'=>{'field_name' => artist.try(:artist_name)}, 'title'=>{'field_name' =>title}}
-  #   option_items_hsh(i_params['options'].select{|k,v| !v.nil?}, hsh)
-  #   field_set_items_hsh(i_params['field_sets'], hsh)
-  # end
+  def title_keys
+    %w[artist title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate]
+  end
 
-  # def option_items_hsh(opt_params, hsh)
-  #   opt_params.each do |k,v|
-  #     hsh.merge!({v.kind =>{'field_name' => v.field_name}})
-  #   end
-  # end
-  #
-  # def field_set_items_hsh(kind_hsh, hsh)
-  #   kind_hsh.each do |kind, param_hsh|
-  #     next if param_hsh.has_key?(fk_id(kind)) && param_hsh[fk_id(kind)].nil?
-  #     param_hsh.each do |param_key, param_value| #dim_id, <obj>
-  #       if param_key == 'options' && !param_hsh[param_key][fk_id(kind)].nil?
-  #         hsh.merge!({kind=>{'field_name'=> param_hsh[param_key][fk_id(kind)].field_name}})
-  #       elsif param_key == 'tags'
-  #         set_hsh(hsh, param_hsh, kind, param_key)
-  #       end
-  #     end
-  #   end
-  #   hsh
-  # end
-  #
-  # def set_hsh(hsh, param_hsh, k, k2)
-  #   if hsh.has_key?(k)
-  #     hsh[k][k2] = param_hsh[k2]
-  #   else
-  #    hsh[k] = {k2 => param_hsh[k2]}
-  #   end
-  # end
+  def description_keys
+    %w[title artist embellished category sub_category medium material dimension leafing remarque numbering signature mounting certificate dimension]
+  end
 end
