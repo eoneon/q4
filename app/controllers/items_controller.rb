@@ -1,4 +1,5 @@
 class ItemsController < ApplicationController
+  #after_action :product_group, only: [:show, :new, :create]
 
   def show
     @item = Item.find(params[:id])
@@ -7,6 +8,7 @@ class ItemsController < ApplicationController
 
     @products = products
     @input_group = search_input_group
+    @product_group = @item.product_group
   end
 
   def create
@@ -32,6 +34,7 @@ class ItemsController < ApplicationController
     @input_group = search_input_group
 
     @item.save
+    @product_group = @item.product_group
 
     respond_to do |format|
       format.js
@@ -67,7 +70,6 @@ class ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(:sku, :title, :qty)
-    #params.require(:item).permit!
   end
 
   def product
@@ -79,3 +81,5 @@ class ItemsController < ApplicationController
   end
 
 end
+
+#params.require(:item).permit!

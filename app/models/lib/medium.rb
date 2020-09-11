@@ -220,7 +220,7 @@ class Medium
 
         class SubMedia < OnCanvas
           def self.opt_hsh
-            {prepend_set: [SubMedium::SFO::Standard::Embellished, Category::LimitedEdition], append_set: AppendSet::Standard.set}
+            {prepend_set: [SubMedium::SFO::Standard::Embellished, Category::LimitedEdition], append_set: AppendSet::WithNumbering.set}
           end
 
           class Media < SubMedia

@@ -40,13 +40,14 @@ class Mounting
 
   class Border < Mounting
     def self.builder
-      field_set(field_name, field_kind, Dimension::FieldGroup.options(Dimension::FieldGroup.width_height, field_kind).prepend(radio_button(field_name, field_kind)), tags)
+      #field_set(field_name, field_kind, Dimension::FieldGroup.options(Dimension::FieldGroup.width_height, field_kind).prepend(radio_button(field_name, field_kind)), tags)
+      field_set(field_name, field_kind, Dimension::FieldGroup.options(Dimension::FieldGroup.width_height, field_kind), tags)
     end
   end
 
   class Matting < Mounting
     def self.builder
-      field_set(field_name, field_kind, Dimension::FieldGroup.options(Dimension::FieldGroup.width_height, field_kind).prepend(radio_button(field_name, field_kind)), tags)
+      field_set(field_name, field_kind, Dimension::FieldGroup.options(Dimension::FieldGroup.width_height, field_kind), tags)
     end
   end
 

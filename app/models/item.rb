@@ -28,7 +28,7 @@ class Item < ApplicationRecord
   # product_group ############################################################## Item.find(3).product_group
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
-    return {'params'=>params, 'inputs'=>inputs} if !product
+    return {'params'=>params, 'inputs'=>inputs, 'description'=> 'There is no product selected.'} if !product
     p_fields, i_fields, opt_scope = product.field_targets, field_targets, %w[embellished category medium material]
     p_fields.each do |f|
       if f.type == 'SelectField'
@@ -171,12 +171,27 @@ class Item < ApplicationRecord
     item_hsh(hsh)
     media_hsh(opt_params.select{|k,v| !v.nil?}, hsh)
     sub_media_hsh(fs_params, hsh)
-    tag_line(hsh, hsh.keys)
+    dimension_hsh(hsh, hsh.keys)
+    description_builder(hsh, {'title' => title_keys(hsh, hsh.keys), 'body' => body_keys(hsh, hsh.keys)})
   end
 
+  # item_hsh: PART I ###########################################################
+
   def item_hsh(hsh)
-    [['artist', artist.try(:artist_name)], ['title', title]].map{|set| hsh.merge!(field_name_value(set[0], set[1]))}
+    set_artist(hsh)
+    set_title(hsh)
   end
+
+  def set_artist(hsh)
+    hsh.merge!(field_name_value('artist', artist.artist_name)) if artist
+  end
+
+  def set_title(hsh)
+    v = title.blank? ? 'This' : "\"#{title}\""
+    hsh.merge!(field_name_value('title', v))
+  end
+
+  # media_hsh: PART II #########################################################
 
   def media_hsh(source_hsh, hsh)
     %w[embellished category sub_category medium material].each do |kind|
@@ -193,13 +208,11 @@ class Item < ApplicationRecord
     end
   end
 
-  #################################################
+  # sub_media_hsh: PART III ####################################################
 
   def sub_media_hsh(source_hsh, hsh)
     source_hsh.each do |kind, kind_hsh|
       merge_options_and_tags_hsh(kind_hsh, hsh, kind)
-      #f_hsh_from_source_hsh(kind_hsh.dig('options'), hsh, kind) if kind_hsh.dig('options') && !kind_hsh.dig('options').values.any?{|v| v.blank?}
-      #tags_hsh(kind_hsh.dig('tags'), hsh, kind, 'tags') if kind_hsh.dig('tags') && !kind_hsh.dig('tags').values.any?{|v| v.blank?}
     end
     hsh
   end
@@ -212,22 +225,6 @@ class Item < ApplicationRecord
     end
     hsh
   end
-
-  # def merge_sub_media_to_hsh(source_hsh, hsh, kind)
-  #   source_hsh.each do |f_key, f_hsh|
-  #     next if f_hsh.class != Hash || f_hsh.values.any?{|v| v.blank?}
-  #     sub_media_merge_cases(f_hsh, f_key, kind, hsh)
-  #   end
-  #   hsh
-  # end
-
-  # def sub_media_merge_cases(source_hsh, f_key, kind, hsh)
-  #   if f_key == 'options'
-  #     f_hsh_from_source_hsh(source_hsh, hsh, kind)
-  #   elsif f_key == 'tags'
-  #     tags_hsh(source_hsh, hsh, kind, 'tags')
-  #   end
-  # end
 
   def f_hsh_from_source_hsh(source_hsh, hsh, k)
     hsh.merge!(field_name_value(k, source_hsh[fk_id(k)].field_name))
@@ -249,47 +246,228 @@ class Item < ApplicationRecord
     {k=>{'field_name'=>v}}
   end
 
-  ##############################################################################
+  #refactored methods for building description #################################
 
-  def tag_line(d_hsh, d_keys, set=[])
-    title_keys.each do |k|
-      set << tag_line_values(k, d_hsh[k]['field_name'], d_hsh.dig(k, 'tags'), d_keys) if d_keys.include?(k)
+  def description_builder(d_hsh, d_keys_hsh, hsh={})
+    d_keys_hsh.each do |context, d_keys|
+      build_description_by_kind(d_hsh, context, d_keys, hsh.merge!({context =>[]}))
     end
-    set #[set, d_keys, d_hsh]
+    hsh
   end
 
-  def tag_line_values(k, field_name, tags, d_keys)
-    #puts "#{k_hsh}"
-    #field_names = k_hsh['field_name']
+  def dimension_hsh(d_hsh, d_keys, tag_set=[])
+    %w[mounting dimension].each do |k|
+      if d_keys.include?(k) && d_hsh.dig(k, 'tags')
+        k_tags, tag_keys_split = d_hsh[k]['tags'], d_hsh.dig(k, 'tags').keys.map{|tag_key| tag_key.split('_')}.flatten
+        tag_set << [format_dimensions(k_tags), format_dimension_type(d_hsh[k], tag_keys_split)].join(' ')
+      end
+    end
+    punct = tag_set.count > 1 ? ', ' : ' '
+    d_hsh['dimension']['tags']['body'] = "Measures approx. #{tag_set.join(punct)}." unless tag_set.empty?
+  end
 
-    if k == 'artist' && !field_name.blank?
-      "#{field_name},"
-    elsif k == 'title' && !field_name.blank?
-      "\"#{field_name}\""
-    elsif k == 'category' && field_name == 'one of a kind'
-      'One-of-a-Kind'
-    elsif k == 'material'
-      "on #{field_name}"
-    elsif k == 'leafing'
-      "with #{field_name}"
-    elsif k == 'remarque'
-      d_keys.include?('leafing') ? "and #{field_name}" : "with #{field_name}"
-    elsif k == 'numbering'
-      tags ? "#{field_name} #{tags.values.join('/')}" : field_name
-    elsif k == 'signature'
-      d_keys.include?('numbering') ? "and #{field_name}" : field_name
-    elsif k == 'certificate'
-      "with #{field_name}"
-    else
+  def format_dimension_type(kind_hsh, tag_keys_split)
+    if tag_keys_split[0] == 'material'
+      material_dimension(tag_keys_split)
+    elsif tag_keys_split[0] == 'mounting'
+      mounting_dimension(kind_hsh['field_name'])
+    end
+  end
+
+  def format_dimensions(tags)
+    tags.transform_values{|v| v+"\""}.values.join(' x ')
+  end
+
+  def mounting_dimension(field_name)
+    case
+      when field_name == 'framed'; "(frame)"
+      when field_name == 'matted'; "(matting)"
+      when field_name == 'border'; "(border)"
+    end
+  end
+
+  def material_dimension(tags_keys_split)
+    tags_keys_split.include?('image-diameter') ? "(image-diameter)" : "(image)"
+  end
+
+  def build_description_by_kind(d_hsh, context, d_keys, hsh)
+    d_keys.each do |k|
+      hsh[context] << description_cases(d_hsh, context, k, d_hsh[k]['field_name'], d_hsh[k]['tags'], d_keys)
+    end
+    hsh[context] = format_description_by_context(hsh, context)
+  end
+
+  def format_description_by_context(hsh, context)
+    hsh[context].map!{|words| cap_words(words)} if context == 'title'
+    hsh[context].join(' ')
+  end
+
+  def description_cases(d_hsh, context, k, field_name, tags, d_keys)
+    case
+      when k == 'artist' then format_artist(context, field_name)
+      when k == 'title' && context == 'body' && d_keys.index('title')+1 then format_title(d_hsh[d_keys[d_keys.index('title')+1]]['field_name'], field_name)
+      when k == 'mounting' then format_mounting(context, field_name)
+      when k == 'category' && field_name == 'one of a kind' then format_category(context)
+      when k == 'medium' && context == 'title' then format_medium(d_keys, field_name)
+      when k == 'material' then format_material(context, d_keys, field_name, field_name.split(' '))
+      when k == 'leafing' then format_leafing(d_keys, field_name)
+      when k == 'remarque' then format_remarque(context, d_keys, field_name)
+      when k == 'numbering' then format_numbering(d_keys, field_name, tags, field_name.split(' ').include?('from'))
+      when k == 'signature' then format_signature(context, d_keys, field_name)
+      when k == 'certificate' then format_certificate(context, field_name)
+      when k == 'dimension' then format_dimension(context, tags)
+      else field_name
+    end
+  end
+
+  def format_artist(context, field_name)
+    context == 'title' ? "#{field_name}," : "by #{field_name},"
+  end
+
+  def format_title(word, field_name)
+    "#{field_name} is #{format_vowel(word, ['one-of-a-kind', 'unique'])}"
+  end
+
+  def format_mounting(context, field_name)
+    if context == 'title' && field_name.split(' ').include?('framed')
+      'framed'
+    elsif context == 'body' && field_name.split(' ').any?{|i| ['framed', 'matted']}
+      "This piece comes #{field_name}."
+    end
+  end
+
+  def format_medium(d_keys, field_name)
+     "#{field_name}," if %w[material leafing remarque].all? {|k| d_keys.exclude?(k)}
+  end
+
+  def format_category(context)
+    context == 'title' ? 'One-of-a-Kind' : 'one-of-a-kind'
+  end
+
+  def format_material(context, d_keys, field_name, split_field_name)
+    return if context == 'title' && split_field_name.include?('paper')
+    field_name = 'canvas' if context == 'title' && split_field_name.include?('stretched')
+    field_name = 'canvas' if context == 'body' && split_field_name.include?('gallery')
+    punct = ',' if %w[leafing remarque].all? {|i| d_keys.exclude?(i)} && context == 'title'
+    "on #{[field_name, punct].join('')}"
+  end
+
+  def format_leafing(d_keys, field_name)
+    punct = ',' if d_keys.exclude?('remarque')
+    "with #{[field_name, punct].join('')}"
+  end
+
+  def format_remarque(context, d_keys, field_name)
+    word = d_keys.include?('leafing') ? 'and' : 'with'
+    field_name = field_name+',' if context == 'title'
+    "#{word} #{field_name}"
+  end
+
+  def format_numbering(d_keys, field_name, tags, proof_ed)
+    if proof_ed && d_keys.include?('material')
       field_name
+    elsif proof_ed && %w[leafing remarque].all? {|k| d_keys.exclude?(k)}
+      "#{field_name},"
+    elsif !proof_ed
+      word = 'and' if d_keys.include?('signature')
+      words = tags ? "#{field_name} #{tags.values.join('/')}" : field_name
+      [words, word].join(' ')
     end
   end
 
-  def title_keys
+  def format_signature(context, d_keys, field_name)
+    if context == 'title' && d_keys.include?('certificate')
+      field_name
+    elsif context == 'title' && d_keys.exclude?('certificate')
+      "#{field_name}."
+    elsif context == 'body'
+      "#{field_name} by the artist."
+    end
+  end
+
+  def format_certificate(context, field_name)
+    field_name = field_name == 'LOA' ? 'Letter' : 'Certificate'
+    word = context == 'title' ? 'with' : 'Includes'
+    [word, field_name, 'of Authenticity.'].join(' ')
+  end
+
+  def format_dimension(context, tags)
+    tags['body'] if context == 'body'
+  end
+
+  # title_keys #################################################################
+
+  def title_keys(d_hsh, d_keys)
+    reorder_title_keys(d_hsh, all_title_keys).reject {|k| reject_title_keys(d_hsh, d_keys, k)}
+  end
+
+  def reorder_title_keys(d_hsh, title_keys)
+    all_title_keys.each do |k|
+      reorder_title_key_cases(k, d_hsh[k]['field_name'], title_keys) if d_hsh.has_key?(k)
+    end
+    title_keys
+  end
+
+  def reorder_title_key_cases(k, v, title_keys)
+    if k == 'numbering' && v.split(' ')[0] == 'from'
+      title_keys.delete(k)
+      title_keys.insert(title_keys.index('material'), k)
+    else
+      title_keys
+    end
+  end
+
+  def reject_title_keys(d_hsh, d_keys, k)
+    return true if d_keys.exclude?(k)
+    reject_title_keys_cases(d_hsh, d_keys, k, d_hsh[k]['field_name'])
+  end
+
+  def reject_title_keys_cases(d_hsh, d_keys, k, v)
+    case
+      when k == 'medium' && v.split(' ').include?('giclee') && d_hsh['material']['field_name'].split(' ').exclude?('paper'); true
+      when k == 'material' && v.split(' ').include?('paper'); true
+      when k == 'title' && v[0] != "\""; true
+      else false
+    end
+  end
+
+  def all_title_keys
     %w[artist title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate]
   end
 
-  def description_keys
-    %w[title artist embellished category sub_category medium material dimension leafing remarque numbering signature mounting certificate dimension]
+  # body_keys ##################################################################
+
+  def body_keys(d_hsh, d_keys)
+    reorder_title_keys(d_hsh, all_body_keys).reject {|k| reject_body_keys(d_hsh, d_keys, k)}
+  end
+
+  def reject_body_keys(d_hsh, d_keys, k)
+    d_keys.exclude?(k)
+  end
+
+  def all_body_keys
+    %w[title embellished category sub_category medium material leafing remarque artist numbering signature mounting certificate dimension]
+  end
+
+  ##############################################################################
+
+  def format_vowel(word, exception_set=[])
+    %w[a e i o u].include?(word.first.downcase) && exception_set.exclude?(word) ? 'an' : 'a'
+  end
+
+  def cap_words(words, set=[])
+    return words if words[0] == "\""
+    words.split(' ').each do |word|
+      set << cap_case(word)
+    end
+    set.join(' ')
+  end
+
+  def cap_case(word)
+    if ('A'..'Z').include?(word[0]) || %w[a an and from with].include?(word)
+      word
+    else
+      word.capitalize
+    end
   end
 end

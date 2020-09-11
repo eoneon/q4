@@ -1,5 +1,5 @@
-$("#edit-item").html("<%= j render 'items/edit', invoice: @invoice, item: @item, product: @product, artist: @artist %>");
-$("#search-card").html("<%= j render 'items/search_card', products: @products, input_group: @input_group %>");
+$("#edit-item").html("<%= j render 'items/edit', invoice: @invoice, item: @item, product: @product, artist: @artist, product_group: @product_group %>");
+$("#search-card").html("<%= j render 'items/search_card', products: @products, input_group: @input_group, product_group: @product_group %>");
 
 // $("#search-form").html("<%= j render 'items/search', item: @item, products: @products, input_group: @input_group %>");
 // $("#tab-pane").html("<%= j render 'items/aside', products: @products, product_id: @input_group[:product_id] %>");

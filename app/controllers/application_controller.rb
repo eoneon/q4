@@ -163,7 +163,7 @@ class ApplicationController < ActionController::Base
 
   def update_default_options_hsh(options_hsh)
     options_hsh.each do |f_hsh|
-      add_field(f_hsh[:collection][0].id, {}) if %w[category_id material_id].include?(f_hsh[:method]) || f_hsh[:method] == 'medium_id' && f_hsh[:collection].count == 1
+      add_field(f_hsh[:collection][0].id, {}) if %w[category_id material_id medium_id].include?(f_hsh[:method]) #|| f_hsh[:method] == 'medium_id' && f_hsh[:collection].count == 1
     end
   end
 
