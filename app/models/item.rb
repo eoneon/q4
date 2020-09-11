@@ -246,14 +246,7 @@ class Item < ApplicationRecord
     {k=>{'field_name'=>v}}
   end
 
-  #refactored methods for building description #################################
-
-  def description_builder(d_hsh, d_keys_hsh, hsh={})
-    d_keys_hsh.each do |context, d_keys|
-      build_description_by_kind(d_hsh, context, d_keys, hsh.merge!({context =>[]}))
-    end
-    hsh
-  end
+  # dimension_hsh methods ######################################################
 
   def dimension_hsh(d_hsh, d_keys, tag_set=[])
     %w[mounting dimension].each do |k|
@@ -290,16 +283,26 @@ class Item < ApplicationRecord
     tags_keys_split.include?('image-diameter') ? "(image-diameter)" : "(image)"
   end
 
+  #refactored methods for building description #################################
+
+  def description_builder(d_hsh, d_keys_hsh, hsh={})
+    d_keys_hsh.each do |context, d_keys|
+      build_description_by_kind(d_hsh, context, d_keys, hsh.merge!({context =>[]}))
+      hsh[context] = format_description_by_context(hsh[context].compact, context)
+    end
+    hsh
+  end
+
   def build_description_by_kind(d_hsh, context, d_keys, hsh)
     d_keys.each do |k|
       hsh[context] << description_cases(d_hsh, context, k, d_hsh[k]['field_name'], d_hsh[k]['tags'], d_keys)
     end
-    hsh[context] = format_description_by_context(hsh, context)
+    hsh[context].compact
   end
 
-  def format_description_by_context(hsh, context)
-    hsh[context].map!{|words| cap_words(words)} if context == 'title'
-    hsh[context].join(' ')
+  def format_description_by_context(word_set, context)
+    word_set.map!{|words| cap_words(words)} if context == 'title'
+    word_set.join(' ')
   end
 
   def description_cases(d_hsh, context, k, field_name, tags, d_keys)
@@ -320,6 +323,8 @@ class Item < ApplicationRecord
     end
   end
 
+  # description_cases methods for building description #########################
+
   def format_artist(context, field_name)
     context == 'title' ? "#{field_name}," : "by #{field_name},"
   end
@@ -337,7 +342,7 @@ class Item < ApplicationRecord
   end
 
   def format_medium(d_keys, field_name)
-     "#{field_name}," if %w[material leafing remarque].all? {|k| d_keys.exclude?(k)}
+     %w[material leafing remarque].all? {|k| d_keys.exclude?(k)} ? "#{field_name}," : field_name
   end
 
   def format_category(context)
@@ -359,7 +364,7 @@ class Item < ApplicationRecord
 
   def format_remarque(context, d_keys, field_name)
     word = d_keys.include?('leafing') ? 'and' : 'with'
-    field_name = field_name+',' if context == 'title'
+    field_name = field_name+',' #if context == 'title'
     "#{word} #{field_name}"
   end
 
@@ -456,8 +461,12 @@ class Item < ApplicationRecord
   end
 
   def cap_words(words, set=[])
-    return words if words[0] == "\""
-    words.split(' ').each do |word|
+    return set << words if words && words[0] == "\""
+    format_word_set(words.split(' '), set)
+  end
+
+  def format_word_set(word_set, set)
+    word_set.each do |word|
       set << cap_case(word)
     end
     set.join(' ')
