@@ -25,7 +25,7 @@ class Item < ApplicationRecord
   end
 
   # Item.find(5).field_targets ## h = Item.find(5).product_group['description'] ## h['inputs'] ## h['inputs']['field_sets']
-  # product_group ############################################################## Item.find(3).product_group
+  # product_group ############################################################## Item.find(5).product_group['inputs']['field_sets']
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
     return {'params'=>params, 'inputs'=>inputs, 'description'=> 'There is no product selected.'} if !product
@@ -381,11 +381,28 @@ class Item < ApplicationRecord
   end
 
   def format_signature(context, d_keys, field_name)
-    if context == 'title' && d_keys.include?('certificate')
-      field_name
-    elsif context == 'title' && d_keys.exclude?('certificate')
+    context == 'title' ? title_signature(d_keys, field_name) : body_signature(d_keys, field_name)
+    # if context == 'title' && d_keys.include?('certificate')
+    #   field_name
+    # elsif context == 'title' && d_keys.exclude?('certificate')
+    #   "#{field_name}."
+    # elsif context == 'body'
+    #   "#{field_name} by the artist."
+    # end
+  end
+
+  def title_signature(d_keys, field_name)
+    field_name = field_name.split(' ').include?('authorized') ? 'signed' : field_name
+    punct = '.' if d_keys.exclude?('certificate')
+    [field_name, punct].join('')
+  end
+
+  def body_signature(d_keys, field_name)
+    if k = %w[plate authorized].detect{|k| field_name.split(' ').include?(k)}
+      "bearing the #{k} signature of the artist."
+    elsif field_name.split(' ').include?('estate')
       "#{field_name}."
-    elsif context == 'body'
+    else
       "#{field_name} by the artist."
     end
   end
