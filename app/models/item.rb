@@ -10,6 +10,11 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
+  attribute :tags
+  attribute :disclaimer
+  attribute :field_sets
+  attribute :options
+
   def field_targets
     scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
   end

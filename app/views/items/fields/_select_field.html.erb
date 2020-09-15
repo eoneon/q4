@@ -1,5 +1,6 @@
 <div class="col-3">
-  <div class="input-group input-group-sm mb-3">
+  <label><%= f_hsh[:label] %></label>
+  <div class="input-group input-group-sm">
     <%= f.fields_for :options do |ff| %>
       <%= ff.collection_select f_hsh[:method], f_hsh[:collection], :id, :field_name, {include_blank: true, selected: f_hsh[:selected].try(:id)}, {class: "form-control field-param"} %>
     <% end %>

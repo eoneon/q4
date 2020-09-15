@@ -1,35 +1,60 @@
 <%= form_with model: item, url: invoice_item_path(invoice, item), id: "edit-item" do |f| %>
   <h5><span>Tagline: <%= @product_group['description']['title'] %></span></h5>
+  <hr>
   <h5><span>Description: <%= @product_group['description']['body'] %></span></h5>
   <div class="form">
     <%= hidden_field_tag "hidden[type]", product.try(:type) %>
     <%= hidden_field_tag "hidden[product_id]", product.try(:id) %>
     <%= hidden_field_tag "hidden[artist_id]", artist.try(:id) %>
 
-    <div class="col-2">
-      <%= f.number_field :sku, placeholder: "sku", class: "form-control form-control-sm mr-sm-2" %>
-    </div>
+    <div class="card border border-secondary p-2 mb-2">
+      <div class="row">
+        <div class="col-2">
+          <label>sku</label>
+          <%= f.number_field :sku, placeholder: "sku", class: "form-control form-control-sm mr-sm-2" %>
+        </div>
 
-    <div class="col-6">
-      <%= f.text_field :title, placeholder: "title", class: "form-control form-control-sm mr-sm-2" %>
+        <div class="col-4">
+          <label>title</label>
+          <%= f.text_field :title, placeholder: "title", class: "form-control form-control-sm mr-sm-2" %>
+        </div>
+
+        <div class="col-2">
+          <label>retail</label>
+          <%= f.number_field :retail, placeholder: "retail", class: "form-control form-control-sm mr-sm-2" %>
+        </div>
+
+        <div class="col-2">
+          <label>qty</label>
+          <%= f.number_field :qty, placeholder: "qty", class: "form-control form-control-sm mr-sm-2" %>
+        </div>
+      </div>
     </div>
 
     <% inputs = @product_group['inputs'] %>
-    <div class="row">
-      <% inputs['options'].each do |f_hsh| %>
-        <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh %>
-      <% end %>
+    <div class="card border border-secondary p-2 mb-2">
+      <div class="row">
+        <% inputs['options'].each do |f_hsh| %>
+          <%= render "items/fields/#{f_hsh[:render_as]}", f: f, f_hsh: f_hsh %>
+        <% end %>
+      </div>
     </div>
 
     <%= f.fields_for :field_sets do |ff| %>
       <% field_set_rows(inputs['field_sets']).each do |field_row| %>
+      <div class="card border border-secondary p-2 mb-2">
         <div class="row">
           <% field_row.each do |scope, set| %>
             <%= render "items/fields/fields_for", f: ff, scope: scope, set: set %>
           <% end %>
         </div>
+      </div>
       <% end %>
     <% end %>
+
+    <%#= f.fields_for :tags, OpenStruct.new(item.tags) do |ff| %>
+      <%#= ff.text_area "disclaimer", placeholder: "disclaimer", class: "form-control" %>
+    <%# end %>
 
     <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
     <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>

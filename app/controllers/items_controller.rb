@@ -24,6 +24,7 @@ class ItemsController < ApplicationController
   def update
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
+    puts "item_params: #{item_params}"
     @item.assign_attributes(item_params)
 
     @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
@@ -69,7 +70,17 @@ class ItemsController < ApplicationController
   private
 
   def item_params
-    params.require(:item).permit(:sku, :title, :qty)
+    params.require(:item).permit(:sku, :title, :retail, :qty)
+    #params.require(:item).permit(:sku, :title, :retail, :qty, {tags: :disclaimer})
+    #hsh['tags'] = hsh[:tags].to_h
+    #hsh
+    #item_params = params.require(:item).permit(:sku, :title, :retail, :qty, {tags: :disclaimer})
+    #tags = params[:item].delete(:tags)
+    #item_params[:item][:tags] = tags.to_h
+    # puts tags: "#{tags}"
+    # params.require(:item).permit(:sku, :title, :retail, :qty).tap do |whitelisted|
+    #   whitelisted[:tags] = tags
+    # end
   end
 
   def product

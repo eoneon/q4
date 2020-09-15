@@ -3,8 +3,15 @@
     <div class="media">
       <div class="media-body">
         <a href="<%= invoice_item_path(item.invoice, item) %>" class="btn btn-link" type="button">
-          <%= "#{item.sku} #{item.invoice.items.count}" %>
+          <%= "#{item.sku}:" %>
         </a>
+      </div>
+    </div>
+  </th>
+  <th>
+    <div class="media">
+      <div class="media-body">
+        <%= "#{item.product_group['description']['title']}" %>
       </div>
     </div>
   </th>
