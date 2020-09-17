@@ -10,10 +10,45 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  attribute :tags
-  attribute :disclaimer
-  attribute :field_sets
-  attribute :options
+  # attribute :width
+  # attribute :height
+  def csv_item
+    [:sku, :title, :retail, :qty].map{|k| [k, self.public_send(k)]}.to_h
+  end
+
+  def csv_dimensions
+    %w[material_width material_height mounting_width mounting_height].map {|k| format_csv_dimension_hsh(k.split('_'), tags.try(:[], k))}.to_h
+  end
+
+  def format_csv_dimension_hsh(split_key, val)
+    kind, dimension = split_key
+    [csv_dimension_key(dimension, kind), csv_dimension_val(kind, val)]
+  end
+
+  def csv_dimension_key(dimension, kind)
+    kind == 'material' ? dimension.to_sym : ['frame', dimension].join('_').to_sym
+  end
+
+  def csv_dimension_val(kind, val)
+    return if val.nil?
+    kind == 'material' ? val.to_i : frame_dimensions(val)
+  end
+
+  def frame_dimensions(val)
+    val.to_i if field_targets.detect {|f| f.field_name == 'framing'}
+  end
+
+  def self.to_csv
+    items = Item.all
+    CSV.generate do |csv|
+      csv << items.first.csv_dimensions.keys
+      all.each do |item|
+        csv << item.csv_dimensions.values
+      end
+    end
+  end
+
+  ##############################################################################
 
   def field_targets
     scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
@@ -29,7 +64,7 @@ class Item < ApplicationRecord
     artists.first if artists.any?
   end
 
-  # Item.find(5).field_targets ## h = Item.find(5).product_group['description'] ## h['inputs'] ## h['inputs']['field_sets']
+  # Item.find(5).field_targets ## h = Item.find(5).product_group['description'] ## h['inputs'] ## h['inputs']['field_sets']   Item.find(5).product_group['inputs']['field_sets']
   # product_group ############################################################## Item.find(5).product_group['inputs']['field_sets']
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
@@ -456,6 +491,14 @@ class Item < ApplicationRecord
       when k == 'title' && v[0] != "\""; true
       else false
     end
+  end
+
+  # def export_keys
+  #   %w[sku artist artist_id title tag_line property_room description retail qty art_category art_type medium material width height frame_width frame_height]
+  # end
+
+  def export_keys
+    %w[sku artist tag_line medium material width]
   end
 
   def all_title_keys

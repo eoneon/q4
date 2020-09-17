@@ -34,8 +34,8 @@ module Context
       TextField.builder(f={field_name: field_name, kind: kind, tags: tags})
     end
 
-    def text_area_field(field_name, kind, tags=nil)
-      TextField.builder(f={field_name: field_name, kind: kind, tags: tags})
+    def text_area(field_name, kind, tags=nil)
+      TextAreaField.builder(f={field_name: field_name, kind: kind, tags: tags})
     end
 
     #builder methods for lib classes  ##########################################

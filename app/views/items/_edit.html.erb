@@ -52,10 +52,6 @@
       <% end %>
     <% end %>
 
-    <%#= f.fields_for :tags, OpenStruct.new(item.tags) do |ff| %>
-      <%#= ff.text_area "disclaimer", placeholder: "disclaimer", class: "form-control" %>
-    <%# end %>
-
     <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
     <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
 

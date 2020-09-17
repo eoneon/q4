@@ -4,13 +4,15 @@ class ProductType
   # ProductType.media_sets
   def self.media_sets
     media_groups.map{|h| media_set_builder(h)}.flatten(1)
+    disclaimer = Detail::Disclaimer.builder
+    Product.all.map{|product| product.assoc_unless_included(disclaimer)}
   end
 
   def self.media_set_builder(media_set:, material_set:, prepend_set: [], append_set: [], insert_set: [], set: [], tags: {})
     media_set, material_set, prepend_set, append_set, insert_set = [media_set, material_set, prepend_set, append_set, insert_set].map{|arg| arg_as_arr(arg)}
     media_set.product(material_set).each do |option_set|
       kv_assign(tags, [['medium', option_set[0].klass_name], ['material', option_set[1].klass_name]])
-      options = option_set_build(options: option_set, prepend_set: prepend_set, append_set: append_set, insert_set: insert_set) #.map{|klass| klass.builder}.flatten
+      options = option_set_build(options: option_set, prepend_set: prepend_set, append_set: append_set, insert_set: insert_set)
       standard_product(product_name(tags), build_options(options), tags)
     end
   end

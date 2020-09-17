@@ -1,5 +1,8 @@
-<div class="input-group input-group-sm">
+<div class="col-12">
+  <label><%= f_hsh[:label] %></label>
+  <div class="input-group input-group-sm">
   <%= f.fields_for :tags do |ff| %>
-    <%= ff.text_area_field f_hsh[:method], placeholder: f_hsh[:label], class: "form-control" %>
+    <%= ff.text_area f_hsh[:method], value: f_hsh[:selected], placeholder: f_hsh[:label], class: "form-control" %>
   <% end %>
+  </div>
 </div>

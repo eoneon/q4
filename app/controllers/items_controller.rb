@@ -24,7 +24,7 @@ class ItemsController < ApplicationController
   def update
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
-    puts "item_params: #{item_params}"
+    #puts "item_params: #{item_params}"
     @item.assign_attributes(item_params)
 
     @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])

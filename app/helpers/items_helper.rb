@@ -6,7 +6,7 @@ module ItemsHelper
       next if field_row.empty?
       rows << field_row
     end
-    rows 
+    rows
   end
 
   def field_set_row(fs_hsh, key_sets, hsh={})
@@ -18,11 +18,11 @@ module ItemsHelper
   end
 
   def row_assocs
-    [:dimension, :mounting, :sub_media, :numbering, :authentication]
+    [:dimension, :mounting, :sub_media, :numbering, :authentication, :disclaimer]
   end
 
   def row_key_sets
-    [[:dimension, %w[dimension]], [:mounting, %w[mounting]], [:sub_media, %w[leafing remarque]], [:numbering, %w[numbering]], [:authentication, %w[signature certificate]]]
+    [[:dimension, %w[dimension]], [:mounting, %w[mounting]], [:sub_media, %w[leafing remarque]], [:numbering, %w[numbering]], [:authentication, %w[signature certificate]], [:disclaimer, %w[disclaimer]]]
   end
 
 end
