@@ -59,7 +59,7 @@ class Material
 
   class Wood < Material
     def self.builder
-      select_field = select_field(field_name, field_kind, Option.builder(['wood', 'wood panel', 'board'], field_kind), tags)
+      select_field = select_field(field_name, field_kind, Option.builder(['wood', 'wood panel', 'board', 'panel'], field_kind), tags)
       field_set(field_name, field_kind, FieldSetOption::Standard.builder(select_field), tags)
     end
   end

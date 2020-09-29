@@ -34,8 +34,9 @@ class ItemsController < ApplicationController
     @products = products
     @input_group = search_input_group
 
-    @item.save
     @product_group = @item.product_group
+    @item.save
+    #@product_group = @item.product_group
 
     respond_to do |format|
       format.js
@@ -71,16 +72,6 @@ class ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(:sku, :title, :retail, :qty)
-    #params.require(:item).permit(:sku, :title, :retail, :qty, {tags: :disclaimer})
-    #hsh['tags'] = hsh[:tags].to_h
-    #hsh
-    #item_params = params.require(:item).permit(:sku, :title, :retail, :qty, {tags: :disclaimer})
-    #tags = params[:item].delete(:tags)
-    #item_params[:item][:tags] = tags.to_h
-    # puts tags: "#{tags}"
-    # params.require(:item).permit(:sku, :title, :retail, :qty).tap do |whitelisted|
-    #   whitelisted[:tags] = tags
-    # end
   end
 
   def product
@@ -93,4 +84,13 @@ class ItemsController < ApplicationController
 
 end
 
-#params.require(:item).permit!
+#params.require(:item).permit(:sku, :title, :retail, :qty, {tags: :disclaimer})
+#hsh['tags'] = hsh[:tags].to_h
+#hsh
+#item_params = params.require(:item).permit(:sku, :title, :retail, :qty, {tags: :disclaimer})
+#tags = params[:item].delete(:tags)
+#item_params[:item][:tags] = tags.to_h
+# puts tags: "#{tags}"
+# params.require(:item).permit(:sku, :title, :retail, :qty).tap do |whitelisted|
+#   whitelisted[:tags] = tags
+# end

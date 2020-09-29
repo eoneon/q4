@@ -1,5 +1,6 @@
 class Item < ApplicationRecord
   include STI
+  #include ExportAttrs
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :standard_products, through: :item_groups, source: :target, source_type: "StandardProduct"
@@ -10,45 +11,11 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  # attribute :width
-  # attribute :height
-  def csv_item
-    [:sku, :title, :retail, :qty].map{|k| [k, self.public_send(k)]}.to_h
-  end
-
-  def csv_dimensions
-    %w[material_width material_height mounting_width mounting_height].map {|k| format_csv_dimension_hsh(k.split('_'), tags.try(:[], k))}.to_h
-  end
-
-  def format_csv_dimension_hsh(split_key, val)
-    kind, dimension = split_key
-    [csv_dimension_key(dimension, kind), csv_dimension_val(kind, val)]
-  end
-
-  def csv_dimension_key(dimension, kind)
-    kind == 'material' ? dimension.to_sym : ['frame', dimension].join('_').to_sym
-  end
-
-  def csv_dimension_val(kind, val)
-    return if val.nil?
-    kind == 'material' ? val.to_i : frame_dimensions(val)
-  end
-
-  def frame_dimensions(val)
-    val.to_i if field_targets.detect {|f| f.field_name == 'framing'}
-  end
-
-  def self.to_csv
-    items = Item.all
-    CSV.generate do |csv|
-      csv << items.first.csv_dimensions.keys
-      all.each do |item|
-        csv << item.csv_dimensions.values
-      end
-    end
-  end
-
-  ##############################################################################
+  # before_save :set_title
+  #
+  # def set_title
+  #   self.title = 'Untitled' if title.blank?
+  # end
 
   def field_targets
     scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
@@ -68,7 +35,7 @@ class Item < ApplicationRecord
   # product_group ############################################################## Item.find(5).product_group['inputs']['field_sets']
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
-    return {'params'=>params, 'inputs'=>inputs, 'description'=> 'There is no product selected.'} if !product
+    return {'params'=>params, 'inputs'=>inputs, 'description'=> 'Pending'} if !product
     p_fields, i_fields, opt_scope = product.field_targets, field_targets, %w[embellished category medium material]
     p_fields.each do |f|
       if f.type == 'SelectField'
@@ -79,7 +46,8 @@ class Item < ApplicationRecord
         select_menu_group(f, i_fields, params, inputs, opt_scope)
       end
     end
-    {'params'=>params, 'inputs'=>inputs, 'description' => description_hsh(params['options'], params['field_sets'])}
+    #{'params'=>params, 'inputs'=>inputs, 'description' => description_hsh(params['options'], params['field_sets'])}
+    {'params'=>params, 'inputs'=>inputs, 'description' => {}}
   end
 
   # field-type specific methods ################################################
@@ -212,6 +180,7 @@ class Item < ApplicationRecord
     media_hsh(opt_params.select{|k,v| !v.nil?}, hsh)
     sub_media_hsh(fs_params, hsh)
     dimension_hsh(hsh, hsh.keys)
+
     description_builder(hsh, {'title' => title_keys(hsh, hsh.keys), 'body' => body_keys(hsh, hsh.keys)})
   end
 
@@ -219,17 +188,17 @@ class Item < ApplicationRecord
 
   def item_hsh(hsh)
     set_artist(hsh)
-    set_title(hsh)
+    #set_title(hsh)
   end
 
   def set_artist(hsh)
     hsh.merge!(field_name_value('artist', artist.artist_name)) if artist
   end
 
-  def set_title(hsh)
-    v = title.blank? ? 'This' : "\"#{title}\""
-    hsh.merge!(field_name_value('title', v))
-  end
+  # def set_title(hsh)
+  #   v = title.blank? ? 'This' : "\"#{title}\""
+  #   hsh.merge!(field_name_value('title', v))
+  # end
 
   # media_hsh: PART II #########################################################
 
