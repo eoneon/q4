@@ -6,22 +6,79 @@ class Export
     export_params(item, item.product, item.artist, item.product_group['params'])
   end
 
-  # def csv_values(item, product, artist, store)
-  #   product_hsh(product.tags)
-  #   handle_item(item, artist, store)
-  #   handle_product(item, product, store)
-  #   store
-  # end
-  #store['product'].keys, opt_media_keys(p_keys, m_keys)
   # export_params ##############################################################
-  def export_params(item, product, artist, pg_hsh, store={})
-    store.merge!(product_hsh(product.tags))
-    store.merge!(item_hsh(item, artist))
-    store.merge!(dimension_hsh(pg_hsh['field_sets']))
-    store.merge!(opt_media_hsh(pg_hsh['options'].select{|k,v| !v.nil?}, store['product']))
-    store.merge!(fs_media_hsh(pg_hsh['field_sets']))
+  def export_params(item, product, artist, pg_hsh, store={'attrs'=>{}, 'tagline'=>{}, 'body'=>{}})
+    item_hsh(item, artist, store)
+    dimension_hsh(pg_hsh['field_sets'], store)
+    # store.merge!(item_hsh(item, artist, store))
+    # store.merge!(product_hsh(product.tags))
+    # store.merge!(dimension_hsh(pg_hsh['field_sets']))
+    # store.merge!(opt_media_hsh(pg_hsh['options'].select{|k,v| !v.nil?}, store['product']))
+    # store.merge!(fs_media_hsh(pg_hsh['field_sets']))
     store
   end
+
+  # item_hsh ###################################################################
+  def item_hsh(item, artist, store, hsh={'item'=>{}})
+    build_item_hsh(item, artist, store, hsh['item'])
+  end
+
+  def build_item_hsh(item, artist, store, i_hsh)
+    i_hsh.merge!(csv_attr_and_val(item, 'item').merge(csv_attr_and_val(artist, 'artist')))
+    i_hsh['title'] = i_hsh['title'].blank? ? 'Untitled' : i_hsh['title']
+    export_item(i_hsh, store)
+    i_hsh
+  end
+
+  def export_item(i_hsh, store)
+    i_hsh.each do |k,v|
+      store['attrs'].merge!({k=>v})
+      description_hsh(store,k,v) if %w[title artist_name].include?(k)
+    end
+    store
+  end
+
+  def title_detail(store,k,v)
+    title = v == 'Untitled' ? 'This' : "\"#{v}\""
+    store['tagline'].merge!({k=>title}) if title != 'This'
+    store['body'].merge!({k=>title})
+  end
+
+  def artist_detail(store,k,v)
+    store['tagline'].merge!({k=> "#{v},"})
+    store['body'].merge!({k=> "by #{v},"})
+  end
+
+  # description_hsh ############################################################
+
+  def description_hsh(store,k,v)
+    return if v.blank?
+    description_case(store,k,v)
+  end
+
+  def description_case(store,k,v)
+    case
+      when k == 'title'; title_detail(store,k,v)
+      when k == 'artist_name'; artist_detail(store,k,v)
+    end
+  end
+  # def export_item(i_hsh, store)
+  #   i_hsh.each do |k,v|
+  #     store['attrs'].merge!({k=>v})
+  #     store['description'].merge!(fname_hsh(k,v)) if %w[title artist_name].include?(k) && !v.blank?
+  #   end
+  #   store
+  # end
+
+  # def attr_title(title)
+  #   title.blank? ? 'Untitled' : title
+  # end
+
+  # def item_hsh(item, artist, hsh={'item'=>{}})
+  #   hsh['item'].merge!(csv_attr_and_val(item, 'item').merge(csv_attr_and_val(artist, 'artist')))
+  #   hsh['item']['title'] = attr_title(hsh['item']['title'])
+  #   hsh
+  # end
 
   # product_hsh ################################################################ => {"product"=>{"category"=>"Original", "medium"=>"Painting", "material"=>"Board"}}
   def product_hsh(p_tags, hsh={'product'=>{}})
@@ -63,25 +120,18 @@ class Export
     %w[category sub_category medium material]
   end
 
-  # item_hsh ###################################################################
-  def item_hsh(item, artist, hsh={'item'=>{}})
-    hsh['item'].merge!(csv_attr_and_val(item, 'item').merge(csv_attr_and_val(artist, 'artist')))
-    hsh['item']['title'] = attr_title(hsh['item']['title'])
-    hsh
-  end
-
-  def attr_title(title)
-    title.blank? ? 'Untitled' : title
-  end
-
   # dimension_hsh ##############################################################
-  def dimension_hsh(fs_hsh, hsh={'dimension'=>{}})
+  def dimension_hsh(fs_hsh, store, hsh={'dimension'=>{}})
+    export_dimensions(build_dimension_hsh(fs_hsh, hsh['dimension']), store)
+    update_fs_hsh(fs_hsh)
+  end
+
+  def build_dimension_hsh(fs_hsh, d_hsh)
     %w[dimension mounting].each do |kind|
       tags, obj = ['tags', kind+'_id'].map{|key| fs_hsh.dig(kind, key)}
-      build_dimension_hsh(dimension_tags(tags, kind), obj.try(:field_name), hsh['dimension'])
+      build_nested_dimension_hsh(dimension_tags(tags, kind), obj.try(:field_name), d_hsh)
     end
-    update_fs_hsh(fs_hsh)
-    hsh
+    d_hsh
   end
 
   def dimension_tags(tags, kind)
@@ -93,13 +143,13 @@ class Export
     keys.map{|k| [k, nil]}.to_h
   end
 
-  def build_dimension_hsh(dimension_tags, fname, hsh)
+  def build_nested_dimension_hsh(dimension_tags, fname, d_hsh)
     dimension_tags.each do |d_key, d_val|
       k, k2 = d_key.split('_')
-      hsh[k] = {'dimension_type'=> dimension_type(fname)} if !hsh.has_key?(k)
-      assign_or_merge(hsh[k], 'dimensions',  k2, d_val)
+      d_hsh[k] = {'dimension_type'=> dimension_type(fname)} if !d_hsh.has_key?(k)
+      assign_or_merge(d_hsh[k], 'dimensions',  k2, d_val)
     end
-    hsh
+    d_hsh
   end
 
   def dimension_type(fname)
@@ -111,10 +161,82 @@ class Export
     end
   end
 
+  def export_dimensions(d_hsh, store, hsh={}, tag_set=[])
+    d_hsh.each do |d_kind, d_kind_hsh|
+      dimensions, dimension_type = d_kind_hsh['dimensions'], d_kind_hsh['dimension_type']
+      hsh.merge!(attr_dimensions(d_kind, dimensions, dimension_type))
+      tag_set << format_dimensions(dimensions) + ' ' + "(#{dimension_type})" if dimensions.values.exclude?(nil)
+    end
+    hsh.each {|k,v| store['attrs'].merge!({k=>v})}
+    dimension_detail(store, 'dimension', tag_set)
+  end
+
+  def attr_dimensions(d_kind, dimensions, dimension_type)
+    if d_kind == 'mounting'
+      attr_mounting_dimension(dimension_type, dimensions.transform_keys{|v| 'frame_'+v})
+    else
+      attr_material_dimension(dimensions)
+    end
+  end
+  # def export_dimensions(d_hsh, store, hsh={})
+  #   d_hsh.each do |k, h|
+  #     attr_dimension_case(k, h, hsh)
+  #   end
+  #   hsh.each {|k,v| store['attrs'].merge!({k=>v})}
+  # end
+  #
+  # def attr_dimension_case(k, h, hsh)
+  #   tags = k == 'mounting' ? attr_mounting_dimension(h['dimension_type'], h['dimensions'].transform_keys{|v| 'frame_'+v}) : attr_material_dimension(h['dimensions'])
+  #   hsh.merge!(tags)
+  # end
+
+  def attr_material_dimension(tags)
+    return tags if tags.keys == %w[width height]
+    tag_vals = tags.values
+    tag_vals.count == 1 ? %w[width height].map{|k| [k, tag_vals[0]]}.to_h : %w[width height].each_with_index{|(k,v), idx| [k, tag_vals[idx]]}.to_h
+  end
+
+  def attr_mounting_dimension(dimension_type, tags)
+    dimension_type == 'frame' ? tags : tags.transform_values!{|v| nil}
+  end
+
+  def dimension_detail(store, k, tag_set)
+    punct = tag_set.count > 1 ? ', ' : ' '
+    store['body'].merge!({k=> "Measures approx. #{tag_set.join(punct)}."})
+  end
+
+  def format_dimensions(dimensions)
+    dimensions.transform_values{|v| v+"\""}.values.join(' x ')
+  end
+
   def update_fs_hsh(fs_hsh)
     fs_hsh.delete('dimension')
     fs_hsh['mounting'].delete('tags')
   end
+  # def build_dimension_hsh(dimension_tags, fname, hsh)
+  #   dimension_tags.each do |d_key, d_val|
+  #     k, k2 = d_key.split('_')
+  #     hsh[k] = {'dimension_type'=> dimension_type(fname)} if !hsh.has_key?(k)
+  #     assign_or_merge(hsh[k], 'dimensions',  k2, d_val)
+  #   end
+  #   hsh
+  # end
+
+  # def dimension_hsh(fs_hsh, hsh={'dimension'=>{}})
+  #   %w[dimension mounting].each do |kind|
+  #     tags, obj = ['tags', kind+'_id'].map{|key| fs_hsh.dig(kind, key)}
+  #     build_dimension_hsh(dimension_tags(tags, kind), obj.try(:field_name), hsh['dimension'])
+  #   end
+  #   update_fs_hsh(fs_hsh)
+  #   hsh
+  # end
+
+  # def attr_dimensions(d_hsh, hsh={})
+  #   d_hsh.each do |k, h|
+  #     attr_dimension_case(k, h, hsh)
+  #   end
+  #   hsh
+  # end
 
   # opt_media ################################################################## {"media"=>{"category"=>"Original", "medium"=>"watercolor painting", "material"=>"paper"}}
   def opt_media_hsh(opt_hsh, product_hsh, hsh={'opt_media'=>{}})
@@ -168,23 +290,44 @@ class Export
     end
   end
 
+  # def description_hsh(store, hsh={'description'=>{}})
+  #   #%w[title artist_name].map{|k| hsh['description'].merge!()} #{fname()} store['item'][k])
+  #   store.each do |kind, kind_params|
+  #   end
+  # end
+
+  # def description_hsh(store)
+  #   store.each do |kind, kind_params|
+  #   end
+  # end
+  #
+  # def attr_hsh
+  # end
+
+  # class Description
+  # end
+  #
+  # class CSV
+  # end
+
+  # Description ###############################################################
   # END OF REVAMPED export_params METHODS  #####################################
   ##############################################################################
 
-  def handle_item(item, artist, store)
-    stash_item(item, artist, store)
-    store['description'] = attr_item(store['stash']['item'])
-  end
-
-  def stash_item(item, artist, store, h={})
-    store['stash'] = {'item' => h.merge!(csv_attr_and_val(item, 'item').merge(csv_attr_and_val(artist, 'artist')))}
-    store['stash']['item'].merge!({'title'=> attr_title(store['stash']['title'])})
-  end
-
-  def attr_item(i_store, h={})
-    %w[title artist_name].map{|k| h.merge!({k=> {'field_name' => i_store[k]}}) if i_store.has_key?(k)}
-    h
-  end
+  # def handle_item(item, artist, store)
+  #   stash_item(item, artist, store)
+  #   store['description'] = attr_item(store['stash']['item'])
+  # end
+  #
+  # def stash_item(item, artist, store, h={})
+  #   store['stash'] = {'item' => h.merge!(csv_attr_and_val(item, 'item').merge(csv_attr_and_val(artist, 'artist')))}
+  #   store['stash']['item'].merge!({'title'=> attr_title(store['stash']['title'])})
+  # end
+  #
+  # def attr_item(i_store, h={})
+  #   %w[title artist_name].map{|k| h.merge!({k=> {'field_name' => i_store[k]}}) if i_store.has_key?(k)}
+  #   h
+  # end
 
   # def attr_title(title)
   #   title.blank? ? 'Untitled' : title
@@ -192,30 +335,30 @@ class Export
 
   #######################
 
-  def handle_product(item, product, store)
-    return attr_values(store).merge!(attr_product_keys.map{|k| [k, nil]}.to_h) if product.nil?
-    handle_mounting_dimensions(store)
-    handle_media(store, product.tags)
-    #handle_description(store['description'])
-    #handle_description(store)
-    attr_values(store)
-  end
+  # def handle_product(item, product, store)
+  #   return attr_values(store).merge!(attr_product_keys.map{|k| [k, nil]}.to_h) if product.nil?
+  #   handle_mounting_dimensions(store)
+  #   handle_media(store, product.tags)
+  #   #handle_description(store['description'])
+  #   #handle_description(store)
+  #   attr_values(store)
+  # end
 
   ##############################################################################
 
-  def handle_mounting_dimensions(store)
-    stash_dimensions(store)
-    update_mounting_hsh(store)
-    update_dimension_hsh(store)
-  end
-
-  def stash_dimensions(store, h={})
-    %w[dimension mounting].each do |k|
-      tags, obj = ['tags', k+'_id'].map{|k2| store['field_sets'].dig(k, k2)}
-      stash_dimension_hsh(default_tags(tags, k), obj.try(:field_name), h)
-    end
-    store['stash'].merge!({'dimension' => h})
-  end
+  # def handle_mounting_dimensions(store)
+  #   stash_dimensions(store)
+  #   update_mounting_hsh(store)
+  #   update_dimension_hsh(store)
+  # end
+  #
+  # def stash_dimensions(store, h={})
+  #   %w[dimension mounting].each do |k|
+  #     tags, obj = ['tags', k+'_id'].map{|k2| store['field_sets'].dig(k, k2)}
+  #     stash_dimension_hsh(default_tags(tags, k), obj.try(:field_name), h)
+  #   end
+  #   store['stash'].merge!({'dimension' => h})
+  # end
 
   # def default_tags(tags, k)
   #   return tags if tags
@@ -223,82 +366,82 @@ class Export
   #   keys.map{|k| [k, nil]}.to_h
   # end
 
-  def stash_dimension_hsh(d_tags, d_type, h)
-    d_tags.each do |d_key, d_val|
-      k, k2 = d_key.split('_')
-      h[k] = {'dimension_type'=> dimension_type(d_type)} if !h.has_key?(k)
-      assign_or_merge(h[k], 'dimensions',  k2, d_val)
-    end
-    h
-  end
-
-  def dimension_type(field_name)
-    case field_name
-      when 'framing'; 'frame'
-      when 'matted'; 'matting'
-      when 'width & height'; 'image'
-      else field_name
-    end
-  end
-
-  def update_mounting_hsh(store)
-    return if !store['field_sets'].has_key?('mounting')
-    store['field_sets']['mounting'].delete('tags')
-    store['field_sets'].merge!({'mounting' => {'options' => store['field_sets']['mounting']}})
-  end
-
-  def update_dimension_hsh(store)
-    store['field_sets'].merge!({'dimension' => {'tags' => store['stash']['dimension']}})
-  end
+  # def stash_dimension_hsh(d_tags, d_type, h)
+  #   d_tags.each do |d_key, d_val|
+  #     k, k2 = d_key.split('_')
+  #     h[k] = {'dimension_type'=> dimension_type(d_type)} if !h.has_key?(k)
+  #     assign_or_merge(h[k], 'dimensions',  k2, d_val)
+  #   end
+  #   h
+  # end
+  #
+  # def dimension_type(field_name)
+  #   case field_name
+  #     when 'framing'; 'frame'
+  #     when 'matted'; 'matting'
+  #     when 'width & height'; 'image'
+  #     else field_name
+  #   end
+  # end
+  #
+  # def update_mounting_hsh(store)
+  #   return if !store['field_sets'].has_key?('mounting')
+  #   store['field_sets']['mounting'].delete('tags')
+  #   store['field_sets'].merge!({'mounting' => {'options' => store['field_sets']['mounting']}})
+  # end
+  #
+  # def update_dimension_hsh(store)
+  #   store['field_sets'].merge!({'dimension' => {'tags' => store['stash']['dimension']}})
+  # end
 
   ##############################################################################
 
-  def handle_media(store, p_tags)
-    stash_media(store, p_tags, store['options']['medium_id'].try(:field_name))
-    media_opt_hsh(store['options'].select{|k,v| !v.nil?}, p_media_keys.map{|k| [k, p_tags[k]]}.to_h.reject{|k,v| v == 'n/a'}, store)
-    media_fs_hsh(store)
-  end
-
-  def stash_media(store, p_tags, medium_val)
-    media_keys.each do |k|
-      store['stash'][k] = media_val(k, p_tags[k], medium_val)
-    end
-    store
-  end
-
-  def media_val(k, v, medium_val)
-    k == 'medium' ? {'medium_type' => v, 'medium_opt' => medium_val} : v
-  end
-
-  def media_opt_hsh(opt_hsh, p_hsh, store, p_media={})
-    keys = opt_hsh.keys.include?('embellished_id') ? p_hsh.keys.prepend('embellished') : p_hsh.keys
-    keys.each do |k|
-      field_name = opt_hsh.has_key?(k+'_id') ? opt_hsh[k+'_id'].field_name : decamelize(p_hsh[k])
-      p_media.merge!({k=>{'field_name'=>field_name}})
-    end
-    store['description'].merge!(p_media)
-  end
-
-  def media_fs_hsh(store)
-    store['field_sets'].each do |kind_key, kind_hsh|
-      if h = merge_fname_or_tags(kind_key, kind_hsh, kind_key+'_id')
-        store['description'].merge!(h)
-      end
-    end
-    store
-  end
-
-  def merge_fname_or_tags(kind_key, kind_hsh, fk, h={})
-    kind_hsh.select{|f_key, f_hsh| f_hsh.class == Hash && f_hsh.values.none?{|v| v.blank?}}.each do |f_key, f_hsh|
-      h.merge!({kind_key => {'field_name' => f_hsh[fk].field_name}}) if f_key == 'options'
-      h['tags'] = f_hsh if f_key == 'tags'
-    end
-    h unless h.empty?
-  end
-
-  def p_media_keys
-    %w[category sub_category medium material]
-  end
+  # def handle_media(store, p_tags)
+  #   stash_media(store, p_tags, store['options']['medium_id'].try(:field_name))
+  #   media_opt_hsh(store['options'].select{|k,v| !v.nil?}, p_media_keys.map{|k| [k, p_tags[k]]}.to_h.reject{|k,v| v == 'n/a'}, store)
+  #   media_fs_hsh(store)
+  # end
+  #
+  # def stash_media(store, p_tags, medium_val)
+  #   media_keys.each do |k|
+  #     store['stash'][k] = media_val(k, p_tags[k], medium_val)
+  #   end
+  #   store
+  # end
+  #
+  # def media_val(k, v, medium_val)
+  #   k == 'medium' ? {'medium_type' => v, 'medium_opt' => medium_val} : v
+  # end
+  #
+  # def media_opt_hsh(opt_hsh, p_hsh, store, p_media={})
+  #   keys = opt_hsh.keys.include?('embellished_id') ? p_hsh.keys.prepend('embellished') : p_hsh.keys
+  #   keys.each do |k|
+  #     field_name = opt_hsh.has_key?(k+'_id') ? opt_hsh[k+'_id'].field_name : decamelize(p_hsh[k])
+  #     p_media.merge!({k=>{'field_name'=>field_name}})
+  #   end
+  #   store['description'].merge!(p_media)
+  # end
+  #
+  # def media_fs_hsh(store)
+  #   store['field_sets'].each do |kind_key, kind_hsh|
+  #     if h = merge_fname_or_tags(kind_key, kind_hsh, kind_key+'_id')
+  #       store['description'].merge!(h)
+  #     end
+  #   end
+  #   store
+  # end
+  #
+  # def merge_fname_or_tags(kind_key, kind_hsh, fk, h={})
+  #   kind_hsh.select{|f_key, f_hsh| f_hsh.class == Hash && f_hsh.values.none?{|v| v.blank?}}.each do |f_key, f_hsh|
+  #     h.merge!({kind_key => {'field_name' => f_hsh[fk].field_name}}) if f_key == 'options'
+  #     h['tags'] = f_hsh if f_key == 'tags'
+  #   end
+  #   h unless h.empty?
+  # end
+  #
+  # def p_media_keys
+  #   %w[category sub_category medium material]
+  # end
 
   ##############################################################################
 
@@ -310,9 +453,9 @@ class Export
     d_store.merge!(hsh)
   end
 
-  def description_hsh(d_store)
-    {'tagline' => title_keys(d_store, d_store.keys), 'body' => body_keys(d_store, d_store.keys)}
-  end
+  # def description_hsh(d_store)
+  #   {'tagline' => title_keys(d_store, d_store.keys), 'body' => body_keys(d_store, d_store.keys)}
+  # end
 
   def build_description_by_kind(d_store, context, d_keys, hsh)
     d_keys.each do |k|
@@ -321,23 +464,23 @@ class Export
     hsh[context].compact
   end
 
-  def description_cases(d_store, context, k, fname, tags, d_keys)
-    case k
-      when 'artist'; format_artist(context, fname)
-      when 'title'; format_title(context, d_store, d_keys, fname)
-      when 'mounting'; format_mounting(context, fname)
-      when 'category'; format_category(context, fname)
-      when 'medium'; format_medium(context, fname, d_keys)
-      when 'material'; format_material(context, fname, d_keys, fname.split(' '))
-      when 'leafing'; format_leafing(d_keys, fname)
-      when 'remarque'; format_remarque(context, d_keys, fname)
-      when 'numbering'; format_numbering(d_keys, fname, tags, fname.split(' ').include?('from'))
-      when 'signature'; format_signature(context, d_keys, fname)
-      when 'certificate'; format_certificate(context, fname)
-      when 'dimension'; format_dimension(context, tags)
-      else fname
-    end
-  end
+  # def description_cases(d_store, context, k, fname, tags, d_keys)
+  #   case k
+  #     when 'artist'; format_artist(context, fname)
+  #     when 'title'; format_title(context, d_store, d_keys, fname)
+  #     when 'mounting'; format_mounting(context, fname)
+  #     when 'category'; format_category(context, fname)
+  #     when 'medium'; format_medium(context, fname, d_keys)
+  #     when 'material'; format_material(context, fname, d_keys, fname.split(' '))
+  #     when 'leafing'; format_leafing(d_keys, fname)
+  #     when 'remarque'; format_remarque(context, d_keys, fname)
+  #     when 'numbering'; format_numbering(d_keys, fname, tags, fname.split(' ').include?('from'))
+  #     when 'signature'; format_signature(context, d_keys, fname)
+  #     when 'certificate'; format_certificate(context, fname)
+  #     when 'dimension'; format_dimension(context, tags)
+  #     else fname
+  #   end
+  # end
 
   def format_artist(context, fname)
     context == 'tagline' ? "#{fname}," : "by #{fname},"
@@ -448,9 +591,9 @@ class Export
     "Measures approx. #{tag_set.join(punct)}."
   end
 
-  def format_dimensions(dimensions)
-    dimensions.transform_values{|v| v+"\""}.values.join(' x ')
-  end
+  # def format_dimensions(dimensions)
+  #   dimensions.transform_values{|v| v+"\""}.values.join(' x ')
+  # end
 
   def format_dimension_type(dimension_type)
     "(#{dimension_type})"
@@ -481,7 +624,6 @@ class Export
   end
   #######################
 
-
   def attr_values(store, attr_hsh={})
     store['stash'].each do |kind_key, kind_val|
       attr_hsh.merge!(attr_case(kind_key, kind_val))
@@ -504,27 +646,27 @@ class Export
   #   title.blank? ? 'Untitled' : title
   # end
 
-  def attr_dimensions(d_hsh, hsh={})
-    d_hsh.each do |k, h|
-      attr_dimension_case(k, h, hsh)
-    end
-    hsh
-  end
-
-  def attr_dimension_case(k, h, hsh)
-    tags = k == 'mounting' ? attr_mounting_dimension(h['dimension_type'], h['dimensions'].transform_keys{|v| 'frame_'+v}) : attr_material_dimension(h['dimensions'])
-    hsh.merge!(tags)
-  end
-
-  def attr_material_dimension(tags)
-    return tags if tags.keys == %w[width height]
-    tag_vals = tags.values
-    tag_vals.count == 1 ? %w[width height].map{|k| [k, tag_vals[0]]}.to_h : %w[width height].each_with_index{|(k,v), idx| [k, tag_vals[idx]]}.to_h
-  end
-
-  def attr_mounting_dimension(dimension_type, tags)
-    dimension_type == 'frame' ? tags : tags.transform_values!{|v| nil}
-  end
+  # def attr_dimensions(d_hsh, hsh={})
+  #   d_hsh.each do |k, h|
+  #     attr_dimension_case(k, h, hsh)
+  #   end
+  #   hsh
+  # end
+  #
+  # def attr_dimension_case(k, h, hsh)
+  #   tags = k == 'mounting' ? attr_mounting_dimension(h['dimension_type'], h['dimensions'].transform_keys{|v| 'frame_'+v}) : attr_material_dimension(h['dimensions'])
+  #   hsh.merge!(tags)
+  # end
+  #
+  # def attr_material_dimension(tags)
+  #   return tags if tags.keys == %w[width height]
+  #   tag_vals = tags.values
+  #   tag_vals.count == 1 ? %w[width height].map{|k| [k, tag_vals[0]]}.to_h : %w[width height].each_with_index{|(k,v), idx| [k, tag_vals[idx]]}.to_h
+  # end
+  #
+  # def attr_mounting_dimension(dimension_type, tags)
+  #   dimension_type == 'frame' ? tags : tags.transform_values!{|v| nil}
+  # end
 
   def attr_category(v)
     [%w[art_type, art_category], attr_category_case(v)].transpose.to_h
