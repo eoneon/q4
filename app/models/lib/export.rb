@@ -1,6 +1,6 @@
 class Export
 
-  ####################### h = Export.new.csv_values_test h['fs_media']  <!--> Item.find(5).product_group['params']['field_sets']
+  ####################### h = Export.new.csv_values_test['attrs']  <!--> Item.find(5).product_group['params']['field_sets']  h = Item.find(5).product_group['params']['options']
   def csv_values_test
     item = Item.find(5)
     export_params(item, item.product, item.artist, item.product_group['params'])
@@ -9,13 +9,12 @@ class Export
   # export_params ##############################################################
   def export_params(item, product, artist, pg_hsh, store={'attrs'=>{}, 'tagline'=>{}, 'body'=>{}})
     item_hsh(item, artist, store)
-    dimension_hsh(pg_hsh['field_sets'], store)
-    # store.merge!(item_hsh(item, artist, store))
-    # store.merge!(product_hsh(product.tags))
-    # store.merge!(dimension_hsh(pg_hsh['field_sets']))
-    # store.merge!(opt_media_hsh(pg_hsh['options'].select{|k,v| !v.nil?}, store['product']))
-    # store.merge!(fs_media_hsh(pg_hsh['field_sets']))
-    store
+    product_media_hsh(product, pg_hsh, store)
+    
+    mounting_dimension_hsh(pg_hsh, store)
+    fs_opt_media(pg_hsh['field_sets'], store)
+    detail_numbering(pg_hsh['field_sets'], 'numbering', store)
+    format_description(store)
   end
 
   # item_hsh ###################################################################
@@ -38,19 +37,7 @@ class Export
     store
   end
 
-  def title_detail(store,k,v)
-    title = v == 'Untitled' ? 'This' : "\"#{v}\""
-    store['tagline'].merge!({k=>title}) if title != 'This'
-    store['body'].merge!({k=>title})
-  end
-
-  def artist_detail(store,k,v)
-    store['tagline'].merge!({k=> "#{v},"})
-    store['body'].merge!({k=> "by #{v},"})
-  end
-
   # description_hsh ############################################################
-
   def description_hsh(store,k,v)
     return if v.blank?
     description_case(store,k,v)
@@ -58,58 +45,125 @@ class Export
 
   def description_case(store,k,v)
     case
-      when k == 'title'; title_detail(store,k,v)
-      when k == 'artist_name'; artist_detail(store,k,v)
+      when k == 'title'; detail_title(store,k,v)
+      when k == 'artist_name'; detail_artist(store,k,v)
+      when k == 'category' && v == 'one of a kind';  detail_category(store,k,v)
+      when k == 'material'; detail_material(store,k,v)
+      when k == 'signature'; detail_signature(store,k,v)
+      when k == 'certificate'; detail_certificate(store,k,v)
+      else default_detail(store,k,v)
     end
   end
-  # def export_item(i_hsh, store)
-  #   i_hsh.each do |k,v|
-  #     store['attrs'].merge!({k=>v})
-  #     store['description'].merge!(fname_hsh(k,v)) if %w[title artist_name].include?(k) && !v.blank?
-  #   end
-  #   store
-  # end
 
-  # def attr_title(title)
-  #   title.blank? ? 'Untitled' : title
-  # end
+  def detail_title(store,k,v)
+    title = v == 'Untitled' ? 'This' : "\"#{v}\""
+    store['tagline'].merge!({k=>title}) if title != 'This'
+    store['body'].merge!({k=>title})
+  end
 
-  # def item_hsh(item, artist, hsh={'item'=>{}})
-  #   hsh['item'].merge!(csv_attr_and_val(item, 'item').merge(csv_attr_and_val(artist, 'artist')))
-  #   hsh['item']['title'] = attr_title(hsh['item']['title'])
-  #   hsh
-  # end
+  def detail_artist(store,k,v)
+    store['tagline'].merge!({k=> "#{v},"})
+    store['body'].merge!({k=> "by #{v},"})
+  end
+
+  def detail_category(store, k, v)
+    store['tagline'].merge!({k=>'One-of-a-Kind'})
+    store['body'].merge!({k=>'one-of-a-kind'})
+  end
+
+  def detail_material(store,k,v)
+    return if v == 'Sericel'
+    store['tagline'].merge!({k => "on #{tagline_material_value(v)}"}) if store['attrs']['material'] != 'Paper'
+    store['body'].merge!({k => "on #{body_material_value(v)}"})
+  end
+
+  def detail_mounting(k, mounting, store)
+    store['tagline'].merge!({k=>'framed'}) if mounting.split(' ').include?('framed')
+    store['body'].merge!({k=>"This piece comes #{mounting}."}) if mounting.split(' ').any?{|i| ['framed', 'matted', 'gallery']}
+  end
+
+  def detail_dimension(store, k, tag_set)
+    punct = tag_set.count > 1 ? ', ' : ' '
+    store['body'].merge!({k=> "Measures approx. #{tag_set.join(punct)}."})
+  end
+
+  def detail_signature(store, k, v)
+    store['tagline'].merge!({k=>tagline_signature(v)})
+    store['body'].merge!({k=>body_signature(v)})
+  end
+
+  def detail_certificate(store, k, v)
+    v = v == 'LOA' ? 'Letter' : 'Certificate'
+    store['tagline'].merge!({k=> "with #{v} of Authenticity."})
+    store['body'].merge!({k=> "Includes #{v} of Authenticity."})
+  end
+
+  def detail_numbering(fs_hsh, k, store)
+    numbering, opt_numbering, tags = fs_hsh.dig(k, k+'_id').try(:field_name), fs_hsh.dig(k, 'options', k+'_id').try(:field_name), fs_hsh.dig(k, 'tags')
+    return if !numbering || !opt_numbering
+    numbering_value = numbering_value(numbering, opt_numbering, tags)
+    store['tagline'].merge!({k=> numbering_value})
+    store['body'].merge!({k=> numbering_value})
+  end
+
+  def default_detail(store,k,v)
+    store['tagline'].merge!({k=>v.split(' ').map{|k| k.capitalize}.join(' ')})
+    store['body'].merge!({k=>v})
+  end
 
   # product_hsh ################################################################ => {"product"=>{"category"=>"Original", "medium"=>"Painting", "material"=>"Board"}}
-  def product_hsh(p_tags, hsh={'product'=>{}})
-    product_keys.map{|k| [k, p_tags[k]]}.to_h.reject{|k,v| v == 'n/a'}.each do |k, v|
-      hsh['product'].merge!({k => product_value_case(k, v)})
-    end
-    hsh
-  end
-
-  def product_value_case(k, v)
-    if k == 'medium'
-      product_medium_value_case(v)
+  def attr_product_media_case(k, v)
+    if k == 'category'
+      attr_category(v)
+    elsif k == 'medium'
+      {k=>attr_medium(v)}
     elsif k == 'material'
-      product_material_value_case(v)
+      {k=>attr_material(v)}
     else
-      v
+      {k=>v}
     end
   end
 
-  def product_medium_value_case(medium)
+  def attr_category(v)
+    [%w[art_type, art_category], attr_category_case(v)].transpose.to_h
+  end
+
+  def attr_category_case(v)
+    if ['Original', 'OneOfAKind'].include?(v)
+      ['Original', 'Original Painting']
+    elsif v == 'LimitedEdition'
+      ['Limited Edition', 'Limited Edition']
+    elsif v == 'PrintMedia'
+      ['Print', 'Limited Edition']
+    end
+  end
+
+  def attr_medium(medium)
     case
-      when ['Etching', 'Giclee', 'Lithograph', 'Monoprint', 'Poster'].include?(medium); medium
-      when medium == 'Silkscreen'; 'Serigraph'
-      when medium.underscore.split('_').include?('painting'); 'Painting'
-      when medium.underscore.split('_').include?('drawing'); 'Drawing'
-      else 'Mixed Media'
+      when medium == 'Painting'; attr_painting(medium).capitalize
+      when medium == 'Drawing'; attr_drawing(medium)
+      else medium
     end
   end
 
-  def product_material_value_case(material_split)
-    if k = %w[canvas paper board metal sericel].detect{|k| material_split.include?(k)}
+  def attr_painting(medium)
+    case medium
+      when medium == 'painting'; 'unknown'
+      when medium == 'sumi ink painting'; 'watercolor'
+      else %w[oil acrylic watercolor pastel guache].detect {|k| medium == "#{k} painting"}
+    end
+  end
+
+  def attr_drawing(medium)
+    if medium.split(' ').include?('pencil')
+      'Pencil'
+    else
+      'Pen and Ink'
+    end
+  end
+
+  def attr_material(material)
+    if k = %w[canvas paper board metal sericel].detect{|k| material.underscore.split('_').include?(k)}
       k.capitalize
     else
       'Board'
@@ -120,10 +174,45 @@ class Export
     %w[category sub_category medium material]
   end
 
+  # mounting_dimension_hsh #####################################################
+  def mounting_dimension_hsh(pg_hsh, store, hsh={'dimension'=>{}})
+    mounting_hsh(pg_hsh, store)
+    dimension_hsh(pg_hsh['field_sets'], store, hsh)
+  end
+
+  # mounting_hsh ###############################################################
+  def mounting_hsh(pg_hsh, store, k='mounting')
+    if mounting = mounting_value_case(pg_hsh, k)
+      detail_mounting(k, mounting, store)
+    end
+  end
+
+  def mounting_value_case(pg_hsh, k)
+    if mounting = wrapped_mounting_value(pg_hsh.dig('options', 'material_id').try(:field_name))
+      mounting
+    elsif mounting = pg_hsh.dig('field_sets', k, 'options', k+'_id').try(:field_name)
+      mounting == 'matting' ? 'matted' : mounting
+    end
+  end
+
+  def wrapped_mounting_value(material)
+    'gallery wrapped' if material && material.split(' ').include?('gallery')
+  end
+
   # dimension_hsh ##############################################################
-  def dimension_hsh(fs_hsh, store, hsh={'dimension'=>{}})
+  def dimension_hsh(fs_hsh, store, hsh)
     export_dimensions(build_dimension_hsh(fs_hsh, hsh['dimension']), store)
     update_fs_hsh(fs_hsh)
+  end
+
+  def export_dimensions(d_hsh, store, hsh={}, tag_set=[])
+    d_hsh.each do |d_kind, d_kind_hsh|
+      dimensions, dimension_type = d_kind_hsh['dimensions'], d_kind_hsh['dimension_type']
+      hsh.merge!(attr_dimensions(d_kind, dimensions, dimension_type))
+      tag_set << format_dimensions(dimensions) + ' ' + "(#{dimension_type})" if dimensions.values.exclude?(nil)
+    end
+    hsh.each {|k,v| store['attrs'].merge!({k=>v})}
+    detail_dimension(store, 'dimension', tag_set)
   end
 
   def build_dimension_hsh(fs_hsh, d_hsh)
@@ -161,16 +250,6 @@ class Export
     end
   end
 
-  def export_dimensions(d_hsh, store, hsh={}, tag_set=[])
-    d_hsh.each do |d_kind, d_kind_hsh|
-      dimensions, dimension_type = d_kind_hsh['dimensions'], d_kind_hsh['dimension_type']
-      hsh.merge!(attr_dimensions(d_kind, dimensions, dimension_type))
-      tag_set << format_dimensions(dimensions) + ' ' + "(#{dimension_type})" if dimensions.values.exclude?(nil)
-    end
-    hsh.each {|k,v| store['attrs'].merge!({k=>v})}
-    dimension_detail(store, 'dimension', tag_set)
-  end
-
   def attr_dimensions(d_kind, dimensions, dimension_type)
     if d_kind == 'mounting'
       attr_mounting_dimension(dimension_type, dimensions.transform_keys{|v| 'frame_'+v})
@@ -178,17 +257,6 @@ class Export
       attr_material_dimension(dimensions)
     end
   end
-  # def export_dimensions(d_hsh, store, hsh={})
-  #   d_hsh.each do |k, h|
-  #     attr_dimension_case(k, h, hsh)
-  #   end
-  #   hsh.each {|k,v| store['attrs'].merge!({k=>v})}
-  # end
-  #
-  # def attr_dimension_case(k, h, hsh)
-  #   tags = k == 'mounting' ? attr_mounting_dimension(h['dimension_type'], h['dimensions'].transform_keys{|v| 'frame_'+v}) : attr_material_dimension(h['dimensions'])
-  #   hsh.merge!(tags)
-  # end
 
   def attr_material_dimension(tags)
     return tags if tags.keys == %w[width height]
@@ -200,58 +268,87 @@ class Export
     dimension_type == 'frame' ? tags : tags.transform_values!{|v| nil}
   end
 
-  def dimension_detail(store, k, tag_set)
-    punct = tag_set.count > 1 ? ', ' : ' '
-    store['body'].merge!({k=> "Measures approx. #{tag_set.join(punct)}."})
-  end
-
   def format_dimensions(dimensions)
     dimensions.transform_values{|v| v+"\""}.values.join(' x ')
   end
 
   def update_fs_hsh(fs_hsh)
     fs_hsh.delete('dimension')
-    fs_hsh['mounting'].delete('tags')
-  end
-  # def build_dimension_hsh(dimension_tags, fname, hsh)
-  #   dimension_tags.each do |d_key, d_val|
-  #     k, k2 = d_key.split('_')
-  #     hsh[k] = {'dimension_type'=> dimension_type(fname)} if !hsh.has_key?(k)
-  #     assign_or_merge(hsh[k], 'dimensions',  k2, d_val)
-  #   end
-  #   hsh
-  # end
-
-  # def dimension_hsh(fs_hsh, hsh={'dimension'=>{}})
-  #   %w[dimension mounting].each do |kind|
-  #     tags, obj = ['tags', kind+'_id'].map{|key| fs_hsh.dig(kind, key)}
-  #     build_dimension_hsh(dimension_tags(tags, kind), obj.try(:field_name), hsh['dimension'])
-  #   end
-  #   update_fs_hsh(fs_hsh)
-  #   hsh
-  # end
-
-  # def attr_dimensions(d_hsh, hsh={})
-  #   d_hsh.each do |k, h|
-  #     attr_dimension_case(k, h, hsh)
-  #   end
-  #   hsh
-  # end
-
-  # opt_media ################################################################## {"media"=>{"category"=>"Original", "medium"=>"watercolor painting", "material"=>"paper"}}
-  def opt_media_hsh(opt_hsh, product_hsh, hsh={'opt_media'=>{}})
-    opt_media_keys(product_hsh.keys, opt_hsh.keys).each do |k|
-      hsh['opt_media'].merge!(fname_hsh(k, media_value(opt_hsh, product_hsh, k, k+'_id')))
-    end
-    hsh
+    fs_hsh.delete('mounting')
   end
 
-  def media_value(opt_hsh, product_hsh, k, fk)
-    if opt_hsh.has_key?(fk) && opt_hsh[fk]
-      opt_hsh[fk].field_name
-    elsif product_hsh.has_key?(k)
-      product_hsh[k]
+  # product_media_hsh ################################################################## {"media"=>{"category"=>"Original", "medium"=>"watercolor painting", "material"=>"paper"}}
+  def product_media_hsh(product, pg_hsh, store, hsh={'product'=>{}})
+    return store['attrs'].merge!(default_attr_media) if product.nil?
+    options = build_opt_hsh(pg_hsh['options'])
+    product_media = build_product_media_hsh(product, options, store, hsh)
+    export_product_media(product_media, store)
+    opt_media_hsh(options, product_media, store)
+  end
+
+  def export_product_media(product_media, store)
+    product_media.each do |k, media|
+      store['attrs'].merge!(attr_product_media_case(k, media))
     end
+  end
+
+  def build_opt_hsh(opt_hsh, h={'opt_hsh'=>{}})
+    opt_hsh.reject{|fk,obj| obj.nil?}.each do |fk, obj|
+      h['opt_hsh'].merge!({obj.kind=>obj.field_name})
+    end
+    h['opt_hsh']
+  end
+
+  def build_product_media_hsh(product, options, store, hsh)
+    build_product_hsh(product).each do |kind, media|
+      hsh['product'].merge!({kind => build_product_media(kind, media, options)})
+    end
+    hsh['product']
+  end
+
+  def build_product_hsh(product)
+    product_keys.map{|k| [k, product.tags[k]]}.to_h.reject{|k,v| v == 'n/a'}
+  end
+
+  def build_product_media(kind, media, options)
+    kind == 'medium' && options.has_key?(kind) ? attr_product_medium_case(options[kind]) : media
+  end
+
+  def attr_product_medium_case(medium)
+    case
+      when ['Etching', 'Giclee', 'Lithograph', 'Monoprint', 'Poster'].include?(medium); medium
+      when medium == 'Silkscreen'; 'Serigraph'
+      when medium.underscore.split('_').include?('painting'); 'Painting'
+      when medium.underscore.split('_').include?('drawing'); 'Drawing'
+      else 'Mixed Media'
+    end
+  end
+
+  def default_attr_media
+    attr_product_keys.map{|k| [k, nil]}.to_h
+  end
+
+  # opt_media_hsh ##########################################################
+  def opt_media_hsh(options, product_media, store)
+    opt_media_keys(product_media.keys, options.keys).each do |kind|
+      description_hsh(store, kind, media_value(options, product_media, kind))
+    end
+  end
+
+  def media_value(options, product_media, k)
+    if options.has_key?(k) && options[k]
+      options[k]
+    elsif product_media.has_key?(k)
+      product_media[k].underscore.split('_').join(' ')
+    end
+  end
+
+  def tagline_material_value(material)
+    ['wrapped canvas', 'stretched canvas'].any?{|k| k == material} ? 'Canvas' : material.split(' ').map{|k| k.capitalize}.join(' ')
+  end
+
+  def body_material_value(material)
+    material.split(' ').include?('wrapped') ? 'canvas' : material
   end
 
   #product_hsh.keys, opt_hsh.keys
@@ -259,11 +356,23 @@ class Export
     product_keys.prepend('embellished').select{|k| p_keys.include?(k) || m_keys.include?(k)}
   end
 
-  def fname_hsh(k,v)
-    {k => {'field_name' => v}}
+  # fs_media_hsh ############################################################### => {"mounting"=>{"field_name"=>"framed"}, "signature"=>{"field_name"=>"hand signed"}, "certificate"=>{"field_name"=>"LOA"}}
+  def fs_opt_media(fs_hsh, store)
+    build_fs_opt_hsh(fs_hsh).each do |kind, kind_val|
+      description_hsh(store, kind, kind_val)
+      fs_hsh.delete(kind)
+    end
   end
 
-  # fs_media_hsh ############################################################### => {"mounting"=>{"field_name"=>"framed"}, "signature"=>{"field_name"=>"hand signed"}, "certificate"=>{"field_name"=>"LOA"}}
+  def build_fs_opt_hsh(fs_hsh, hsh={})
+    fs_hsh.each do |k, kind_param|
+      if kind_param.has_key?('options') && kind_param['options'][k+'_id'] && kind_param.keys.count == 1
+        hsh.merge!({k => kind_param['options'][k+'_id'].field_name})
+      end
+    end
+    hsh
+  end
+
   def fs_media_hsh(fs_hsh, hsh={'fs_media'=>{}})
     fs_hsh.each do |kind, kind_param|
       next if fs_param_case(kind_param, kind+'_id') == true
@@ -290,117 +399,158 @@ class Export
     end
   end
 
-  # def description_hsh(store, hsh={'description'=>{}})
-  #   #%w[title artist_name].map{|k| hsh['description'].merge!()} #{fname()} store['item'][k])
-  #   store.each do |kind, kind_params|
-  #   end
+  def tagline_signature(v)
+    if v.split(' ').include?('authorized')
+      'signed'
+    elsif v == 'unsigned'
+      '(Unsigned)'
+    else
+      v
+    end
+  end
+
+  def body_signature(v)
+    if k = %w[plate authorized].detect{|k| v.split(' ').include?(k)}
+      "bearing the #{k} signature of the artist."
+    elsif v.split(' ').include?('estate')
+      "#{v}."
+    elsif v == 'unsigned'
+      'This piece is unsigned.'
+    else
+      "#{v} by the artist."
+    end
+  end
+
+  def numbering_value(numbering, opt_numbering, tags)
+    if numbering == 'proof edition' || tags && tags.values.any?{|i| i.blank?}
+      opt_numbering
+    elsif tags
+      "#{opt_numbering} #{tags.values.join('/')}"
+    end
+  end
+
+  # Description ################################################################
+  def format_description(store)
+    description_keys_hsh(store).each do |context, media_keys|
+      store['attrs'][context] = build_description(context, store[context], media_keys)
+    end
+    store
+  end
+
+  def build_description(context, media_hsh, media_keys, set=[])
+    media_keys.each do |media_key|
+      set << assign_media(context, media_hsh, media_keys, media_key, media_hsh[media_key])
+    end
+    set.join(' ')
+  end
+
+  def assign_media(context, media_hsh, media_keys, media_key, media_val)
+    if updated_media = format_description_case(context, media_hsh, media_keys, media_key, media_val)
+      updated_media
+    else
+      media_val
+    end
+  end
+
+  def format_description_case(context, media_hsh, media_keys, media_key, media_val)
+    case media_key
+      #when 'artist_name'; format_artist(context, media_val)
+      when 'title'; format_title(context, media_val, media_hsh[media_keys[1]])
+      when 'medium'; format_medium(context, media_key, media_val)
+      when 'material'; format_material(context, media_keys, media_val)
+      when 'leafing'; format_leafing(media_keys, media_val)
+      when 'remarque'; format_remarque(context, media_keys, media_val)
+      when 'numbering'; format_numbering(media_keys, media_val, media_val.split(' ').include?('from'))
+      #when 'signature'; format_signature(context, media_keys, media_val)
+      #when 'certificate'; format_certificate(media_val)
+    end
+  end
+
+  # def format_artist(context, media_val)
+  #   context == 'tagline' ? "#{media_val}," : "by #{media_val},"
   # end
 
-  # def description_hsh(store)
-  #   store.each do |kind, kind_params|
-  #   end
+  def format_title(context, media_val, next_media)
+    context == 'tagline' ? media_val :  "#{media_val} is #{format_vowel(next_media, ['one-of-a-kind', 'unique'])}"
+  end
+
+  def format_medium(context, media_keys, media_val)
+    return unless context == 'tagline'
+    %w[material leafing remarque].all? {|k| media_keys.exclude?(k)} ? "#{media_val}," : media_val
+  end
+
+  def format_material(context, media_keys, media_val)
+    return unless context == 'tagline' && %w[leafing remarque].all? {|i| media_keys.exclude?(i)}
+    "#{media_val},"
+  end
+
+  def format_leafing(media_keys, media_val)
+    punct = ',' if media_keys.exclude?('remarque')
+    "with #{[media_val, punct].join('')}"
+  end
+
+  def format_remarque(context, media_keys, media_val)
+    word = media_keys.include?('leafing') ? 'and' : 'with'
+    "#{word} #{media_val},"
+  end
+
+  def format_numbering(media_keys, media_val, proof_bool)
+    if proof_bool && %w[leafing remarque].all? {|k| media_keys.exclude?(k)} #proof_context + context
+      "#{media_val},"
+    elsif !proof_bool && media_keys.include?('signature')
+      "#{media_val} and"
+    end
+  end
+
+  # def format_signature(context, media_keys, media_val)
+  #   context == 'body' || context == 'tagline' && media_keys.exclude?('certificate') ? "#{media_val}" : media_val
   # end
   #
-  # def attr_hsh
+  # def format_certificate(media_val)
+  #   "#{media_val}"
   # end
 
-  # class Description
-  # end
-  #
-  # class CSV
-  # end
+  ##############################################################################
+  def description_keys_hsh(store)
+    {'tagline' => tagline_keys(store['tagline'], store['tagline'].keys), 'body' => all_body_keys.select{|k| store['body'].has_key?(k)}}
+  end
 
-  # Description ###############################################################
+  def tagline_keys(tagline_hsh, tagline_keys)
+    tagline_keys = sorted_tagline_keys(tagline_hsh, tagline_keys)
+    tagline_keys = tagline_keys.reject {|k| reject_tagline_keys(tagline_hsh, k, tagline_hsh[k])}
+  end
+
+  def sorted_tagline_keys(tagline_hsh, tagline_keys)
+    tagline_keys = all_title_keys.select{|k| tagline_keys.include?(k)}
+    reorder_numbering_key(tagline_hsh, tagline_keys)
+  end
+
+  def reorder_numbering_key(tagline_hsh, tagline_keys, k='numbering')
+    return tagline_keys unless tagline_hsh[k] && tagline_hsh[k].split(' ')[0] == 'from'
+    tagline_keys.delete(k)
+    tagline_keys.insert(tagline_keys.index('material'), k)
+    tagline_keys
+  end
+
+  def reject_tagline_keys(tagline_hsh, k, v)
+    case k
+      when 'medium' && v.downcase.split(' ').include?('giclee') && tagline_hsh['material'].downcase.split(' ').exclude?('paper'); true
+      when 'material' && v.split(' ').include?('paper'); true
+      else false
+    end
+  end
+
+  def all_tagline_keys
+    %w[artist_name title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate]
+  end
+
+  def all_body_keys
+    %w[title embellished category sub_category medium material leafing remarque artist_name numbering signature mounting certificate dimension]
+  end
+
   # END OF REVAMPED export_params METHODS  #####################################
   ##############################################################################
 
-  # def handle_item(item, artist, store)
-  #   stash_item(item, artist, store)
-  #   store['description'] = attr_item(store['stash']['item'])
-  # end
-  #
-  # def stash_item(item, artist, store, h={})
-  #   store['stash'] = {'item' => h.merge!(csv_attr_and_val(item, 'item').merge(csv_attr_and_val(artist, 'artist')))}
-  #   store['stash']['item'].merge!({'title'=> attr_title(store['stash']['title'])})
-  # end
-  #
-  # def attr_item(i_store, h={})
-  #   %w[title artist_name].map{|k| h.merge!({k=> {'field_name' => i_store[k]}}) if i_store.has_key?(k)}
-  #   h
-  # end
-
-  # def attr_title(title)
-  #   title.blank? ? 'Untitled' : title
-  # end
-
-  #######################
-
-  # def handle_product(item, product, store)
-  #   return attr_values(store).merge!(attr_product_keys.map{|k| [k, nil]}.to_h) if product.nil?
-  #   handle_mounting_dimensions(store)
-  #   handle_media(store, product.tags)
-  #   #handle_description(store['description'])
-  #   #handle_description(store)
-  #   attr_values(store)
-  # end
-
-  ##############################################################################
-
-  # def handle_mounting_dimensions(store)
-  #   stash_dimensions(store)
-  #   update_mounting_hsh(store)
-  #   update_dimension_hsh(store)
-  # end
-  #
-  # def stash_dimensions(store, h={})
-  #   %w[dimension mounting].each do |k|
-  #     tags, obj = ['tags', k+'_id'].map{|k2| store['field_sets'].dig(k, k2)}
-  #     stash_dimension_hsh(default_tags(tags, k), obj.try(:field_name), h)
-  #   end
-  #   store['stash'].merge!({'dimension' => h})
-  # end
-
-  # def default_tags(tags, k)
-  #   return tags if tags
-  #   keys = k == 'dimension' ? %w[material_width material_height] : %w[mounting_width mounting_height]
-  #   keys.map{|k| [k, nil]}.to_h
-  # end
-
-  # def stash_dimension_hsh(d_tags, d_type, h)
-  #   d_tags.each do |d_key, d_val|
-  #     k, k2 = d_key.split('_')
-  #     h[k] = {'dimension_type'=> dimension_type(d_type)} if !h.has_key?(k)
-  #     assign_or_merge(h[k], 'dimensions',  k2, d_val)
-  #   end
-  #   h
-  # end
-  #
-  # def dimension_type(field_name)
-  #   case field_name
-  #     when 'framing'; 'frame'
-  #     when 'matted'; 'matting'
-  #     when 'width & height'; 'image'
-  #     else field_name
-  #   end
-  # end
-  #
-  # def update_mounting_hsh(store)
-  #   return if !store['field_sets'].has_key?('mounting')
-  #   store['field_sets']['mounting'].delete('tags')
-  #   store['field_sets'].merge!({'mounting' => {'options' => store['field_sets']['mounting']}})
-  # end
-  #
-  # def update_dimension_hsh(store)
-  #   store['field_sets'].merge!({'dimension' => {'tags' => store['stash']['dimension']}})
-  # end
-
-  ##############################################################################
-
-  # def handle_media(store, p_tags)
-  #   stash_media(store, p_tags, store['options']['medium_id'].try(:field_name))
-  #   media_opt_hsh(store['options'].select{|k,v| !v.nil?}, p_media_keys.map{|k| [k, p_tags[k]]}.to_h.reject{|k,v| v == 'n/a'}, store)
-  #   media_fs_hsh(store)
-  # end
   #
   # def stash_media(store, p_tags, medium_val)
   #   media_keys.each do |k|
@@ -445,159 +595,27 @@ class Export
 
   ##############################################################################
 
-  def handle_description(store, hsh={})
-    description_hsh(store['description']).each do |context, d_keys|
-      build_description_by_kind(d_store, context, d_keys, hsh.merge!({context =>[]}))
-      hsh[context] = format_description_by_context(hsh[context].compact, context)
-    end
-    d_store.merge!(hsh)
-  end
+  # def handle_description(store, hsh={})
+  #   description_hsh(store['description']).each do |context, d_keys|
+  #     build_description_by_kind(d_store, context, d_keys, hsh.merge!({context =>[]}))
+  #     hsh[context] = format_description_by_context(hsh[context].compact, context)
+  #   end
+  #   d_store.merge!(hsh)
+  # end
 
   # def description_hsh(d_store)
   #   {'tagline' => title_keys(d_store, d_store.keys), 'body' => body_keys(d_store, d_store.keys)}
   # end
 
-  def build_description_by_kind(d_store, context, d_keys, hsh)
-    d_keys.each do |k|
-      hsh[context] << description_cases(d_store, context, k, d_store[k]['field_name'], d_store[k]['tags'], d_keys)
-    end
-    hsh[context].compact
-  end
-
-  # def description_cases(d_store, context, k, fname, tags, d_keys)
-  #   case k
-  #     when 'artist'; format_artist(context, fname)
-  #     when 'title'; format_title(context, d_store, d_keys, fname)
-  #     when 'mounting'; format_mounting(context, fname)
-  #     when 'category'; format_category(context, fname)
-  #     when 'medium'; format_medium(context, fname, d_keys)
-  #     when 'material'; format_material(context, fname, d_keys, fname.split(' '))
-  #     when 'leafing'; format_leafing(d_keys, fname)
-  #     when 'remarque'; format_remarque(context, d_keys, fname)
-  #     when 'numbering'; format_numbering(d_keys, fname, tags, fname.split(' ').include?('from'))
-  #     when 'signature'; format_signature(context, d_keys, fname)
-  #     when 'certificate'; format_certificate(context, fname)
-  #     when 'dimension'; format_dimension(context, tags)
-  #     else fname
+  # def build_description_by_kind(d_store, context, d_keys, hsh)
+  #   d_keys.each do |k|
+  #     hsh[context] << description_cases(d_store, context, k, d_store[k]['field_name'], d_store[k]['tags'], d_keys)
   #   end
+  #   hsh[context].compact
   # end
 
-  def format_artist(context, fname)
-    context == 'tagline' ? "#{fname}," : "by #{fname},"
-  end
 
-  def format_title(context, d_store, d_keys, fname)
-    fname == 'Untitled' ? 'This' : "\"#{fname}\""
-    if context == 'tagline'
-      fname if fname != 'This'
-    else
-      word = d_store[d_keys[d_keys.index('title')+1]]['field_name']
-      "#{fname} is #{format_vowel(word, ['one-of-a-kind', 'unique'])}"
-    end
-  end
 
-  def format_mounting(context, fname)
-    if context == 'tagline' && fname.split(' ').include?('framed')
-      'framed'
-    elsif context == 'body' && fname.split(' ').any?{|i| ['framed', 'matting']}
-      "This piece comes #{fname}."
-    end
-  end
-
-  def format_mounting(context, fname)
-    fname == 'matting' ? 'matted' : fname
-    if context == 'tagline' && fname.split(' ').include?('framed')
-      'framed'
-    else context == 'body' && fname.split(' ').any?{|i| ['framed', 'matted']}
-      "This piece comes #{fname}."
-    end
-  end
-
-  def format_category(context, fname)
-    return unless fname == 'one of a kind'
-    context == 'tagline' ? 'One-of-a-Kind' : 'one-of-a-kind'
-  end
-
-  def format_medium(context, fname, d_keys)
-    return unless context == 'tagline'
-    %w[material leafing remarque].all? {|k| d_keys.exclude?(k)} ? "#{fname}," : fname
-  end
-
-  def format_material(context, fname, d_keys, split_fname)
-    return if context == 'tagline' && split_fname.include?('paper')
-    fname = 'canvas' if context == 'tagline' && split_fname.include?('stretched')
-    fname = 'canvas' if context == 'body' && split_fname.include?('gallery')
-    punct = ',' if %w[leafing remarque].all? {|i| d_keys.exclude?(i)} && context == 'tagline'
-    "on #{[fname, punct].join('')}"
-  end
-
-  def format_leafing(d_keys, fname)
-    punct = ',' if d_keys.exclude?('remarque')
-    "with #{[fname, punct].join('')}"
-  end
-
-  def format_remarque(context, d_keys, fname)
-    word = d_keys.include?('leafing') ? 'and' : 'with'
-    fname = fname+','
-    "#{word} #{fname}"
-  end
-
-  def format_numbering(d_keys, fname, tags, proof_ed)
-    if proof_ed && d_keys.include?('material')
-      fname
-    elsif proof_ed && %w[leafing remarque].all? {|k| d_keys.exclude?(k)}
-      "#{fname},"
-    elsif !proof_ed
-      word = 'and' if d_keys.include?('signature')
-      words = tags ? "#{fname} #{tags.values.join('/')}" : fname
-      [words, word].join(' ')
-    end
-  end
-
-  def format_signature(context, d_keys, fname)
-    context == 'tagline' ? title_signature(d_keys, fname) : body_signature(d_keys, fname)
-  end
-
-  def title_signature(d_keys, fname)
-    fname = fname.split(' ').include?('authorized') ? 'signed' : fname
-    punct = '.' if d_keys.exclude?('certificate')
-    [fname, punct].join('')
-  end
-
-  def body_signature(d_keys, fname)
-    if k = %w[plate authorized].detect{|k| fname.split(' ').include?(k)}
-      "bearing the #{k} signature of the artist."
-    elsif fname.split(' ').include?('estate')
-      "#{fname}."
-    else
-      "#{fname} by the artist."
-    end
-  end
-
-  def format_certificate(context, fname)
-    fname = fname == 'LOA' ? 'Letter' : 'Certificate'
-    word = context == 'tagline' ? 'with' : 'Includes'
-    [word, fname, 'of Authenticity.'].join(' ')
-  end
-
-  def format_dimension(context, tags, tag_set=[])
-    return unless context == 'body'
-    %w[mounting material].each do |k|
-      if tags.has_key?(k)
-        tag_set << format_dimensions(tags[k]['dimensions']) + ' ' + format_dimension_type(tags[k]['dimension_type'])
-      end
-    end
-    punct = tag_set.count > 1 ? ', ' : ' '
-    "Measures approx. #{tag_set.join(punct)}."
-  end
-
-  # def format_dimensions(dimensions)
-  #   dimensions.transform_values{|v| v+"\""}.values.join(' x ')
-  # end
-
-  def format_dimension_type(dimension_type)
-    "(#{dimension_type})"
-  end
   ##########################
 
   # def description_cases(d_store, context, k, field_name, tags, d_keys)
@@ -618,29 +636,29 @@ class Export
   #   end
   # end
   #
-  def format_description_by_context(word_set, context)
-    word_set.map!{|words| cap_words(words)} if context == 'tagline'
-    word_set.join(' ')
-  end
-  #######################
-
-  def attr_values(store, attr_hsh={})
-    store['stash'].each do |kind_key, kind_val|
-      attr_hsh.merge!(attr_case(kind_key, kind_val))
-    end
-    store['export'] = attr_hsh
-  end
-
-  def attr_case(kind_key, kind_val)
-    case kind_key
-      #when 'item'; kind_val.merge!({'title' => attr_title(kind_val['title'])})
-      when 'dimension'; attr_dimensions(kind_val)
-      when 'category'; attr_category(kind_val)
-      when 'medium'; attr_medium(kind_key, kind_val)
-      when 'material'; attr_material(kind_key, kind_val)
-      else {kind_key => kind_val}
-    end
-  end
+  # def format_description_by_context(word_set, context)
+  #   word_set.map!{|words| cap_words(words)} if context == 'tagline'
+  #   word_set.join(' ')
+  # end
+  # #######################
+  #
+  # def attr_values(store, attr_hsh={})
+  #   store['stash'].each do |kind_key, kind_val|
+  #     attr_hsh.merge!(attr_case(kind_key, kind_val))
+  #   end
+  #   store['export'] = attr_hsh
+  # end
+  #
+  # def attr_case(kind_key, kind_val)
+  #   case kind_key
+  #     #when 'item'; kind_val.merge!({'title' => attr_title(kind_val['title'])})
+  #     #when 'dimension'; attr_dimensions(kind_val)
+  #     when 'category'; attr_category(kind_val)
+  #     when 'medium'; attr_medium(kind_key, kind_val)
+  #     when 'material'; attr_material(kind_key, kind_val)
+  #     else {kind_key => kind_val}
+  #   end
+  # end
 
   # def attr_title(title)
   #   title.blank? ? 'Untitled' : title
@@ -668,61 +686,61 @@ class Export
   #   dimension_type == 'frame' ? tags : tags.transform_values!{|v| nil}
   # end
 
-  def attr_category(v)
-    [%w[art_type, art_category], attr_category_case(v)].transpose.to_h
-  end
+  # def attr_category(v)
+  #   [%w[art_type, art_category], attr_category_case(v)].transpose.to_h
+  # end
+  #
+  # def attr_category_case(v)
+  #   if ['Original', 'OneOfAKind'].include?(v)
+  #     ['Original', 'Original Painting']
+  #   elsif v == 'LimitedEdition'
+  #     ['Limited Edition', 'Limited Edition']
+  #   elsif v == 'PrintMedia'
+  #     ['Print', 'Limited Edition']
+  #   end
+  # end
 
-  def attr_category_case(v)
-    if ['Original', 'OneOfAKind'].include?(v)
-      ['Original', 'Original Painting']
-    elsif v == 'LimitedEdition'
-      ['Limited Edition', 'Limited Edition']
-    elsif v == 'PrintMedia'
-      ['Print', 'Limited Edition']
-    end
-  end
-
-  def attr_medium(k, m_hsh)
-    {k => attr_medium_value_case(m_hsh)}
-  end
-
-  def attr_medium_value_case(m_hsh)
-    case
-      when ['Etching', 'Giclee', 'Lithograph', 'Monoprint', 'Poster'].include?(m_hsh['medium_type']); m_hsh['medium_type']
-      when m_hsh['medium_type'] == 'Silkscreen'; 'Serigraph'
-      when m_hsh['medium_type'].underscore.split('_').include?('painting'); attr_painting(m_hsh).capitalize
-      when m_hsh['medium_type'].underscore.split('_').include?('drawing'); attr_drawing(m_hsh)
-      else 'Mixed Media'
-    end
-  end
-
-  def attr_painting(m_hsh)
-    case
-    when m_hsh['medium_opt'].nil? || m_hsh['medium_opt'] == 'painting'; 'unknown'
-    when m_hsh['medium_opt'] == 'sumi ink painting'; 'watercolor'
-    else %w[oil acrylic watercolor pastel guache].detect {|k| m_hsh['medium_opt'] == "#{k} painting"}
-    end
-  end
-
-  def attr_drawing(m_hsh)
-    if medium_opt = m_hsh['medium_opt']
-      medium_opt.split(' ').include?('pencil') ? 'Pencil' : 'Pen and Ink'
-    else
-      'Pen and Ink'
-    end
-  end
-
-  def attr_material(kind_key, kind_val)
-    {kind_key => attr_material_value(kind_val.underscore.split('_'))}
-  end
-
-  def attr_material_value(material_split)
-    if k = %w[canvas paper board metal sericel].detect{|k| material_split.include?(k)}
-      k.capitalize
-    else
-      'Board'
-    end
-  end
+  # def attr_medium(k, m_hsh)
+  #   {k => attr_medium_value_case(m_hsh)}
+  # end
+  #
+  # def attr_medium_value_case(m_hsh)
+  #   case
+  #     when ['Etching', 'Giclee', 'Lithograph', 'Monoprint', 'Poster'].include?(m_hsh['medium_type']); m_hsh['medium_type']
+  #     when m_hsh['medium_type'] == 'Silkscreen'; 'Serigraph'
+  #     when m_hsh['medium_type'].underscore.split('_').include?('painting'); attr_painting(m_hsh).capitalize
+  #     when m_hsh['medium_type'].underscore.split('_').include?('drawing'); attr_drawing(m_hsh)
+  #     else 'Mixed Media'
+  #   end
+  # end
+  #
+  # def attr_painting(m_hsh)
+  #   case
+  #   when m_hsh['medium_opt'].nil? || m_hsh['medium_opt'] == 'painting'; 'unknown'
+  #   when m_hsh['medium_opt'] == 'sumi ink painting'; 'watercolor'
+  #   else %w[oil acrylic watercolor pastel guache].detect {|k| m_hsh['medium_opt'] == "#{k} painting"}
+  #   end
+  # end
+  #
+  # def attr_drawing(m_hsh)
+  #   if medium_opt = m_hsh['medium_opt']
+  #     medium_opt.split(' ').include?('pencil') ? 'Pencil' : 'Pen and Ink'
+  #   else
+  #     'Pen and Ink'
+  #   end
+  # end
+  #
+  # def attr_material(kind_key, kind_val)
+  #   {kind_key => attr_material_value(kind_val.underscore.split('_'))}
+  # end
+  #
+  # def attr_material(material_split)
+  #   if k = %w[canvas paper board metal sericel].detect{|k| material_split.include?(k)}
+  #     k.capitalize
+  #   else
+  #     'Board'
+  #   end
+  # end
   #######################
 
 
@@ -1034,11 +1052,11 @@ class Export
     end
   end
 
-  def reorder_numbering_key(k, tagline_keys)
-    tagline_keys.delete(k)
-    tagline_keys.insert(tagline_keys.index('material'), k)
-    tagline_keys
-  end
+  # def reorder_numbering_key(k, tagline_keys)
+  #   tagline_keys.delete(k)
+  #   tagline_keys.insert(tagline_keys.index('material'), k)
+  #   tagline_keys
+  # end
 
   def reject_title_keys_cases(d_store, d_keys, k, field_name)
     case k
@@ -1071,9 +1089,9 @@ class Export
   #   d_keys.exclude?(k)
   # end
 
-  def all_body_keys
-    %w[title embellished category sub_category medium material leafing remarque artist numbering signature mounting certificate dimension]
-  end
+  # def all_body_keys
+  #   %w[title embellished category sub_category medium material leafing remarque artist numbering signature mounting certificate dimension]
+  # end
 
   ##############################################################################
 
@@ -1130,110 +1148,47 @@ class Export
   # csv hsh ###################################################
   # def csv_hsh(store['stash']['medium'], i_tags, p_tags, attr_hsh={})
   # def csv_hsh(pg_hsh['options']['medium_id'].try(:field_name), i_tags, p_tags, attr_hsh={})
-  def csv_hsh(pg_hsh, i_tags, p_tags, csv_hsh={})
-    pg_hsh = {'mounting' => pg_hsh['field_sets']['mounting']['mounting_id'].try(:field_name), 'medium'=> pg_hsh['options']['medium_id'].try(:field_name)}
-    csv_hsh.merge!(csv_media(p_tags, pg_hsh['medium']))
-    csv_hsh.merge!(csv_dimensions(i_tags, pg_hsh['mounting']))
-    csv_hsh
-  end
+
+  # def csv_hsh(pg_hsh, i_tags, p_tags, csv_hsh={})
+  #   pg_hsh = {'mounting' => pg_hsh['field_sets']['mounting']['mounting_id'].try(:field_name), 'medium'=> pg_hsh['options']['medium_id'].try(:field_name)}
+  #   csv_hsh.merge!(csv_media(p_tags, pg_hsh['medium']))
+  #   csv_hsh.merge!(csv_dimensions(i_tags, pg_hsh['mounting']))
+  #   csv_hsh
+  # end
 
   # csv dimensions ###################################################
 
-  def csv_dimensions(i_tags, mounting_val)
-    dimension_keys.map {|k| format_csv_dimension_hsh(k.split('_'), i_tags.try(:[], k), mounting_val)}.to_h
-  end
-
-  def format_csv_dimension_hsh(split_key, val, mounting_val)
-    kind, dimension = split_key
-    [csv_dimension_key(dimension, kind), csv_dimension_val(kind, val, mounting_val)]
-  end
-
-  def csv_dimension_key(dimension, kind)
-    kind == 'material' ? dimension : ['frame', dimension].join('_')
-  end
-
-  def csv_dimension_val(kind, val, mounting_val)
-    return if val.nil?
-    kind == 'material' ? val.to_i : frame_dimensions(val, mounting_val)
-  end
-
-  def frame_dimensions(val, mounting_val)
-    val.to_i if val && mounting_val == 'framing'
-  end
-
-  def dimension_keys
-    %w[material_width material_height mounting_width mounting_height]
-  end
-
-  def media_keys
-    %w[category medium material]
-  end
-
-  # update THIS ################################################################
-
-  def csv_media(p_tags, medium_val, csv_hsh={})
-    media_keys.each do |k|
-      csv_hsh.merge!(media_case(k, p_tags[k], medium_val))
-    end
-    csv_hsh
-  end
-
-  def media_case(k, v, medium_val)
-    if k == 'category'
-      [%w[art_type, art_category], category_case(v)].transpose.to_h
-    elsif k == 'medium'
-      {k => medium_case(v, medium_val)}
-    elsif k == 'material'
-      {k => material_case(v.underscore.split('_'))}
-    end
-  end
-
-  def category_case(v)
-    if ['Original', 'OneOfAKind'].include?(v)
-      ['Original', 'Original Painting']
-    elsif v == 'LimitedEdition'
-      ['Limited Edition', 'Limited Edition']
-    elsif v == 'PrintMedia'
-      ['Print', 'Limited Edition']
-    end
-  end
-
-  # def material_case(material_split)
-  #   case
-  #     when material_split.include?('canvas'); 'Canvas'
-  #     when material_split.include?('paper'); 'Paper'
-  #     when material_split.include?('wood') || material_split.include?('acrylic'); 'Board'
-  #     when material_split.include?('metal'); 'Metal'
-  #     when material_split.include?('sericel'); 'Sericel'
-  #   end
+  # def csv_dimensions(i_tags, mounting_val)
+  #   dimension_keys.map {|k| format_csv_dimension_hsh(k.split('_'), i_tags.try(:[], k), mounting_val)}.to_h
+  # end
+  #
+  # def format_csv_dimension_hsh(split_key, val, mounting_val)
+  #   kind, dimension = split_key
+  #   [csv_dimension_key(dimension, kind), csv_dimension_val(kind, val, mounting_val)]
+  # end
+  #
+  # def csv_dimension_key(dimension, kind)
+  #   kind == 'material' ? dimension : ['frame', dimension].join('_')
+  # end
+  #
+  # def csv_dimension_val(kind, val, mounting_val)
+  #   return if val.nil?
+  #   kind == 'material' ? val.to_i : frame_dimensions(val, mounting_val)
+  # end
+  #
+  # def frame_dimensions(val, mounting_val)
+  #   val.to_i if val && mounting_val == 'framing'
+  # end
+  #
+  # def dimension_keys
+  #   %w[material_width material_height mounting_width mounting_height]
   # end
 
-  def medium_case(medium, medium_val)
-    if medium = %w[painting drawing].detect {|k| medium.underscore.split('_').include?(k)}
-      return 'Unknown' if medium_val.blank? || medium_val == 'painting'
-      public_send(medium+'_option_case', medium_val.split(' ')[0])
-    else
-      medium_option_case(medium)
-    end
-  end
+  # def media_keys
+  #   %w[category medium material]
+  # end
 
-  def medium_option_case(medium)
-    case
-      when ['BasicMixedMedia', 'AcrylicMixedMedia', 'Relief'].include?(medium); 'Mixed Media'
-      when ['Etching', 'Giclee', 'Lithograph', 'Monoprint', 'Poster'].include?(medium); medium
-      when medium == 'Silkscreen'; 'Serigraph'
-    end
-  end
-
-  def painting_option_case(medium)
-    case
-      when %w[oil acrylic watercolor pastel guache].include?(medium); medium.capitalize
-      when medium == 'mixed'; 'Mixed Media'
-      when medium == 'sumi-ink'; 'Watercolor'
-    end
-  end
-
-  ####################################################
+  # update THIS ################################################################
 
   def csv_sorted_keys
     %w[item artist dimension media description].map{|k| csv_target_key_set(k)}.flatten(1).sort {|a,b| a[0] <=> b[0]}.map{|set| set[1]}
