@@ -24,9 +24,8 @@ class ItemsController < ApplicationController
   def update
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
-    #puts "item_params: #{item_params}"
     @item.assign_attributes(item_params)
-
+    #
     @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
     update_product
     @item, @artist = update_assocs(@item, @item.artist, 'Artist', params[:hidden][:artist_id])
@@ -35,8 +34,8 @@ class ItemsController < ApplicationController
     @input_group = search_input_group
 
     @product_group = @item.product_group
+    @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])
     @item.save
-    #@product_group = @item.product_group
 
     respond_to do |format|
       format.js

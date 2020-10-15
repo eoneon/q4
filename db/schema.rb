@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20200917152837) do
+ActiveRecord::Schema.define(version: 20201014144719) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -64,6 +64,7 @@ ActiveRecord::Schema.define(version: 20200917152837) do
     t.bigint "invoice_id"
     t.string "title"
     t.integer "qty"
+    t.hstore "csv_tags"
     t.index ["invoice_id"], name: "index_items_on_invoice_id"
   end
 
