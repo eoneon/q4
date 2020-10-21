@@ -1,0 +1,16 @@
+<%= form_tag(invoice_export_skus_path(@invoice, format: "csv"), method: "post", id: "export-skus") do |f| %>
+  <div class="card border border-secondary p-2 mb-2">
+    <div class="form">
+      <div class="row">
+        <label class="col-1 col-form-label form-control-sm ml-sm-2">sku range:</label>
+        <div class="col-2">
+          <%= number_field_tag :start_sku, nil, placeholder: "start sku", maxlength: 6, class: "form-control form-control-sm mr-sm-2" %>
+        </div>
+        <div class="col-2">
+          <%= number_field_tag :end_sku, nil, placeholder: "end sku", maxlength: 6, class: "form-control form-control-sm mr-sm-2" %>
+        </div>
+        <%= submit_tag "export", class: "btn btn-sm btn-outline-primary form-control-sm mr-sm-2" %>
+      </div>
+    </div>
+  </div>
+<% end %>

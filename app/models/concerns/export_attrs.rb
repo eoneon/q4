@@ -4,15 +4,23 @@ module ExportAttrs
   extend ActiveSupport::Concern
 
   class_methods do
-    def to_csv
-      items = all
-      #items = method_that_grabs_defined_set_of_items_scoped_by_skus(items)
+
+    def to_csv(items)
       CSV.generate do |csv|
-        csv << items.first.csv_tags.keys
+        csv << attr_keys
         items.each do |item|
-          csv << item.csv_tags.values if item.product
+          csv << map_attr_values(item.csv_tags) if item.product
         end
       end
     end
+
+    def map_attr_values(csv_tags)
+      attr_keys.map{|k| csv_tags[k]}
+    end
+
+    def attr_keys
+      %w[sku artist_name artist_id title tagline property_room body width height frame_width frame_height retail qty]
+    end
+
   end
 end

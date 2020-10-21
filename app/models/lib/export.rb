@@ -225,8 +225,8 @@ class Export
     d_hsh.each do |d_kind, d_kind_hsh|
       dimensions, dimension_type = d_kind_hsh['dimensions'], d_kind_hsh['dimension_type']
       hsh.merge!(attr_dimensions(d_kind, dimensions, dimension_type))
-      puts "dimensions: #{dimensions.values}"
-      tag_set << format_dimensions(dimensions) + ' ' + "(#{dimension_type})" if dimensions.values.exclude?("")
+      #puts "dimensions: #{dimensions.values}"
+      tag_set << format_dimensions(dimensions) + ' ' + "(#{dimension_type})" if dimensions.values.none?{|v| v.blank?}
     end
     hsh.each {|k,v| store['attrs'].merge!({k=>v})}
     detail_dimension(store, 'dimension', tag_set)
@@ -241,6 +241,7 @@ class Export
   end
 
   def dimension_tags(tags, kind)
+    #tags.values.none?{|v| v.blank?} ? tags : default_tags(kind)
     tags ? tags : default_tags(kind)
   end
 
@@ -418,17 +419,38 @@ class Export
     end
   end
 
-  # Description ################################################################
+  # format_description ################################################################
   def format_description(store)
     description_keys_hsh(store).each do |context, media_keys|
       store['attrs'][context] = build_description(context, store[context], media_keys)
     end
-    store['attrs']
+     store['attrs'].merge!({'property_room' => property_room(store['attrs']['tagline'], 128)})
+     store['attrs']
+  end
+
+  def property_room(build, i)
+    sub_list.each do |sub_arr|
+      return build.squish if build.squish.size <= i
+      build = build.gsub(sub_arr[0], sub_arr[-1]).squish
+    end
+    build
+  end
+
+  def sub_list
+    [
+      ["Certificate of Authenticity", "COA"],
+      ["Letter of Authenticity", "LOA"],
+      [" with ", " w/"], [" and ", " & "], [" Numbered ", " No "],
+      ["Hand Embellished", ""], ["Artist Embellished", ""],
+      ["Gold Leaf", "GoldLeaf"], ["Silver Leaf", "SilverLeaf"],
+      ["Hand Drawn Remarque", ""]
+    ]
   end
 
   def build_description(context, media_hsh, media_keys, set=[])
     media_keys.each do |media_key|
-      set << assign_media(context, media_hsh, media_keys, media_key, media_hsh[media_key])
+      media_val = assign_media(context, media_hsh, media_keys, media_key, media_hsh[media_key])
+      set << tagline_cap(context, media_val, media_key)
     end
     set.join(' ')
   end
@@ -556,12 +578,15 @@ class Export
     %w[a e i o u].include?(word.first.downcase) && exception_set.exclude?(word) ? 'an' : 'a'
   end
 
-  def cap_words(words, set=[])
-    return set << words if words && words[0] == "\""
-    format_word_set(words.split(' '), set)
+  def tagline_cap(context, media_val, media_key)
+    if context == 'tagline' && %[artist_name title dimension].exclude?(media_key)
+      cap_words(media_val.split(' '))
+    else
+      media_val
+    end
   end
 
-  def format_word_set(word_set, set)
+  def cap_words(word_set, set=[])
     word_set.each do |word|
       set << cap_case(word)
     end
@@ -569,11 +594,19 @@ class Export
   end
 
   def cap_case(word)
-    if ('A'..'Z').include?(word[0]) || %w[a an and from with].include?(word)
+    if acronym?(word) || excluded_word?(word)
       word
     else
       word.capitalize
     end
+  end
+
+  def acronym?(word)
+    ('A'..'Z').include?(word[0])
+  end
+
+  def excluded_word?(word)
+    %w[a an on of and from with].include?(word)
   end
 
   def decamelize(name)
@@ -581,13 +614,8 @@ class Export
   end
 
   # update THIS ################################################################
-
-  # def csv_sorted_keys
-  #   %w[item artist dimension media description].map{|k| csv_target_key_set(k)}.flatten(1).sort {|a,b| a[0] <=> b[0]}.map{|set| set[1]}
-  # end
-
   def attr_product_keys
-    %w[media dimension description].map{|k| csv_target_key_set(k)}.flatten(1).map{|set| set[1]}
+    %w[media dimension description].map{|k| csv_target_key_set(k)}.flatten(1).sort {|a,b| a[0] <=> b[0]}.map{|set| set[1]}
   end
 
   def csv_target_keys(target)

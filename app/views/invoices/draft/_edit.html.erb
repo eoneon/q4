@@ -1,0 +1,6 @@
+<div class="form-inline" id="edit-invoice">
+  <%= form_with model: invoice, url: supplier_invoice_path(invoice.supplier, invoice) do |f| %>
+    <%= f.number_field :invoice_number, placeholder: "invoice #", class: "form-control form-control-sm mr-sm-2" %>
+    <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">submit</button>
+  <% end %>
+</div>

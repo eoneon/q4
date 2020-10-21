@@ -5,6 +5,7 @@ Rails.application.routes.draw do
 
   resources :invoices do
     resources :items, except: [:index]
+    resources :export_skus, only: [:create]
     resources :skus, only: [:create] do
       member do
         post :destroy

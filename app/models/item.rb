@@ -1,6 +1,8 @@
 class Item < ApplicationRecord
+  
   include STI
   include ExportAttrs
+  include SkuRange
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :standard_products, through: :item_groups, source: :target, source_type: "StandardProduct"
