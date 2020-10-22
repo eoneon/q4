@@ -1,6 +1,10 @@
 <h1><%= @invoice.supplier.supplier_name %>: <%= @invoice.invoice_number %></h1>
 <%#= link_to 'Back', url_for(:back) %>
+<%= render 'skus/form', invoice: @invoice %>
 <%= render 'export_skus/form', invoice: @invoice %>
 <%= render 'invoices/edit', invoice: @invoice %>
 <%= render 'invoices/nav_bar', invoice: @invoice %>
-<%= render 'items/table', invoice: @invoice %>
+
+<div id="items-table">
+  <%= render 'items/table', invoice: @invoice %>
+</div>
