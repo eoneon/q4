@@ -7,7 +7,7 @@ class Export
   # end
 
   # export_params ##############################################################
-  def export_params(item, product, artist, pg_hsh, store={'attrs'=>{}, 'tagline'=>{}, 'body'=>{}})
+  def export_params(item, product, artist, pg_hsh, store={'attrs'=>{}, 'tagline'=>{}, 'search_tagline'=>{}, 'body'=>{}})
     csv_values_from_item(item, artist, store)
     csv_values_from_params(product, pg_hsh, store)
   end
@@ -70,9 +70,16 @@ class Export
     end
   end
 
+  # def detail_title(store,k,v)
+  #   title = v == 'Untitled' ? 'This' : "\"#{v}\""
+  #   store['tagline'].merge!({k=>title}) if title != 'This'
+  #   store['body'].merge!({k=>title})
+  # end
+
   def detail_title(store,k,v)
     title = v == 'Untitled' ? 'This' : "\"#{v}\""
     store['tagline'].merge!({k=>title}) if title != 'This'
+    store['search_tagline'].merge!({k=>title}) if title != 'This'
     store['body'].merge!({k=>title})
   end
 
@@ -83,47 +90,98 @@ class Export
 
   def detail_category(store, k, v)
     store['tagline'].merge!({k=>'One-of-a-Kind'})
+    store['search_tagline'].merge!({k=>'One-of-a-Kind'})
     store['body'].merge!({k=>'one-of-a-kind'})
   end
+  #
+  # def detail_category(store, k, v)
+  #   store['tagline'].merge!({k=>'One-of-a-Kind'})
+  #   store['body'].merge!({k=>'one-of-a-kind'})
+  # end
+
+  # def detail_material(store,k,v)
+  #   return if v == 'Sericel'
+  #   store['tagline'].merge!({k => "on #{tagline_material_value(v)}"}) if store['attrs']['material'] != 'Paper'
+  #   store['body'].merge!({k => "on #{body_material_value(v)}"})
+  # end
 
   def detail_material(store,k,v)
     return if v == 'Sericel'
     store['tagline'].merge!({k => "on #{tagline_material_value(v)}"}) if store['attrs']['material'] != 'Paper'
+    store['search_tagline'].merge!({k => "on #{v}"})
     store['body'].merge!({k => "on #{body_material_value(v)}"})
   end
 
+  # def detail_mounting(k, mounting, store)
+  #   store['tagline'].merge!({k=>'framed'}) if mounting.split(' ').include?('framed')
+  #   store['body'].merge!({k=>"This piece comes #{mounting}."}) if mounting.split(' ').any?{|i| ['framed', 'matted', 'gallery']}
+  # end
+
   def detail_mounting(k, mounting, store)
     store['tagline'].merge!({k=>'framed'}) if mounting.split(' ').include?('framed')
+    store['search_tagline'].merge!({k=>'framed'}) if mounting.split(' ').include?('framed')
     store['body'].merge!({k=>"This piece comes #{mounting}."}) if mounting.split(' ').any?{|i| ['framed', 'matted', 'gallery']}
   end
+
+  # def detail_dimension(store, k, tag_set)
+  #   return if tag_set.empty?
+  #   punct = tag_set.count > 1 ? ', ' : ' '
+  #   store['body'].merge!({k=> "Measures approx. #{tag_set.join(punct)}."})
+  # end
 
   def detail_dimension(store, k, tag_set)
     return if tag_set.empty?
     punct = tag_set.count > 1 ? ', ' : ' '
+    store['search_tagline'].merge!({k => tag_set})
     store['body'].merge!({k=> "Measures approx. #{tag_set.join(punct)}."})
   end
 
+  # def detail_signature(store, k, v)
+  #   store['tagline'].merge!({k=>tagline_signature(v)})
+  #   store['body'].merge!({k=>body_signature(v)})
+  # end
+
   def detail_signature(store, k, v)
     store['tagline'].merge!({k=>tagline_signature(v)})
+    store['search_tagline'].merge!({k=> store['tagline'][k]})
     store['body'].merge!({k=>body_signature(v)})
   end
 
   def detail_certificate(store, k, v)
+    store['search_tagline'].merge!({k =>"with #{v}"})
     v = v == 'LOA' ? 'Letter' : 'Certificate'
     store['tagline'].merge!({k=> "with #{v} of Authenticity."})
     store['body'].merge!({k=> "Includes #{v} of Authenticity."})
   end
 
+  # def detail_certificate(store, k, v)
+  #   v = v == 'LOA' ? 'Letter' : 'Certificate'
+  #   store['tagline'].merge!({k=> "with #{v} of Authenticity."})
+  #   store['body'].merge!({k=> "Includes #{v} of Authenticity."})
+  # end
+
+  # def detail_numbering(fs_hsh, k, store)
+  #   numbering, opt_numbering, tags = fs_hsh.dig(k, k+'_id').try(:field_name), fs_hsh.dig(k, 'options', k+'_id').try(:field_name), fs_hsh.dig(k, 'tags')
+  #   return if !numbering || !opt_numbering
+  #
+  #   numbering_value = numbering_value(numbering, opt_numbering, tags)
+  #   store['tagline'].merge!({k=> numbering_value})
+  #   store['body'].merge!({k=> numbering_value})
+  # end
+
   def detail_numbering(fs_hsh, k, store)
     numbering, opt_numbering, tags = fs_hsh.dig(k, k+'_id').try(:field_name), fs_hsh.dig(k, 'options', k+'_id').try(:field_name), fs_hsh.dig(k, 'tags')
     return if !numbering || !opt_numbering
+
     numbering_value = numbering_value(numbering, opt_numbering, tags)
     store['tagline'].merge!({k=> numbering_value})
+    store['search_tagline'].merge!({k => opt_numbering}) #abbrv later?
     store['body'].merge!({k=> numbering_value})
   end
 
   def default_detail(store,k,v)
     store['tagline'].merge!({k=>v.split(' ').map{|k| k.capitalize}.join(' ')})
+    store['search_tagline'].merge!({k=>store['tagline'][k]})
     store['body'].merge!({k=>v})
   end
 
@@ -225,7 +283,6 @@ class Export
     d_hsh.each do |d_kind, d_kind_hsh|
       dimensions, dimension_type = d_kind_hsh['dimensions'], d_kind_hsh['dimension_type']
       hsh.merge!(attr_dimensions(d_kind, dimensions, dimension_type))
-      #puts "dimensions: #{dimensions.values}"
       tag_set << format_dimensions(dimensions) + ' ' + "(#{dimension_type})" if dimensions.values.none?{|v| v.blank?}
     end
     hsh.each {|k,v| store['attrs'].merge!({k=>v})}
@@ -241,7 +298,6 @@ class Export
   end
 
   def dimension_tags(tags, kind)
-    #tags.values.none?{|v| v.blank?} ? tags : default_tags(kind)
     tags ? tags : default_tags(kind)
   end
 
@@ -475,16 +531,19 @@ class Export
   end
 
   def format_title(context, media_val, next_media)
-    context == 'tagline' ? media_val :  "#{media_val} is #{format_vowel(next_media, ['one-of-a-kind', 'unique'])}"
+    #context == 'tagline' ? media_val :  "#{media_val} is #{format_vowel(next_media, ['one-of-a-kind', 'unique'])}"
+    %w[tagline search_tagline].include?(context) ? media_val :  "#{media_val} is #{format_vowel(next_media, ['one-of-a-kind', 'unique'])}"
   end
 
   def format_medium(context, media_keys, media_val)
-    return unless context == 'tagline'
+    #return unless context == 'tagline'
+    return unless %w[tagline search_tagline].include?(context)
     %w[leafing remarque].all? {|k| media_keys.exclude?(k)} ? media_val : "#{media_val},"
   end
 
   def format_material(context, media_keys, media_val)
-    return unless context == 'tagline' && %w[leafing remarque].all? {|i| media_keys.exclude?(i)}
+    #return unless context == 'tagline' && %w[leafing remarque].all? {|i| media_keys.exclude?(i)}
+    return unless %w[tagline search_tagline].include?(context) && %w[leafing remarque].all? {|i| media_keys.exclude?(i)}
     "#{media_val},"
   end
 
@@ -508,9 +567,28 @@ class Export
 
   ##############################################################################
 
-  def description_keys_hsh(store)
-    {'tagline' => tagline_keys(store['tagline'], store['tagline'].keys), 'body' => all_body_keys.select{|k| store['body'].has_key?(k)}}
+  def description_keys_hsh(store, hsh={})
+    tagline_key_hsh(store['tagline'], hsh)
+    search_tagline_key_hsh(store['tagline'].keys, hsh)
+    body_key_hsh(store['body'], hsh)
+    hsh
   end
+
+  def tagline_key_hsh(tagline, hsh, k='tagline')
+    hsh.merge!({k => tagline_keys(tagline, tagline.keys)})
+  end
+
+  def search_tagline_key_hsh(tagline_keys, hsh, k='search_tagline')
+    hsh.merge!({k => tagline_keys.reject{|k,v| k == 'artist_name'}})
+  end
+
+  def body_key_hsh(body, hsh, k='body')
+    hsh.merge!({k=> all_body_keys.select{|k| body.has_key?(k)}})
+  end
+  ##############################################################################
+  # def description_keys_hsh(store)
+  #   {'tagline' => tagline_keys(store['tagline'], store['tagline'].keys), 'body' => all_body_keys.select{|k| store['body'].has_key?(k)}}
+  # end
 
   def tagline_keys(tagline_hsh, tagline_keys)
     tagline_keys = sorted_tagline_keys(tagline_hsh, tagline_keys)
@@ -579,7 +657,7 @@ class Export
   end
 
   def tagline_cap(context, media_val, media_key)
-    if context == 'tagline' && %[artist_name title dimension].exclude?(media_key)
+    if %w[tagline search_tagline].include?(context) && %[artist_name title dimension].exclude?(media_key)
       cap_words(media_val.split(' '))
     else
       media_val

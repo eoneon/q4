@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-sm navbar-light bg-light" id="invoice-show">
-  <a class="navbar-brand"><%= invoice.invoice_number %></a>
+  <a class="navbar-brand"><%#= invoice.invoice_number %></a>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
     <span class="navbar-toggler-icon"></span>
@@ -30,7 +30,7 @@
   </div>
 
   <div class="collapse" id="<%= dom_tag(invoice, :new_sku) %>" data-parent="#invoice-show">
-    <%= render 'items/new', invoice: invoice %>
+    <%#= render 'items/new', invoice: invoice %>
   </div>
 
   <div class="collapse" id="<%= dom_tag(invoice, :new_skus) %>" data-parent="#invoice-show">

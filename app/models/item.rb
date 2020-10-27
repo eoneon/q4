@@ -1,5 +1,5 @@
 class Item < ApplicationRecord
-  
+
   include STI
   include ExportAttrs
   include SkuRange
@@ -35,7 +35,7 @@ class Item < ApplicationRecord
     artists.first if artists.any?
   end
 
-  # Item.find(5).field_targets ## h = Item.find(5).product_group['description'] ## h['inputs'] ## h['inputs']['field_sets']   Item.find(5).product_group['inputs']['field_sets']
+  # Item.find(5).field_targets ## pg = Item.find(5).product_group['params'] ## h['inputs'] ## h['inputs']['field_sets']   Item.find(5).product_group['inputs']['field_sets']
   # product_group ############################################################## Item.find(5).product_group['inputs']['field_sets']
   def product_group
     params, inputs = {}, {'options'=>[], 'field_sets'=>{}}
@@ -51,7 +51,7 @@ class Item < ApplicationRecord
       end
     end
     #{'params'=>params, 'inputs'=>inputs, 'description' => description_hsh(params['options'], params['field_sets'])}
-    {'params'=>params, 'inputs'=>inputs, 'description' => {}}
+    {'params'=>params, 'inputs'=>inputs}
   end
 
   # field-type specific methods ################################################

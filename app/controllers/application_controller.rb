@@ -246,7 +246,7 @@ class ApplicationController < ActionController::Base
 
   def update_tags(tags, param_tags)
     tags.each do |tag_key, tag|
-      puts "tags: #{tags}, param_tags[tag_key]: #{param_tags[tag_key]}"
+      #puts "tags: #{tags}, param_tags[tag_key]: #{param_tags[tag_key]}"
       param_tag = param_tags[tag_key]
       assign_or_merge(tag_key, param_tag) unless (tag.blank? && param_tag.blank?) || (tag == param_tag)
     end

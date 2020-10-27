@@ -8,7 +8,7 @@ Rails.application.routes.draw do
     resources :export_skus, only: [:create]
     resources :skus, only: [:create] do
       member do
-        post :destroy
+        post :batch_destroy
       end
     end
   end
