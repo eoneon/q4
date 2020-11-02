@@ -1,11 +1,121 @@
 class Export
 
-  ####################### h = Export.new.csv_values_test['attrs']  <!--> Item.find(5).product_group['params']['field_sets']  h = Item.find(5).product_group['params']['options']
-  # def csv_values_test
-  #   item = Item.find(5)
-  #   export_params(item, item.product, item.artist, item.product_group['params'])
+  ####################### h = Export.new.csv_test(6)  <!--> Item.find(5).product_group['params']['field_sets']  h = Item.find(5).product_group['params']['options']
+  def csv_test(i, store={'attrs'=>{}, 'tagline'=>{}, 'search_tagline'=>{}, 'body'=>{}})
+    pg_hsh = Item.find(i).product_group['params']
+    mounting_dimension(pg_hsh, store)
+    store
+  end
+
+  # refactor mounting_dimension_hsh #####################################################
+  def mounting_dimension(pg_hsh, store)
+    build_mounting_dimension(pg_hsh, store)
+    #detail_mounting_dimension
+    store
+  end
+
+  def build_mounting_dimension(pg_hsh, store, hsh={'dimensions'=>{}})
+    %w[mounting dimension].each do |k|
+      format_mounting_dimensions(pg_hsh, hsh, k, k+'_id')
+      k, dimensions, dimension_for = attr_dimensions_args(k, hsh)
+      attr_dimensions(k, dimensions, dimension_for, store)
+    end
+    hsh
+  end
+
+  def attr_dimensions_args(k, hsh)
+    k = k == 'dimension' ? 'material' : k
+    dimensions = format_attr_dimensions(k, hsh['dimensions'][k])
+    [k, dimensions, hsh['dimensions'].dig(k,'dimension_for')]
+  end
+
+  def format_mounting_dimensions(pg_hsh, hsh, k, fk)
+    extract_dimensions_from_tags(pg_hsh.dig('field_sets', k, 'tags'), hsh, k)
+    add_dimension_for(pg_hsh, hsh, k, fk)
+    hsh
+  end
+
+  def attr_dimensions(k, dimensions, dimension_for, store)
+    store['attrs'].merge!(attr_dimensions_hsh(k, dimensions, dimension_for))
+  end
+
+  def add_dimension_for(pg_hsh, hsh, k, fk)
+    if val = extract_dimension_for(pg_hsh, k, k+'_id')
+      hsh[k] = val
+      dimension_for(hsh['dimensions'], k, val) unless included_set?(val, %w[gallery stretched])
+    end
+  end
+
+  def dimension_for(hsh, k, val)
+    k = k == 'dimension' ? 'material' : k
+    hsh[k].merge!({'dimension_for' => dimension_for_val(val)})
+  end
+
+  def dimension_for_val(fname)
+    case
+      when fname.index('fram'); 'frame'
+      when fname == 'matted'; 'matting'
+      when fname.index('width'); 'image'
+      else fname
+    end
+  end
+
+  def attr_dimensions_hsh(k, dimensions, dimension_for)
+    if dimensions.nil? || k=='mounting' && dimension_for != 'frame'
+      nil_dimensions(k)
+    else
+      build_attr_dimensions(dimensions, dimensions.values, attr_dimension_keys(k))
+    end
+  end
+
+  def nil_dimensions(k)
+    attr_dimension_keys(k).map{|i| [i, nil]}.to_h
+  end
+
+  def build_attr_dimensions(dimensions, vals, set)
+    return dimensions if dimensions.keys == set
+    vals.count == 1 ? set.map{|k| [k, vals[0]]}.to_h : set.map{|k| [k, dimensions[k]]}.to_h
+  end
+
+  def format_attr_dimensions(k, dimensions)
+    k == 'mounting' ? dimensions.transform_keys{|v| 'frame_'+v} : dimensions
+  end
+
+  def attr_dimension_keys(k)
+    k == 'mounting' ? %w[frame_width frame_height] : %w[width height]
+  end
+
+  def included_set?(str, set)
+    str.split(' ').any?{|i| set.include?(i)}
+  end
+  # refactor...
+  # def build_mounting_dimension(pg_hsh, hsh={'dimensions'=>{}})
+  #   %w[mounting dimension].each do |k|
+  #     extract_dimensions_from_tags(pg_hsh.dig('field_sets', k, 'tags'), hsh, k)
+  #     if refname = extract_dimension_for(pg_hsh, k, k+'_id')
+  #       hsh[k] = refname
+  #     end
+  #   end
+  #   hsh
   # end
 
+  def extract_dimensions_from_tags(tags, hsh, k)
+    dimension_params(tags, k).each do |dimension_field, dimension_val|
+      kind_key, dimension_field = dimension_field.split('_')
+      assign_or_merge(hsh['dimensions'], kind_key, dimension_field, dimension_val)
+    end
+    hsh
+  end
+
+  def extract_dimension_for(pg_hsh, k, fk)
+    if k == 'mounting' && !pg_hsh['field_sets'].has_key?(k)
+      wrapped_context(nested_fname(pg_hsh['options'], 'material_id'))
+    elsif pg_hsh['field_sets'][k].has_key?('options')
+      nested_fname(pg_hsh['field_sets'], k, 'options', fk)
+    elsif pg_hsh['field_sets'][k].has_key?(fk)
+      nested_fname(pg_hsh['field_sets'], k, fk)
+    end
+  end
   # export_params ##############################################################
   def export_params(item, product, artist, pg_hsh, store={'attrs'=>{}, 'tagline'=>{}, 'search_tagline'=>{}, 'body'=>{}})
     csv_values_from_item(item, artist, store)
@@ -70,16 +180,10 @@ class Export
     end
   end
 
-  # def detail_title(store,k,v)
-  #   title = v == 'Untitled' ? 'This' : "\"#{v}\""
-  #   store['tagline'].merge!({k=>title}) if title != 'This'
-  #   store['body'].merge!({k=>title})
-  # end
-
   def detail_title(store,k,v)
     title = v == 'Untitled' ? 'This' : "\"#{v}\""
     store['tagline'].merge!({k=>title}) if title != 'This'
-    store['search_tagline'].merge!({k=>title}) if title != 'This'
+    #store['search_tagline'].merge!({k=>title}) if title != 'This'
     store['body'].merge!({k=>title})
   end
 
@@ -93,17 +197,6 @@ class Export
     store['search_tagline'].merge!({k=>'One-of-a-Kind'})
     store['body'].merge!({k=>'one-of-a-kind'})
   end
-  #
-  # def detail_category(store, k, v)
-  #   store['tagline'].merge!({k=>'One-of-a-Kind'})
-  #   store['body'].merge!({k=>'one-of-a-kind'})
-  # end
-
-  # def detail_material(store,k,v)
-  #   return if v == 'Sericel'
-  #   store['tagline'].merge!({k => "on #{tagline_material_value(v)}"}) if store['attrs']['material'] != 'Paper'
-  #   store['body'].merge!({k => "on #{body_material_value(v)}"})
-  # end
 
   def detail_material(store,k,v)
     return if v == 'Sericel'
@@ -112,34 +205,25 @@ class Export
     store['body'].merge!({k => "on #{body_material_value(v)}"})
   end
 
-  # def detail_mounting(k, mounting, store)
-  #   store['tagline'].merge!({k=>'framed'}) if mounting.split(' ').include?('framed')
-  #   store['body'].merge!({k=>"This piece comes #{mounting}."}) if mounting.split(' ').any?{|i| ['framed', 'matted', 'gallery']}
-  # end
-
   def detail_mounting(k, mounting, store)
     store['tagline'].merge!({k=>'framed'}) if mounting.split(' ').include?('framed')
-    store['search_tagline'].merge!({k=>'framed'}) if mounting.split(' ').include?('framed')
+    store['search_tagline'].merge!({k=> "(#{mounting})"}) if mounting.split(' ').any?{|i| %w[framed matted border].include?(i)}
     store['body'].merge!({k=>"This piece comes #{mounting}."}) if mounting.split(' ').any?{|i| ['framed', 'matted', 'gallery']}
   end
-
-  # def detail_dimension(store, k, tag_set)
-  #   return if tag_set.empty?
-  #   punct = tag_set.count > 1 ? ', ' : ' '
-  #   store['body'].merge!({k=> "Measures approx. #{tag_set.join(punct)}."})
+  # def detail_mounting(k, mounting, store)
+  #   store['tagline'].merge!({k=>'framed'}) if mounting.split(' ').include?('framed')
+  #   puts "mounting: #{mounting}"
+  #   store['search_tagline'].merge!(search_tagline_mounting(k, mounting)) if mounting.split(' ').any?{|i| %w[framed matted border]}
+  #   #store['search_tagline'].merge!({k=>'framed'}) if mounting.split(' ').any?{|i| %w[framed matted border]} #mounting.split(' ').include?('framed')
+  #   store['body'].merge!({k=>"This piece comes #{mounting}."}) if mounting.split(' ').any?{|i| ['framed', 'matted', 'gallery']}
   # end
 
   def detail_dimension(store, k, tag_set)
     return if tag_set.empty?
     punct = tag_set.count > 1 ? ', ' : ' '
-    store['search_tagline'].merge!({k => tag_set})
+    #store['search_tagline'].merge!({k => tag_set})
     store['body'].merge!({k=> "Measures approx. #{tag_set.join(punct)}."})
   end
-
-  # def detail_signature(store, k, v)
-  #   store['tagline'].merge!({k=>tagline_signature(v)})
-  #   store['body'].merge!({k=>body_signature(v)})
-  # end
 
   def detail_signature(store, k, v)
     store['tagline'].merge!({k=>tagline_signature(v)})
@@ -153,21 +237,6 @@ class Export
     store['tagline'].merge!({k=> "with #{v} of Authenticity."})
     store['body'].merge!({k=> "Includes #{v} of Authenticity."})
   end
-
-  # def detail_certificate(store, k, v)
-  #   v = v == 'LOA' ? 'Letter' : 'Certificate'
-  #   store['tagline'].merge!({k=> "with #{v} of Authenticity."})
-  #   store['body'].merge!({k=> "Includes #{v} of Authenticity."})
-  # end
-
-  # def detail_numbering(fs_hsh, k, store)
-  #   numbering, opt_numbering, tags = fs_hsh.dig(k, k+'_id').try(:field_name), fs_hsh.dig(k, 'options', k+'_id').try(:field_name), fs_hsh.dig(k, 'tags')
-  #   return if !numbering || !opt_numbering
-  #
-  #   numbering_value = numbering_value(numbering, opt_numbering, tags)
-  #   store['tagline'].merge!({k=> numbering_value})
-  #   store['body'].merge!({k=> numbering_value})
-  # end
 
   def detail_numbering(fs_hsh, k, store)
     numbering, opt_numbering, tags = fs_hsh.dig(k, k+'_id').try(:field_name), fs_hsh.dig(k, 'options', k+'_id').try(:field_name), fs_hsh.dig(k, 'tags')
@@ -248,29 +317,134 @@ class Export
     %w[category sub_category medium material]
   end
 
+  # # refactor mounting_dimension_hsh #####################################################
+  # def mounting_dimension(pg_hsh, store, hsh)
+  #   build_mounting_dimension(pg_hsh, hsh)
+  # end
+  #
+  # def build_mounting_dimension(pg_hsh, hsh)
+  #   %w[mounting dimension].each do |k|
+  #     extract_dimensions_from_tags(pg_hsh.dig('field_sets', k, 'tags'), hsh, k)
+  #     puts "#{build_mounting_dimension_params(pg_hsh, k, k+'_id')}"
+  #     if val = build_mounting_dimension_params(pg_hsh, k, k+'_id')
+  #       puts "val: #{val}"
+  #       #hsh.merge!({k=> val})
+  #       hsh[k] = val
+  #     end
+  #   end
+  #   hsh
+  # end
+  #
+  # def extract_dimensions_from_tags(tags, hsh, k)
+  #   dimension_params(tags, k).each do |dimension_field, dimension_val|
+  #     kind_key, dimension_field = dimension_field.split('_')
+  #     assign_or_merge(hsh['dimensions'], kind_key, dimension_field, dimension_val)
+  #   end
+  #   hsh
+  # end
+
+  def dimension_params(tags, kind)
+    tags ? tags : default_dimension_params(kind)
+  end
+
+  def default_dimension_params(kind)
+    keys = kind == 'dimension' ? %w[material_width material_height] : %w[mounting_width mounting_height]
+    keys.map{|k| [k, nil]}.to_h
+  end
+
+  # def build_mounting_dimension_params(pg_hsh, k, fk)
+  #   if k == 'mounting' && !pg_hsh['field_sets'].has_key?(k)
+  #     wrapped_context(nested_fname(pg_hsh['options'], 'material_id'))
+  #   elsif pg_hsh['field_sets'][k].has_key?('options')
+  #     nested_fname(pg_hsh['field_sets'], k, 'options')
+  #   elsif pg_hsh['field_sets'][k].has_key?(fk)
+  #     nested_fname(pg_hsh['field_sets'], fk)
+  #   end
+  # end
+
+  def assign_or_merge(h, k,  k2, v)
+    if h.has_key?(k)
+      h[k].merge!({k2=>v})
+    else
+      h.merge!({k=>{k2=>v}})
+    end
+  end
   # mounting_dimension_hsh #####################################################
+
   def mounting_dimension_hsh(pg_hsh, store, hsh={'dimension'=>{}})
     mounting_hsh(pg_hsh, store)
     dimension_hsh(pg_hsh['field_sets'], store, hsh)
   end
 
-  # mounting_hsh ###############################################################
+  # refactored mounting_hsh ##############################################################
   def mounting_hsh(pg_hsh, store, k='mounting')
-    if mounting = mounting_value_case(pg_hsh, k)
+    if mounting = mounting_value_case(pg_hsh, k, k+'_id')
       detail_mounting(k, mounting, store)
     end
   end
 
-  def mounting_value_case(pg_hsh, k)
-    if mounting = wrapped_mounting_value(pg_hsh.dig('options', 'material_id').try(:field_name))
-      mounting
-    elsif mounting = pg_hsh.dig('field_sets', k, 'options', k+'_id').try(:field_name)
-      mounting == 'matting' ? 'matted' : mounting
+  def mounting_value_case(pg_hsh, k, fk)
+    if wrapped_mounting = wrapped_mounting(nested_fname(pg_hsh['options'], 'material_id')) #gallery wrapped, stretched
+      wrapped_mounting
+    elsif fs_opt_mounting = fs_opt_mounting(nested_fname(pg_hsh['field_sets'], k, 'options', fk)) #framed, custum framed
+      fs_opt_mounting
+    elsif fs_mounting = fs_mounting(nested_fname(pg_hsh['field_sets'], k, fk)) #border, matting
+      fs_mounting
+    elsif fs_dimension = fs_mounting(nested_fname(pg_hsh['field_sets'], 'dimension', fk)) #image
+      fs_dimension
     end
   end
 
+  def wrapped_context(material)
+    wrapped_context_value(material) if material
+  end
+
+  def wrapped_context_value(material)
+    if material.split(' ').include?('gallery')
+      'gallery wrapped'
+    elsif material.split(' ').include?('stretched')
+      'stretched'
+    end
+  end
+
+  def wrapped_mounting(material)
+    wrapped_mounting_value(material) if material
+  end
+
   def wrapped_mounting_value(material)
-    'gallery wrapped' if material && material.split(' ').include?('gallery')
+    if material.split(' ').include?('gallery')
+      'gallery wrapped'
+    elsif material.split(' ').include?('stretched')
+      'stretched'
+    end
+  end
+
+  def fs_opt_mounting(mounting)
+    framed(mounting) if mounting
+  end
+
+  def framed(mounting)
+    mounting if mounting.split(' ').include?('framed')
+  end
+
+  def fs_mounting(mounting)
+    fs_mounting_value(mounting) if mounting
+  end
+
+  def fs_mounting_value(mounting)
+    mounting == 'matting' ? 'matted' : mounting
+  end
+
+  def fs_dimension(mounting)
+    fs_dimension_value(mounting) if mounting
+  end
+
+  def fs_dimension_value(mounting)
+    mounting == 'width & height' ? 'image' : mounting
+  end
+
+  def nested_fname(pg_hsh, *keys)
+    pg_hsh.dig(*keys).try(:field_name)
   end
 
   # dimension_hsh ##############################################################
@@ -279,31 +453,12 @@ class Export
     update_fs_hsh(fs_hsh)
   end
 
-  def export_dimensions(d_hsh, store, hsh={}, tag_set=[])
-    d_hsh.each do |d_kind, d_kind_hsh|
-      dimensions, dimension_type = d_kind_hsh['dimensions'], d_kind_hsh['dimension_type']
-      hsh.merge!(attr_dimensions(d_kind, dimensions, dimension_type))
-      tag_set << format_dimensions(dimensions) + ' ' + "(#{dimension_type})" if dimensions.values.none?{|v| v.blank?}
-    end
-    hsh.each {|k,v| store['attrs'].merge!({k=>v})}
-    detail_dimension(store, 'dimension', tag_set)
-  end
-
   def build_dimension_hsh(fs_hsh, d_hsh)
     %w[mounting dimension].each do |kind|
       tags, obj = ['tags', kind+'_id'].map{|key| fs_hsh.dig(kind, key)}
       build_nested_dimension_hsh(dimension_tags(tags, kind), obj.try(:field_name), d_hsh)
     end
     d_hsh
-  end
-
-  def dimension_tags(tags, kind)
-    tags ? tags : default_tags(kind)
-  end
-
-  def default_tags(kind)
-    keys = kind == 'dimension' ? %w[material_width material_height] : %w[mounting_width mounting_height]
-    keys.map{|k| [k, nil]}.to_h
   end
 
   def build_nested_dimension_hsh(dimension_tags, fname, d_hsh)
@@ -315,6 +470,26 @@ class Export
     d_hsh
   end
 
+  def export_dimensions(d_hsh, store, hsh={}, tag_set=[])
+    d_hsh.each do |d_kind, d_kind_hsh|
+      dimensions, dimension_type = d_kind_hsh['dimensions'], d_kind_hsh['dimension_type']
+      hsh.merge!(attr_dimensions(d_kind, dimensions, dimension_type))
+
+      tag_set << format_dimensions(dimensions) + ' ' + "(#{dimension_type})" if dimensions.values.none?{|v| v.blank?}
+    end
+    hsh.each {|k,v| store['attrs'].merge!({k=>v})}
+    detail_dimension(store, 'dimension', tag_set)
+  end
+
+  def dimension_tags(tags, kind)
+    tags ? tags : default_tags(kind)
+  end
+
+  def default_tags(kind)
+    keys = kind == 'dimension' ? %w[material_width material_height] : %w[mounting_width mounting_height]
+    keys.map{|k| [k, nil]}.to_h
+  end
+
   def dimension_type(fname)
     case fname
       when 'framing'; 'frame'
@@ -324,13 +499,13 @@ class Export
     end
   end
 
-  def attr_dimensions(d_kind, dimensions, dimension_type)
-    if d_kind == 'mounting'
-      attr_mounting_dimension(dimension_type, dimensions.transform_keys{|v| 'frame_'+v})
-    else
-      attr_material_dimension(dimensions)
-    end
-  end
+  # def attr_dimensions(d_kind, dimensions, dimension_type)
+  #   if d_kind == 'mounting'
+  #     attr_mounting_dimension(dimension_type, dimensions.transform_keys{|v| 'frame_'+v})
+  #   else
+  #     attr_material_dimension(dimensions)
+  #   end
+  # end
 
   def attr_material_dimension(tags)
     return tags if tags.keys == %w[width height]
@@ -444,6 +619,14 @@ class Export
     end
     hsh
   end
+
+  # def search_tagline_mounting(k, mounting)
+  #   if mounting.split(' ').include?('framed')
+  #     {k => mounting}
+  #   else
+  #     {k => "(#{mounting})"}
+  #   end
+  # end
 
   def tagline_signature(v)
     if v.split(' ').include?('authorized')
@@ -569,7 +752,7 @@ class Export
 
   def description_keys_hsh(store, hsh={})
     tagline_key_hsh(store['tagline'], hsh)
-    search_tagline_key_hsh(store['tagline'].keys, hsh)
+    search_tagline_key_hsh(store['search_tagline'].keys, hsh)
     body_key_hsh(store['body'], hsh)
     hsh
   end
@@ -600,12 +783,29 @@ class Export
     reorder_numbering_key(tagline_hsh, tagline_keys)
   end
 
+  def search_tagline_keys(search_tagline_hsh, search_tagline_keys)
+    sorted_search_tagline_keys(search_tagline_hsh, search_tagline_keys)
+  end
+
+  def sorted_search_tagline_keys(search_tagline_hsh, search_tagline_keys)
+    search_tagline_keys = all_search_tagline_keys.select{|k| search_tagline_keys.include?(k)}
+    reorder_numbering_key(search_tagline_hsh, search_tagline_keys)
+    #reorder_mounting_key(search_tagline_hsh, search_tagline_keys)
+  end
+
   def reorder_numbering_key(tagline_hsh, tagline_keys, k='numbering')
     return tagline_keys unless tagline_hsh[k] && tagline_hsh[k].split(' ')[0] == 'from'
     tagline_keys.delete(k)
     tagline_keys.insert(tagline_keys.index('material'), k)
     tagline_keys
   end
+
+  # def reorder_mounting_key(search_tagline_hsh, search_tagline_keys, k='mounting')
+  #   return search_tagline_keys unless search_tagline_hsh[k] && search_tagline_hsh[k].split(' ').include?('framed')
+  #   search_tagline_keys.delete(k)
+  #   search_tagline_keys.insert(0, k)
+  #   search_tagline_keys
+  # end
 
   def reject_tagline_keys(tagline_hsh, k, v)
     case k
@@ -617,6 +817,10 @@ class Export
 
   def all_tagline_keys
     %w[artist_name title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate]
+  end
+
+  def all_search_tagline_keys
+    %w[embellished category sub_category medium material leafing remarque numbering signature certificate mounting]
   end
 
   def all_body_keys
@@ -644,13 +848,13 @@ class Export
     {k=>{k2=>v}}
   end
 
-  def assign_or_merge(h, k,  k2, v)
-    if h.has_key?(k)
-      h[k].merge!({k2=>v})
-    else
-      h.merge!(nested_hsh(k: k, k2: k2, v: v))
-    end
-  end
+  # def assign_or_merge(h, k,  k2, v)
+  #   if h.has_key?(k)
+  #     h[k].merge!({k2=>v})
+  #   else
+  #     h.merge!(nested_hsh(k: k, k2: k2, v: v))
+  #   end
+  # end
 
   def format_vowel(word, exception_set=[])
     %w[a e i o u].include?(word.first.downcase) && exception_set.exclude?(word) ? 'an' : 'a'
@@ -728,3 +932,25 @@ class Export
     [[4, 'tag_line'], [5, 'property_room'], [6, 'description']]
   end
 end
+
+
+
+  # mounting_hsh ###############################################################
+  # def mounting_hsh(pg_hsh, store, k='mounting')
+  #   if mounting = mounting_value_case(pg_hsh, k)
+  #     detail_mounting(k, mounting, store)
+  #   end
+  # end
+  #
+  # def mounting_value_case(pg_hsh, k)
+  #   if mounting = wrapped_mounting_value(pg_hsh.dig('options', 'material_id').try(:field_name))
+  #     mounting
+  #   elsif mounting = pg_hsh.dig('field_sets', k, 'options', k+'_id').try(:field_name)
+  #     #puts "mounting: #{mounting}"
+  #     mounting == 'matting' ? 'matted' : mounting
+  #   end
+  # end
+  #
+  # def wrapped_mounting_value(material)
+  #   'gallery wrapped' if material && material.split(' ').include?('gallery')
+  # end
