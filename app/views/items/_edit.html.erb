@@ -1,6 +1,8 @@
 <%= form_with model: item, url: invoice_item_path(invoice, item), id: "edit-item" do |f| %>
   <h5><span>Tagline: <%= @item.tagline %></span></h5>
   <hr>
+  <h5><span>Search: <%= @item.search_tagline %></span></h5>
+  <hr>
   <h5><span>Description: <%= @item.body %></span></h5>
   <div class="form">
     <%= hidden_field_tag "hidden[type]", product.try(:type) %>

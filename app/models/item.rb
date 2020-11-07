@@ -17,6 +17,10 @@ class Item < ApplicationRecord
     csv_tags['tagline'] unless csv_tags.nil?
   end
 
+  def search_tagline
+    csv_tags['search_tagline'] unless csv_tags.nil?
+  end
+
   def body
     csv_tags['body'] unless csv_tags.nil?
   end
