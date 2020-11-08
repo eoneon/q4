@@ -1,6 +1,6 @@
 class Export
 
-  ####################### h = Export.new.csv_test(6)  <!--> Item.find(5).product_group['params']['field_sets']  h = Item.find(5).product_group['params']['options']
+  ####################### h = Export.new.csv_test(6)  <!--> Item.find(6).csv_tags product_group['params']['field_sets']  h = Item.find(5).product_group['params']['options']
   def csv_test(i, store={'attrs'=>{}, 'tagline'=>{}, 'search_tagline'=>{}, 'body'=>{}})
     pg_hsh = Item.find(i).product_group['params']
     mounting_dimension(pg_hsh, store)
@@ -60,8 +60,6 @@ class Export
     fs_opt_media(pg_hsh['field_sets'], store)
     detail_numbering(pg_hsh['field_sets'], 'numbering', store)
   end
-
-
   # end ########################################################################
 
 
@@ -128,8 +126,10 @@ class Export
   # mounting_dimension_hsh #####################################################
   # START: primary methods: build_hsh; attr_hsh; detail_hsh; update fs_hsh ############
   def mounting_dimension(pg_hsh, store)
-    build_mounting_dimension(pg_hsh, hsh={'dimensions'=>{}, 'mounting_ref'=>{}, 'dimension_for'=>{}})
-    attr_dimensions(hsh['dimensions'], store)
+    build_mounting_dimension(pg_hsh, hsh={'dimensions'=>{}, 'mounting_ref'=>{}, 'dimension_for'=>{}}) # hsh.dig('dimension_for', 'mounting') hsh['dimension_for']['mounting']
+    #puts "mounting: #{hsh.dig('dimension_for', 'mounting')}"
+    #attr_dimensions(hsh['dimensions'], store)
+    attr_dimensions(hsh['dimensions'], hsh.dig('dimension_for', 'mounting'), store)
     detail_mounting_dimension(hsh, store)
     update_fs_hsh(pg_hsh['field_sets'])
   end
@@ -143,9 +143,10 @@ class Export
     hsh
   end
 
-  def attr_dimensions(hsh, store)
+  #def attr_dimensions(hsh, store)
+  def attr_dimensions(hsh, mounting, store)
     hsh.each do |k, dimensions|
-      dimensions = format_attr_dimensions(k, dimensions)
+      dimensions = format_attr_dimensions(k, mounting, dimensions)
       store['attrs'].merge!(build_attr_dimensions(dimensions, dimensions.values.take(2), attr_dimension_keys(k)))
     end
   end
@@ -219,8 +220,14 @@ class Export
   # end: build_mounting_dimension ##############################################
 
   # start: attr_dimensions #####################################################
-  def format_attr_dimensions(k, dimensions)
-    k == 'mounting' ? dimensions.transform_keys{|v| 'frame_'+v} : dimensions
+  # def format_attr_dimensions(k, dimensions)
+  #   k == 'mounting' ? dimensions.transform_keys{|v| 'frame_'+v} : dimensions
+  # end
+
+  def format_attr_dimensions(k, mounting, dimensions)
+    dimensions.transform_keys{|v| 'frame_'+v} if k == 'mounting'
+    dimensions.transform_values{|v| nil} if mounting == 'frame'
+    #dimensions
   end
 
   def build_attr_dimensions(dimensions, dimension_vals, set)
@@ -370,7 +377,6 @@ class Export
   end
 
   def description_case(store,k,v)
-    #puts "description_case: #{k}, #{v}"
     case
       when k == 'title'; detail_title(store,k,v)
       when k == 'artist_name'; detail_artist(store,k,v)
@@ -433,7 +439,6 @@ class Export
   def default_detail(store,k,v)
     store['tagline'].merge!({k=>v.split(' ').map{|k| k.capitalize}.join(' ')})
     store['search_tagline'].merge!({k=>v})
-    #store['search_tagline'].merge!({k=>store['tagline'][k]})
     store['body'].merge!({k=>v})
   end
 
@@ -486,19 +491,9 @@ class Export
   # end
 
   # FORMAT DESCRIPTION #########################################################
-  # def format_description(store)
-  #   description_keys_hsh(store).each do |context, media_keys|
-  #     store['attrs'][context] = build_description(context, store[context], media_keys)
-  #   end
-  #    store['attrs'].merge!({'property_room' => property_room(store['attrs']['tagline'], 128)})
-  #    store['attrs']
-  # end
-
   def format_description(store)
     description_keys.each do |context|
       media_keys = scoped_media_keys(context, store)
-      #puts "store[context]: #{store[context]}, media_keys: #{media_keys}"
-      puts "update_keys: #{update_keys(context, media_keys, store[context])}"
       store['attrs'][context] = build_description(context, store[context], update_keys(context, media_keys, store[context]))
     end
     store['attrs'].merge!({'property_room' => property_room(store['attrs']['tagline'], 128)})
@@ -508,7 +503,6 @@ class Export
   def build_description(context, media_hsh, media_keys, set=[])
     media_keys.each do |media_key|
       media_val = assign_media(context, media_hsh, media_keys, media_key, media_hsh[media_key])
-      #puts "context: #{context}, media_hsh: #{media_hsh}, media_key: #{media_key}, media_val: #{media_val}"
       set << tagline_cap(context, media_val, media_key)
     end
     set.join(' ')
@@ -546,7 +540,7 @@ class Export
     return media_keys unless context_hsh[k] && context_hsh[k].split(' ')[0] == 'from'
     media_keys.delete(k)
     media_keys.insert(media_keys.index('material'), k)
-    media_keys
+    # media_keys
   end
   # end ########################################################################
 
@@ -616,84 +610,6 @@ class Export
 
   ##############################################################################
 
-  def description_keys_hsh(store, hsh={})
-    #puts "before: #{store}"
-    filter_keys(store)
-    #puts "after: #{store}"
-    tagline_key_hsh(store['tagline'], hsh)
-    search_tagline_key_hsh(store['search_tagline'].keys, hsh)
-    body_key_hsh(store['body'], hsh)
-    hsh
-  end
-
-  # def filter_keys(store)
-  #   description_keys.each do |context|
-  #     store[context].delete_if{|k,v| v.blank?}
-  #     # need to reorder if: ordered_keys[context].select{|k| store[context].has_key?(k)}
-  #   end
-  # end
-
-  # def tagline_key_hsh(tagline, hsh, k='tagline')
-  #   hsh.merge!({k => tagline_keys(tagline, tagline.keys)})
-  # end
-  #
-  # def search_tagline_key_hsh(tagline_keys, hsh, k='search_tagline')
-  #   hsh.merge!({k => tagline_keys.reject{|k,v| k == 'artist_name'}})
-  # end
-  #
-  # def body_key_hsh(body, hsh, k='body')
-  #   hsh.merge!({k=> all_body_keys.select{|k| body.has_key?(k)}})
-  # end
-
-  def tagline_key_hsh(tagline, hsh, k='tagline')
-    hsh.merge!({k => tagline_keys(tagline)})
-  end
-
-  def search_tagline_key_hsh(tagline_keys, hsh, k='search_tagline')
-    hsh.merge!({k => tagline_keys.reject{|k,v| k == 'artist_name'}})
-  end
-
-  def body_key_hsh(body, hsh, k='body')
-    hsh.merge!({k=> all_body_keys.select{|k| body.has_key?(k)}})
-  end
-
-
-
-  ##############################################################################
-
-  # def tagline_keys(tagline_hsh, tagline_keys)
-  #   tagline_hsh = tagline_hsh.select{|k,v| !v.blank?}
-  #   tagline_keys = sorted_tagline_keys(tagline_hsh, tagline_hsh.keys)
-  #   #tagline_keys = sorted_tagline_keys(tagline_hsh, tagline_keys)
-  #   tagline_keys = tagline_keys.reject {|k| reject_tagline_keys(tagline_hsh, k, tagline_hsh[k])}
-  # end
-
-  def tagline_keys(tagline_hsh)
-    tagline_keys = sorted_tagline_keys(tagline_hsh, tagline_hsh.keys)
-    tagline_hsh.keys.reject {|k| reject_tagline_keys(tagline_hsh, k, tagline_hsh[k])}
-  end
-
-  def sorted_tagline_keys(tagline_hsh, tagline_keys)
-    tagline_keys = all_tagline_keys.select{|k| tagline_keys.include?(k)}
-    reorder_numbering_key(tagline_hsh, tagline_keys)
-  end
-
-  def search_tagline_keys(search_tagline_hsh, search_tagline_keys)
-    sorted_search_tagline_keys(search_tagline_hsh, search_tagline_keys)
-  end
-
-  def sorted_search_tagline_keys(search_tagline_hsh, search_tagline_keys)
-    search_tagline_keys = all_search_tagline_keys.select{|k| search_tagline_keys.include?(k)}
-    reorder_numbering_key(search_tagline_hsh, search_tagline_keys)
-  end
-
-  # def reorder_numbering_key(tagline_hsh, tagline_keys, k='numbering')
-  #   return tagline_keys unless tagline_hsh[k] && tagline_hsh[k].split(' ')[0] == 'from'
-  #   tagline_keys.delete(k)
-  #   tagline_keys.insert(tagline_keys.index('material'), k)
-  #   tagline_keys
-  # end
-
   def reject_tagline_keys(tagline_hsh, k, v)
     case k
       when 'medium' && v.downcase.split(' ').include?('giclee') && tagline_hsh['material'].downcase.split(' ').exclude?('paper'); true
@@ -702,30 +618,12 @@ class Export
     end
   end
 
-  # def filter_keys(store)
-  #   description_keys.map{|key| store[key].delete_if{|k,v| v.blank?}}
-  # end
-
-
-
   def ordered_keys
     {
       'tagline'=> %w[artist_name title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate],
       'search_tagline'=> %w[embellished category sub_category medium material leafing remarque numbering signature certificate mounting dimension],
       'body'=> %w[title embellished category sub_category medium material leafing remarque artist_name numbering signature mounting certificate dimension]
     }
-  end
-
-  def all_tagline_keys
-    %w[artist_name title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate]
-  end
-
-  def all_search_tagline_keys
-    %w[embellished category sub_category medium material leafing remarque numbering signature certificate mounting dimension]
-  end
-
-  def all_body_keys
-    %w[title embellished category sub_category medium material leafing remarque artist_name numbering signature mounting certificate dimension]
   end
 
   def product_keys
@@ -845,6 +743,97 @@ class Export
     str.split(' ').any?{|i| set.include?(i)}
   end
 end
+
+
+  # def description_keys_hsh(store, hsh={})
+  #   #puts "before: #{store}"
+  #   filter_keys(store)
+  #   #puts "after: #{store}"
+  #   tagline_key_hsh(store['tagline'], hsh)
+  #   search_tagline_key_hsh(store['search_tagline'].keys, hsh)
+  #   body_key_hsh(store['body'], hsh)
+  #   hsh
+  # end
+
+  # def filter_keys(store)
+  #   description_keys.each do |context|
+  #     store[context].delete_if{|k,v| v.blank?}
+  #     # need to reorder if: ordered_keys[context].select{|k| store[context].has_key?(k)}
+  #   end
+  # end
+
+  # def tagline_key_hsh(tagline, hsh, k='tagline')
+  #   hsh.merge!({k => tagline_keys(tagline, tagline.keys)})
+  # end
+  #
+  # def search_tagline_key_hsh(tagline_keys, hsh, k='search_tagline')
+  #   hsh.merge!({k => tagline_keys.reject{|k,v| k == 'artist_name'}})
+  # end
+  #
+  # def body_key_hsh(body, hsh, k='body')
+  #   hsh.merge!({k=> all_body_keys.select{|k| body.has_key?(k)}})
+  # end
+
+  # def tagline_key_hsh(tagline, hsh, k='tagline')
+  #   hsh.merge!({k => tagline_keys(tagline)})
+  # end
+  #
+  # def search_tagline_key_hsh(tagline_keys, hsh, k='search_tagline')
+  #   hsh.merge!({k => tagline_keys.reject{|k,v| k == 'artist_name'}})
+  # end
+  #
+  # def body_key_hsh(body, hsh, k='body')
+  #   hsh.merge!({k=> all_body_keys.select{|k| body.has_key?(k)}})
+  # end
+
+  ##############################################################################
+
+  # def tagline_keys(tagline_hsh, tagline_keys)
+  #   tagline_hsh = tagline_hsh.select{|k,v| !v.blank?}
+  #   tagline_keys = sorted_tagline_keys(tagline_hsh, tagline_hsh.keys)
+  #   #tagline_keys = sorted_tagline_keys(tagline_hsh, tagline_keys)
+  #   tagline_keys = tagline_keys.reject {|k| reject_tagline_keys(tagline_hsh, k, tagline_hsh[k])}
+  # end
+
+  # def tagline_keys(tagline_hsh)
+  #   tagline_keys = sorted_tagline_keys(tagline_hsh, tagline_hsh.keys)
+  #   tagline_hsh.keys.reject {|k| reject_tagline_keys(tagline_hsh, k, tagline_hsh[k])}
+  # end
+  #
+  # def sorted_tagline_keys(tagline_hsh, tagline_keys)
+  #   tagline_keys = all_tagline_keys.select{|k| tagline_keys.include?(k)}
+  #   reorder_numbering_key(tagline_hsh, tagline_keys)
+  # end
+  #
+  # def search_tagline_keys(search_tagline_hsh, search_tagline_keys)
+  #   sorted_search_tagline_keys(search_tagline_hsh, search_tagline_keys)
+  # end
+  #
+  # def sorted_search_tagline_keys(search_tagline_hsh, search_tagline_keys)
+  #   search_tagline_keys = all_search_tagline_keys.select{|k| search_tagline_keys.include?(k)}
+  #   reorder_numbering_key(search_tagline_hsh, search_tagline_keys)
+  # end
+
+  # def reorder_numbering_key(tagline_hsh, tagline_keys, k='numbering')
+  #   return tagline_keys unless tagline_hsh[k] && tagline_hsh[k].split(' ')[0] == 'from'
+  #   tagline_keys.delete(k)
+  #   tagline_keys.insert(tagline_keys.index('material'), k)
+  #   tagline_keys
+  # end
+
+
+  # def all_tagline_keys
+  #   %w[artist_name title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate]
+  # end
+  #
+  # def all_search_tagline_keys
+  #   %w[embellished category sub_category medium material leafing remarque numbering signature certificate mounting dimension]
+  # end
+  #
+  # def all_body_keys
+  #   %w[title embellished category sub_category medium material leafing remarque artist_name numbering signature mounting certificate dimension]
+  # end
+
 
 # def reorder_mounting_key(search_tagline_hsh, search_tagline_keys, k='mounting')
 #   return search_tagline_keys unless search_tagline_hsh[k] && search_tagline_hsh[k].split(' ').include?('framed')
