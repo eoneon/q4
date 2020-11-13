@@ -39,6 +39,7 @@ class Item < ApplicationRecord
     artists.first if artists.any?
   end
 
+  # Item.find(6).product_group['params']   Item.find(6).product_group['inputs']
   # Item.find(5).field_targets ## pg = Item.find(5).product_group['params'] ## h['inputs'] ## h['inputs']['field_sets']   Item.find(5).product_group['inputs']['field_sets']
   # product_group ############################################################## Item.find(5).product_group['inputs']['field_sets']
   def product_group
@@ -73,7 +74,11 @@ class Item < ApplicationRecord
         select_field_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type == 'SelectMenu'
         select_menu_group(f, i_fields, params, inputs, opt_scope)
+      elsif f.type == 'FieldSet'
+        #puts "testing!!! #{f.field_name}"
+        field_set_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type != 'FieldSet'
+        puts "testing!!! #{f.field_name}"
         tags_group(f, params, inputs)
       end
     end
