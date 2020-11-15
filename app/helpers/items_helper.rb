@@ -1,4 +1,14 @@
 module ItemsHelper
+  def invoice_keys
+    %w[sku artist_name title search_tagline mounting dimension numbering]
+  end
+
+  def invoice_media(csv_tags, rows=[])
+    invoice_keys[1..-1].each do |k|
+      rows << csv_tags.dig(k) ? csv_tags.dig(k) : 'n/a'
+    end
+    rows
+  end
 
   def field_set_rows(fs_hsh, rows=[])
     row_assocs.each do |row_key|

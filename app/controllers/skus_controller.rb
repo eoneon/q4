@@ -71,7 +71,7 @@ class SkusController < ApplicationController
   end
 
   ##############################################################################
-  
+
   def product_assocs(pg_hsh, set=[])
     pg_hsh.each do |f_key, f_hsh|
       product_group_assocs(f_key, f_hsh, set)

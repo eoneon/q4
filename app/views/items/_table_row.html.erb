@@ -1,18 +1,13 @@
 <tr>
-  <th>
-    <div class="media">
-      <div class="media-body">
-        <a href="<%= invoice_item_path(item.invoice, item) %>" class="btn btn-link" type="button">
-          <%= "#{item.sku}:" %>
-        </a>
-      </div>
-    </div>
-  </th>
-  <th>
-    <div class="media">
-      <div class="media-body">
-        <%= item.tagline %>
-      </div>
-    </div>
-  </th>
+  <td>
+    <a href="<%= invoice_item_path(item.invoice, item) %>" class="btn btn-sm btn-link" type="button">
+      <span class="fs-s"><%= item.sku %></span>
+    </a>
+  </td>
+
+  <% invoice_media(item.csv_tags).each do |row| %>
+    <td>
+      <span class="fs-s"><%= row %></span>
+    </td>
+  <% end %>
 </tr>
