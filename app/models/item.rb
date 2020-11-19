@@ -13,6 +13,41 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
+  def self.inputs_and_options(item_search_keys, product_items, h={})
+    item_search_keys.map{|k| h[k] = search_option_values(product_items, k)}
+    h
+  end
+
+  def self.search_option_values(product_items, k)
+    product_items.map{|product_item| product_item.csv_tags[k]}.uniq.compact
+  end
+
+  ####################
+
+  def self.product_items(search_params)
+    if search_params.any?
+      Item.item_search(search_params)
+    else
+      Item.where("csv_tags ?& ARRAY[:keys]", keys: item_search_keys).distinct
+    end
+  end
+
+  ####################
+
+  def self.item_search(search_params)
+    Item.where(search_params.each{|k,v| query_build(k, v)}.join(" AND ")).distinct
+  end
+
+  def self.query_build(k,v, key='csv_tags')
+    "#{key} -> \'#{k}\' = \'#{v}\'"
+  end
+
+  def self.item_search_keys
+    %w[search_tagline mounting dimension edition]
+  end
+
+  ##############################################################################
+
   def tagline
     csv_tags['tagline'] unless csv_tags.nil?
   end

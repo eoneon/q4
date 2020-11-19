@@ -3,6 +3,11 @@ class InvoicesController < ApplicationController
     @invoice = Invoice.find(params[:id])
   end
 
+  def search
+    @invoice = Invoice.find(params[:id])
+    @items = Item.product_items([])
+  end
+
   def new
     @supplier = Supplier.find(params[:supplier_id])
     @invoice = Invoice.new
@@ -49,5 +54,13 @@ class InvoicesController < ApplicationController
 
   def invoice_params
     params.require(:invoice).permit!
+  end
+
+  def search_params(search_item_params)
+    if search_params = params[:search]
+      search_params.reject{|k,v| v.blank?}.to_a
+    else
+      []
+    end
   end
 end

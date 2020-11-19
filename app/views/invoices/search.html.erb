@@ -1,0 +1,9 @@
+<h1><%= @invoice.supplier.supplier_name %>: <%= @invoice.invoice_number %></h1>
+
+<div id="search-form">
+  <%= render 'search_items/form', invoice: @invoice, items: @items %>
+</div>
+
+<div id="search-table">
+  <%= render 'search_items/table', items: @items %>
+</div>

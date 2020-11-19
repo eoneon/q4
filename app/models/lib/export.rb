@@ -95,11 +95,46 @@ class Export
   ### MOUNTING & DIMENSION: build, attr & detail  ############################## => {"dimensions"=>{"mounting"=>{"width"=>nil, "height"=>nil}, "material"=>{"width"=>"25", "height"=>"25"}}, "mounting"=>{"search_tagline"=>"gallery wrapped", "body"=>"gallery wrapped"}, "material"=>{"measurements"=>"25\" x 25\"", "dimension_for"=>"image"}}
   def mounting_dimension(pg_hsh, store)
     hsh = build_detail_dimension(build_mounting_dimension(pg_hsh))
+    attr_mounting(hsh, store)
+    attr_scoped_dimensions(hsh, store)
     attr_dimensions(hsh['dimensions'], hsh.dig('dimension_for', 'mounting'), store)
     detail_mounting_dimension(hsh, store)
-    attr_mounting(hsh, store)
-    attr_dimension(hsh, store)
+    puts "hsh 101: #{hsh}"
+    #attr_mounting(hsh, store)
+    #attr_dimension(hsh, store)
     update_fs_hsh(pg_hsh['field_sets'])
+  end
+
+  def attr_scoped_dimensions(hsh, store, f='_dimensions')
+    %w[mounting material].each do |k|
+      #['gallery wrapped', 'stretched'].exclude?(hsh.dig(k, 'search_tagline'))
+      #measurements, dimension_ref = hsh.dig(k, 'measurements'), k == 'mounting' && hsh.dig(k, 'search_tagline') ? hsh.dig(k, 'search_tagline') : hsh.dig(k, 'dimension_for')
+      measurements, dimension_ref = hsh.dig(k, 'measurements'), k == 'mounting' ? hsh.dig(k, 'search_tagline') : hsh.dig(k, 'dimension_for')
+      puts "measurements: #{measurements}, dimension_ref: #{dimension_ref}"
+      #next if !measurements && ['gallery wrapped', 'stretched'].exclude?(dimension_ref)
+      #store['attrs'].merge!({k+f => [detect_patt_and_sub(dimension_ref, abbrv_sub_set), measurements].compact.join(': ').squish})
+      store['attrs'].merge!({k+f => [dimension_ref, measurements].compact.join(': ').squish})
+    end
+  end
+
+  # def attr_scoped_dimensions(hsh, store, set=[])
+  #   %w[mounting material].each do |k|
+  #     measurements, dimension_for = %w[measurements dimension_for].map{|key| hsh.dig(k, key)}
+  #     next if measurements.nil?
+  #     #detect_patt_and_sub(dimension_for,)
+  #     if k == 'material'
+  #       material_dimensions(measurements, dimension_for, store, k+'_dimensions')
+  #       set << store['attrs'][k+'_dimensions']
+  #     else
+  #       set << measurements
+  #     end
+  #   end
+  #   store['attrs'].merge!({'dimension'=> set.compact.join(', ')})
+  # end
+
+  def material_dimensions(measurements, dimension_for, store, k)
+    v = "#{measurements} #{detect_patt_and_sub(dimension_for, [['image', '(img)'], ['image-diameter', '(img-dia)']])}".squish
+    store['attrs'].merge!({k=>v})
   end
 
   #### BUILD
@@ -127,12 +162,26 @@ class Export
     description_keys.each do |dkey|
       if dkey == 'tagline' && oversized_values?(dimensions.values, dimension_for, k)
         h[dkey] = "(#{measurements})"
-      elsif dkey == 'search_tagline'
-         h[dkey] = "#{detect_patt_and_sub(dimension_for, [['image'], ['image-diameter', 'img-diam']])} #{measurements}".squish
+      # elsif dkey == 'search_tagline'
+      #    #h[dkey] = "#{detect_patt_and_sub(dimension_for, [['image'], ['image-diameter', 'img-diam']])} #{measurements}".squish
+      #    h[dkey] = abbrv_dimensions(k, dimension_for, measurements)
       elsif dkey == 'body'
         h[dkey] << "#{measurements} (#{dimension_for})"
       end
     end
+  end
+
+  def abbrv_dimensions(k, dimension_for, measurements)
+    if k == 'material'
+      "#{detect_patt_and_sub(dimension_for, [['image'], ['image-diameter', 'img-diam']])} #{measurements}".squish
+    else
+      measurements
+    end
+  end
+
+  def abbrv_sub_set
+    [['matting', 'matted'], ['custom', 'cstm-frmd'], ['gallery', 'g-wrapped'], ['stretched'], ['framed'], ['border'], ['image'], ['image-diameter', 'img-diam']]
+    #[['matting', 'matted'], ['custom', 'c-frmd'], ['gallery', 'g-wrpd'], ['strchd'], ['framed'], ['border']]
   end
 
   def build_dimensions(dimension_params, hsh)
@@ -235,15 +284,9 @@ class Export
   def update_dimension(h, hsh)
     return if h.empty?
     measurements = h['body'].any? ? h['body'].join(', ') : h['body']
+    puts "measurements 249: #{measurements}"
     h['body'] = "Measures approx. #{measurements}." if measurements == String
     hsh.merge!({'dimension'=>h, 'measures'=> measurements})
-    #
-    # unless h['body'].empty?
-    #   measurements = h['body'].join(', ')
-    #   h['body'] = "Measures approx. #{measurements}."
-    #   hsh.merge!({'measures'=> measurements})
-    # end
-    # hsh.merge!({'dimension'=>h})
   end
 
   #### DETAIL: MOUNTING & DIMENSION
@@ -258,6 +301,7 @@ class Export
   def attr_dimensions(hsh, mounting, store)
     hsh.each do |k, dimensions|
       dimensions = format_attr_dimensions(k, mounting, dimensions)
+      #store['attrs'].merge!({'material_dimensions' =>}) if k != 'mounting'
       store['attrs'].merge!(build_attr_dimensions(dimensions, dimensions.values.take(2), attr_dimension_keys(k)))
     end
   end
@@ -467,10 +511,14 @@ class Export
   def detail_numbering(fs_hsh, k, store)
     fs_numbering, opt_numbering, numbering_params = nested_fname(fs_hsh, k, k+'_id'), nested_fname(fs_hsh, k, 'options', k+'_id'), format_numbering_params(fs_hsh.dig(k, 'tags'))
     return if !fs_numbering || !opt_numbering
-    numbering_value = [opt_numbering, numbering_params].compact.join(' ')
-    map_merge(%w[tagline body], k, numbering_value, store)
-    store['search_tagline'].merge!({k=>numbering_abbrv(fs_numbering, numbering_value)})
-    store['attrs'].merge!({k=>[store['search_tagline'][k], numbering_params].compact.join(' ')})
+    build_numbering(k, fs_numbering, opt_numbering, numbering_params, store)
+  end
+
+  def build_numbering(k, fs_numbering, opt_numbering, numbering_params, store)
+    abbrv_numbering = numbering_abbrv(fs_numbering, opt_numbering)
+    map_merge(%w[tagline body], k, [opt_numbering, numbering_params].compact.join(' '), store)
+    store['attrs'].merge!({k=> [abbrv_numbering, numbering_params].compact.join(' ')})
+    store['attrs'].merge!({'edition'=> abbrv_numbering})
   end
 
   def format_numbering_params(tags)
@@ -530,6 +578,7 @@ class Export
       store['attrs'][context] = build_description(context, store[context], update_keys(context, media_keys, store[context]))
     end
     store['attrs'].merge!({'property_room' => property_room(store['attrs']['tagline'], 128)})
+    format_search_values(store)
     store['attrs']
   end
 
@@ -539,6 +588,14 @@ class Export
       set << tagline_cap(context, media_val, media_key)
     end
     set.join(' ')
+  end
+
+  def format_search_values(store)
+    Item.item_search_keys.append('numbering').each do |k|
+      if !store.dig('attrs', k)
+        store['attrs'].merge!({k=> 'n/a'})
+      end
+    end
   end
 
   def assign_media(context, media_hsh, media_keys, media_key, media_val)

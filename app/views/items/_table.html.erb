@@ -1,8 +1,8 @@
 <table class="table table-sm table-striped table-hover">
   <thead>
     <tr>
-      <% invoice_keys.each do |k| %>
-      <th scope="col"><span class="fs-s"><%= k %></span></th>
+      <% invoice_keys.each do |opts| %>
+        <th scope="col"><span class="fs-s"><%= opts[-1] %></span></th>
       <% end %>
     </tr>
   </thead>

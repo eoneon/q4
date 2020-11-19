@@ -1,18 +1,8 @@
 module ItemsHelper
-  def invoice_keys
-    %w[sku artist_name title search_tagline mounting dimension numbering]
-  end
-
-  def invoice_media(csv_tags, rows=[])
-    invoice_keys[1..-1].each do |k|
-      rows << csv_tags.dig(k) ? csv_tags.dig(k) : 'n/a'
-    end
-    rows
-  end
 
   def field_set_rows(fs_hsh, rows=[])
     row_assocs.each do |row_key|
-      field_row = field_set_row(fs_hsh, row_key_sets.assoc(row_key).last) #fs_hsh, %w[k,...]
+      field_row = field_set_row(fs_hsh, row_key_sets.assoc(row_key).last)
       next if field_row.empty?
       rows << field_row
     end

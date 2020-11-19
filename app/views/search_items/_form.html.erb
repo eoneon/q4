@@ -1,0 +1,10 @@
+<%= form_with model: Item.new, url: search_invoice_search_items_path(invoice), id: "search-items" do |f| %>
+  <div class="form card border border-secondary p-2 pl-3 mb-2">
+    <div class="row">
+      <% inputs_and_options(items).each do |k,opts| %>
+        <%= render 'search_items/input_field', k: k, opts: opts %>
+      <% end %>
+      <button class="btn btn-sm btn-outline-primary form-control-sm mx-3" type="submit">submit</button>
+    </div>
+  </div>
+<% end %>

@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  #get 'search_items/search'
+
   resources :suppliers do
     resources :invoices
   end
@@ -10,6 +12,15 @@ Rails.application.routes.draw do
       member do
         post :batch_destroy
       end
+    end
+    # resources :search_items, only: [:search]
+    resources :search_items, only: [:search] do
+      collection do
+        get :search
+      end
+    end
+    member do
+      get :search
     end
   end
 
