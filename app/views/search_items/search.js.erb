@@ -1,0 +1,2 @@
+$("#search-items").html("<%= j render 'search_items/form', invoice: @invoice, items: @items['opt_set'], inputs: @items['inputs'] %>");
+$("#search-table").html("<%= j render 'search_items/table', items: @items['search_results'] %>");

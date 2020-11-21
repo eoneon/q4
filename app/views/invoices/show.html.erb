@@ -1,5 +1,9 @@
 <h1><%= @invoice.supplier.supplier_name %>: <%= @invoice.invoice_number %></h1>
-<%#= link_to 'Back', url_for(:back) %>
+
+<a href="<%= search_invoice_path(@invoice) %>" class="btn btn-link" type="button">
+  search
+</a>
+
 <%= render 'skus/destroy', invoice: @invoice %>
 <%= render 'skus/form', invoice: @invoice %>
 <%= render 'export_skus/form', invoice: @invoice %>

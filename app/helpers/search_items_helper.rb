@@ -1,5 +1,5 @@
 module SearchItemsHelper
-  
+
   def inputs_and_options(items, h={})
     Item.item_search_keys.each do |k|
       h.merge!({k=> items.map{|item| item.csv_tags[k]}.uniq.compact})

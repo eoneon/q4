@@ -5,7 +5,7 @@ class InvoicesController < ApplicationController
 
   def search
     @invoice = Invoice.find(params[:id])
-    @items = Item.product_items([])
+    @items = Item.search(Item.default_query)
   end
 
   def new

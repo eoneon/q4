@@ -13,16 +13,96 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  def self.inputs_and_options(item_search_keys, product_items, h={})
-    item_search_keys.map{|k| h[k] = search_option_values(product_items, k)}
+  # def self.inputs_and_options(item_search_keys, product_items, h={})
+  #   item_search_keys.map{|k| h[k] = search_option_values(product_items, k)}
+  #   h
+  # end
+  #
+  # def self.search_option_values(product_items, k)
+  #   product_items.map{|product_item| product_item.csv_tags[k]}.uniq.compact
+  # end
+
+  # start refurbish ###################
+  # model/module #######################################
+  ## query methods
+
+  # def self.search(search_params, hstore='csv_tags', h={'inputs'=>{}})
+  #   h.merge!({'set'=>query_case(search_params, hstore)})
+  #   search_options(h['set'], search_params, hstore, h['inputs'])
+  #   h
+  # end
+
+  def self.search(search_params, hstore='csv_tags', h={})
+    query_case(search_params, hstore, h)
+    h.merge!({'inputs' => search_options(h['opt_set'], search_params, hstore)})
     h
   end
 
-  def self.search_option_values(product_items, k)
-    product_items.map{|product_item| product_item.csv_tags[k]}.uniq.compact
+  # def self.query_case(search_params, hstore)
+  #   if search_params.values.all?{|v| v.blank?}
+  #     search_query(search_params, hstore)
+  #   elsif search_params.values.all?{|v| v.index('All')}
+  #     index_query(search_params.keys, hstore)
+  #   else
+  #     search_query(search_params.reject{|k,v| v.blank? || v.index('All')}, hstore)
+  #   end
+  # end
+
+  def self.query_case(search_params, hstore, h)
+    if search_params.all?{|k,v| v.blank?}
+      h.merge!({'opt_set'=> index_query(search_params.keys, hstore), 'search_results'=>[]})
+    elsif search_params.all?{|k,v| v.index(' All ')}
+      h['opt_set'] = index_query(search_params.keys, hstore)
+      h['search_results'] = h['opt_set']
+    else
+      h['opt_set'] = search_query(search_params.reject{|k,v| v.blank? || v.index(' All ')}, hstore)
+      h['search_results'] = h['opt_set']
+    end
   end
 
-  ####################
+  # def self.index_query(keys, hstore='csv_tags')
+  #   Item.where("#{hstore}?& ARRAY[:keys]", keys: keys).distinct
+  # end
+
+  def self.index_query(keys, hstore)
+    Item.where("#{hstore}?& ARRAY[:keys]", keys: keys).distinct
+  end
+
+  def self.search_query(search_params, hstore)
+    Item.where(search_params.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND ")).distinct
+  end
+
+  def self.query_params(k,v, hstore)
+    "#{hstore} -> \'#{k}\' = \'#{v}\'"
+  end
+
+  def self.search_options(opt_set, search_params, hstore, h={})
+    search_params.each do |k,v|
+      h.merge!({k=>{'opts'=> select_opts(opt_set, k, hstore), 'selected'=>v}})
+    end
+    h
+  end
+
+  def self.select_opts(opt_set, k, hstore)
+    opt_set.map{|i| i.public_send(hstore)[k]}.uniq.compact.prepend('-- All --')
+  end
+
+  ## input methods
+  # def self.search_options(set, search_params, hstore, h)
+  #   search_params.each do |k,v|
+  #     h.merge!({k=>{'opts'=> select_opts(set, k, hstore), 'selected'=>v}})
+  #   end
+  #   h
+  # end
+  #
+  # def self.select_opts(set, k, hstore)
+  #   set.map{|i| i.public_send(hstore)[k]}.uniq.compact.prepend('-- All --')
+  # end
+
+  def self.default_query
+    item_search_keys.map{|k| [k,'']}.to_h
+  end
+  # end refurbish ###################
 
   def self.product_items(search_params)
     if search_params.any?
@@ -35,7 +115,7 @@ class Item < ApplicationRecord
   ####################
 
   def self.item_search(search_params)
-    Item.where(search_params.each{|k,v| query_build(k, v)}.join(" AND ")).distinct
+    Item.where(search_params.to_a.map{|kv_set| query_build(kv_set[0], kv_set[1])}.join(" AND ")).distinct
   end
 
   def self.query_build(k,v, key='csv_tags')
@@ -43,7 +123,7 @@ class Item < ApplicationRecord
   end
 
   def self.item_search_keys
-    %w[search_tagline mounting dimension edition]
+    %w[search_tagline mounting material_dimensions edition]
   end
 
   ##############################################################################

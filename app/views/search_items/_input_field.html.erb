@@ -1,5 +1,5 @@
 <div class="form-row">
   <div class="input-group input-group-sm mx-3 border border-secondary rounded">
-    <%= select_tag "search_items[search][#{k}]", options_for_select(opts), {include_blank: true, class: "form-control"} %>
+    <%= select_tag "search_items[search][#{k}]", options_for_select(opts, selected), {include_blank: true, class: "form-control search-select"} %>
   </div>
 </div>
