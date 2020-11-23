@@ -1,0 +1,12 @@
+<%= form_with model: Item.new, url: invoice_skus_path(invoice), id: "new-skus" do |f| %>
+  <div class="form card border border-secondary p-2 mb-2">
+    <%= hidden_field_tag "hidden[item_id]" %>
+    <div class="row">
+      <label class="col-1 col-form-label form-control-sm ml-sm-2">sku range:</label>
+      <div class="col-4">
+        <%= f.text_field :skus, placeholder: "enter sku range", class: "form-control form-control-sm mr-sm-2" %>
+      </div>
+      <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">submit</button>
+    </div>
+  </div>
+<% end %>

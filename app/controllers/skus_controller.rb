@@ -20,7 +20,7 @@ class SkusController < ApplicationController
     end
   end
 
-  private
+  # private
 
   def sku_params
     params.require(:item).permit!
@@ -71,29 +71,90 @@ class SkusController < ApplicationController
   end
 
   ##############################################################################
-
-  def product_assocs(pg_hsh, set=[])
-    pg_hsh.each do |f_key, f_hsh|
-      product_group_assocs(f_key, f_hsh, set)
-      set.flatten
+  def item_targets
+    if id = params[:id]
+      item = Item.find(id)
+      product_assocs(item.product_group['params'], h={'set'=>[item.product], 'tags'=>{}})
     end
   end
 
-  def product_group_assocs(f_key, f_hsh, set)
+  def product_assocs(pg_hsh, h)
+    pg_hsh.each do |f_key, f_hsh|
+      product_group_assocs(f_key, f_hsh, h)
+      h['set'].flatten!
+    end
+    h
+  end
+
+  def product_group_assocs(f_key, f_hsh, h)
     if f_key == 'options'
-      option_assocs(f_hsh, set)
-    elsif f_key == 'field_sets'
-      field_set_assocs(f_hsh, set)
+      option_assocs(f_hsh, h['set'])
+    else
+      field_set_assocs(f_hsh, h)
     end
   end
 
   def option_assocs(f_hsh, set)
-    set << f_hsh.values.reject{|fk_id, obj| obj.nil?}
+    f_hsh.values.map{|obj| assign_assocs(obj, set)}
   end
 
   def field_set_assocs(f_hsh, set)
-    set << f_hsh.values.select{|h| h.has_key?('options')}.map{|h| h['options']}.map{|h| h.values}
+    f_hsh.each do |k,k_hsh|
+      select_assocs(k, k+'_id', k_hsh, set)
+    end
   end
+
+  def select_assocs(k, fk, k_hsh, h)
+    [[fk], ['options', fk], ['tags']].each do |keys|
+      v = k_hsh.dig(*keys)
+      next if v.blank? || keys[0] == 'tags' && k != 'dimension'
+      if keys[0] == 'tags'
+        h['tags'].merge!(v)
+      else
+        assign_assocs(v, h['set'])
+      end
+    end
+  end
+
+  def assign_assocs(obj, set)
+    set << obj if obj.present?
+  end
+  # def product_assocs(pg_hsh, set=[])
+  #   pg_hsh.each do |f_key, f_hsh|
+  #     product_group_assocs(f_key, f_hsh, set)
+  #     set.flatten
+  #   end
+  #   set
+  # end
+  #
+  # def product_group_assocs(f_key, f_hsh, set)
+  #   if f_key == 'options'
+  #     option_assocs(f_hsh, set)
+  #   elsif f_key == 'field_sets'
+  #     field_set_assocs(f_hsh, set)
+  #   end
+  # end
+  #
+  # def option_assocs(f_hsh, set)
+  #   f_hsh.values.map{|obj| assign_assocs(obj, set)}
+  # end
+  #
+  # def field_set_assocs(f_hsh, set)
+  #   f_hsh.each do |k,k_hsh|
+  #     select_assocs(k, k+'_id', k_hsh, set)
+  #   end
+  # end
+  #
+  # def select_assocs(k, fk, k_hsh, set)
+  #   [[fk], ['options', fk]].each do |keys|
+  #     #next if keys[0] == 'tags' && k != 'dimension'
+  #     assign_assocs(k_hsh.dig(*keys), set)
+  #   end
+  # end
+  #
+  # def assign_assocs(obj, set)
+  #   set << obj if obj.present?
+  # end
 
   def extract_digits(num_str)
     num_str.gsub(/\D/, '')

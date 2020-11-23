@@ -5,6 +5,8 @@
   <%= render 'search_items/form', invoice: @invoice, items: @items['opt_set'], inputs: @items['inputs'] %>
 </div>
 
+<%= render 'search_items/sku_form', invoice: @invoice %>
+
 <div id="search-table">
   <%= render 'search_items/table', items: @items['search_results'] %>
 </div>

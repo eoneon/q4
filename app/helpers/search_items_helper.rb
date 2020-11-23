@@ -1,5 +1,9 @@
 module SearchItemsHelper
 
+  def search_tags
+    {'search_tagline'=>{'label'=>'tagline', 'col'=>'col-6'}, 'mounting'=>{'label'=>'mounting', 'col'=>'col-2'}, 'material_dimensions'=>{'label'=>'dimensions', 'col'=>'col-2'}, 'edition'=>{'label'=>'edition', 'col'=>'col-1'}}
+  end
+
   def inputs_and_options(items, h={})
     Item.item_search_keys.each do |k|
       h.merge!({k=> items.map{|item| item.csv_tags[k]}.uniq.compact})
