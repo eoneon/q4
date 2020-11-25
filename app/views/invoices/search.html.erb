@@ -8,5 +8,6 @@
 <%= render 'search_items/sku_form', invoice: @invoice %>
 
 <div id="search-table">
-  <%= render 'search_items/table', items: @items['search_results'] %>
+  <%#= render 'search_items/table', items: @items['search_results'] %>
+  <%= render 'search_items/index', items: @items['search_results'] %>
 </div>

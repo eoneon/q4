@@ -1,3 +1,5 @@
 <% items.each do |item| %>
-  <%= render 'search_items/table_row', item: item %>
+  <button type="button" id="<%= item.id %>">
+    <%= render 'search_items/table_row', item: item %>
+  </button>
 <% end %>

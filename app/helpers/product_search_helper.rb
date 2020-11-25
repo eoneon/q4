@@ -22,8 +22,8 @@ module ProductSearchHelper
     end
   end
 
-  def active_btn(id, product_id)
-    'active' if id == product_id
+  def active_btn(id, fk_id)
+    'active' if id == fk_id
   end
 
   def format_product_type(type)

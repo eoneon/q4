@@ -85,6 +85,14 @@ $(document).ready(function(){
     $("#edit-item").submit();
   });
 
+  //CRUD ITEM-SEARCH INDEX #update
+  $("body").on("click", "#item-index button.list-group-item", function(e){
+    var item_id = $('#hidden_item_id').val();
+    var id = $(this).attr("id");
+    toggleTab(id, e);
+    $('#hidden_item_id').val(toggleAttr(item_id, id));
+  });
+
   //CRUD ITEM-ARTIST #update
   $("body").on("change", ".artist-add", function(e){
     var id = $(this).val();
