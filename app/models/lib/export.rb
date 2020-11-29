@@ -2,11 +2,11 @@ class Export
 
   ####################### h = Export.new.csv_test(6)  <!--> Item.find(6).csv_tags product_group['params']['field_sets']  h = Item.find(5).product_group['params']['options']
 
-  def csv_test(i, store=to_hsh(%w[attrs tagline search_tagline body]))
-    pg_hsh = Item.find(i).product_group['params']
-    mounting_dimension(pg_hsh, store)
-    store
-  end
+  # def csv_test(i, store=to_hsh(%w[attrs tagline search_tagline body]))
+  #   pg_hsh = Item.find(i).product_group['params']
+  #   mounting_dimension(pg_hsh, store)
+  #   store
+  # end
 
   # EXPORT: ITEM & PARAMS: PRODUCT, OPTIONS & FIELD-SET ########################
   def export_params(item, product, artist, pg_hsh, store=to_hsh(%w[attrs tagline search_tagline body]))
@@ -140,11 +140,6 @@ class Export
     end
   end
 
-  # def abbrv_sub_set
-  #   [['matting', 'matted'], ['custom', 'cstm-frmd'], ['gallery', 'g-wrapped'], ['stretched'], ['framed'], ['border'], ['image'], ['image-diameter', 'img-diam']]
-  #   #[['matting', 'matted'], ['custom', 'c-frmd'], ['gallery', 'g-wrpd'], ['strchd'], ['framed'], ['border']]
-  # end
-
   def build_dimensions(dimension_params, hsh)
     dimension_params.each do |dimension_field, dimension_val|
       new_key, dimension_field = dimension_field.split('_')
@@ -174,7 +169,7 @@ class Export
   ##### MOUNTING-SPECIFIC
   def build_mounting(pg_hsh, new_key, k, fk, hsh)
     build_mounting_hsh(pg_hsh, new_key, k, fk, hsh)
-    update_body_mounting(new_key, hsh.dig('mounting', 'body'), hsh) if new_key == 'material'
+    update_body_mounting(new_key, hsh.dig('mounting', 'body'), hsh) #if new_key == 'material'
     update_search_tagline_mounting(k, hsh.dig('mounting', 'search_tagline'), hsh) if k == 'mounting'
   end
 
@@ -245,7 +240,7 @@ class Export
   def update_dimension(h, hsh)
     return if h.empty?
     measurements = h['body'].any? ? h['body'].join(', ') : h['body']
-    h['body'] = "Measures approx. #{measurements}." if measurements == String
+    h['body'] = "Measures approx. #{measurements}." if measurements.class == String
     hsh.merge!({'dimension'=>h, 'measures'=> measurements})
   end
 
@@ -287,6 +282,7 @@ class Export
   def attr_dimension(hsh, store, k='dimension')
     store['attrs'].merge!({k=> hsh['measures']})
   end
+
   ###### UTILTIY METHODS
   def dimension_params(tags, k)
     tags ? tags : default_dimension_params(k)
@@ -533,8 +529,8 @@ class Export
   # FORMAT DESCRIPTION #########################################################
   def format_description(store)
     description_keys.each do |context|
-      media_keys = scoped_media_keys(context, store)
-      store['attrs'][context] = build_description(context, store[context], update_keys(context, media_keys, store[context]))
+      media_keys = update_media_keys(context, scoped_media_keys(context, store), store[context])
+      store['attrs'][context] = build_description(context, store[context], media_keys)
     end
     store['attrs'].merge!({'property_room' => property_room(store['attrs']['tagline'], 128)})
     format_search_values(store)
@@ -572,7 +568,7 @@ class Export
     ordered_keys[context].select{|k| store[context].has_key?(k)}
   end
 
-  def update_keys(context, media_keys, context_hsh)
+  def update_media_keys(context, media_keys, context_hsh)
     if context == 'tagline'
       update_tagline_keys(context_hsh, media_keys)
     else context == 'search_tagline'
@@ -617,8 +613,8 @@ class Export
   def format_description_case(context, media_hsh, media_keys, media_key, media_val)
     case media_key
       when 'title'; format_title(context, media_val, media_hsh[media_keys[1]])
-      when 'medium'; format_medium(context, media_keys, media_val)
-      when 'material'; format_material(context, media_keys, media_val)
+      when 'medium'; format_medium(context, media_key, media_keys, media_val)
+      when 'material'; format_material(context, media_key, media_keys, media_val)
       when 'leafing'; format_leafing(context, media_keys, media_val)
       when 'remarque'; format_remarque(context, media_keys, media_val)
       when 'numbering'; format_numbering(media_keys, media_val, media_val.split(' ').include?('from'))
@@ -629,14 +625,45 @@ class Export
     %w[tagline search_tagline].include?(context) ? media_val :  "#{media_val} is #{format_vowel(next_media, ['one-of-a-kind', 'unique'])}"
   end
 
-  def format_medium(context, media_keys, media_val)
+  def format_medium(context, media_key, media_keys, media_val)
     return unless %w[tagline search_tagline].include?(context)
-    %w[material leafing remarque].any? {|k| media_keys.include?(k)} ? media_val : "#{media_val},"
+    [media_val, medium_punct(media_key, media_keys)].compact.join('')
   end
 
-  def format_material(context, media_keys, media_val)
-    return unless %w[tagline search_tagline].include?(context) && %w[leafing remarque].all? {|i| media_keys.exclude?(i)}
-    "#{media_val},"
+  def medium_punct(media_key, media_keys)
+    if media_key == media_keys.last
+      '.'
+    elsif %w[material leafing remarque].none? {|k| media_keys.include?(k)}
+      ','
+    end
+  end
+
+  def format_material(context, media_key, media_keys, media_val)
+    [media_val, material_punct(context, media_key, media_keys)].compact.join('')
+  end
+
+  def material_punct(context, media_key, media_keys)
+    if context == 'body'
+      body_material_punct(media_key, media_keys)
+    else
+      tagline_material_punct(media_key, media_keys)
+    end
+  end
+
+  def tagline_material_punct(media_key, media_keys)
+    if media_key == media_keys.last
+      '.'
+    elsif %w[leafing remarque].none? {|i| media_keys.include?(i)}
+      ','
+    end
+  end
+
+  def body_material_punct(media_key, media_keys)
+    if %w[leafing remarque artist_name numbering signature].none? {|i| media_keys.include?(i)}
+      '.'
+    elsif %w[leafing remarque artist_name].none? {|i| media_keys.include?(i)}
+      ','
+    end
   end
 
   def format_leafing(context, media_keys, media_val)
@@ -733,6 +760,22 @@ class Export
   def csv_description_keys
     [[4, 'tag_line'], [5, 'property_room'], [6, 'description']]
   end
+
+  ##############################################################################
+
+  def material_dimension_keys
+    %w[material_width material_height]
+  end
+
+  def frame_dimension_keys
+    %w[frame_width frame_height]
+  end
+
+  def numbering_keys
+    %w[edition_number edition_size]
+  end
+
+  ##############################################################################
 
   # utility methods: ###########################################################
   # hash methods: ##############################################################
@@ -845,8 +888,68 @@ class Export
     sub_words.map{|sub_args| words.gsub!(sub_args[0], sub_args[1])}
     words.split(' ').map{|word| word.squish}.join(' ')
   end
+
+  ##############################################################################
+
+  # def update_descriptions(tags, csv_tags)
+  #   #tagline, body = csv_tags['tagline'], csv_tags['body']
+  #   #update_numbering(tags.select{|k,v| numbering_keys.include?(k) && v.present?}, csv_tags, tagline, body)
+  #   update_numbering([tags.dig('edition_number'), tags.dig('edition_size')].compact.join('/'), csv_tags, csv_tags['tagline'], csv_tags['body'])
+  #   puts "after numbering: #{csv_tags}"
+  #   update_title(csv_tags, csv_tags.dig('title'), csv_tags['tagline'], csv_tags['body'])
+  #   puts "after title: #{csv_tags}"
+  #   update_mounting_dimensions(csv_tags, csv_tags.dig('mounting_dimensions'), csv_tags['tagline'], csv_tags['body'])
+  #   puts "after mounting_dimensions: #{csv_tags}"
+  #   #update_artist_name(csv_tags)
+  #   tags, csv_tags = tags, csv_tags
+  # end
+  #
+  # def update_numbering(numbering, csv_tags, tagline, body)
+  #   if numbering.present?
+  #     csv_tags['tagline'] = tagline.sub(numbering, '')
+  #     csv_tags['body'] = body.sub(numbering, '')
+  #     csv_tags
+  #   end
+  # end
+  #
+  # def update_title(csv_tags, title, tagline, body)
+  #   if title && title != 'Untitled'
+  #     title = "\"#{title}\""
+  #     csv_tags['tagline'] = tagline.sub(title, '')
+  #     csv_tags['body'] = body.sub(title, 'This')
+  #     csv_tags
+  #   end
+  #   #csv_tags
+  # end
+  #
+  # def update_mounting_dimensions(csv_tags, mounting_dimensions, tagline, body)
+  #   if mounting_dimensions && mounting_dimensions != 'n/a'
+  #     puts "inside mounting_dimensions: #{csv_tags}"
+  #     v = mounting_dimensions.partition(':').map{|k| k.strip}
+  #     puts "v: #{v}"
+  #
+  #     csv_tags['tagline'] = tagline.sub("(#{v[0]})", '')
+  #     csv_tags['body'] = body.sub("#{v[-1]} (#{v[0]})", '')
+  #     csv_tags
+  #   end
+  #   #csv_tags
+  # end
+  #
+  # def update_artist_name(csv_tags)
+  #   if csv_tags['artist_name'].present?
+  #     csv_tags['tagline'] = csv_tags['tagline'].sub!("#{csv_tags['artist_name']},", '')
+  #     csv_tags['body'] = csv_tags['body'].sub!("by #{csv_tags['artist_name']},", '')
+  #   end
+  #   #csv_tags
+  # end
 end
 
+
+
+# def abbrv_sub_set
+#   [['matting', 'matted'], ['custom', 'cstm-frmd'], ['gallery', 'g-wrapped'], ['stretched'], ['framed'], ['border'], ['image'], ['image-diameter', 'img-diam']]
+#   #[['matting', 'matted'], ['custom', 'c-frmd'], ['gallery', 'g-wrpd'], ['strchd'], ['framed'], ['border']]
+# end
 
 # def assign_store_values(set, hsh, store)
 #   set.each do |key|
