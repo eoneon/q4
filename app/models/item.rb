@@ -24,19 +24,19 @@ class Item < ApplicationRecord
       h.merge!({'opt_set'=> index_query(search_params.keys, hstore), 'search_results'=>[]})
     elsif search_params.all?{|k,v| v.index(' All ')}
       h['opt_set'] = index_query(search_params.keys, hstore)
-      h['search_results'] = h['opt_set']
+      h['search_results'] = distinct_hstore(h['opt_set'])
     else
       h['opt_set'] = search_query(search_params.reject{|k,v| v.blank? || v.index(' All ')}, hstore)
-      h['search_results'] = h['opt_set']
+      h['search_results'] = distinct_hstore(h['opt_set'])
     end
   end
 
   def self.index_query(keys, hstore)
-    Item.where("#{hstore}?& ARRAY[:keys]", keys: keys).distinct
+    Item.where("#{hstore}?& ARRAY[:keys]", keys: keys)
   end
 
   def self.search_query(search_params, hstore)
-    Item.where(search_params.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND ")).distinct
+    Item.where(search_params.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND "))
   end
 
   def self.query_params(k,v, hstore)
@@ -62,9 +62,19 @@ class Item < ApplicationRecord
     %w[search_tagline mounting material_dimensions edition]
   end
 
-  # def self.item_search_hsh
-  #   {'search_tagline'=>{'label'=>'tagline', 'col_w'=>'6'}, 'mounting'=>{'label'=>'mounting', 'col_w'=>'2'}, 'material_dimensions'=>{'label'=>'dimensions', 'col_w'=>'2'}, 'edition'=>{'label'=>'edition', 'col_w'=>'1'}}
-  # end
+  def self.distinct_hstore(items, list=[], set=[])
+    items.each do |item|
+      assign_unique(item, list, set)
+    end
+    set
+  end
+
+  def self.assign_unique(item, list, set)
+    h = item_search_keys.map{|k| [k, item.csv_tags[k]]}.to_h
+    return if list.include?(h)
+    list << h
+    set << item
+  end
 
   ##############################################################################
 

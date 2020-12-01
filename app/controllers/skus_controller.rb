@@ -8,21 +8,10 @@ class SkusController < ApplicationController
       if targets
         targets['set'].map{|target| i.assoc_unless_included(target)}
         i.tags = targets['tags'] if targets['tags']
-        i.csv_tags = Export.new.export_params(i, i.product, nil, i.product_group['params'] )
+        i.csv_tags = Export.new.export_params(i, i.product, i.artist, i.product_group['params'])
         i.save
       end
     end
-
-    # format_skus(params[:item][:skus]).select{|sku| uniq_sku?(sku)}.each do |sku|
-    #   i = Item.create(sku: sku, invoice: @invoice)
-    #   if targets
-    #     targets['csv_tags']['sku'] = sku
-    #     targets['set'].map{|target| i.assoc_unless_included(target)}
-    #     i.tags = targets['tags']
-    #     i.csv_tags = targets['csv_tags']
-    #     i.save
-    #   end
-    # end
 
   end
 
@@ -88,46 +77,19 @@ class SkusController < ApplicationController
 
   ##############################################################################
 
-  # def csv_tags(csv_tags)
-  #   update_csv_tags(csv_tags).each do |k,v|
-  #     csv_tags[k] = v
-  #   end
-  #   csv_tags
-  # end
-  #
-  # def update_csv_tags(csv_tags)
-  #   h = %w[title artist_name retail frame_width frame_height mounting_dimensions].map{|k| [k,nil]}.to_h
-  #   h.merge([['numbering', csv_tags['edition']], ['qty', 1]].to_h)
-  # end
-  #
-  # def tags(tags, h={})
-  #   tags.each do |k,v|
-  #     v = %w[material_width material_height].include?(k) ? v : nil
-  #     h.merge!({k=>v})
-  #   end
-  #   h
-  # end
-
-  ##############################################################################
-
   def item_targets
     if id = params[:hidden][:item_id]
       item = Item.find(id)
       product_group = item.product_group['params']
       tags = product_group.dig('field_sets', 'dimension', 'tags')
-      product_assocs(product_group , h={'set'=>[item.product], 'tags'=>tags})
+      #product_assocs(product_group , h={'set'=>[item.product], 'tags'=>tags})
+      product_assocs(product_group , h={'set'=>[item.product, artist].compact, 'tags'=>tags})
     end
   end
 
-  # def item_targets
-  #   if id = params[:hidden][:item_id]
-  #     item = Item.find(id)
-  #     product = item.product
-  #     tags, csv_tags = Export.new.update_descriptions(item.tags, item.csv_tags)
-  #     product_group = item.product_group['params']
-  #     product_assocs(product_group, h={'set'=>[product], 'tags'=>tags(tags), 'csv_tags'=> csv_tags(csv_tags)})
-  #   end
-  # end
+  def artist
+    Artist.find(params[:item][:artist_id]) if params[:item][:artist_id].present?
+  end
 
   def product_assocs(pg_hsh, h)
     pg_hsh.each do |f_key, f_hsh|
@@ -163,18 +125,6 @@ class SkusController < ApplicationController
     end
   end
 
-  # def select_assocs(k, fk, k_hsh, h)
-  #   [[fk], ['options', fk], ['tags']].each do |keys|
-  #     v = k_hsh.dig(*keys)
-  #     next if v.blank? || keys[0] == 'tags' && k != 'dimension'
-  #     if keys[0] == 'tags'
-  #       h['tags'].merge!(v)
-  #     else
-  #       assign_assocs(v, h['set'])
-  #     end
-  #   end
-  # end
-
   def assign_assocs(obj, set)
     set << obj if obj.present?
   end
@@ -184,25 +134,3 @@ class SkusController < ApplicationController
   end
 
 end
-
-# def item_targets
-#   if id = params[:hidden][:item_id]
-#     @item = Item.find(id)
-#     @product = @item.product
-#     @product_group = @item.product_group['params']
-#     @artist = nil
-#     product_assocs(@product_group, h={'set'=>[@product], 'tags'=>{}})
-#   end
-# end
-
-
-  # def create
-  #   @invoice = Invoice.find(params[:invoice_id])
-  #   format_skus(params[:item][:skus]).select{|sku| uniq_sku?(sku)}.each do |sku|
-  #     Item.create(sku: sku, invoice: @invoice)
-  #   end
-  #
-  #   respond_to do |format|
-  #     format.js
-  #   end
-  # end

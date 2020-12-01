@@ -13,7 +13,7 @@ Rails.application.routes.draw do
         post :batch_destroy
       end
     end
-    # resources :search_items, only: [:search]
+    
     resources :search_items, only: [:search] do
       collection do
         get :search

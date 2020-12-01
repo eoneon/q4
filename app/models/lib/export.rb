@@ -889,59 +889,6 @@ class Export
     words.split(' ').map{|word| word.squish}.join(' ')
   end
 
-  ##############################################################################
-
-  # def update_descriptions(tags, csv_tags)
-  #   #tagline, body = csv_tags['tagline'], csv_tags['body']
-  #   #update_numbering(tags.select{|k,v| numbering_keys.include?(k) && v.present?}, csv_tags, tagline, body)
-  #   update_numbering([tags.dig('edition_number'), tags.dig('edition_size')].compact.join('/'), csv_tags, csv_tags['tagline'], csv_tags['body'])
-  #   puts "after numbering: #{csv_tags}"
-  #   update_title(csv_tags, csv_tags.dig('title'), csv_tags['tagline'], csv_tags['body'])
-  #   puts "after title: #{csv_tags}"
-  #   update_mounting_dimensions(csv_tags, csv_tags.dig('mounting_dimensions'), csv_tags['tagline'], csv_tags['body'])
-  #   puts "after mounting_dimensions: #{csv_tags}"
-  #   #update_artist_name(csv_tags)
-  #   tags, csv_tags = tags, csv_tags
-  # end
-  #
-  # def update_numbering(numbering, csv_tags, tagline, body)
-  #   if numbering.present?
-  #     csv_tags['tagline'] = tagline.sub(numbering, '')
-  #     csv_tags['body'] = body.sub(numbering, '')
-  #     csv_tags
-  #   end
-  # end
-  #
-  # def update_title(csv_tags, title, tagline, body)
-  #   if title && title != 'Untitled'
-  #     title = "\"#{title}\""
-  #     csv_tags['tagline'] = tagline.sub(title, '')
-  #     csv_tags['body'] = body.sub(title, 'This')
-  #     csv_tags
-  #   end
-  #   #csv_tags
-  # end
-  #
-  # def update_mounting_dimensions(csv_tags, mounting_dimensions, tagline, body)
-  #   if mounting_dimensions && mounting_dimensions != 'n/a'
-  #     puts "inside mounting_dimensions: #{csv_tags}"
-  #     v = mounting_dimensions.partition(':').map{|k| k.strip}
-  #     puts "v: #{v}"
-  #
-  #     csv_tags['tagline'] = tagline.sub("(#{v[0]})", '')
-  #     csv_tags['body'] = body.sub("#{v[-1]} (#{v[0]})", '')
-  #     csv_tags
-  #   end
-  #   #csv_tags
-  # end
-  #
-  # def update_artist_name(csv_tags)
-  #   if csv_tags['artist_name'].present?
-  #     csv_tags['tagline'] = csv_tags['tagline'].sub!("#{csv_tags['artist_name']},", '')
-  #     csv_tags['body'] = csv_tags['body'].sub!("by #{csv_tags['artist_name']},", '')
-  #   end
-  #   #csv_tags
-  # end
 end
 
 
@@ -956,4 +903,58 @@ end
 #     compact_hsh(hsh)
 #     description_keys.map{|k| assign_or_merge(store, k, key, hsh.dig(key, k)) if hsh.dig(key, k)}
 #   end
+# end
+
+##############################################################################
+
+# def update_descriptions(tags, csv_tags)
+#   #tagline, body = csv_tags['tagline'], csv_tags['body']
+#   #update_numbering(tags.select{|k,v| numbering_keys.include?(k) && v.present?}, csv_tags, tagline, body)
+#   update_numbering([tags.dig('edition_number'), tags.dig('edition_size')].compact.join('/'), csv_tags, csv_tags['tagline'], csv_tags['body'])
+#   puts "after numbering: #{csv_tags}"
+#   update_title(csv_tags, csv_tags.dig('title'), csv_tags['tagline'], csv_tags['body'])
+#   puts "after title: #{csv_tags}"
+#   update_mounting_dimensions(csv_tags, csv_tags.dig('mounting_dimensions'), csv_tags['tagline'], csv_tags['body'])
+#   puts "after mounting_dimensions: #{csv_tags}"
+#   #update_artist_name(csv_tags)
+#   tags, csv_tags = tags, csv_tags
+# end
+#
+# def update_numbering(numbering, csv_tags, tagline, body)
+#   if numbering.present?
+#     csv_tags['tagline'] = tagline.sub(numbering, '')
+#     csv_tags['body'] = body.sub(numbering, '')
+#     csv_tags
+#   end
+# end
+#
+# def update_title(csv_tags, title, tagline, body)
+#   if title && title != 'Untitled'
+#     title = "\"#{title}\""
+#     csv_tags['tagline'] = tagline.sub(title, '')
+#     csv_tags['body'] = body.sub(title, 'This')
+#     csv_tags
+#   end
+#   #csv_tags
+# end
+#
+# def update_mounting_dimensions(csv_tags, mounting_dimensions, tagline, body)
+#   if mounting_dimensions && mounting_dimensions != 'n/a'
+#     puts "inside mounting_dimensions: #{csv_tags}"
+#     v = mounting_dimensions.partition(':').map{|k| k.strip}
+#     puts "v: #{v}"
+#
+#     csv_tags['tagline'] = tagline.sub("(#{v[0]})", '')
+#     csv_tags['body'] = body.sub("#{v[-1]} (#{v[0]})", '')
+#     csv_tags
+#   end
+#   #csv_tags
+# end
+#
+# def update_artist_name(csv_tags)
+#   if csv_tags['artist_name'].present?
+#     csv_tags['tagline'] = csv_tags['tagline'].sub!("#{csv_tags['artist_name']},", '')
+#     csv_tags['body'] = csv_tags['body'].sub!("by #{csv_tags['artist_name']},", '')
+#   end
+#   #csv_tags
 # end
