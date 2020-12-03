@@ -24,10 +24,10 @@ class Item < ApplicationRecord
       h.merge!({'opt_set'=> index_query(search_params.keys, hstore), 'search_results'=>[]})
     elsif search_params.all?{|k,v| v.index(' All ')}
       h['opt_set'] = index_query(search_params.keys, hstore)
-      h['search_results'] = distinct_hstore(h['opt_set'])
+      h['search_results'] = uniq_hattrs(h['opt_set'])
     else
       h['opt_set'] = search_query(search_params.reject{|k,v| v.blank? || v.index(' All ')}, hstore)
-      h['search_results'] = distinct_hstore(h['opt_set'])
+      h['search_results'] = uniq_hattrs(h['opt_set'])
     end
   end
 
@@ -51,7 +51,7 @@ class Item < ApplicationRecord
   end
 
   def self.select_opts(opt_set, k, hstore)
-    opt_set.map{|i| i.public_send(hstore)[k]}.uniq.compact.prepend('-- All --')
+    opt_set.map{|i| i.public_send(hstore)[k]}.uniq.compact #.prepend('-- All --')
   end
 
   def self.default_query
@@ -62,7 +62,11 @@ class Item < ApplicationRecord
     %w[search_tagline mounting material_dimensions edition]
   end
 
-  def self.distinct_hstore(items, list=[], set=[])
+  def self.index_search
+    item_search_keys.map{|k| [k, nil]}.to_h
+  end
+
+  def self.uniq_hattrs(items, list=[], set=[])
     items.each do |item|
       assign_unique(item, list, set)
     end
@@ -74,6 +78,17 @@ class Item < ApplicationRecord
     return if list.include?(h)
     list << h
     set << item
+  end
+
+  #new methods: #############################################################################
+
+  def self.index_hstore_query(keys, hstore)
+    opt_set = uniq_hattrs(Item.where("#{hstore}?& ARRAY[:keys]", keys: keys))
+    {'inputs' => search_options(opt_set, default_hsh(keys), hstore), 'search_results' => opt_set}
+  end
+
+  def self.default_hsh(keys)
+    keys.map{|k| [k, nil]}.to_h
   end
 
   ##############################################################################

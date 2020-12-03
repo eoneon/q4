@@ -5,25 +5,26 @@ module Search
 
   class_methods do
 
-    def search(joins_target: nil, joins: nil, attrs:{}, hattrs: {params:{}, hstore: nil})
-      set = query_set(joins_target, joins)
+    def search(joins_scope: nil, joins: nil, attrs:{}, hattrs: {params:{}, hstore: nil}, search_group:{})
+      set = query_set(joins_scope, joins)
+      search_group.merge!({'scope' => joins_scope.try(:id)})
       set = attr_search(set, attrs.reject{|k,v| v.blank?})
-      set = hattr_search(set, hattrs[:params].reject{|k,v| v.blank?}, hattrs[:hstore])
-      #set = origin.search(opt[:hattrs][:params], opt[:hattrs][:hstore]) if required_args?(opt[:hattrs])
+      search_group.merge!({'attrs' => attrs})
+      set = hattr_search(set, hattrs[:params].reject{|k,v| v.blank?}, hattrs[:hstore], search_group)
       set
     end
 
     # join_search (I) ##########################################################
-    def query_set(joins_target, joins)
-      joins && joins_target ? join_targets(joins_target, joins) : self
+    def query_set(joins_scope, joins)
+      joins && joins_scope ? join_targets(joins_scope, joins) : self
     end
 
-    def join_targets(joins_target, joins)
-      self.joins(joins).where(joins => join_target_params(joins_target))
+    def join_targets(joins_scope, joins)
+      self.joins(joins).where(joins => join_target_params(joins_scope))
     end
 
-    def join_target_params(joins_target)
-      {target_type: joins_target.class.base_class.name, target_id: joins_target.id}
+    def join_target_params(joins_scope)
+      {target_type: joins_scope.class.base_class.name, target_id: joins_scope.id}
     end
 
     # attr_search (II) #########################################################
@@ -32,11 +33,12 @@ module Search
     end
 
     # hattr_search (III) #######################################################
-    def hattr_search(set, search_params, hstore)
+    def hattr_search(set, search_params, hstore, search_group)
       return default_search_results(set) if !hstore
       context = context = search_params.all?{|k,v| v.index(' All ')} ? :all : nil
-      hattr_query_case(set, search_params.reject{|k,v| v.index(' All ')}, hstore, context, h)
-      h.merge!({'inputs' => search_inputs(h['opt_set'], search_params, hstore)})
+      hattr_query_case(set, search_params.reject{|k,v| v.index(' All ')}, hstore, context, search_group)
+
+      search_group.merge!({'hattrs' => search_inputs(h['opt_set'], search_params, hstore)})
     end
 
     def default_search_results(set)
@@ -44,9 +46,10 @@ module Search
     end
 
     # hattr_search: hattr_query_case (a) #######################################
-    def hattr_query_case(set, search_params, context, hstore, h)
+    def hattr_query_case(set, search_params, context, hstore, search_group)
       opt_set = distinct_hstore(hattr_search_query(set, search_params, hstore))
       search_results = context ==  :all ? opt_set : []
+
       h.merge!({'opt_set'=> opt_set, 'search_results'=> search_results})
     end
 

@@ -103,10 +103,7 @@ $(document).ready(function(){
   });
 
   $("body").on("change", "select.search-select", function(){
-    // var v = $(this).val();
     var form = $(this).closest("form");
-    // $('#'+$(this).attr("id").replace("items_search", "hidden_search")).val(v);
-    //$('#'+$(this).attr("id").replace("items_search", "hidden_previous")).val(v);
     $(form).submit();
   });
 
@@ -117,13 +114,22 @@ $(document).ready(function(){
   });
 
   //#SEARCH: handler for submitting search form: on dropdown selection
+  // $("body").on("click", ".reset-select", function(){
+  //   var input_name = $(this).attr("data-target");
+  //   var form = $(this).closest("form");
+  //   $("#items_search_"+input_name+"").val("all");
+  //   $("#hidden_search_"+input_name+"").val("all");
+  //   //$("#hidden_previous"+input_name+"").val("all");
+  //   $(form).submit();
+  // });
+
   $("body").on("click", ".reset-select", function(){
-    var input_name = $(this).attr("data-target");
     var form = $(this).closest("form");
-    $("#items_search_"+input_name+"").val("all");
-    $("#hidden_search_"+input_name+"").val("all");
-    //$("#hidden_previous"+input_name+"").val("all");
-    $(form).submit();
+    $(form).find("#hidden_index").val("All");
+    //$("input[name='search_items[search][search_tagline]']").remove();
+    //$("#search_items_search_search_tagline").val("All");
+    //$(".search-select").val("All");
+    //$(this).closest("form").submit();
   });
 
   //page load

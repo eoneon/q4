@@ -82,7 +82,6 @@ class SkusController < ApplicationController
       item = Item.find(id)
       product_group = item.product_group['params']
       tags = product_group.dig('field_sets', 'dimension', 'tags')
-      #product_assocs(product_group , h={'set'=>[item.product], 'tags'=>tags})
       product_assocs(product_group , h={'set'=>[item.product, artist].compact, 'tags'=>tags})
     end
   end
