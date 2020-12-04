@@ -1,10 +1,7 @@
 class SearchItemsController < ApplicationController
   def index
     @invoice = Invoice.find(params[:invoice_id])
-    @items = Item.index_hstore_query(Item.item_search_keys, 'csv_tags')
-    # default_params = Item.index_search
-    # opt_set = Item.where("csv_tags?& ARRAY[:keys]", keys: default_params.keys)
-    # @items = {'inputs' => Item.search_options(opt_set, default_params, 'csv_tags'), 'search_results' => Item.distinct_hstore(opt_set)}
+    @items = Item.index_hstore_input_group(Item.item_search_keys, 'csv_tags')
 
     respond_to do |format|
       format.js
@@ -14,7 +11,8 @@ class SearchItemsController < ApplicationController
 
   def search
     @invoice = Invoice.find(params[:invoice_id])
-    @items = Item.search(search_params)
+    #@items = Item.search(search_params)
+    @items = Item.search(hattrs: search_params, hstore: 'csv_tags')
 
     respond_to do |format|
       format.js

@@ -1,8 +1,7 @@
 <h1><%= @invoice.supplier.supplier_name %>: <%= link_to  @invoice.invoice_number, url_for(:back) %></h1>
 
-<!-- items: @items['opt_set'], -->
 <div id="search-form">
-  <%= render 'search_items/form', invoice: @invoice, inputs: @items['inputs'] %>
+  <%= render 'search_items/form', invoice: @invoice, hattrs: @items['hattrs'] %>
 </div>
 
 <%= render 'search_items/sku_form', invoice: @invoice %>

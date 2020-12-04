@@ -5,7 +5,7 @@ class InvoicesController < ApplicationController
 
   def search
     @invoice = Invoice.find(params[:id])
-    @items = Item.search(Item.default_query)
+    @items = Item.index_hstore_input_group(Item.item_search_keys, 'csv_tags', search_results: [])
   end
 
   def new

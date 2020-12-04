@@ -13,38 +13,69 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  def self.search(search_params, hstore='csv_tags', h={})
-    query_case(search_params, hstore, h)
-    h.merge!({'inputs' => search_options(h['opt_set'], search_params, hstore)})
-    h
+  # search(scope:nil, joins:nil, attrs:{}, hattrs:{} hstore:nil, input_group:{})
+  # search(hattrs:{params: search_params, hstore: 'csv_tags'})
+  # search(hattrs:{params: search_params, hstore: nil})
+  # def self.search(search_params, hstore='csv_tags', h={})
+  #   query_case(search_params, hstore, h)
+  #   h.merge!({'inputs' => search_options(h['opt_set'], search_params, hstore)})
+  #   h
+  # end
+
+  def self.search(scope:nil, joins:nil, hstore:nil, hattrs:{}, input_group:{})
+    hattr_group(hattrs, hstore, input_group)
+    input_group
   end
 
-  def self.query_case(search_params, hstore, h)
-    if search_params.all?{|k,v| v.blank?}
-      h.merge!({'opt_set'=> index_query(search_params.keys, hstore), 'search_results'=>[]})
-    elsif search_params.all?{|k,v| v.index(' All ')}
-      h['opt_set'] = index_query(search_params.keys, hstore)
-      h['search_results'] = uniq_hattrs(h['opt_set'])
+  def self.hattr_group(hattrs, hstore, input_group)
+    #return default_search_results(set) if !hstore
+    hattr_query_case(hattrs.reject{|k,v| v.blank?}, hstore, input_group)
+    input_group.merge!({'hattrs' => search_options(input_group['opt_set'], hattrs, hstore)})
+  end
+
+  def self.hattr_query_case(hattrs, hstore, input_group)
+    opt_set = uniq_hattrs(hattr_search_query(hattrs, hstore))
+    input_group.merge!({'opt_set'=> opt_set, 'search_results'=> search_results(hattrs, opt_set)})
+  end
+
+  def self.hattr_search_query(hattrs, hstore)
+    if hattrs.empty?
+      index_query(hattrs.keys, hstore)
     else
-      h['opt_set'] = search_query(search_params.reject{|k,v| v.blank? || v.index(' All ')}, hstore)
-      h['search_results'] = uniq_hattrs(h['opt_set'])
+      search_query(hattrs, hstore)
     end
   end
+
+  def self.search_results(hattrs, opt_set)
+    hattrs.empty? ? [] : opt_set
+  end
+
+  # def self.query_case(search_params, hstore, h)
+  #   if search_params.all?{|k,v| v.blank?}
+  #     h.merge!({'opt_set'=> index_query(search_params.keys, hstore), 'search_results'=>[]})
+  #   elsif search_params.all?{|k,v| v.index(' All ')}
+  #     h['opt_set'] = index_query(search_params.keys, hstore)
+  #     h['search_results'] = uniq_hattrs(h['opt_set'])
+  #   else
+  #     h['opt_set'] = search_query(search_params.reject{|k,v| v.blank? || v.index(' All ')}, hstore)
+  #     h['search_results'] = uniq_hattrs(h['opt_set'])
+  #   end
+  # end
 
   def self.index_query(keys, hstore)
     Item.where("#{hstore}?& ARRAY[:keys]", keys: keys)
   end
 
-  def self.search_query(search_params, hstore)
-    Item.where(search_params.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND "))
+  def self.search_query(hattrs, hstore)
+    Item.where(hattrs.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND "))
   end
 
   def self.query_params(k,v, hstore)
     "#{hstore} -> \'#{k}\' = \'#{v}\'"
   end
 
-  def self.search_options(opt_set, search_params, hstore, h={})
-    search_params.each do |k,v|
+  def self.search_options(opt_set, hattrs, hstore, h={})
+    hattrs.each do |k,v|
       h.merge!({k=>{'opts'=> select_opts(opt_set, k, hstore), 'selected'=>v}})
     end
     h
@@ -81,16 +112,19 @@ class Item < ApplicationRecord
   end
 
   #new methods: #############################################################################
+  def self.index_hstore_input_group(keys, hstore, input_group:{}, search_results:nil)
+    opt_set = uniq_hattrs(index_query(keys, hstore))
+    build_hstore_input_group(keys, opt_set, hstore, input_group, search_results)
+  end
 
-  def self.index_hstore_query(keys, hstore)
-    opt_set = uniq_hattrs(Item.where("#{hstore}?& ARRAY[:keys]", keys: keys))
-    {'inputs' => search_options(opt_set, default_hsh(keys), hstore), 'search_results' => opt_set}
+  def self.build_hstore_input_group(keys, opt_set, hstore, input_group, search_results)
+    search_results = search_results.nil? ? opt_set : search_results
+    input_group.merge!({'hattrs' => search_options(opt_set, default_hsh(keys), hstore), 'search_results' => search_results})
   end
 
   def self.default_hsh(keys)
     keys.map{|k| [k, nil]}.to_h
   end
-
   ##############################################################################
 
   def tagline

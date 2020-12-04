@@ -13,6 +13,8 @@ class SkusController < ApplicationController
       end
     end
 
+    #redirect_to [@invoice.supplier, @invoice]
+
   end
 
   def batch_destroy
@@ -78,8 +80,8 @@ class SkusController < ApplicationController
   ##############################################################################
 
   def item_targets
-    if id = params[:hidden][:item_id]
-      item = Item.find(id)
+    if params[:hidden][:item_id].present?
+      item = Item.find(params[:hidden][:item_id])
       product_group = item.product_group['params']
       tags = product_group.dig('field_sets', 'dimension', 'tags')
       product_assocs(product_group , h={'set'=>[item.product, artist].compact, 'tags'=>tags})
