@@ -14,12 +14,16 @@ module Search
 
     # join_search (I) ##########################################################
     def scope_group(scope, joins, input_group)
-      input_group.merge!({'scope' => scope.try(:id)})
-      build_scope_group(scope, joins)
+      input_group.merge!({'scope' => scope.try(:id), 'search_results' => scope_results(scope, joins)})
+      scope_set(input_group)
     end
 
-    def build_scope_group(scope, joins)
-      joins && scope ? scope_query(scope, joins) : self
+    def scope_results(scope, joins)
+      joins && scope ? scope_query(scope, joins) : []
+    end
+
+    def scope_set(input_group)
+      input_group['search_results'].blank? ? self : input_group['search_results']
     end
 
     def scope_query(scope, joins)
@@ -95,7 +99,7 @@ module Search
     end
 
     # hattr_search: distinct_hstore (c) ########################################
-    
+
     def distinct_hstore(opt_set, list=[], set=[])
       opt_set.each do |i|
         assign_unique(i, list, set)

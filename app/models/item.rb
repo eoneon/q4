@@ -13,36 +13,52 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  # search(scope:nil, joins:nil, attrs:{}, hattrs:{} hstore:nil, input_group:{})
-  # search(hattrs:{params: search_params, hstore: 'csv_tags'})
-  # search(hattrs:{params: search_params, hstore: nil})
-  # def self.search(search_params, hstore='csv_tags', h={})
-  #   query_case(search_params, hstore, h)
-  #   h.merge!({'inputs' => search_options(h['opt_set'], search_params, hstore)})
-  #   h
-  # end
-
   def self.search(scope:nil, joins:nil, hstore:nil, hattrs:{}, input_group:{})
-    hattr_group(hattrs, hstore, input_group)
+    set = scope_group(scope, joins, input_group)
+
+    hattr_group(set, hattrs, hstore, input_group)
     input_group
   end
 
-  def self.hattr_group(hattrs, hstore, input_group)
-    #return default_search_results(set) if !hstore
-    hattr_query_case(hattrs.reject{|k,v| v.blank?}, hstore, input_group)
+  # join_search (I) ##########################################################
+  def self.scope_group(scope, joins, input_group)
+    input_group.merge!({'scope' => scope.try(:id)})
+    build_scope_group(scope, joins)
+  end
+
+  def self.build_scope_group(scope, joins)
+    joins && scope ? scope_query(scope, joins) : self
+  end
+
+  def self.scope_query(scope, joins)
+    self.joins(joins).where(joins => scope_query_params(scope))
+  end
+
+  def self.scope_query_params(scope)
+    {target_type: scope.class.base_class.name, target_id: scope.id}
+  end
+
+  def default_search_results(set)
+    set == self ? [] : set
+  end
+  
+  # hattr_search (III) #######################################################
+  def self.hattr_group(set, hattrs, hstore, input_group)
+    return default_search_results(set) if !hstore
+    hattr_query_case(set, hattrs.reject{|k,v| v.blank?}, hstore, input_group)
     input_group.merge!({'hattrs' => search_options(input_group['opt_set'], hattrs, hstore)})
   end
 
-  def self.hattr_query_case(hattrs, hstore, input_group)
-    opt_set = uniq_hattrs(hattr_search_query(hattrs, hstore))
+  def self.hattr_query_case(set, hattrs, hstore, input_group)
+    opt_set = uniq_hattrs(hattr_search_query(set, hattrs, hstore))
     input_group.merge!({'opt_set'=> opt_set, 'search_results'=> search_results(hattrs, opt_set)})
   end
 
-  def self.hattr_search_query(hattrs, hstore)
+  def self.hattr_search_query(set, hattrs, hstore)
     if hattrs.empty?
-      index_query(hattrs.keys, hstore)
+      index_query(set, hattrs.keys, hstore)
     else
-      search_query(hattrs, hstore)
+      search_query(set, hattrs, hstore)
     end
   end
 
@@ -50,24 +66,12 @@ class Item < ApplicationRecord
     hattrs.empty? ? [] : opt_set
   end
 
-  # def self.query_case(search_params, hstore, h)
-  #   if search_params.all?{|k,v| v.blank?}
-  #     h.merge!({'opt_set'=> index_query(search_params.keys, hstore), 'search_results'=>[]})
-  #   elsif search_params.all?{|k,v| v.index(' All ')}
-  #     h['opt_set'] = index_query(search_params.keys, hstore)
-  #     h['search_results'] = uniq_hattrs(h['opt_set'])
-  #   else
-  #     h['opt_set'] = search_query(search_params.reject{|k,v| v.blank? || v.index(' All ')}, hstore)
-  #     h['search_results'] = uniq_hattrs(h['opt_set'])
-  #   end
-  # end
-
-  def self.index_query(keys, hstore)
-    Item.where("#{hstore}?& ARRAY[:keys]", keys: keys)
+  def self.index_query(set, keys, hstore)
+    set.where("#{hstore}?& ARRAY[:keys]", keys: keys)
   end
 
-  def self.search_query(hattrs, hstore)
-    Item.where(hattrs.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND "))
+  def self.search_query(set, hattrs, hstore)
+    set.where(hattrs.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND "))
   end
 
   def self.query_params(k,v, hstore)
@@ -82,7 +86,7 @@ class Item < ApplicationRecord
   end
 
   def self.select_opts(opt_set, k, hstore)
-    opt_set.map{|i| i.public_send(hstore)[k]}.uniq.compact #.prepend('-- All --')
+    opt_set.map{|i| i.public_send(hstore)[k]}.uniq.compact
   end
 
   def self.default_query
@@ -113,7 +117,7 @@ class Item < ApplicationRecord
 
   #new methods: #############################################################################
   def self.index_hstore_input_group(keys, hstore, input_group:{}, search_results:nil)
-    opt_set = uniq_hattrs(index_query(keys, hstore))
+    opt_set = uniq_hattrs(index_query(self, keys, hstore))
     build_hstore_input_group(keys, opt_set, hstore, input_group, search_results)
   end
 
