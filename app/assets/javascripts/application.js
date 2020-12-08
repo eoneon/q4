@@ -113,41 +113,34 @@ $(document).ready(function(){
     $(form).submit();
   });
 
-  //#SEARCH: handler for submitting search form: on dropdown selection
-  // $("body").on("click", ".reset-select", function(){
-  //   var input_name = $(this).attr("data-target");
-  //   var form = $(this).closest("form");
-  //   $("#items_search_"+input_name+"").val("all");
-  //   $("#hidden_search_"+input_name+"").val("all");
-  //   //$("#hidden_previous"+input_name+"").val("all");
-  //   $(form).submit();
-  // });
-
-  $("body").on("click", ".reset-select", function(){
-    var form = $(this).closest("form");
-    $(form).find("#hidden_index").val("All");
-    //$("input[name='search_items[search][search_tagline]']").remove();
-    //$("#search_items_search_search_tagline").val("All");
-    //$(".search-select").val("All");
-    //$(this).closest("form").submit();
+  $("body").on("change", "select.artist-select", function(){
+    var artist = $(this).val();
+    if (artist.length){
+      $('#new-skus option[value="'+artist+'"]').attr('selected', true);
+    } else {
+      $('#new-skus').find(":selected").attr('selected', false);
+    }
   });
 
-  //page load
-  // $(function(e) {
-  //   var type = $('#hidden_search_type').val();
-  //   $("input[name='items[search][type]']").prop('checked', false)
-  //   $("input[name='items[search][type]'][value='"+type+"']").prop('checked', true);
-  //   var product_id = $('#hidden_product_id').val();
-  //   if (product_id != undefined && product_id.length){
-  //     $('#'+product_id).addClass("active");
-  //
-  //     var input_vals = $("#search-form").find("input:hidden");
-  //     $(input_vals).each(function(i, input){
-  //       var v = $(input).val();
-  //       $('option[value="'+v+'"]').attr('selected', true);
-  //     });
-  //   }
-  // });
+  $("body").on("click", ".search-btn", function(){
+    $('#new-skus').find(":selected").attr('selected', false);
+    $('#new-skus').find(":input").val("");
+  });
+
+  $("body").on("change", "#title", function(){
+    var title = $(this).val();
+    $("input[name='item[title]']").val(title)
+  });
+
+  $("body").on("keyup", ".required-field", function(){
+    var val = $(this).val();
+    var submit = $(this).closest("form").find(".disabled-btn");
+    if (val.length){
+      $(submit).removeAttr('disabled');
+    } else {
+      $(submit).attr('disabled', 'disabled')
+    }
+  });
 
   $(function(e) {
     var artist_id = $('#hidden_artist_id').val();
@@ -173,6 +166,39 @@ $(document).ready(function(){
     return id
   }
 });
+
+//This worked but switched to dedicated controller#action
+// $("body").on("click", ".reset-select", function(){
+//   var form = $(this).closest("form");
+//   $(form).find("#hidden_index").val("All");
+// });
+
+//#SEARCH: handler for submitting search form: on dropdown selection
+// $("body").on("click", ".reset-select", function(){
+//   var input_name = $(this).attr("data-target");
+//   var form = $(this).closest("form");
+//   $("#items_search_"+input_name+"").val("all");
+//   $("#hidden_search_"+input_name+"").val("all");
+//   //$("#hidden_previous"+input_name+"").val("all");
+//   $(form).submit();
+// });
+
+//page load
+// $(function(e) {
+//   var type = $('#hidden_search_type').val();
+//   $("input[name='items[search][type]']").prop('checked', false)
+//   $("input[name='items[search][type]'][value='"+type+"']").prop('checked', true);
+//   var product_id = $('#hidden_product_id').val();
+//   if (product_id != undefined && product_id.length){
+//     $('#'+product_id).addClass("active");
+//
+//     var input_vals = $("#search-form").find("input:hidden");
+//     $(input_vals).each(function(i, input){
+//       var v = $(input).val();
+//       $('option[value="'+v+'"]').attr('selected', true);
+//     });
+//   }
+// });
 
 //#SEARCH: handler for submitting search form: on dropdown selection
 // $("body").on("change", ".search-select", function(){

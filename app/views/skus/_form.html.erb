@@ -8,7 +8,7 @@
       </div>
 
       <label class="col-1 col-form-label form-control-sm ml-sm-2">artist:</label>
-      <div class="col-4">
+      <div class="col-2">
         <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control form-control-sm mr-sm-2" %>
       </div>
 

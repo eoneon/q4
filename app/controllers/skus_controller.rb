@@ -4,7 +4,7 @@ class SkusController < ApplicationController
     targets = item_targets
 
     format_skus(params[:item][:skus]).select{|sku| uniq_sku?(sku)}.each do |sku|
-      i = Item.create(sku: sku, qty: 1, invoice: @invoice)
+      i = Item.create(sku: sku, title: params[:item][:title], qty: 1, invoice: @invoice)
       if targets
         targets['set'].map{|target| i.assoc_unless_included(target)}
         i.tags = targets['tags'] if targets['tags']
@@ -12,8 +12,6 @@ class SkusController < ApplicationController
         i.save
       end
     end
-
-    #redirect_to [@invoice.supplier, @invoice]
 
   end
 

@@ -1,5 +1,5 @@
 <div class="<%="#{col}"%>">
   <div class="input-group input-group-sm">
-    <%= select_tag "search_items[search][#{k}]", options_for_select(opts, selected), {include_blank: true, class: "form-control search-select"} %>
+    <%= select_tag "search_items[#{scope}][#{k}]", options_for_select(opts, selected), {include_blank: true, class: "form-control search-select", id: k} %>
   </div>
 </div>

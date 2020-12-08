@@ -1,21 +1,27 @@
 <%= form_with model: Item.new, url: search_invoice_search_items_path(invoice), method: :get, id: "search-items" do |f| %>
   <div class="form card border border-secondary p-1 mb-2">
-    <%= hidden_field_tag "hidden[index]" %>
     <div class="form-row">
 
-      <a href="<%= invoice_search_items_path(invoice) %>" class="btn btn-sm btn-secondary ml-1 text-sm text-light font-weight-light reset-select" data-remote="true">
+      <a href="<%= invoice_search_items_path(invoice) %>" class="btn btn-sm btn-secondary ml-1 text-sm text-light font-weight-light search-btn" data-remote="true">
+        <%= (fa_icon "search") %>
+      </a>
+
+      <a href="<%= new_invoice_search_item_path(invoice) %>" class="btn btn-sm btn-secondary ml-1 text-sm text-light font-weight-light search-btn" data-remote="true">
         <%= (fa_icon "repeat") %>
       </a>
 
       <div class="col-2">
         <div class="input-group input-group-sm">
-        <%#= f.collection_select :scope, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control form-control-sm mr-sm-2" %>
-        <%= select "search_items", "scope", Artist.all.collect{|a| [a.artist_name, a.id]}, {include_blank: true, selected: nil}, {class: "form-control search-select"} %>
+        <%= select "search_items", "scope", Artist.all.collect{|a| [a.artist_name, a.id]}, {include_blank: true, selected: scope}, {class: "form-control search-select artist-select"} %>
         </div>
       </div>
 
+      <% attrs.each do |k, opt_hsh| %>
+        <%= render 'search_items/input_field', scope: 'attrs', k: k, opts: opt_hsh['opts'], selected: opt_hsh['selected'], col: 'col-2' %>
+      <% end %>
+
       <% hattrs.each do |k, opt_hsh| %>
-        <%= render 'search_items/input_field', k: k, opts: opt_hsh['opts'], selected: opt_hsh['selected'], col: search_tags[k]['col'] %>
+        <%= render 'search_items/input_field', scope: 'search', k: k, opts: opt_hsh['opts'], selected: opt_hsh['selected'], col: attr_tags[k]['col'] %>
       <% end %>
     </div>
   </div>
