@@ -13,10 +13,15 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  def self.search(scope:nil, joins:nil, hstore:nil, attrs:{}, hattrs:{}, input_group:{})
+  def self.search(scope:nil, joins:nil, hstore:nil, search_keys:nil, attrs:{}, hattrs:{}, input_group:{})
     set = scope_group(scope, joins, input_group)
     set = attr_group(set, attrs, input_group)
     hattr_group(set, hattrs, hstore, input_group)
+    uniq_search(input_group, input_group['search_results'], item_search_keys, hstore)
+  end
+
+  def self.uniq_search(input_group, search_results, item_search_keys, hstore)
+    input_group['search_results'] = uniq_hattrs(search_results, item_search_keys, hstore) if item_search_keys
     input_group
   end
 
@@ -57,7 +62,7 @@ class Item < ApplicationRecord
   def self.attr_set(input_group)
     input_group['search_results'].blank? ? self : input_group['search_results']
   end
-  
+
   # hattr_search (III) #######################################################
   def self.hattr_group(set, hattrs, hstore, input_group)
     return if !hstore
@@ -66,7 +71,7 @@ class Item < ApplicationRecord
   end
 
   def self.hattr_query_case(set, hattrs, hstore, input_group)
-    opt_set = uniq_hattrs(hattr_search_query(set, hattrs, hstore))
+    opt_set = hattr_search_query(set, hattrs, hstore)
     input_group.merge!({'opt_set'=> opt_set, 'search_results'=> hattr_results(hattrs, opt_set, input_group['search_results'])})
   end
 
@@ -87,11 +92,15 @@ class Item < ApplicationRecord
   end
 
   def self.search_query(set, hattrs, hstore)
-    set.where(hattrs.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND "))
+    set.where(hattrs.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND ")) #.order(query_order(hattrs.keys, hstore))
   end
 
   def self.query_params(k,v, hstore)
     "#{hstore} -> \'#{k}\' = \'#{v}\'"
+  end
+
+  def self.query_order(keys, hstore)
+    keys.map{|k| "#{hstore} -> \'#{k}\'"}.join(', ')
   end
 
   def self.search_options(opt_set, hattrs, hstore, h={})
@@ -132,23 +141,23 @@ class Item < ApplicationRecord
     item_search_keys.map{|k| [k, nil]}.to_h
   end
 
-  def self.uniq_hattrs(items, list=[], set=[])
-    items.each do |item|
-      assign_unique(item, list, set)
+  def self.uniq_hattrs(set, keys, hstore, list=[], uniq_set=[])
+    set.each do |i|
+      assign_unique(i, keys, hstore, list, uniq_set)
     end
-    set
+    uniq_set
   end
 
-  def self.assign_unique(item, list, set)
-    h = item_search_keys.map{|k| [k, item.csv_tags[k]]}.to_h
+  def self.assign_unique(i, keys, hstore, list, uniq_set)
+    h = keys.map{|k| [k, i.public_send(hstore)[k]]}.to_h
     return if list.include?(h)
     list << h
-    set << item
+    uniq_set << i
   end
 
   #new methods: #############################################################################
   def self.index_hstore_input_group(keys, hstore, input_group:{}, search_results:nil)
-    opt_set = uniq_hattrs(index_query(self, keys, hstore))
+    opt_set = uniq_hattrs(index_query(self, keys, hstore), keys, hstore)
     build_hstore_input_group(keys, opt_set, hstore, input_group, search_results)
   end
 
