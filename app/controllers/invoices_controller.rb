@@ -2,12 +2,7 @@ class InvoicesController < ApplicationController
   def show
     @invoice = Invoice.find(params[:id])
   end
-
-  def search
-    @invoice = Invoice.find(params[:id])
-    @items = Item.index_hstore_input_group(Item.item_search_keys, 'csv_tags', search_results: [])
-  end
-
+  
   def new
     @supplier = Supplier.find(params[:supplier_id])
     @invoice = Invoice.new

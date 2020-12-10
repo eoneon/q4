@@ -13,16 +13,40 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  def self.search(scope:nil, joins:nil, hstore:nil, search_keys:nil, attrs:{}, hattrs:{}, input_group:{})
+  def self.search(scope:nil, joins:nil, hstore:nil, search_keys:nil, sort_keys:nil, attrs:{}, hattrs:{}, input_group:{})
     set = scope_group(scope, joins, input_group)
     set = attr_group(set, attrs, input_group)
+
     hattr_group(set, hattrs, hstore, input_group)
-    uniq_search(input_group, input_group['search_results'], item_search_keys, hstore)
+    format_search(input_group, input_group['search_results'], search_keys, sort_keys, hstore)
+    input_group
   end
 
-  def self.uniq_search(input_group, search_results, item_search_keys, hstore)
-    input_group['search_results'] = uniq_hattrs(search_results, item_search_keys, hstore) if item_search_keys
-    input_group
+  def self.format_search(input_group, search_results, search_keys, sort_keys, hstore)
+    return if !search_keys || !hstore
+    uniq_search(input_group, search_results, search_keys, hstore)
+    #order_search(input_group, sort_keys, hstore)
+    order_search(input_group['search_results'], sort_keys, hstore)
+  end
+
+  def self.uniq_search(input_group, search_results, search_keys, hstore)
+    input_group['search_results'] = uniq_hattrs(search_results, search_keys, hstore) if search_keys
+  end
+
+  # def self.order_search(input_group, sort_keys, hstore)
+  #   input_group['search_results'].sort_by!{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
+  # end
+
+  def self.order_search(search_results, sort_keys, hstore)
+    search_results.sort_by!{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
+  end
+
+  def self.sort_value(val)
+    is_numeric?(val) ? val.to_i : val
+  end
+
+  def self.is_numeric?(s)
+    !!Float(s) rescue false
   end
 
   # join_search (I) ##########################################################
@@ -92,7 +116,7 @@ class Item < ApplicationRecord
   end
 
   def self.search_query(set, hattrs, hstore)
-    set.where(hattrs.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND ")) #.order(query_order(hattrs.keys, hstore))
+    set.where(hattrs.to_a.map{|kv| query_params(kv[0], kv[1], hstore)}.join(" AND "))
   end
 
   def self.query_params(k,v, hstore)
@@ -156,19 +180,22 @@ class Item < ApplicationRecord
   end
 
   #new methods: #############################################################################
-  def self.index_hstore_input_group(keys, hstore, input_group:{}, search_results:nil)
-    opt_set = uniq_hattrs(index_query(self, keys, hstore), keys, hstore)
-    build_hstore_input_group(keys, opt_set, hstore, input_group, search_results)
+  def self.index_hstore_input_group(search_keys, sort_keys, hstore, input_group:{}, search_results:nil)
+    opt_set = uniq_hattrs(index_query(self, search_keys, hstore), search_keys, hstore)
+    opt_set = order_search(opt_set, sort_keys, hstore)
+    build_hstore_input_group(search_keys, opt_set, hstore, input_group, search_results)
   end
 
-  def self.build_hstore_input_group(keys, opt_set, hstore, input_group, search_results)
+  def self.build_hstore_input_group(search_keys, opt_set, hstore, input_group, search_results)
     search_results = search_results.nil? ? opt_set : search_results
-    input_group.merge!({'hattrs' => search_options(opt_set, default_hsh(keys), hstore), 'search_results' => search_results, 'scope' => nil, 'attrs' => attr_options(default_hsh(attr_search_keys), [])})
+    input_group.merge!({'hattrs' => search_options(opt_set, default_hsh(search_keys), hstore), 'search_results' => search_results, 'scope' => nil, 'attrs' => attr_options(default_hsh(attr_search_keys), [])})
   end
   #attr_options
   def self.default_hsh(keys, v=nil)
     keys.map{|k| [k, v]}.to_h
   end
+
+
   ##############################################################################
 
   def tagline
@@ -233,7 +260,6 @@ class Item < ApplicationRecord
       elsif f.type == 'SelectMenu'
         select_menu_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type == 'FieldSet'
-        #puts "testing!!! #{f.field_name}"
         field_set_group(f, i_fields, params, inputs, opt_scope)
       elsif f.type != 'FieldSet'
         puts "testing!!! #{f.field_name}"

@@ -1,14 +1,14 @@
 <h1><%= @invoice.supplier.supplier_name %>: <%= @invoice.invoice_number %></h1>
 
-<a href="<%= search_invoice_path(@invoice) %>" class="btn btn-link" type="button">
+<a href="<%= new_invoice_search_item_path(@invoice) %>" class="btn btn-link" type="button">
   search
 </a>
 
 <%= render 'skus/destroy', invoice: @invoice %>
-<%= render 'skus/form', invoice: @invoice %>
+<%#= render 'skus/form', invoice: @invoice %>
 <%= render 'export_skus/form', invoice: @invoice %>
 <%= render 'invoices/edit', invoice: @invoice %>
-<%= render 'invoices/nav_bar', invoice: @invoice %>
+<%#= render 'invoices/nav_bar', invoice: @invoice %>
 
 <div id="items-table">
   <%= render 'items/table', invoice: @invoice %>

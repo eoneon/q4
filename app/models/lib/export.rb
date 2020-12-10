@@ -2,12 +2,6 @@ class Export
 
   ####################### h = Export.new.csv_test(6)  <!--> Item.find(6).csv_tags product_group['params']['field_sets']  h = Item.find(5).product_group['params']['options']
 
-  # def csv_test(i, store=to_hsh(%w[attrs tagline search_tagline body]))
-  #   pg_hsh = Item.find(i).product_group['params']
-  #   mounting_dimension(pg_hsh, store)
-  #   store
-  # end
-
   # EXPORT: ITEM & PARAMS: PRODUCT, OPTIONS & FIELD-SET ########################
   def export_params(item, product, artist, pg_hsh, store=to_hsh(%w[attrs tagline search_tagline body]))
     csv_values_from_item(item, artist, store)
@@ -59,6 +53,7 @@ class Export
     mounting_dimension(pg_hsh, store)
     fs_opt_media(pg_hsh['field_sets'], store)
     detail_numbering(pg_hsh['field_sets'], 'numbering', store)
+    detail_disclaimer(pg_hsh['field_sets'], 'disclaimer', store)
   end
 
   ## PRODUCT MEDIA VALUES  ######################################################
@@ -272,7 +267,8 @@ class Export
   end
 
   def attr_dimension_keys(k)
-    k == 'mounting' ? %w[frame_width frame_height] : %w[width height]
+    #k == 'mounting' ? %w[frame_width frame_height] : %w[width height]
+    k == 'mounting' ? frame_dimension_keys : dimension_keys
   end
 
   def attr_mounting(hsh, store, k='mounting')
@@ -482,9 +478,22 @@ class Export
 
   def numbering_abbrv(fs_numbering, numbering_value)
     if proof = slice_acronym(numbering_value)
-      fs_numbering == 'proof edition' ? "#{proof} Ed" : "#{proof} No."
+      fs_numbering == 'proof edition' ? "#{proof} Ed" : "#{proof} Num"
     else
-      'Std No.'
+      'Std Num'
+    end
+  end
+
+  def detail_disclaimer(fs_hsh, k, store)
+    opt_disclaimer, disclaimer = nested_fname(fs_hsh, k, 'options', k+'_id'), fs_hsh.dig(k, 'tags', 'disclaimer_text')
+    return if disclaimer.blank?
+    if opt_disclaimer.blank?
+      store['body'].merge!({k => ['Please note:', disclaimer].join(' ')})
+    elsif opt_disclaimer == 'warning'
+      store['body'].merge!({k => ['**', 'Please note:', disclaimer, '**'].join(' ')})
+    elsif opt_disclaimer == 'danger'
+      store['tagline'].merge!({k => '(Disclaimer)'})
+  	  store['body'].merge!({k => ['**', 'Please note:', disclaimer, '**'].join(' ')})
     end
   end
 
@@ -532,6 +541,7 @@ class Export
       media_keys = update_media_keys(context, scoped_media_keys(context, store), store[context])
       store['attrs'][context] = build_description(context, store[context], media_keys)
     end
+    store['attrs'].merge!({'size' => %w[width height].map{|k| store['attrs'].dig(k).to_i}.inject {|size, num| size * num}})
     store['attrs'].merge!({'property_room' => property_room(store['attrs']['tagline'], 128)})
     format_search_values(store)
     store['attrs']
@@ -697,9 +707,9 @@ class Export
 
   def ordered_keys
     {
-      'tagline'=> %w[artist_name title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate],
+      'tagline'=> %w[artist_name title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate disclaimer],
       'search_tagline'=> %w[embellished category sub_category medium material leafing remarque signature certificate],
-      'body'=> %w[title embellished category sub_category medium material leafing remarque artist_name numbering signature mounting certificate dimension]
+      'body'=> %w[title embellished category sub_category medium material leafing remarque artist_name numbering signature mounting certificate dimension disclaimer]
     }
   end
 
@@ -769,6 +779,10 @@ class Export
 
   def frame_dimension_keys
     %w[frame_width frame_height]
+  end
+
+  def dimension_keys
+    %w[width height]
   end
 
   def numbering_keys
@@ -891,70 +905,13 @@ class Export
 
 end
 
-
+# def csv_test(i, store=to_hsh(%w[attrs tagline search_tagline body]))
+#   pg_hsh = Item.find(i).product_group['params']
+#   mounting_dimension(pg_hsh, store)
+#   store
+# end
 
 # def abbrv_sub_set
 #   [['matting', 'matted'], ['custom', 'cstm-frmd'], ['gallery', 'g-wrapped'], ['stretched'], ['framed'], ['border'], ['image'], ['image-diameter', 'img-diam']]
 #   #[['matting', 'matted'], ['custom', 'c-frmd'], ['gallery', 'g-wrpd'], ['strchd'], ['framed'], ['border']]
-# end
-
-# def assign_store_values(set, hsh, store)
-#   set.each do |key|
-#     compact_hsh(hsh)
-#     description_keys.map{|k| assign_or_merge(store, k, key, hsh.dig(key, k)) if hsh.dig(key, k)}
-#   end
-# end
-
-##############################################################################
-
-# def update_descriptions(tags, csv_tags)
-#   #tagline, body = csv_tags['tagline'], csv_tags['body']
-#   #update_numbering(tags.select{|k,v| numbering_keys.include?(k) && v.present?}, csv_tags, tagline, body)
-#   update_numbering([tags.dig('edition_number'), tags.dig('edition_size')].compact.join('/'), csv_tags, csv_tags['tagline'], csv_tags['body'])
-#   puts "after numbering: #{csv_tags}"
-#   update_title(csv_tags, csv_tags.dig('title'), csv_tags['tagline'], csv_tags['body'])
-#   puts "after title: #{csv_tags}"
-#   update_mounting_dimensions(csv_tags, csv_tags.dig('mounting_dimensions'), csv_tags['tagline'], csv_tags['body'])
-#   puts "after mounting_dimensions: #{csv_tags}"
-#   #update_artist_name(csv_tags)
-#   tags, csv_tags = tags, csv_tags
-# end
-#
-# def update_numbering(numbering, csv_tags, tagline, body)
-#   if numbering.present?
-#     csv_tags['tagline'] = tagline.sub(numbering, '')
-#     csv_tags['body'] = body.sub(numbering, '')
-#     csv_tags
-#   end
-# end
-#
-# def update_title(csv_tags, title, tagline, body)
-#   if title && title != 'Untitled'
-#     title = "\"#{title}\""
-#     csv_tags['tagline'] = tagline.sub(title, '')
-#     csv_tags['body'] = body.sub(title, 'This')
-#     csv_tags
-#   end
-#   #csv_tags
-# end
-#
-# def update_mounting_dimensions(csv_tags, mounting_dimensions, tagline, body)
-#   if mounting_dimensions && mounting_dimensions != 'n/a'
-#     puts "inside mounting_dimensions: #{csv_tags}"
-#     v = mounting_dimensions.partition(':').map{|k| k.strip}
-#     puts "v: #{v}"
-#
-#     csv_tags['tagline'] = tagline.sub("(#{v[0]})", '')
-#     csv_tags['body'] = body.sub("#{v[-1]} (#{v[0]})", '')
-#     csv_tags
-#   end
-#   #csv_tags
-# end
-#
-# def update_artist_name(csv_tags)
-#   if csv_tags['artist_name'].present?
-#     csv_tags['tagline'] = csv_tags['tagline'].sub!("#{csv_tags['artist_name']},", '')
-#     csv_tags['body'] = csv_tags['body'].sub!("by #{csv_tags['artist_name']},", '')
-#   end
-#   #csv_tags
 # end

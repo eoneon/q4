@@ -1,7 +1,7 @@
 class SearchItemsController < ApplicationController
   def index
     @invoice = Invoice.find(params[:invoice_id])
-    @items = Item.index_hstore_input_group(Item.item_search_keys, 'csv_tags')
+    @items = Item.index_hstore_input_group(Item.item_search_keys, Item.item_search_keys.append('size'), 'csv_tags')
 
     respond_to do |format|
       format.js
@@ -11,17 +11,17 @@ class SearchItemsController < ApplicationController
 
   def new
     @invoice = Invoice.find(params[:invoice_id])
-    @items = Item.index_hstore_input_group(Item.item_search_keys, 'csv_tags', search_results: [])
+    @items = Item.index_hstore_input_group(Item.item_search_keys, Item.item_search_keys.append('size'), 'csv_tags', search_results: [])
 
     respond_to do |format|
       format.js
-      format.html
+      format.html {render file: "/invoices/search.html.erb"}
     end
   end
 
   def search
     @invoice = Invoice.find(params[:invoice_id])
-    @items = Item.search(scope: scope_set[0], joins: scope_set[-1], hattrs: search_params, attrs: extract_params(params[:search_items][:attrs]), search_keys: Item.item_search_keys, hstore: 'csv_tags')
+    @items = Item.search(scope: scope_set[0], joins: scope_set[-1], hattrs: search_params, attrs: extract_params(params[:search_items][:attrs]), search_keys: Item.item_search_keys, sort_keys: Item.item_search_keys.append('size'), hstore: 'csv_tags')
 
     respond_to do |format|
       format.js
