@@ -5,6 +5,7 @@ class Export
   # EXPORT: ITEM & PARAMS: PRODUCT, OPTIONS & FIELD-SET ########################
   def export_params(item, product, artist, pg_hsh, store=to_hsh(%w[attrs tagline search_tagline body]))
     csv_values_from_item(item, artist, store)
+    csv_values_from_artist(artist, store)
     csv_values_from_params(product, pg_hsh, store)
   end
 
@@ -30,9 +31,15 @@ class Export
   def export_item(i_hsh, store)
     i_hsh.each do |k,v|
       store['attrs'].merge!({k=>v})
-      description_hsh(store,k,v) if %w[title artist_name].include?(k)
+      description_hsh(store,k,v) if %w[title].include?(k)
     end
     store
+  end
+
+  def csv_values_from_artist(artist, store, hsh={'artist'=>{}})
+    return if !artist
+    description_hsh(store, 'artist_name', artist.artist_data['artist_tag'])
+    store.merge!({'artist'=>artist.artist_data})
   end
 
   # PRODUCT & OPTIONS MEDIA VALUES #############################################

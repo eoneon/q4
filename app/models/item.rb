@@ -25,7 +25,6 @@ class Item < ApplicationRecord
   def self.format_search(input_group, search_results, search_keys, sort_keys, hstore)
     return if !search_keys || !hstore
     uniq_search(input_group, search_results, search_keys, hstore)
-    #order_search(input_group, sort_keys, hstore)
     order_search(input_group['search_results'], sort_keys, hstore)
   end
 
