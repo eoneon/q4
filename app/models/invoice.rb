@@ -10,12 +10,3 @@ class Invoice < ApplicationRecord
     "#{invoice_name}: #{invoice_number}" #if invoice.present?
   end
 end
-
-
-  # def ordered_skus
-  #   items.order(:sku)
-  # end
-  #
-  # def sku_pos(item)
-  #   ordered_skus.index(item) + 1
-  # end

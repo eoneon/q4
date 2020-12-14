@@ -10,7 +10,7 @@ module ItemsHelper
   end
 
   def field_set_row(fs_hsh, key_sets, hsh={})
-    key_sets.each do |k| #'dimension'
+    key_sets.each do |k| 
       next if fs_hsh.keys.exclude?(k)
       hsh[k] = fs_hsh[k]
     end
@@ -18,11 +18,11 @@ module ItemsHelper
   end
 
   def row_assocs
-    [:dimension, :mounting, :sub_media, :numbering, :authentication, :disclaimer]
+    [:dimension, :mounting, :sub_media, :numbering, :authentication, :media_suffix, :disclaimer]
   end
 
   def row_key_sets
-    [[:dimension, %w[dimension]], [:mounting, %w[mounting]], [:sub_media, %w[leafing remarque]], [:numbering, %w[numbering]], [:authentication, %w[signature certificate]], [:disclaimer, %w[disclaimer]]]
+    [[:dimension, %w[dimension]], [:mounting, %w[mounting]], [:sub_media, %w[leafing remarque]], [:numbering, %w[numbering]], [:authentication, %w[signature certificate]], [:media_suffix, %w[media_suffix]], [:disclaimer, %w[disclaimer]]]
   end
 
 end

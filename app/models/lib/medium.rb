@@ -592,25 +592,25 @@ class Medium
   module AppendSet
     module Standard
       def self.set
-        [Authentication::FSO::Standard::SignatureAndCertificate]
+        [Authentication::FSO::Standard::SignatureAndCertificate, Detail::MediaSuffix, Detail::Disclaimer]
       end
     end
 
     module WithNumbering
       def self.set
-        [Numbering, Authentication::FSO::Standard::SignatureAndCertificate]
+        [Numbering, Authentication::FSO::Standard::SignatureAndCertificate, Detail::MediaSuffix, Detail::Disclaimer]
       end
     end
 
     module WithSubMedia
       def self.set
-        [SubMedium::FSO::OnPaper::LeafingAndRemarque, Authentication::FSO::Standard::SignatureAndCertificate]
+        [SubMedium::FSO::OnPaper::LeafingAndRemarque, Authentication::FSO::Standard::SignatureAndCertificate, Detail::MediaSuffix, Detail::Disclaimer]
       end
     end
 
     module WithSubMediaAndNumbering
       def self.set
-        [SubMedium::FSO::OnPaper::LeafingAndRemarque, Numbering, Authentication::FSO::Standard::SignatureAndCertificate]
+        [SubMedium::FSO::OnPaper::LeafingAndRemarque, Numbering, Authentication::FSO::Standard::SignatureAndCertificate, Detail::MediaSuffix, Detail::Disclaimer]
       end
     end
   end

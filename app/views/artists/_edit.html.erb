@@ -1,24 +1,36 @@
 <%= form_with model: artist, id: 'artist-edit' do |f| %>
   <div id="<%= dom_tag(artist, :form, :fields) %>">
-    <div class="col">
-      <div class="form-group">
-        <label>artist name</label>
-        <%= f.text_field :artist_name, class: "form-control form-control-sm", id: 'artist_name' %>
+    <div class="row">
+      <div class="col-10">
+        <div class="form-group">
+          <label>artist name</label>
+          <%= f.text_field :artist_name, class: "form-control form-control-sm", id: 'artist_name' %>
+        </div>
+      </div>
+
+      <div class="col-2">
+        <div class="form-group">
+          <label>artist id</label>
+          <%= f.number_field :artist_id, class: "form-control form-control-sm" %>
+        </div>
       </div>
     </div>
-    <% Artist.tag_field_sets.each do |field_set| %>
-    <div class="row">
-      <% field_set.each do |field| %>
-        <%= f.fields_for :tags, OpenStruct.new(artist.tags) do |ff| %>
-        <div class="col-3">
-          <div class="form-group">
-            <label><%= field.split('_').join(' ') %></label>
-            <%= ff.text_field field, class: "form-control form-control-sm", id: field %>
+
+    <% artsit_edit_form_group.each do |field_set| %>
+      <div class="row">
+        <% field_set.each do |field| %>
+          <%= f.fields_for :tags, OpenStruct.new(artist.tags) do |ff| %>
+
+          <div class="<%= "#{field['col']}" %>">
+            <div class="form-group">
+              <label><%= field['label'] %></label>
+              <%= ff.text_field field['name'], class: "form-control form-control-sm", id: field['name'] %>
+            </div>
           </div>
-        </div>
+
+          <% end %>
         <% end %>
-      <% end %>
-    </div>
+      </div>
     <% end %>
   </div>
   <button class="btn btn-sm btn-outline-primary" type="submit"><%= (fa_icon "plus") %></button>

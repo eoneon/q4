@@ -60,6 +60,7 @@ class Export
     mounting_dimension(pg_hsh, store)
     fs_opt_media(pg_hsh['field_sets'], store)
     detail_numbering(pg_hsh['field_sets'], 'numbering', store)
+    detail_media_suffix(pg_hsh['field_sets'], 'media_suffix', store)
     detail_disclaimer(pg_hsh['field_sets'], 'disclaimer', store)
   end
 
@@ -504,6 +505,11 @@ class Export
     end
   end
 
+  def detail_media_suffix(fs_hsh, k, store)
+    store['body'].merge!({k => fs_hsh.dig(k, 'tags', k)})
+  end
+
+
   def default_detail(store,k,v)
     store['tagline'].merge!({k=>v.split(' ').map{|k| k.capitalize}.join(' ')})
     store['search_tagline'].merge!({k=>v})
@@ -716,7 +722,7 @@ class Export
     {
       'tagline'=> %w[artist_name title mounting embellished category sub_category medium material dimension leafing remarque numbering signature certificate disclaimer],
       'search_tagline'=> %w[embellished category sub_category medium material leafing remarque signature certificate],
-      'body'=> %w[title embellished category sub_category medium material leafing remarque artist_name numbering signature mounting certificate dimension disclaimer]
+      'body'=> %w[title embellished category sub_category medium material leafing remarque artist_name numbering signature media_suffix mounting certificate dimension disclaimer]
     }
   end
 

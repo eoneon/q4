@@ -1,10 +1,10 @@
 class ArtistsController < ApplicationController
   def index
-    @artists = Artist.all #where("tags -> 'kind' = 'medium'") #where("tags ? :key", key: "medium")
+    @artists = Artist.all
   end
 
   def search
-    @artist = Artist.find(params[:id]) #where("tags -> 'kind' = 'medium'") #where("tags ? :key", key: "medium")
+    @artist = Artist.find(params[:id]) 
 
     respond_to do |format|
       format.js

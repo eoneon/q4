@@ -4,8 +4,8 @@ class ProductType
   # ProductType.media_sets
   def self.media_sets
     media_groups.map{|h| media_set_builder(h)}.flatten(1)
-    disclaimer = Detail::Disclaimer.builder
-    Product.all.map{|product| product.assoc_unless_included(disclaimer)}
+    # disclaimer = Detail::Disclaimer.builder
+    # Product.all.map{|product| product.assoc_unless_included(disclaimer)}
   end
 
   def self.media_set_builder(media_set:, material_set:, prepend_set: [], append_set: [], insert_set: [], set: [], tags: {})
