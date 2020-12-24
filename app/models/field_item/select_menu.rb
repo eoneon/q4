@@ -10,6 +10,10 @@ class SelectMenu < FieldItem
 
   validates :field_name, uniqueness: true
 
+  def field_items
+    select_menus + field_sets + select_fields + text_fields + text_area_fields + number_fields
+  end
+  
   # revisit: id_tags
   def self.builder(f)
     select_menu = where(field_name: f[:field_name], kind: f[:kind], tags: id_tags(f[:tags])).first_or_create

@@ -6,12 +6,18 @@ class Item < ApplicationRecord
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :standard_products, through: :item_groups, source: :target, source_type: "StandardProduct"
-  has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
-  has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
+  #has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
+  has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
+
+  ##############################################################################
+  def field_items
+    field_sets + select_fields + options
+  end
+  ##############################################################################
 
   def self.search(scope:nil, joins:nil, hstore:nil, search_keys:nil, sort_keys:nil, attrs:{}, hattrs:{}, input_group:{})
     set = scope_group(scope, joins, input_group)
@@ -209,20 +215,23 @@ class Item < ApplicationRecord
   end
 
   def field_targets
-    scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
+    #scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
+    scoped_targets(scope: 'FieldItem', join: :item_groups, sort: :sort, reject_set: ['RadioButton'])
   end
 
   def product
-    if product = targets.detect{|target| target.class.method_defined?(:type) && target.base_type == 'Product'}
-      product
-    end
+    #item_groups.find_by(target_type: Item.scoped_assocs('Product').map{|assoc| assoc.classify}).target
+    # if product = targets.detect{|target| target.class.method_defined?(:type) && target.base_type == 'Product'}
+    #   product
+    # end
+    scoped_targets(scope: 'Product', join: :item_groups).first
   end
 
   def artist
     artists.first if artists.any?
   end
 
-  # Item.find(51).product_group['params']   Item.find(6).product_group['inputs']
+  # Item.find(53).product_group['params']   Item.find(6).product_group['inputs']
   # Item.find(5).field_targets ## pg = Item.find(5).product_group['params'] ## h['inputs'] ## h['inputs']['field_sets']   Item.find(5).product_group['inputs']['field_sets']
   # product_group ############################################################## Item.find(5).product_group['inputs']['field_sets']
   def product_group
@@ -242,6 +251,10 @@ class Item < ApplicationRecord
       end
     end
     {'params'=>params, 'inputs'=>inputs}
+  end
+
+  def item_product
+    [%w[item product], [field_targets, product.field_targets].map{|fields| fields.group_by{|f| f.kind}}].transpose.to_h
   end
 
   # field-type specific methods ################################################

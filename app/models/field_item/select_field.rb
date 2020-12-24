@@ -1,6 +1,9 @@
 class SelectField < FieldItem
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
 
+  def field_items
+    options 
+  end
   # revisit id_tags
   def self.builder(f)
     select_field = SelectField.where(field_name: f[:field_name], kind: f[:kind], tags: id_tags(f[:tags])).first_or_create

@@ -1,5 +1,8 @@
 <div class="card border border-dark" id="<%= dom_tag(artist, :show) %>">
   <div class="card-header py-0" id="<%= dom_tag(artist, :header) %>">
+    <a href="<%= artist_path(artist) %>" class="btn btn-sm btn-link" type="button">
+      <span class="fs-s"><%= artist.artist_name %></span>
+    </a>
     <div class="row align-items-center bg-light">
       <div class="col-11 mt-3 pr-0">
         <%= render 'artists/edit', artist: artist, url: artist_path(artist) %>

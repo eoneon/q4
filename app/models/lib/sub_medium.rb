@@ -33,7 +33,7 @@ class SubMedium
 
       class Leafing < OnPaper
         def self.options
-          Option.builder(['goldleaf', 'hand laid goldleaf', 'silverleaf', 'hand laid silverleaf'], field_kind)
+          Option.builder(['gold leaf', 'hand laid gold leaf', 'silver leaf', 'hand laid silver leaf', 'hand laid gold and silver leaf', 'hand laid copper leaf'], field_kind)
         end
       end
 

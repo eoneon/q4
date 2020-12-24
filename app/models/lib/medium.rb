@@ -460,7 +460,7 @@ class Medium
     class PrintMedia < SFO
       class Silkscreen < PrintMedia
         def self.options
-          Option.builder(['serigraph', 'silkscreen'], field_kind, tags)
+          Option.builder(['serigraph', 'original serigraph', 'silkscreen'], field_kind, tags)
         end
       end
 
@@ -563,7 +563,7 @@ class Medium
 
       class AnimationCel < SericelMedia
         def self.options
-          Option.builder(['production cel', 'production cel and matching drawing', 'production cel and two matching drawings', 'production cel and three matching drawings'], field_kind, tags)
+          Option.builder(['original production cel', 'original production cel and matching drawing', 'original production cel and two matching drawings', 'original production cel and three matching drawings'], field_kind, tags)
         end
       end
     end

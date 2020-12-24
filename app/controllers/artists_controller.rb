@@ -3,8 +3,12 @@ class ArtistsController < ApplicationController
     @artists = Artist.all
   end
 
+  def show
+    @artist = Artist.find(params[:id])
+  end
+
   def search
-    @artist = Artist.find(params[:id]) 
+    @artist = Artist.find(params[:id])
 
     respond_to do |format|
       format.js

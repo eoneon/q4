@@ -10,6 +10,26 @@ module STI
   end
 
   #subclass methods ############################################################
+  def scoped_targets(scope:, join:, sort: nil, reject_set:[])
+    scoped_targets_through_join(valid_join_targets(scope, join, sort, reject_set))
+  end
+
+  def scoped_targets_through_join(join_set)
+    join_set.includes(:target).map(&:target).flatten
+    #join_set.includes(target: :item_groups).map{|i| i.target}
+  end
+
+  #=> #<ActiveRecord::AssociationRelation [ItemGroup...]>
+  def valid_join_targets(scope, join, sort, reject_set)
+     public_send(join).order(sort).where(target_type: valid_assocs(scope, reject_set).map{|k| k.classify})
+     #targets.where(target_type: valid_assocs(scope, reject_set).map{|k| k.classify})
+     # sm.targets.includes(:target)
+  end
+
+  #=> ["select_menus", "field_sets", "select_fields", "options", "check_box_fields", "text_fields", "number_fields", "text_area_fields"]
+  def valid_assocs(scope, reject_set)
+    to_class.scoped_assocs(scope).select{|assoc| reject_set.exclude?(assoc.classify)}
+  end
 
   #collection methods ##########################################################
   def scoped_sti_targets_by_type(scope:, rel: :has_one, reject_set: [])
@@ -42,7 +62,8 @@ module STI
   end
 
   def sorted_targets
-    item_groups.order(:sort)
+    #item_groups.order(:sort)
+    item_groups.order(nil)
   end
 
   def remove_dependent_item_groups
@@ -229,7 +250,7 @@ module STI
 
     #get ALL assoc names except join assoc; first param for: scoped_assoc_names #=> ["select_fields", "text_fields", "check_box_fields", "number_fields", "text_area_fields", "materials", "mountings"]
     def assoc_names
-      self.reflect_on_all_associations(:has_many).map {|assoc| assoc.name.to_s}.reject {|i| i == 'item_groups'}
+      self.reflect_on_all_associations(:has_many).map{|assoc| assoc.name.to_s}.reject {|i| i == 'item_groups'}
     end
 
     #superclass context methods: ProductItem, FieldItem ########################
@@ -261,6 +282,19 @@ module STI
 
     def file_names
       Dir.glob("#{Rails.root}/app/models/#{self.to_s.underscore}/*.rb").map {|path| path.split("/").last.split(".").first}
+    end
+
+    # refactored AR collection methods #########################################
+    def scoped_assocs(scope)
+      hm_assocs.select{|assoc| dir_files(scope).include?(assoc.singularize)}
+    end
+
+    def hm_assocs
+      self.reflect_on_all_associations(:has_many).map{|assoc| assoc.name.to_s} #plural
+    end
+
+    def dir_files(folder)
+      Dir.glob("#{Rails.root}/app/models/#{folder.underscore}/*.rb").map{|path| path.split("/").last.split(".").first}
     end
 
   end

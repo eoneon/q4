@@ -9,6 +9,10 @@ class FieldSet < FieldItem
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
+  def field_items
+    select_menus + field_sets + select_fields + text_fields + text_area_fields + number_fields
+  end
+
   def self.media_set
     FieldSet.kv_set_search([["kind", "medium"]])
   end
@@ -65,7 +69,7 @@ class FieldSet < FieldItem
   def self.filter_tag(set, k)
     set.map{|i| i.tags[k]}.uniq.compact
   end
-  
+
   def self.builder(f)
     field_set = FieldSet.where(field_name: f[:field_name], kind: f[:kind]).first_or_create
     update_tags(field_set, f[:tags])
