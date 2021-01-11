@@ -5,7 +5,7 @@ class Product < ApplicationRecord
   validates :product_name, uniqueness: true
 
   has_many :item_groups, as: :origin
-  #has_many :field_items, through: :item_groups, inverse_of: :product, source: :target #, source_type: "FieldItem"
+  #has_many :field_items, through: :item_groups, source: :target #, source_type: "SelectMenu"
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
@@ -22,21 +22,76 @@ class Product < ApplicationRecord
     select_menus + field_sets + select_fields + text_area_fields
   end
 
+  def fieldables
+    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
+    # set = item_groups.where(base_type: 'FieldItem').order(:sort) #.map(&:target)
+    # set.includes(:target).map(&:target)
+  end
+
+  def grouped_fieldables
+    fieldables.group_by{|f| f.kind}
+  end
+
+  def nested_fieldables(h={})
+    grouped_fieldables.each do |kind, targets|
+      h.merge!( { kind => format_nested(targets.first) } )
+    end
+    h
+  end
+
+  def format_nested(f, set=[])
+    return f if !f.is_a? FieldSet
+    f.fieldables.each do |ff|
+      set << nested_ffieldables(ff, f.kind == ff.kind)
+    end
+    set
+  end
+
+  def nested_ffieldables(f, kind)
+   kind ? f : {f.kind => f}
+  end
+  # def nested_fieldables(h={})
+  #   grouped_fieldables.each do |kind, set|
+  #     h.merge!( {kind => set.map{|f| format_nested(f)} })
+  #   end
+  #   h
+  # end
+  #
+  # def format_nested(f)
+  #   #f.type == 'FieldSet' ? f.fieldables : f
+  #   f.is_a? FieldSet ? f.fieldables : f
+  # end
+
   ##############################################################################
+  # def recursive_targets(targets=fieldables, target_set=[])
+  #   return target_set if targets.empty?
+  #   recursive_extract(targets, target_set.concat(targets))
+  # end
+  # # targets.includes(item_groups: :target).map(&:target)
+  # # FieldItem.where(id: targets.map(&:id)).joins(:item_groups).order('item_groups.sort').includes(:target).map(&:target)
 
-  def self.recursive_targets(targets, target_set=[])
-    return target_set if targets.empty?
-    recursive_extract(targets, target_set.concat(targets))
-  end
+  # def recursive_extract(targets, target_set)
+  #   return target_set if targets.empty?
+  #   recursive_extract(fieldables, target_set.concat(targets))
+  # end
+  #
+  # def fieldables
+  #   item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
+  # end
 
-  def self.recursive_extract(targets, target_set)
-    return target_set if targets.empty?
-    recursive_extract(join_ftargets(targets), target_set.concat(targets))
-  end
-
-  def self.join_ftargets(targets)
-    ItemGroup.where(origin_type: "FieldItem", origin_id: targets.map(&:id) ).includes(:target).map(&:target)
-  end
+  # def self.recursive_targets(targets, target_set=[])
+  #   return target_set if targets.empty?
+  #   recursive_extract(targets, target_set.concat(targets))
+  # end
+  #
+  # def self.recursive_extract(targets, target_set)
+  #   return target_set if targets.empty?
+  #   recursive_extract(join_ftargets(targets), target_set.concat(targets))
+  # end
+  #
+  # def self.join_ftargets(targets)
+  #   ItemGroup.where(origin_type: "FieldItem", origin_id: targets.map(&:id) ).includes(:target).map(&:target)
+  # end
 
   ##############################################################################
 

@@ -362,8 +362,9 @@ class Export
   end
 
   def attr_medium(medium)
+    puts "here! #{medium}"
     case
-      when medium == 'Painting'; attr_painting(medium).capitalize
+      when medium == 'Painting'; attr_painting(medium.downcase)
       when medium == 'Drawing'; attr_drawing(medium)
       else medium
     end

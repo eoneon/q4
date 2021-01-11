@@ -460,7 +460,7 @@ class Medium
     class PrintMedia < SFO
       class Silkscreen < PrintMedia
         def self.options
-          Option.builder(['serigraph', 'original serigraph', 'silkscreen'], field_kind, tags)
+          Option.builder(['serigraph', 'original serigraph', 'silkscreen', 'seriolithograph'], field_kind, tags)
         end
       end
 
@@ -584,7 +584,7 @@ class Medium
 
     module OnStandardMaterial
       def self.opt_hsh
-        {material_set: [Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic]}
+        {material_set: [Material::Canvas, Material::WrappedCanvas, Material::Wood, Material::WoodBox, Material::Metal, Material::MetalBox, Material::Acrylic]}
       end
     end
   end

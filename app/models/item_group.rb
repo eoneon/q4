@@ -1,7 +1,7 @@
 class ItemGroup < ApplicationRecord
   #include STI
 
-  before_create :set_sort
+  before_create :set_sort, :set_base_type
   before_destroy :update_sort
 
   belongs_to :origin, polymorphic: true
@@ -21,7 +21,12 @@ class ItemGroup < ApplicationRecord
   end
 
   def origin_item_groups
-    origin.item_groups.where.not(target_type: 'Artist')
+    #origin.item_groups.where.not(target_type: 'Artist')
+    origin.item_groups.where(base_type: 'FieldItem')
+  end
+
+  def set_base_type
+    self.base_type = target.class.base_class.name
   end
 
   # def scoped_targets

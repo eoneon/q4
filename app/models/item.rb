@@ -3,6 +3,7 @@ class Item < ApplicationRecord
   include STI
   include ExportAttrs
   include SkuRange
+  include ProductGroup
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :standard_products, through: :item_groups, source: :target, source_type: "StandardProduct"
@@ -16,6 +17,42 @@ class Item < ApplicationRecord
   ##############################################################################
   def field_items
     field_sets + select_fields + options
+  end
+
+  def fieldables
+    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
+  end
+
+  ##############################################################################
+
+  def nested_fieldables(h={})
+    grouped_fieldables.each do |kind, targets|
+      h.merge!( { kind => format_nested(targets) } )
+    end
+    h
+  end
+
+  def grouped_fieldables
+    fieldables.group_by{|f| f.kind}
+  end
+
+  def format_nested(targets, set=[])
+    #puts "targets: #{targets}, targets.one? #{targets.one?} targets.first.class: #{targets.first.class}"
+    return targets.first if targets.one? && targets.first.class != FieldSet
+    targets.each do |f|
+
+      if f.class == FieldSet
+        set << f.fieldables
+      else
+        set << f
+      end
+
+    end
+    set.flatten
+  end
+
+  def nested_ffieldables(f, kind)
+   kind ? f : {f.kind => f}
   end
   ##############################################################################
 
@@ -220,10 +257,6 @@ class Item < ApplicationRecord
   end
 
   def product
-    #item_groups.find_by(target_type: Item.scoped_assocs('Product').map{|assoc| assoc.classify}).target
-    # if product = targets.detect{|target| target.class.method_defined?(:type) && target.base_type == 'Product'}
-    #   product
-    # end
     scoped_targets(scope: 'Product', join: :item_groups).first
   end
 
@@ -253,8 +286,10 @@ class Item < ApplicationRecord
     {'params'=>params, 'inputs'=>inputs}
   end
 
-  def item_product
-    [%w[item product], [field_targets, product.field_targets].map{|fields| fields.group_by{|f| f.kind}}].transpose.to_h
+  # need graceful non-exception condition
+
+  def fields_for_scope_grouped_by_kind
+    [%w[item product], [field_targets, product.field_targets].map{|fields| fields.group_by{|f| f.kind}}].transpose.to_h if product
   end
 
   # field-type specific methods ################################################
@@ -340,6 +375,13 @@ class Item < ApplicationRecord
   def detect_obj(i_fields, kind, *types)
     i_fields.detect{|f| f.kind == kind && types.include?(f.type)}
   end
+
+  # refactor methods: ##########################################################
+  # replace :detect_obj
+  # def detect_option(options, set)
+  #   options.detect{|i| set.include?(i)}
+  # end
+  ##############################################################################
 
   def form_inputs(inputs, scope_keys, f_kind, f_hsh) #scope_keys[0..1]
     if scope_keys[0] == 'options'

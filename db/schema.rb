@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20201014144719) do
+ActiveRecord::Schema.define(version: 20201227212053) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -51,6 +51,7 @@ ActiveRecord::Schema.define(version: 20201014144719) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "sort"
+    t.string "base_type"
     t.index ["origin_type", "origin_id"], name: "index_item_groups_on_origin_type_and_origin_id"
     t.index ["target_type", "target_id"], name: "index_item_groups_on_target_type_and_target_id"
   end

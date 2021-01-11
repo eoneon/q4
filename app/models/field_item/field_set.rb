@@ -9,6 +9,10 @@ class FieldSet < FieldItem
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
+  def fieldables
+    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
+  end
+  
   def field_items
     select_menus + field_sets + select_fields + text_fields + text_area_fields + number_fields
   end

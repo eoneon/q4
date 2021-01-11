@@ -9,6 +9,16 @@ module STI
     before_destroy :remove_dependent_item_groups
   end
 
+  # module Leafing
+  #   def self.opts
+  #     {
+  #       Leafing: ['gold leaf', 'hand laid gold leaf', 'silver leaf', 'hand laid silver leaf', 'hand laid gold and silver leaf', 'hand laid copper leaf']
+  #     }
+  #   end
+  # end
+
+  #one more refactor ###########################################################
+
   #subclass methods ############################################################
   def scoped_targets(scope:, join:, sort: nil, reject_set:[])
     scoped_targets_through_join(valid_join_targets(scope, join, sort, reject_set))
@@ -295,6 +305,10 @@ module STI
 
     def dir_files(folder)
       Dir.glob("#{Rails.root}/app/models/#{folder.underscore}/*.rb").map{|path| path.split("/").last.split(".").first}
+    end
+
+    def detect_option(set, options)
+      set.detect{|i| options.include?(i)}
     end
 
   end
