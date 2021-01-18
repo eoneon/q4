@@ -1,4 +1,5 @@
 module TF
+  extend Build
 
   module Date
     def self.opts
@@ -11,7 +12,8 @@ module TF
   module Numbering
     def self.opts
       {
-        RomanEdition: %w[edition edition_size]
+        Edition: %w[edition],
+        EditionSize: %w[edition_size]
       }
     end
   end

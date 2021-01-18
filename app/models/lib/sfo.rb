@@ -1,41 +1,42 @@
 module SFO
+  extend Build
 
   module Medium
     def self.opts
       {
-        StandardPainting: OPT::Medium.opts[:StandardPainting],
-        PaintingOnPaper: OPT::Medium.opts[:PaintingOnPaper],
+        StandardPainting: [[:Option, :Medium, :StandardPainting]],
+        PaintingOnPaper: [[:Option, :Medium, :PaintingOnPaper]],
 
-        StandardDrawing: OPT::Medium.opts[:StandardDrawing],
+        StandardDrawing: [[:Option, :Medium, :StandardDrawing]],
 
-        Silkscreen: OPT::Medium.opts[:Silkscreen],
-        Giclee: OPT::Medium.opts[:Giclee],
-        Lithograph: OPT::Medium.opts[:Lithograph],
-        Etching: OPT::Medium.opts[:Etching],
-        Relief: OPT::Medium.opts[:Relief],
+        Silkscreen: [[:Option, :Medium, :Silkscreen]],
+        Giclee: [[:Option, :Medium, :Giclee]],
+        Lithograph: [[:Option, :Medium, :Lithograph]],
+        Etching: [[:Option, :Medium, :Etching]],
+        Relief: [[:Option, :Medium, :Relief]],
 
-        HandPulledSilkscreen: OPT::Medium.opts[:Silkscreen].map{|k| ['hand pulled', k].join(' ')},
-        HandPulledLithograph: OPT::Medium.opts[:HandPulledLithograph],
+        HandPulledSilkscreen: [[:Option, :Medium, :HandPulledSilkscreen]],
+        HandPulledLithograph: [[:Option, :Medium, :HandPulledLithograph]],
 
-        BasicMixedMedia: OPT::Medium.opts[:BasicMixedMedia],
-        Monotype: OPT::Medium.opts[:Monotype],
-        Seriolithograph: OPT::Medium.opts[:Seriolithograph],
-        AcrylicMixedMedia: OPT::Medium.opts[:AcrylicMixedMedia],
+        BasicMixedMedia: [[:Option, :Medium, :BasicMixedMedia]],
+        Monotype: [[:Option, :Medium, :Monotype]],
+        Seriolithograph: [[:Option, :Medium, :Seriolithograph]],
+        AcrylicMixedMedia: [[:Option, :Medium, :AcrylicMixedMedia]],
 
-        BasicPrint: OPT::Medium.opts[:BasicPrint],
-        Poster: OPT::Medium.opts[:Poster],
+        BasicPrint: [[:Option, :Medium, :BasicPrint]],
+        Poster: [[:Option, :Medium, :Poster]],
 
-        Photograph: OPT::Medium.opts[:Photograph],
-        SingleExposurePhotograph: OPT::Medium.opts[:SingleExposurePhotograph],
-        SportsPhotograph: OPT::Medium.opts[:SportsPhotograph],
-        ConcertPhotograph: OPT::Medium.opts[:ConcertPhotograph],
-        PressPhotograph: OPT::Medium.opts[:PressPhotograph],
+        Photograph: [[:Option, :Medium, :Photograph]],
+        SingleExposurePhotograph: [[:Option, :Medium, :SingleExposurePhotograph]],
+        SportsPhotograph: [[:Option, :Medium, :SportsPhotograph]],
+        ConcertPhotograph: [[:Option, :Medium, :ConcertPhotograph]],
+        PressPhotograph: [[:Option, :Medium, :PressPhotograph]],
 
-        Sericel: OPT::Medium.opts[:Sericel],
-        ProductionCel: OPT::Medium.opts[:ProductionCel],
+        Sericel: [[:Option, :Medium, :Sericel]],
+        ProductionCel: [[:Option, :Medium, :ProductionCel]],
 
-        HandBlownGlass: OPT::Medium.opts[:HandBlownGlass],
-        Sculpture: OPT::Medium.opts[:Sculpture]
+        HandBlownGlass: [[:Option, :Medium, :HandBlownGlass]],
+        Sculpture: [[:Option, :Medium, :Sculpture]]
       }
     end
   end
@@ -43,8 +44,8 @@ module SFO
   module Embellished
     def self.opts
       {
-        EmbellishedOnPaper: OPT::Embellished.opts[:EmbellishedOnPaper],
-        StandardEmbellished: OPT::Embellished.opts[:StandardEmbellished]
+        EmbellishedOnPaper: [[:Option, :Embellished, :EmbellishedOnPaper]],
+        StandardEmbellished: [[:Option, :Embellished, :StandardEmbellished]]
       }
     end
   end
@@ -52,7 +53,7 @@ module SFO
   module Leafing
     def self.opts
       {
-        Leafing: OPT::Leafing.opts[:Leafing]
+        Leafing: [[:Option, :Leafing, :Leafing]]
       }
     end
   end
@@ -60,7 +61,7 @@ module SFO
   module Remarque
     def self.opts
       {
-        Remarque: OPT::Remarque.opts[:Remarque]
+        Remarque: [[:Option, :Remarque, :Remarque]]
       }
     end
   end
@@ -68,19 +69,19 @@ module SFO
   module Material
     def self.opts
       {
-        Canvas: OPT::Material.opts[:Canvas],
-        WrappedCanvas: OPT::Material.opts[:WrappedCanvas],
+        Canvas: [[:Option, :Material, :Canvas]],
+        WrappedCanvas: [[:Option, :Material, :WrappedCanvas]],
 
-        Paper: OPT::Material.opts[:Paper],
-        PhotoPaper: OPT::Material.opts[:PhotoPaper],
-        AnimaPaper: OPT::Material.opts[:AnimaPaper],
+        Paper: [[:Option, :Material, :Paper]],
+        PhotoPaper: [[:Option, :Material, :PhotoPaper]],
+        AnimaPaper: [[:Option, :Material, :AnimaPaper]],
 
-        Wood: OPT::Material.opts[:Wood],
-        WoodBox: OPT::Material.opts[:WoodBox],
+        Wood: [[:Option, :Material, :Wood]],
+        WoodBox: [[:Option, :Material, :WoodBox]],
 
-        Metal: OPT::Material.opts[:Metal],
-        MetalBox: OPT::Material.opts[:MetalBox],
-        Acrylic: OPT::Material.opts[:Acrylic]
+        Metal: [[:Option, :Material, :Metal]],
+        MetalBox: [[:Option, :Material, :MetalBox]],
+        Acrylic: [[:Option, :Material, :Acrylic]]
       }
     end
   end
@@ -88,7 +89,7 @@ module SFO
   module SculptureType
     def self.opts
       {
-        Decorative: OPT::SculptureType.opts[:Decorative]
+        Decorative: [[:Option, :SculptureType, :Decorative]]
         #GartnerBlade: ['Saturn Oil Lamp', 'Ikebana Flower Bowl', 'Primitive Bowl', 'Primitive Shell', 'Sphere']
       }
     end
@@ -97,9 +98,9 @@ module SFO
   module Mounting
     def self.opts
       {
-        Framing: OPT::Mounting.opts[:Framing],
-        Matting: OPT::Mounting.opts[:Matting],
-        Border: OPT::Mounting.opts[:Border]
+        Framing: [[:Option, :Mounting, :Framing]],
+        Matting: [[:Option, :Mounting, :Matting]],
+        Border: [[:Option, :Mounting, :Border]]
       }
     end
   end
@@ -107,7 +108,7 @@ module SFO
   module Signature
     def self.opts
       {
-        StandardSignature: OPT::Signature.opts[:StandardSignature]
+        StandardSignature: [[:Option, :Signature, :StandardSignature]]
       }
     end
   end
@@ -115,8 +116,8 @@ module SFO
   module Certificate
     def self.opts
       {
-        StandardCertificate: OPT::Certificate.opts[:StandardCertificate],
-        PeterMaxCertificate: OPT::Certificate.opts[:PeterMaxCertificate]
+        StandardCertificate: [[:Option, :Certificate, :StandardCertificate]],
+        PeterMaxCertificate: [[:Option, :Certificate, :PeterMaxCertificate]]
       }
     end
   end
@@ -124,7 +125,7 @@ module SFO
   module Disclaimer
     def self.opts
       {
-        DisclaimerType: OPT::Disclaimer.opts[:DisclaimerType]
+        DisclaimerType: [[:Option, :Disclaimer, :DisclaimerType]]
       }
     end
   end
@@ -132,7 +133,7 @@ module SFO
   module Edition
     def self.opts
       {
-        LimitedEdition: OPT::Edition.opts[:LimitedEdition]
+        LimitedEdition: [[:Option, :Edition, :LimitedEdition]]
       }
     end
   end
@@ -140,11 +141,161 @@ module SFO
   module Numbering
     def self.opts
       {
-        StandardNumbering: OPT::Numbering.opts[:StandardNumbering],
-        RomanNumbering: OPT::Numbering.opts[:RomanNumbering],
-        OneOfOneNumbering: OPT::Numbering.opts[:OneOfOneNumbering],
-        ProofEdition: OPT::Numbering.opts[:ProofEdition]
+        StandardNumbering: [[:Option, :Numbering, :StandardNumbering]],
+        RomanNumbering: [[:Option, :Numbering, :RomanNumbering]],
+        OneOfOneNumbering: [[:Option, :Numbering, :OneOfOneNumbering]],
+        ProofEdition: [[:Option, :Numbering, :ProofEdition]]
       }
     end
   end
 end
+
+################################################################################
+
+# module Medium
+#   def self.opts
+#     {
+#       StandardPainting: OPT::Medium.opts[:StandardPainting],
+#       PaintingOnPaper: OPT::Medium.opts[:PaintingOnPaper],
+#
+#       StandardDrawing: OPT::Medium.opts[:StandardDrawing],
+#
+#       Silkscreen: OPT::Medium.opts[:Silkscreen],
+#       Giclee: OPT::Medium.opts[:Giclee],
+#       Lithograph: OPT::Medium.opts[:Lithograph],
+#       Etching: OPT::Medium.opts[:Etching],
+#       Relief: OPT::Medium.opts[:Relief],
+#
+#       HandPulledSilkscreen: OPT::Medium.opts[:Silkscreen].map{|k| ['hand pulled', k].join(' ')},
+#       HandPulledLithograph: OPT::Medium.opts[:HandPulledLithograph],
+#
+#       BasicMixedMedia: OPT::Medium.opts[:BasicMixedMedia],
+#       Monotype: OPT::Medium.opts[:Monotype],
+#       Seriolithograph: OPT::Medium.opts[:Seriolithograph],
+#       AcrylicMixedMedia: OPT::Medium.opts[:AcrylicMixedMedia],
+#
+#       BasicPrint: OPT::Medium.opts[:BasicPrint],
+#       Poster: OPT::Medium.opts[:Poster],
+#
+#       Photograph: OPT::Medium.opts[:Photograph],
+#       SingleExposurePhotograph: OPT::Medium.opts[:SingleExposurePhotograph],
+#       SportsPhotograph: OPT::Medium.opts[:SportsPhotograph],
+#       ConcertPhotograph: OPT::Medium.opts[:ConcertPhotograph],
+#       PressPhotograph: OPT::Medium.opts[:PressPhotograph],
+#
+#       Sericel: OPT::Medium.opts[:Sericel],
+#       ProductionCel: OPT::Medium.opts[:ProductionCel],
+#
+#       HandBlownGlass: OPT::Medium.opts[:HandBlownGlass],
+#       Sculpture: OPT::Medium.opts[:Sculpture]
+#     }
+#   end
+# end
+#
+# module Embellished
+#   def self.opts
+#     {
+#       EmbellishedOnPaper: OPT::Embellished.opts[:EmbellishedOnPaper],
+#       StandardEmbellished: OPT::Embellished.opts[:StandardEmbellished]
+#     }
+#   end
+# end
+#
+# module Leafing
+#   def self.opts
+#     {
+#       Leafing: OPT::Leafing.opts[:Leafing]
+#     }
+#   end
+# end
+#
+# module Remarque
+#   def self.opts
+#     {
+#       Remarque: OPT::Remarque.opts[:Remarque]
+#     }
+#   end
+# end
+#
+# module Material
+#   def self.opts
+#     {
+#       Canvas: OPT::Material.opts[:Canvas],
+#       WrappedCanvas: OPT::Material.opts[:WrappedCanvas],
+#
+#       Paper: OPT::Material.opts[:Paper],
+#       PhotoPaper: OPT::Material.opts[:PhotoPaper],
+#       AnimaPaper: OPT::Material.opts[:AnimaPaper],
+#
+#       Wood: OPT::Material.opts[:Wood],
+#       WoodBox: OPT::Material.opts[:WoodBox],
+#
+#       Metal: OPT::Material.opts[:Metal],
+#       MetalBox: OPT::Material.opts[:MetalBox],
+#       Acrylic: OPT::Material.opts[:Acrylic]
+#     }
+#   end
+# end
+#
+# module SculptureType
+#   def self.opts
+#     {
+#       Decorative: OPT::SculptureType.opts[:Decorative]
+#       #GartnerBlade: ['Saturn Oil Lamp', 'Ikebana Flower Bowl', 'Primitive Bowl', 'Primitive Shell', 'Sphere']
+#     }
+#   end
+# end
+#
+# module Mounting
+#   def self.opts
+#     {
+#       Framing: OPT::Mounting.opts[:Framing],
+#       Matting: OPT::Mounting.opts[:Matting],
+#       Border: OPT::Mounting.opts[:Border]
+#     }
+#   end
+# end
+#
+# module Signature
+#   def self.opts
+#     {
+#       StandardSignature: OPT::Signature.opts[:StandardSignature]
+#     }
+#   end
+# end
+#
+# module Certificate
+#   def self.opts
+#     {
+#       StandardCertificate: OPT::Certificate.opts[:StandardCertificate],
+#       PeterMaxCertificate: OPT::Certificate.opts[:PeterMaxCertificate]
+#     }
+#   end
+# end
+#
+# module Disclaimer
+#   def self.opts
+#     {
+#       DisclaimerType: OPT::Disclaimer.opts[:DisclaimerType]
+#     }
+#   end
+# end
+#
+# module Edition
+#   def self.opts
+#     {
+#       LimitedEdition: OPT::Edition.opts[:LimitedEdition]
+#     }
+#   end
+# end
+#
+# module Numbering
+#   def self.opts
+#     {
+#       StandardNumbering: OPT::Numbering.opts[:StandardNumbering],
+#       RomanNumbering: OPT::Numbering.opts[:RomanNumbering],
+#       OneOfOneNumbering: OPT::Numbering.opts[:OneOfOneNumbering],
+#       ProofEdition: OPT::Numbering.opts[:ProofEdition]
+#     }
+#   end
+# end

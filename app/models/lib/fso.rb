@@ -1,33 +1,16 @@
 module FSO
-
-  module Material
-    def self.opts
-      {
-        Canvas: [SFO::Material.opts[:Canvas], FSO::Dimension.opts[:WidthHeight], SMO::Mounting.opts[:CanvasMounting]],
-        WrappedCanvas: [SFO::Material.opts[:WrappedCanvas], FSO::Dimension.opts[:WidthHeightDepth]],
-
-        Wood: [SFO::Material.opts[:Wood], SMO::Dimension.opts[:FlatDimension], SMO::Mounting.opts[:StandardMounting]],
-        WoodBox: [SFO::Material.opts[:WoodBox], FSO::Dimension.opts[:WidthHeight]],
-
-        Metal: [SFO::Material.opts[:Metal], SMO::Dimension.opts[:FlatDimension], SMO::Mounting.opts[:StandardMounting]],
-        MetalBox: [SFO::Material.opts[:MetalBox], FSO::Dimension.opts[:WidthHeight]],
-
-        Paper: [SFO::Material.opts[:Paper], SMO::Dimension.opts[:FlatDimension], SMO::Mounting.opts[:StandardMounting]],
-        PhotoPaper: [SFO::Material.opts[:PhotoPaper], SMO::Dimension.opts[:FlatDimension], SMO::Mounting.opts[:StandardMounting]],
-        AnimaPaper: [SFO::Material.opts[:AnimaPaper], SMO::Dimension.opts[:FlatDimension], SMO::Mounting.opts[:StandardMounting]],
-
-        Acrylic: [SFO::Material.opts[:Acrylic], SMO::Dimension.opts[:FlatDimension], SMO::Mounting.opts[:StandardMounting]]
-      }
-    end
-  end
+  extend Build
 
   module Dimension
     def self.opts
       {
-        FlatDimension: [:WidthHeight, :Image_Diameter].map{|k| NF::Dimension.opts[k]},
-        BoxDimension: NF::Dimension.opts[:WidthHeightDepth],
-        WidthHeight: NF::Dimension.opts[:WidthHeight],
-        DepthDimension: [:WidthHeightDepthWeight, :DiameterHeightWeight, :DiameterWeight].map {|k| NF::Dimension.opts[k]}
+        WidthHeight: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height]],
+        #Diameter: [[:NumberField, :Dimension, :Diameter]],
+        WidthHeightDepth: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Depth]],
+
+        WidthHeightDepthWeight: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Depth], [:NumberField, :Dimension, :Weight]],
+        DiameterHeightWeight: [[:NumberField, :Dimension, :Diameter], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Weight]],
+        DiameterWeight: [[:NumberField, :Dimension, :Diameter], [:NumberField, :Dimension, :Weight]]
       }
     end
   end
@@ -35,9 +18,30 @@ module FSO
   module Mounting
     def self.opts
       {
-        Framing: [SFO::Mounting.opts[:Framing], NF::Dimension.opts[:WidthHeight]],
-        Border: [SFO::Mounting.opts[:Border], NF::Dimension.opts[:WidthHeight]],
-        Matting: [SFO::Mounting.opts[:Matting], NF::Dimension.opts[:WidthHeight]]
+        Framing: [[:SelectField, :Mounting, :Framing], [:FieldSet, :Dimension, :WidthHeight]],
+        Border: [[:SelectField, :Mounting, :Border], [:FieldSet, :Dimension, :WidthHeight]],
+        Matting: [[:SelectField, :Mounting, :Matting], [:FieldSet, :Dimension, :WidthHeight]]
+      }
+    end
+  end
+
+  module Material
+    def self.opts
+      {
+        Canvas: [[:SelectField, :Material, :Canvas], [:FieldSet, :Dimension, :WidthHeight], [:SelectMenu, :Mounting, :CanvasMounting]],
+        WrappedCanvas: [[:SelectField, :Material, :WrappedCanvas], [:FieldSet, :Dimension, :WidthHeight]],
+
+        Wood: [[:SelectField, :Material, :Wood], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]],
+        WoodBox: [[:SelectField, :Material, :WoodBox], [:FieldSet, :Dimension, :WidthHeightDepth]],
+
+        Metal: [[:SelectField, :Material, :Metal], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]],
+        MetalBox: [[:SelectField, :Material, :MetalBox], [:FieldSet, :Dimension, :WidthHeightDepth]],
+
+        Paper: [[:SelectField, :Material, :Paper], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]],
+        PhotoPaper: [[:SelectField, :Material, :PhotoPaper], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]],
+
+        AnimaPaper: [[:SelectField, :Material, :AnimaPaper], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]],
+        Acrylic: [[:SelectField, :Material, :Acrylic], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]]
       }
     end
   end
@@ -45,25 +49,11 @@ module FSO
   module Numbering
     def self.opts
       {
-        StandardNumbering: [SFO::Numbering.opts[:StandardNumbering].map{|k| [k, NF::Numbering.opts[:StandardNumbering]].flatten}],
-        RomanNumbering: [SFO::Numbering.opts[:RomanNumbering].map{|k| [k, TF::Numbering.opts].flatten}],
-        ProofNumbering: SFO::Numbering.opts[:ProofNumbering]
-        #BatchEdition: [RBTN::Numbering.opts[:BatchEdition], NF::Numbering.opts[:BatchEdition]]
-        #OneOfOneNumbering: SFO::Numbering.opts[:OneOfOneNumbering]
-        #OpenEdition: [RBTN::Numbering.opts[:OpenEdition], NF::Numbering.opts[:BatchEdition]]
+        StandardNumbering: [[:SelectField, :Numbering, :StandardNumbering], [:NumberField, :Numbering, :Edition], [:NumberField, :Numbering, :EditionSize]],
+        RomanNumbering: [[:SelectField, :Numbering, :RomanNumbering], [:TextField, :Numbering, :Edition], [:TextField, :Numbering, :EditionSize]]
+        #ProofNumbering: [[:SelectField, :Numbering, :ProofNumbering]]
       }
     end
   end
 
 end
-
-# module Dimension
-#   def self.opts
-#     {
-#       FlatDimension: [:WidthHeight, :Image_Diameter].map {|k| NF::Dimension.opts[k]},
-#       BoxDimension: NF::Dimension.opts[:WidthHeightDepth],
-#       DepthDimension: [:WidthHeightDepthWeight, :DiameterHeightWeight, :DiameterWeight].map {|k| NF::Dimension.opts[k]},
-#       WidthHeight: NF::Dimension.opts[:WidthHeightDepth]
-#     }
-#   end
-# end

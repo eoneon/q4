@@ -1,10 +1,11 @@
 module NF
+  extend Build
 
   module Numbering
     def self.opts
       {
-        StandardNumbering: %w[edition edition_size],
-        BatchEdition: %w[edition_size]
+        Edition: %w[edition],
+        EditionSize: %w[edition_size]
       }
     end
   end
@@ -12,15 +13,27 @@ module NF
   module Dimension
     def self.opts
       {
-        WidthHeight: %w[width height],
-        Image_Diameter: %w[image-diameter],
-        
-        WidthHeightDepth: %w[width height depth],
-
-        WidthHeightDepthWeight: %w[width height depth weight],
-        DiameterHeightWeight: %w[diameter height weight],
-        DiameterWeight: %w[diameter weight]
+        Width: %w[width],
+        Height: %w[height],
+        Diameter: %w[diameter],
+        Depth: %w[depth],
+        Weight: %w[weight]
       }
     end
   end
 end
+
+
+# module Dimension
+#   def self.opts
+#     {
+#       WidthHeight: %w[width height],
+#       Diameter: %w[image-diameter],
+#       WidthHeightDepth: %w[width height depth],
+#
+#       WidthHeightDepthWeight: %w[width height depth weight],
+#       DiameterHeightWeight: %w[diameter height weight],
+#       DiameterWeight: %w[diameter weight]
+#     }
+#   end
+# end
