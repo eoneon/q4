@@ -1,25 +1,34 @@
 module PRD
   extend Build
+  # PRD::Painting.opts[:StandardPainting]
 
-  # module Painting
-  #   def self.opts
-  #     {
-  #       StandardPainting: [
-  #         RBTN::Category.opts[:Original],
-  #         SFO::Medium.opts[:StandardPainting],
-  #         FGO::Material.opts[:StandardMaterial],
-  #         FG::Authentication.opts[:Authentication]
-  #       ],
-  #
-  #       PaintingOnPaper: [
-  #         RBTN::Category.opts[:Original],
-  #         SFO::Medium.opts[:PaintingOnPaper],
-  #         FSO::Material.opts[:Paper],
-  #         FG::Authentication.opts[:Authentication]
-  #       ]
-  #     }
+  # [medium_type medium_type medium material]
+  # def seed_products(store: seed_fields)
+  #   constants.each do |medium_type| #Painting
+  #     modulize(self,medium_type).opts.each do |medium_subtype, key_set| #|StandardPainting, [RBTN::Category.opts[:Original],...]|
+  #     end
   #   end
   # end
+
+  module Painting
+    def self.opts
+      {
+        StandardPainting: [
+          RBTN::Category.opts[:Original],
+          SFO::Medium.opts[:StandardPainting],
+          FGO::Material.opts[:StandardMaterial],
+          FGS::Authentication.opts[:Standard]
+        ],
+
+        PaintingOnPaper: [
+          RBTN::Category.opts[:Original],
+          SFO::Medium.opts[:PaintingOnPaper],
+          FGO::Material.opts[:Paper],
+          FGS::Authentication.opts[:Standard]
+        ]
+      }
+    end
+  end
   #
   # module Drawing
   #   def self.opts

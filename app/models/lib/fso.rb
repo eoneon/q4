@@ -5,7 +5,6 @@ module FSO
     def self.opts
       {
         WidthHeight: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height]],
-        #Diameter: [[:NumberField, :Dimension, :Diameter]],
         WidthHeightDepth: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Depth]],
 
         WidthHeightDepthWeight: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Depth], [:NumberField, :Dimension, :Weight]],
@@ -51,7 +50,6 @@ module FSO
       {
         StandardNumbering: [[:SelectField, :Numbering, :StandardNumbering], [:NumberField, :Numbering, :Edition], [:NumberField, :Numbering, :EditionSize]],
         RomanNumbering: [[:SelectField, :Numbering, :RomanNumbering], [:TextField, :Numbering, :Edition], [:TextField, :Numbering, :EditionSize]]
-        #ProofNumbering: [[:SelectField, :Numbering, :ProofNumbering]]
       }
     end
   end
