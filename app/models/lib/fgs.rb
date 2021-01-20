@@ -1,5 +1,5 @@
 module FGS
-
+  
   module Authentication
     def self.opts
       {
@@ -20,5 +20,3 @@ module FGS
   end
 
 end
-
-# FG::Submedia.opts[:StandardSubmedia]

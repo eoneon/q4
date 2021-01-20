@@ -21,7 +21,7 @@ module Build
   end
 
   def seed_field_assocs(store:{})
-    [SFO, FSO, SMO].each do |k|
+    [RBTN, SFO, FSO, SMO].each do |k|
       k.cascade_assoc(store: store)
     end
     store
@@ -41,7 +41,47 @@ module Build
 
   ##############################################################################
 
+  def seed_products(store: seed_fields, products: [])
+    constants.each do |type| #Painting
+      modulize(self, type).opts.each do |subtype, field_group| # StandardPainting, field_group
+        p_hsh = build_kg(field_group[:key_group], store)
+        build_fgo(p_hsh, field_group.dig(:FGO), store, products)
+        build_fgs(field_group.dig(:FGS), store, products)
+      end
+    end
+    products
+  end
 
+  def build_kg(key_group, store, p={})
+    key_group.each do |keys| #[:RadioButton, :Category, :Original]
+      p[keys[1]] = store.dig(*keys) # {:Category => <RadioButton>}
+    end
+    p
+  end
+
+  def build_fgo(p_hsh, key_group, store, products)
+    return products << p_hsh if !key_group
+    key_group.each do |key_set|
+
+      modulize(key_set[0], key_set[1]).opts[key_set[2]].each do |keys|
+        p = p_hsh.dup
+        p[keys[1]] = store.dig(*keys)
+        products << p
+      end
+
+    end
+    products
+  end
+
+  def build_fgs(key_group, store, products)
+    return products if !key_group
+    key_group.each do |key_set|
+      modulize(key_set[0], key_set[1]).opts[key_set[2]].each do |keys|
+        products.map{|p| p[keys[1]] = store.dig(*keys)}
+      end
+    end
+    products
+  end
 
   ##############################################################################
 

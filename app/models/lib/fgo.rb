@@ -1,27 +1,10 @@
 module FGO
   extend Build
-  # h = FGO.field_groups(PRD.seed_fields)
-  # def self.field_groups(store)
-  #   constants.each do |kind|
-  #     modulize(self,kind).opts.each do |fgo_key, field_keys|
-  #       targets = merge_fgo(kind, field_keys, store)
-  #       params_merge(params: store, dig_set: dig_set(fgo_key, targets, :FGO, kind))
-  #     end
-  #   end
-  #   store
-  # end
-  #
-  # def self.merge_fgo(kind, field_keys, store, targets=[])
-  #   field_keys.each do |field_key|
-  #     targets << store.dig(:FieldSet, kind, field_key)
-  #   end
-  #   targets.flatten
-  # end FGO::Material.opts[:StandardMaterial]
 
   module Material
     def self.opts
       {
-        StandardMaterial: FGO.build_key_group([:Canvas, :WrappedCanvas, :Paper, :Wood, :WoodBox, :Metal, :MetalBox, :Acrylic], :FieldSet, :Material),
+        Standard: FGO.build_key_group([:Canvas, :WrappedCanvas, :Wood, :WoodBox, :Metal, :MetalBox, :Acrylic], :FieldSet, :Material),
         Canvas: FGO.build_key_group([:Canvas, :WrappedCanvas], :FieldSet, :Material),
         Paper: FGO.build_key_group([:Paper], :FieldSet, :Material),
         PhotoPaper: FGO.build_key_group([:PhotoPaper], :FieldSet, :Material),
@@ -30,20 +13,32 @@ module FGO
     end
   end
 
-  # module Medium
+  module MixedMedia
+    def self.opts
+      {
+        OnPaper: FGO.build_key_group([:AcrylicMixedMedia, :Monotype], :SelectField, :Medium),
+        OnCanvas: FGO.build_key_group([:AcrylicMixedMedia, :Monotype], :SelectField, :Medium)
+      }
+    end
+  end
+
+  module PrintMedia
+    def self.opts
+      {
+        Standard: FGO.build_key_group([:Silkscreen, :Giclee, :BasicMixedMedia, :BasicPrint], :SelectField, :Medium),
+        OnPaper: FGO.build_key_group([:Silkscreen, :HandPulledSilkscreen, :Lithograph, :HandPulledLithograph, :Giclee, :Seriolithograph, :Etching, :Relief, :BasicMixedMedia, :BasicPrint, :Poster], :SelectField, :Medium),
+        HandPulledOnPaper: FGO.build_key_group([:HandPulledSilkscreen, :HandPulledLithograph], :SelectField, :Medium),
+        HandPulledOnCanvas: FGO.build_key_group([:HandPulledSilkscreen], :SelectField, :Medium),
+        Photograph: FGO.build_key_group([:Photograph, :SingleExposurePhotograph, :SportsPhotograph, :ConcertPhotograph], :SelectField, :Medium)
+      }
+    end
+  end
+
+  # module OriginalMedia
   #   def self.opts
   #     {
-  #       OneOfAKindMixedMediaOnPaper: [:AcrylicMixedMedia, :Monotype].map{|k| SFO::Medium.opts[k]},
-  #       #OneOfAKindMixedMediaOnCanvas:,
-  #
-  #       #MixedMediaOnPaper: [:BasicMixedMedia, :Etching, :Relief].map{|k| SFO::Medium.opts[k]},
-  #       #MixedMediaOnCanvas: [:AcrylicMixedMedia, :BasicMixedMedia].map{|k| SFO::Medium.opts[k]},
-  #
-  #       HandPulledPrintOnPaper: [:HandPulledSilkscreen, :HandPulledLithograph].map{|k| SFO::Medium.opts[k]},
-  #       #HandPulledPrintOnCanvas: ,
-  #       StandardPrint: [:Silkscreen, :Giclee, :BasicMixedMedia, :BasicPrint].map{|k| SFO::Medium.opts[k]},
-  #       PrintOnPaper: [:Lithograph, :Etching, :Relief, :Seriolithograph].map{|k| SFO::Medium.opts[k]}
-  #       #BasicPrintOnPaper: SFO::Medium.opts[:Poster],
+  #       Standard: FGO.build_key_group([:AcrylicMixedMedia, :Monotype], :SelectField, :Medium),
+  #       OnCanvas: FGO.build_key_group([:AcrylicMixedMedia, :Monotype], :SelectField, :Medium)
   #     }
   #   end
   # end
