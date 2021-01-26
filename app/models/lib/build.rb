@@ -1,11 +1,98 @@
 module Build
-  # [medium_category medium material]
-  # def seed_products(store: seed_fields)
-  #   constants.each do |prd| #Painting
-  #     modulize(self,kind).opts.each do |key, key_set|
-  #     end
-  #   end
-  # end
+  # a = PRD.seed_products
+  def seed_products(store: seed_fields, products: [])
+    constants.each do |type| #Painting
+      modulize(self, type).opts.each do |subtype, field_group| # StandardPainting, field_group
+        p_hsh = {'p'=>{}, 'tags'=>{'product_type'=> type, 'product_subtype'=> subtype}}
+        build_product_group(field_group, store, p_hsh, products)
+      end
+    end
+    products
+  end
+
+  def build_product_group(field_group, store, p_hsh, products)
+    p_hsh = build_kg(field_group.dig(:key_group), store, p_hsh)
+    p_hsh = build_fgs(field_group.dig(:FGS), store, p_hsh)
+    build_fgo(field_group.dig(:FGO), store, p_hsh, products)
+    products
+  end
+
+  def build_kg(key_group, store, p_hsh)
+    return p_hsh if !key_group
+    key_group.each do |keys| #[:RadioButton, :Category, :Original]
+      p_hsh['p'].merge!({keys[1] => store.dig(*keys)})
+      build_tags(p_hsh, keys[1])
+    end
+    p_hsh
+  end
+
+  def build_fgs(key_group, store, p_hsh)
+    return p_hsh if !key_group
+    key_group.each do |key_set|
+      modulize(key_set[0], key_set[1]).opts[key_set[2]].each do |keys|
+        p_hsh['p'].merge!({keys[1] => store.dig(*keys)})
+        build_tags(p_hsh, keys[1])
+      end
+    end
+    p_hsh
+  end
+
+  def build_fgo(key_group, store, p_hsh, products, set=[])
+    return products << p_hsh if !key_group
+    kind_groups = key_group.map{|keys| modulize(keys[0], keys[1]).opts[keys[2]]}.flatten(1)
+    kind_groups.map{|key_set| set << store.dig(*key_set)}
+    kind_sets = set.group_by(&:kind).values
+    combined_fields = kind_sets[0].product(*kind_sets[1..-1]).map{|a| a.group_by(&:kind).transform_values{|v| v[0]}.transform_keys{|k| k.to_sym}}
+    
+    combined_fields.each do |f_hsh|
+      p = p_hsh.dup
+      p['p'].merge!(f_hsh)
+      f_hsh.keys.each {|k| build_tags(p, k)}
+      products << p
+    end
+
+    # puts "__"
+    # #puts "kind_sets[0]: #{kind_sets[0]}, kind_sets[1..-1]: #{kind_sets[1..-1]}"
+    # puts "product: #{kind_sets[0].product(*kind_sets[1..-1]).map{|a| a.group_by(&:kind)}}"
+    # puts "__"
+    # key_group.each do |key_set|
+    #   modulize(key_set[0], key_set[1]).opts[key_set[2]].each do |keys|
+    #     p = p_hsh.dup
+    #     p['p'].merge!({keys[1] => store.dig(*keys)})
+    #
+    #     build_tags(p, keys[1])
+    #     products << p
+    #
+    #   end
+    # end
+    products
+  end
+
+  def build_tags(p_hsh, kind)
+    if [:Category, :Medium, :Material].include?(kind)
+      p_hsh['tags'].merge!({kind => p_hsh['p'][kind].field_name})
+    end
+  end
+
+  ##############################################################################
+
+  def order_fields(p_hsh, p={})
+    field_order.each do |k|
+      p[k] = p_hsh[k] if p_hsh.has_key?(k)
+    end
+    p
+  end
+
+  def set_tags(p, tags={})
+    [:Category, :Medium, :Material].each do |k|
+      tags[k.to_s.downcase] = p[k]
+    end
+    tags
+  end
+
+  def field_order
+    [:Embellished, :Category, :Edition, :Medium, :Material, :Leafing, :Remarque, :Numbering, :Signature, :TextBeforeCOA, :Certificate]
+  end
 
   ##############################################################################
 
@@ -25,62 +112,6 @@ module Build
       k.cascade_assoc(store: store)
     end
     store
-  end
-
-  def field_groups(store)
-    [FGS, FGO].each do |k|
-      k.constants.each do |kind|
-        modulize(k,kind).opts.each do |key, key_group|
-          targets = merge_targets(key_group, store)
-          params_merge(params: store, dig_set: dig_set(key, targets, k.name.to_sym, kind))
-        end
-      end
-    end
-    store
-  end
-
-  ##############################################################################
-
-  def seed_products(store: seed_fields, products: [])
-    constants.each do |type| #Painting
-      modulize(self, type).opts.each do |subtype, field_group| # StandardPainting, field_group
-        p_hsh = build_kg(field_group[:key_group], store)
-        build_fgo(p_hsh, field_group.dig(:FGO), store, products)
-        build_fgs(field_group.dig(:FGS), store, products)
-      end
-    end
-    products
-  end
-
-  def build_kg(key_group, store, p={})
-    key_group.each do |keys| #[:RadioButton, :Category, :Original]
-      p[keys[1]] = store.dig(*keys) # {:Category => <RadioButton>}
-    end
-    p
-  end
-
-  def build_fgo(p_hsh, key_group, store, products)
-    return products << p_hsh if !key_group
-    key_group.each do |key_set|
-
-      modulize(key_set[0], key_set[1]).opts[key_set[2]].each do |keys|
-        p = p_hsh.dup
-        p[keys[1]] = store.dig(*keys)
-        products << p
-      end
-
-    end
-    products
-  end
-
-  def build_fgs(key_group, store, products)
-    return products if !key_group
-    key_group.each do |key_set|
-      modulize(key_set[0], key_set[1]).opts[key_set[2]].each do |keys|
-        products.map{|p| p[keys[1]] = store.dig(*keys)}
-      end
-    end
-    products
   end
 
   ##############################################################################
@@ -129,12 +160,6 @@ module Build
     build_and_merge(modulize(type), key, kind, build_targets(key_group, store), store)
   end
 
-  def merge_targets(key_group, store, targets=[])
-    key_group.each do |key_set|
-      targets << store.dig(*key_set)
-    end
-    targets.compact.flatten
-  end
   ##############################################################################
 
   def context_build(fieldable:, field_name:, kind:, tags:nil, targets:[])
@@ -192,3 +217,46 @@ module Build
   end
 
 end
+
+
+# def build_fgo(key_group, store, p_hsh, products, set=[])
+#   return products << p_hsh if !key_group
+#   # kind_groups = key_group.map{|keys| modulize(keys[0], keys[1]).opts[keys[2]]}.flatten(1)
+#   # kind_groups.map{|key_set| set << store.dig(*key_set)}
+#   # puts "__"
+#   # puts "kind_groups: #{kind_groups}"
+#   # puts "kind_groups: #{set}"
+#   # #puts "kind_groups: #{set.group_by(&:kind)}"
+#   # puts "__"
+#   key_group.each do |key_set|
+#     modulize(key_set[0], key_set[1]).opts[key_set[2]].each do |keys|
+#       p = p_hsh.dup
+#       p['p'].merge!({keys[1] => store.dig(*keys)})
+#
+#       build_tags(p, keys[1])
+#       products << p
+#
+#     end
+#   end
+#   products
+# end
+
+# def field_groups(store)
+#   [FGS, FGO].each do |k|
+#     k.constants.each do |kind|
+#       modulize(k,kind).opts.each do |key, key_group|
+#         targets = merge_targets(key_group, store)
+#         params_merge(params: store, dig_set: dig_set(key, targets, k.name.to_sym, kind))
+#       end
+#     end
+#   end
+#   store
+# end
+
+
+# def merge_targets(key_group, store, targets=[])
+#   key_group.each do |key_set|
+#     targets << store.dig(*key_set)
+#   end
+#   targets.compact.flatten
+# end

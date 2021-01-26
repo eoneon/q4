@@ -32,6 +32,7 @@ module FSO
 
         Wood: [[:SelectField, :Material, :Wood], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]],
         WoodBox: [[:SelectField, :Material, :WoodBox], [:FieldSet, :Dimension, :WidthHeightDepth]],
+        Board: [[:SelectField, :Material, :Board], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]],
 
         Metal: [[:SelectField, :Material, :Metal], [:SelectMenu, :Dimension, :FlatDimension], [:SelectMenu, :Mounting, :StandardMounting]],
         MetalBox: [[:SelectField, :Material, :MetalBox], [:FieldSet, :Dimension, :WidthHeightDepth]],

@@ -71,6 +71,7 @@ module SFO
       {
         Canvas: [[:Option, :Material, :Canvas]],
         WrappedCanvas: [[:Option, :Material, :WrappedCanvas]],
+        Board: [[:Option, :Material, :Board]],
 
         Paper: [[:Option, :Material, :Paper]],
         PhotoPaper: [[:Option, :Material, :PhotoPaper]],
@@ -117,7 +118,8 @@ module SFO
     def self.opts
       {
         StandardCertificate: [[:Option, :Certificate, :StandardCertificate]],
-        PeterMaxCertificate: [[:Option, :Certificate, :PeterMaxCertificate]]
+        PeterMaxCertificate: [[:Option, :Certificate, :PeterMaxCertificate]],
+        BrittoCertificate: [[:Option, :Certificate, :BrittoCertificate]]
       }
     end
   end

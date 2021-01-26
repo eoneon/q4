@@ -6,7 +6,9 @@ module OPT
       {
         Original: ['original'],
         OneOfAKind: ['one-of-a-kind'],
-        SingleEdition: ['one-of-a-kind'],
+        OneOfOne: ['one-of-a-kind'],
+        Production: ['original production'],
+
         UniqueVariation: ['unique variation'],
         LimitedEdition: ['limited edition'],
         Reproduction: ['reproduction'],
@@ -25,7 +27,8 @@ module OPT
 
         Silkscreen: ['serigraph', 'original serigraph', 'silkscreen'],
         Giclee: ['giclee', 'textured giclee'],
-        Lithograph: ['lithograph', 'offset lithograph', 'original lithograph'],
+        Lithograph: ['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph', 'hand pulled original lithograph'],
+
         Etching: ['etching', 'etching (black)', 'etching (sepia)', 'hand pulled etching', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint'],
         Relief: ['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print'],
 
@@ -85,7 +88,7 @@ module OPT
       {
         Canvas: ['canvas', 'canvas board', 'textured canvas'],
         WrappedCanvas: ['gallery wrapped canvas', 'stretched canvas'],
-
+        Board: ['board', 'wood board'],
         Paper: ['paper', 'deckle edge paper', 'rice paper', 'arches paper', 'archival paper', 'museum quality paper', 'sommerset paper', 'mother of pearl paper'],
         PhotoPaper: ['paper', 'photography paper', 'archival grade paper'],
         AnimaPaper: ['paper', 'animation paper'],
@@ -131,7 +134,8 @@ module OPT
     def self.opts
       {
         StandardCertificate: ['LOA', 'COA'],
-        PeterMaxCertificate: ['LOA', 'COA from Peter Max Studios']
+        PeterMaxCertificate: ['LOA', 'COA from Peter Max Studios'],
+        BrittoCertificate: ['LOA', 'COA from Britto Rommero fine art', 'official Britto Stamp inverso']
       }
     end
   end
@@ -169,6 +173,14 @@ module OPT
         ProofEdition: editions.compact.map{|i| ['from', indefinite_article(i), i, 'edition'].join(' ')},
         BatchEdition: ['from an edition of']
         #OpenEdition: ['from an open edition']
+      }
+    end
+  end
+
+  module TextBeforeCOA
+    def self.opts
+      {
+        Everhart: ["This is one of the final Everhart editions to be created on a rare, antique Marinoni Voirin lithograph press that dates back to the 1800's."]
       }
     end
   end
