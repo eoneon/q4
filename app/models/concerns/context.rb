@@ -7,7 +7,7 @@ module Context
 
     #abbreviated subclass builder methods for readability ###############################
     def standard_product(field_name, options, tags=nil)
-      StandardProduct.builder(f={field_name: field_name, options: options, tags: tags})
+      StandardProduct.builder(f={product_name: field_name, options: options, tags: tags})
     end
 
     def select_menu(field_name, kind, options, tags=nil)

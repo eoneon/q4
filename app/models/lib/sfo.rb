@@ -150,4 +150,41 @@ module SFO
       }
     end
   end
+
+  module GartnerBladeSculpture
+    def self.opts
+      {
+        OpenBowl: [[:Option, :GartnerBladeSculpture, :OpenBowl]],
+        OpenVase: [[:Option, :GartnerBladeSculpture, :OpenVase]],
+        CoveredBowl: [[:Option, :GartnerBladeSculpture, :CoveredBowl]],
+        CoveredVase: [[:Option, :GartnerBladeSculpture, :CoveredVase]]
+      }
+    end
+  end
+
+  module GartnerBladeLid
+    def self.opts
+      {
+        Lid: [[:Option, :GartnerBladeLid, :Lid]]
+      }
+    end
+  end
+
+  module GartnerBladeSize
+    def self.opts
+      {
+        Size: [[:Option, :GartnerBladeSize, :Size]]
+      }
+    end
+  end
+
+  module GartnerBladeColor
+    def self.opts
+      {
+        Color: [[:Option, :GartnerBladeColor, :Color]]
+      }
+    end
+  end
+
+
 end

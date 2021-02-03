@@ -24,7 +24,9 @@ module FGO
     def self.opts
       {
         OnPaper: FGO.build_key_group([:AcrylicMixedMedia, :Monotype], :SelectField, :Medium),
-        OnCanvas: FGO.build_key_group([:AcrylicMixedMedia, :Monotype], :SelectField, :Medium)
+        OnCanvas: FGO.build_key_group([:AcrylicMixedMedia, :Monotype], :SelectField, :Medium),
+        Etching_Silkscreen: FGO.build_key_group([:Etching, :Silkscreen, :HandPulledSilkscreen], :SelectField, :Medium),
+        Silkscreen: FGO.build_key_group([:Silkscreen, :HandPulledSilkscreen], :SelectField, :Medium)
       }
     end
   end
@@ -35,8 +37,8 @@ module FGO
         Standard: FGO.build_key_group([:Silkscreen, :Giclee, :BasicMixedMedia], :SelectField, :Medium),
         OnCanvas: FGO.build_key_group([:Silkscreen, :Giclee, :BasicMixedMedia, :Seriolithograph], :SelectField, :Medium),
         OnPaper: FGO.build_key_group([:Silkscreen, :Lithograph, :Etching, :Relief, :Giclee, :BasicMixedMedia, :Poster, :Seriolithograph], :SelectField, :Medium),
-        BasicOnPaper: FGO.build_key_group([:BasicPrint, :Poster], :SelectField, :Medium),
-        MixedMediaOnPaper: FGO.build_key_group([:Silkscreen, :HandPulledSilkscreen, :Etching, :Relief], :SelectField, :Medium)
+        BasicOnPaper: FGO.build_key_group([:BasicPrint, :Poster], :SelectField, :Medium)
+        #MixedMediaOnPaper: FGO.build_key_group([:Silkscreen, :HandPulledSilkscreen, :Etching, :Relief], :SelectField, :Medium)
       }
     end
   end

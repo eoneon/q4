@@ -12,7 +12,7 @@ module OPT
         UniqueVariation: ['unique variation'],
         LimitedEdition: ['limited edition'],
         Reproduction: ['reproduction'],
-        Unique: ['unique']
+        HandBlownGlass: ['hand blown glass']
       }
     end
   end
@@ -180,8 +180,69 @@ module OPT
   module TextBeforeCOA
     def self.opts
       {
-        Everhart: ["This is one of the final Everhart editions to be created on a rare, antique Marinoni Voirin lithograph press that dates back to the 1800's."]
+        Everhart: ["This is one of the final Everhart editions to be created on a rare, antique Marinoni Voirin lithograph press that dates back to the 1800's."],
+        SingleExposure: ["This piece was created using a single-exposure over time in which the artist walks into the shot creating figures on film; no photoshop or digital manipulation is involved."]
       }
     end
   end
+
+  #add method to generate title based on: sculpture type, size, lid, etc...
+  module GartnerBladeSculpture
+    def self.opts
+      {
+        OpenBowl: ['bowl', 'sphere'],
+        OpenVase: ['cone', 'footed cone', 'traditional urn', 'closed urn', 'flat vessel', 'cylinder'],
+
+        CoveredBowl: ['bowl', 'covered bowl'],
+        CoveredVase: ['covered jar'],
+
+        PrimitiveBowl: ['primitive bowl'],
+        Ikebana: ['ikebana flower bowl'],
+        SaturnLamp: ['Saturn oil lamp'],
+
+        Arbor: ['arbor sculpture'],
+        PrimitiveShell: ['primitive shell']
+      }
+    end
+  end
+
+  module GartnerBladeLid
+    def self.opts
+      {
+        Lid: ['marble finnial', 'avian finnial', 'bone and tendril finnial', 'juniper finnial']
+      }
+    end
+  end
+
+  module GartnerBladeSize
+    def self.opts
+      {
+        Size: ['large', 'medium', 'small']
+        #ArborSize: ['large', 'medium', 'small', 'mini'],
+      }
+    end
+  end
+
+  module GartnerBladeColor
+    def self.opts
+      {
+        Color: ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
+        # IkebanaSaturn: ['amethyst', 'cobalt', 'lime', 'ruby', 'tangerine']
+      }
+    end
+  end
+
+  module GartnerBladeMedium
+    def self.opts
+      {
+        Ikebana: ['sculpture features a secured Kenzan spiked disc inside - the key to any fine Ikebana style flower arrangement'],
+        Primitive: ['sculpture combines sand-etched exteriors with a glossy interior'],
+        SaturnLamp: ['features a fiberglass wick to get you started, and when lit, the lamp casts a glowing ring of firelight, evoking the rings of majestic Saturn'],
+        Arbor: ['integrates striking colors with graceful curves'],
+        OpenBowlVase: ['combines sand-etched exteriors with an elegant lip accent'],
+        CoveredBowlVase: ['sculpture combines sand-etched exteriors with an elegant']
+      }
+    end
+  end
+
 end

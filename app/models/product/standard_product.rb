@@ -1,6 +1,6 @@
 class StandardProduct < Product
   def self.builder(f)
-    product = self.where(product_name: f[:field_name]).first_or_create
+    product = self.where(product_name: f[:product_name]).first_or_create
     update_tags(product, f[:tags])
     f[:options].map {|opt| product.assoc_unless_included(opt)}
     product

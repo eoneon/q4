@@ -30,4 +30,20 @@ module FGS
     end
   end
 
+  module GartnerBladeSizeColor
+    def self.opts
+      {
+        SizeColor: [[:SelectField, :GartnerBladeSize, :Size], [:SelectField, :GartnerBladeColor, :Color]]
+      }
+    end
+  end
+
+  module GartnerBladeSizeColorLid
+    def self.opts
+      {
+        SizeColorLid: [[:SelectField, :GartnerBladeSize, :Size], [:SelectField, :GartnerBladeColor, :Color], [:SelectField, :GartnerBladeLid, :Lid]]
+      }
+    end
+  end
+
 end
