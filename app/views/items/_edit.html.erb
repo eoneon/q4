@@ -5,7 +5,7 @@
   <hr>
   <h5><span>Description: <%= @item.body %></span></h5>
   <div class="form">
-    <%= hidden_field_tag "hidden[type]", product.try(:type) %>
+    <%#= hidden_field_tag "hidden[type]", product.try(:type) %>
     <%= hidden_field_tag "hidden[product_id]", product.try(:id) %>
     <%= hidden_field_tag "hidden[artist_id]", artist.try(:id) %>
 

@@ -5,11 +5,11 @@ class ApplicationController < ActionController::Base
 
   #show ########################################################################
   def search_input_group
-    h={type: product_type, inputs: search_tag_inputs, selected: selected_search_tag_inputs, item_id: @item.try(:id), product_id: @product.try(:id)}
+    h={type: Product, inputs: search_tag_inputs, selected: selected_search_tag_inputs, item_id: @item.try(:id), product_id: @product.try(:id)}
   end
 
   def products
-    to_class(product_type).tags_search(h = {tag_params: search_params, default_set: :product_group}.compact)
+    Product.tags_search(h = {tag_params: search_params, default_set: :product_group}.compact)
   end
 
   #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
   # tag_search_field_group(search_keys, @products)
   def search_tag_inputs
     args={search_keys: search_keys, products: @products}.compact
-    to_class(product_type).tag_search_field_group(args).transform_values{|opts| opts.map{|opt| h={text: format_text_tag(opt), value: opt}}}
+    Product.tag_search_field_group(args).transform_values{|opts| opts.map{|opt| h={text: format_text_tag(opt), value: opt}}}
   end
 
   #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
@@ -45,22 +45,22 @@ class ApplicationController < ActionController::Base
   # case 1: ["medium_category", "medium", "material"]
   def search_keys
     case
-    when @product && (action_name == 'show' || action_name == 'update') then to_class(product_type).valid_search_keys([@product])
+    when @product && (action_name == 'show' || action_name == 'update') then Product.valid_search_keys([@product])
     when !@product && (action_name == 'show' || action_name == 'update') then derive_search_keys
     when action_name == 'search' then derive_search_keys
     end
   end
 
   def derive_search_params
-    to_class(product_type).tag_search_field_group(search_keys: search_keys, products: [@product]).each {|k,v| v.prepend(k.to_s)}.values
+    Product.tag_search_field_group(search_keys: search_keys, products: [@product]).each {|k,v| v.prepend(k.to_s)}.values
   end
 
   def derive_search_keys
-    to_class(product_type).filter_keys
+    Product.filter_keys
   end
 
   def derive_search_tag_inputs
-    to_class(product_type).filter_keys.map{|k| [k, build_tag_value(k)]}
+    Product.filter_keys.map{|k| [k, build_tag_value(k)]}
   end
 
   def build_tag_value(k)
@@ -71,19 +71,19 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def product_type
-    if params[:items] && !params[:items][:search][:type].blank?
-      params[:items][:search][:type]
-    elsif @product && action_name == 'show'
-      @product.type
-    else
-      default_product_type
-    end
-  end
+  # def product_type
+  #   if params[:items] && !params[:items][:search][:type].blank?
+  #     params[:items][:search][:type]
+  #   elsif @product && action_name == 'show'
+  #     @product.type
+  #   else
+  #     default_product_type
+  #   end
+  # end
 
-  def default_product_type
-    Product.ordered_types.first
-  end
+  # def default_product_type
+  #   Product.ordered_types.first
+  # end
 
   def format_text_tag(tag_value)
     tag_value.underscore.split('_').join(' ').sub('one of a kind', 'One-of-a-Kind').split(' ').map{|w| w.capitalize}.join(' ')

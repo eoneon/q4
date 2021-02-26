@@ -1,59 +1,26 @@
 class Item < ApplicationRecord
 
   include STI
+  include Fieldable
   include ExportAttrs
   include SkuRange
   include ProductGroup
 
   has_many :item_groups, as: :origin, dependent: :destroy
-  has_many :standard_products, through: :item_groups, source: :target, source_type: "StandardProduct"
-  #has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
+  has_many :products, through: :item_groups, source: :target, source_type: "Product"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
+  #has_many :standard_products, through: :item_groups, source: :target, source_type: "StandardProduct"
+  #has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
 
   ##############################################################################
   def field_items
     field_sets + select_fields + options
   end
 
-  def fieldables
-    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
-  end
-
-  ##############################################################################
-
-  def nested_fieldables(h={})
-    grouped_fieldables.each do |kind, targets|
-      h.merge!( { kind => format_nested(targets) } )
-    end
-    h
-  end
-
-  def grouped_fieldables
-    fieldables.group_by{|f| f.kind}
-  end
-
-  def format_nested(targets, set=[])
-    #puts "targets: #{targets}, targets.one? #{targets.one?} targets.first.class: #{targets.first.class}"
-    return targets.first if targets.one? && targets.first.class != FieldSet
-    targets.each do |f|
-
-      if f.class == FieldSet
-        set << f.fieldables
-      else
-        set << f
-      end
-
-    end
-    set.flatten
-  end
-
-  def nested_ffieldables(f, kind)
-   kind ? f : {f.kind => f}
-  end
   ##############################################################################
 
   def self.search(scope:nil, joins:nil, hstore:nil, search_keys:nil, sort_keys:nil, attrs:{}, hattrs:{}, input_group:{})
@@ -257,7 +224,7 @@ class Item < ApplicationRecord
   end
 
   def product
-    scoped_targets(scope: 'Product', join: :item_groups).first
+    products.first if products.any? #scoped_targets(scope: 'Product', join: :item_groups).first
   end
 
   def artist
@@ -447,3 +414,41 @@ class Item < ApplicationRecord
     end
   end
 end
+
+# def fieldables
+#   item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
+#   # set = item_groups.where(base_type: 'FieldItem').order(:sort) #.map(&:target)
+#   # set.includes(:target).map(&:target)
+# end
+
+##############################################################################
+
+# def nested_fieldables(h={})
+#   grouped_fieldables.each do |kind, targets|
+#     h.merge!( { kind => format_nested(targets) } )
+#   end
+#   h
+# end
+#
+# def grouped_fieldables
+#   fieldables.group_by{|f| f.kind}
+# end
+#
+# def format_nested(targets, set=[])
+#   #puts "targets: #{targets}, targets.one? #{targets.one?} targets.first.class: #{targets.first.class}"
+#   return targets.first if targets.one? && targets.first.class != FieldSet
+#   targets.each do |f|
+#
+#     if f.class == FieldSet
+#       set << f.fieldables
+#     else
+#       set << f
+#     end
+#
+#   end
+#   set.flatten
+# end
+#
+# def nested_ffieldables(f, kind)
+#  kind ? f : {f.kind => f}
+# end

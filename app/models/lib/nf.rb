@@ -15,6 +15,8 @@ module NF
       {
         Width: %w[width],
         Height: %w[height],
+        MountingWidth: %w[mounting_width],
+        MountingHeight: %w[mounting_height],
         Diameter: %w[diameter],
         Depth: %w[depth],
         Weight: %w[weight]

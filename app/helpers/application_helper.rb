@@ -7,7 +7,8 @@ module ApplicationHelper
     if tag.class == Symbol
       tag.to_s
     elsif tag.respond_to?(:id)
-      [tag == :sup ? tag.class.superclass.name.underscore : tag.type.underscore, tag.id].join("-")
+      [tag.class.name.underscore, tag.id].join("-")
+      #[tag == :sup ? tag.class.superclass.name.underscore : tag.type.underscore, tag.id].join("-")
     end
   end
 

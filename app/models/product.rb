@@ -1,16 +1,15 @@
 class Product < ApplicationRecord
   include STI
+  include Fieldable
 
-  validates :type, :product_name, presence: true
+  #validates :type, :product_name, presence: true
+  validates :product_name, presence: true
   validates :product_name, uniqueness: true
 
   has_many :item_groups, as: :origin
-  #has_many :field_items, through: :item_groups, source: :target #, source_type: "SelectMenu"
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
-  #has_many :options, through: :item_groups, source: :target, source_type: "Option"
-  has_many :check_box_fields, through: :item_groups, source: :target, source_type: "CheckBoxField"
   has_many :radio_buttons, through: :item_groups, source: :target, source_type: "RadioButton"
   has_many :text_fields, through: :item_groups, source: :target, source_type: "TextField"
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
@@ -18,38 +17,15 @@ class Product < ApplicationRecord
 
   scope :product_group, -> {self.all}
 
-  def field_items
-    select_menus + field_sets + select_fields + text_area_fields
+  ##############################################################################
+
+  def self.builder(f)
+    product = self.where(product_name: f[:product_name]).first_or_create
+    update_tags(product, f[:tags])
+    f[:options].map {|opt| product.assoc_unless_included(opt)}
+    product
   end
 
-  def fieldables
-    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
-    # set = item_groups.where(base_type: 'FieldItem').order(:sort) #.map(&:target)
-    # set.includes(:target).map(&:target)
-  end
-
-  def grouped_fieldables
-    fieldables.group_by{|f| f.kind}
-  end
-
-  def nested_fieldables(h={})
-    grouped_fieldables.each do |kind, targets|
-      h.merge!( { kind => format_nested(targets.first) } )
-    end
-    h
-  end
-
-  def format_nested(f, set=[])
-    return f if !f.is_a? FieldSet
-    f.fieldables.each do |ff|
-      set << nested_ffieldables(ff, f.kind == ff.kind)
-    end
-    set
-  end
-
-  def nested_ffieldables(f, kind)
-   kind ? f : {f.kind => f}
-  end
   # def nested_fieldables(h={})
   #   grouped_fieldables.each do |kind, set|
   #     h.merge!( {kind => set.map{|f| format_nested(f)} })
@@ -62,7 +38,9 @@ class Product < ApplicationRecord
   #   f.is_a? FieldSet ? f.fieldables : f
   # end
 
-  ##############################################################################
+  def field_items
+    select_menus + field_sets + select_fields + text_area_fields
+  end
   # def recursive_targets(targets=fieldables, target_set=[])
   #   return target_set if targets.empty?
   #   recursive_extract(targets, target_set.concat(targets))
@@ -130,14 +108,14 @@ class Product < ApplicationRecord
     search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
   end
 
-  def self.ordered_types
-    set=[]
-    product_types = Product.file_set[1..-1]
-    (1..product_types.count).each do |i|
-      type = product_types.detect{|type| type.classify.constantize.type_order == i}
-      set << type.classify
-    end
-    set
-  end
+  # def self.ordered_types
+  #   set=[]
+  #   product_types = Product.file_set[1..-1]
+  #   (1..product_types.count).each do |i|
+  #     type = product_types.detect{|type| type.classify.constantize.type_order == i}
+  #     set << type.classify
+  #   end
+  #   set
+  # end
 
 end

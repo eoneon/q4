@@ -21,7 +21,6 @@ class ItemGroup < ApplicationRecord
   end
 
   def origin_item_groups
-    #origin.item_groups.where.not(target_type: 'Artist')
     origin.item_groups.where(base_type: 'FieldItem')
   end
 
@@ -29,26 +28,26 @@ class ItemGroup < ApplicationRecord
     self.base_type = target.class.base_class.name
   end
 
-  # def scoped_targets
-  #   target.item_groups.includes(:target)
-  # end
-
-  # def origin_item_groups
-  #   #need to check if there's a folder in dir; otherwise use target_type
-  #   target_type = sti_obj?(target) ? scoped_assocs(target.base_type) : target.base_type
-  #   origin.item_groups.where(target_type: target_type)
-  # end
-
   def max_sort
     origin_item_groups.count
   end
 
-  # def ordered_item_groups(origin)
-  #   origin.item_groups.order(:sort).map{|item_group| item_group}
-  # end
-  #
-  # def targets(origin)
-  #   ordered_item_groups(origin).map{|item_group| item_group.target}
-  # end
-
 end
+
+# def scoped_targets
+#   target.item_groups.includes(:target)
+# end
+
+# def origin_item_groups
+#   #need to check if there's a folder in dir; otherwise use target_type
+#   target_type = sti_obj?(target) ? scoped_assocs(target.base_type) : target.base_type
+#   origin.item_groups.where(target_type: target_type)
+# end
+
+# def ordered_item_groups(origin)
+#   origin.item_groups.order(:sort).map{|item_group| item_group}
+# end
+#
+# def targets(origin)
+#   ordered_item_groups(origin).map{|item_group| item_group.target}
+# end

@@ -1,6 +1,6 @@
 <%= form_with model: Product.new, id: "product-new" do |f| %>
   <div class="form-inline">
-    <%= f.select :type, types(Product), {prompt: "- select type -"}, {class: "form-control form-control-sm mr-sm-2"} %>
+    <%#= f.select :type, types(Product), {prompt: "- select type -"}, {class: "form-control form-control-sm mr-sm-2"} %>
     <%= f.text_field :product_name, placeholder: "name", class: "form-control form-control-sm mr-sm-2" %>
     <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">submit</button>
   </div>

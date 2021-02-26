@@ -37,7 +37,7 @@ module Build
     product['p'] = sort_fields(p)
     product['tags'] = build_tags(p, tags)
     product['name'] = build_name(product['tags'])
-    StandardProduct.builder({product_name: product['name'], options: product['p'], tags: product['tags']})
+    Product.builder({product_name: product['name'], options: product['p'], tags: product['tags']})
   end
 
   def sort_fields(p, p_set=[])
@@ -246,6 +246,7 @@ module Build
   end
 
   def dig_set(k, v, *keys)
+    return {k => v} if keys.empty?
     keys.map{|key| [key, {}]}.append([k,v]).transpose
   end
 

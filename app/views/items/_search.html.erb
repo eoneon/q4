@@ -4,12 +4,12 @@
     <div id="hidden_tags">
       <%= hidden_field_tag "hidden[search][item_id]", input_group[:item_id] %>
       <%= hidden_field_tag "hidden[search][product_id]", input_group[:product_id] %>
-      <%= hidden_field_tag "hidden[search][type]", input_group[:type] %>
+      <%#= hidden_field_tag "hidden[search][type]", input_group[:type] %>
     </div>
 
-    <% radio_option_group("items[search][type]", input_group[:type]).each do |opt_hsh| %>
-      <%= render "items/fields/radio_button", opt_hsh: opt_hsh %>
-    <% end %>
+    <%# radio_option_group("items[search][type]", input_group[:type]).each do |opt_hsh| %>
+      <%#= render "items/fields/radio_button", opt_hsh: opt_hsh %>
+    <%# end %>
 
     <% input_group[:inputs].keys.each do |input_key| %>
       <%= render "items/input_field", field_name: input_key.to_s, opt_set: input_group[:inputs][input_key], selected: input_group[:selected][input_key.to_s] %>

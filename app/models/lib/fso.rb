@@ -5,6 +5,7 @@ module FSO
     def self.opts
       {
         WidthHeight: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height]],
+        MountingWidthHeight: [[:NumberField, :Dimension, :MountingWidth], [:NumberField, :Dimension, :MountingHeight]],
         WidthHeightDepth: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Depth]],
 
         WidthHeightDepthWeight: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Depth], [:NumberField, :Dimension, :Weight]],
@@ -16,10 +17,15 @@ module FSO
 
   module Mounting
     def self.opts
+      # {
+      #   Framing: [[:SelectField, :Mounting, :Framing], [:FieldSet, :Dimension, :WidthHeight]],
+      #   Border: [[:SelectField, :Mounting, :Border], [:FieldSet, :Dimension, :WidthHeight]],
+      #   Matting: [[:SelectField, :Mounting, :Matting], [:FieldSet, :Dimension, :WidthHeight]]
+      # }
       {
-        Framing: [[:SelectField, :Mounting, :Framing], [:FieldSet, :Dimension, :WidthHeight]],
-        Border: [[:SelectField, :Mounting, :Border], [:FieldSet, :Dimension, :WidthHeight]],
-        Matting: [[:SelectField, :Mounting, :Matting], [:FieldSet, :Dimension, :WidthHeight]]
+        Framing: [[:SelectField, :Mounting, :Framing], [:FieldSet, :Dimension, :MountingWidthHeight]],
+        Border: [[:SelectField, :Mounting, :Border], [:FieldSet, :Dimension, :MountingWidthHeight]],
+        Matting: [[:SelectField, :Mounting, :Matting], [:FieldSet, :Dimension, :MountingWidthHeight]]
       }
     end
   end
