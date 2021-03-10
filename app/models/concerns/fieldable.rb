@@ -4,25 +4,43 @@ module Fieldable
   extend ActiveSupport::Concern
 
   # p.prg_hsh(p)
+  # def prg_hsh(p, i=Item.find(97))
+  #   input_groups = p.grouped_inputs(p.g_hsh(p)) # i.grouped_inputs(i.g_hsh(i))
+  #   @p_params = i.p_params
+  #   input_loop(input_groups)
+  # end
+  # fs.grouped_inputs(fs.g_hsh(fs))
+  # fs.prg_hsh(fs)
   def prg_hsh(p, i=Item.find(97))
-    input_groups = p.grouped_inputs(p.g_hsh(p))
+    field_groups = p.grouped_inputs(p.g_hsh(p)) # i.grouped_inputs(i.g_hsh(i))
     @p_params = i.p_params
-    param_loop(input_groups)
+    input_loop(field_groups)
+  end
+
+  ############################################################################## p.input_args(p.prg_hsh(p))
+
+  def input_group(pg_hsh)
+    pg_hsh.each do |k, field_groups|
+      field_groups.transform_values!{|field_group| field_group.values}
+    end
   end
 
   ##############################################################################
 
-  def param_loop(input_groups, inputs={})
-    param_args(input_groups).each do |args|
-      input = assoc_selected(args[:k], args[:t], args[:input_name], args[:input])
-      param_merge(params: inputs, dig_set: dig_set(k: args[:input_name], v: input, dig_keys: [args[:k], args[:t]]))
-      nested_params(input['selected'], inputs) if input['selected'] && !input['selected'].is_a?(String)
+  def input_loop(field_groups, inputs={})
+    param_args(field_groups).each do |args|
+
+      selected = detect_assoc(args[:t], args[:f_name], args[:f_obj])
+      input = build_input(args[:t], args[:f_name], args[:f_obj], selected)
+
+      param_merge(params: inputs, dig_set: dig_set(k: args[:f_name], v: input, dig_keys: [args[:k].underscore, f_scope(args[:t]).underscore])) #v: a => [{},...]
+      nested_params(selected, inputs) if selected && !selected.is_a?(String)
     end
     inputs
   end
 
-  def param_args(input_groups, a=[])
-    input_groups.each do |k, field_group|
+  def param_args(field_groups, a=[])
+    field_groups.each do |k, field_group|
       if k == 'FieldSet'
         param_args(field_group, a)
       else
@@ -33,15 +51,15 @@ module Fieldable
   end
 
   def fg_params(k, field_group, a)
-    field_group.each do |t, field_inputs|
-      input_params(k, t, field_inputs, a)
+    field_group.each do |t, fields|
+      input_params(k, t, fields, a)
     end
     a
   end
 
-  def input_params(k, t, field_inputs, a)
-    field_inputs.each do |input_name, input|
-      a.append({k: k, t: t, input_name: input_name, input: input})
+  def input_params(k, t, fields, a)
+    fields.each do |f_name, f_obj|
+      a.append({k: k, t: t, f_name: f_name, f_obj: f_obj})
     end
     a
   end
@@ -50,25 +68,31 @@ module Fieldable
 
   def nested_params(f, hsh)
     if f.type == 'FieldSet'
-      param_loop(f.grouped_inputs(f.g_hsh(f)), hsh)
+      input_loop(f.grouped_inputs(f.g_hsh(f)), hsh)
     end
   end
 
   ##############################################################################
 
-  def assoc_selected(k, t, input_name, input)
-    if f = detect_assoc(t, input_name, input)
-      input['selected'] = f
-    end
-    input
+  def build_input(f_type, f_name, f_obj, selected)
+    f_hsh(f_type, f_name, f_obj, selected)
   end
 
-  def detect_assoc(t, input_name, input)
-    if input_attrs.exclude?(t)
-      input['obj'].fieldables.detect{|f| @p_params['fields'].include?(f)}
+  def f_hsh(f_type, f_name, f_obj, selected)
+    {render_as: f_type.underscore, method: f_name.underscore, f_obj: f_obj, selected: format_selected(selected)}
+  end
+
+  def detect_assoc(f_type, f_name, f_obj)
+    if input_attrs.exclude?(f_type)
+      f_obj.fieldables.detect{|f| @p_params['fields'].include?(f)}
     else
-      @p_params.dig('tags', input_name)
+      @p_params.dig('tags', f_name)
     end
+  end
+
+  def format_selected(selected)
+    return selected if selected.nil? || selected.is_a?(String)
+    selected.id
   end
 
   ##############################################################################
@@ -84,7 +108,7 @@ module Fieldable
 
   def expand_field_set(k, t, f_hsh, h)
     if t != 'FieldSet'
-      h.merge!({k=> grouped_input_hsh(t, f_hsh)})
+      h.merge!({k=> grouped_input_hsh(t, f_hsh)}) #h.merge!({k.underscore => grouped_input_hsh(t, f_hsh)})
     else
       f_hsh.values.map{|fs| handle_fs(t, fs.fieldables, h)} #f_hsh.values.map{|fs| grouped_inputs(grouped_hsh(enum: fs.fieldables), h)}
     end
@@ -100,13 +124,90 @@ module Fieldable
 
   def grouped_input_hsh(t, f_hsh, h={})
     f_hsh.each do |f_name, f|
-      h.merge!({f_name=>{'obj'=>f, 'selected'=>nil}})
+      h.merge!({f_name=>f})
     end
-    {t => h}
+    {t => h} # {t.underscore => h}
   end
 
   def g_hsh(context)
-    context.grouped_hsh(enum: context.fieldables, attrs: context.f_attrs)
+    context.grouped_hsh(enum: context.fieldables.select{|f| f.type != "RadioButton"}, attrs: context.f_attrs)
+  end
+
+  ##############################################################################
+
+  # def i_param_loop(p_args, tags, i_params={})
+  #   p_args.each do |args|
+  #     f_name, id, dig_keys = args[:f_name], args[:f_obj].try(:id), [args[:k], args[:t]]
+  #     param_merge(params: i_params, dig_set: dig_set(k: f_name, v: id, dig_keys: dig_keys))
+  #     tag_param(args[:f_obj], tags, i_params)
+  #   end
+  #   i_params
+  # end
+  #
+  # def tag_param(f_obj, tags, i_params)
+  #   if f_obj.type == 'FieldSet'
+  #     tags_param_loop(f_obj.fieldables, tags, i_params)
+  #   end
+  # end
+  #
+  # def tags_param_loop(fields, tags, i_params)
+  #   fields.each do |f|
+  #     if f.input_attrs.include?(f.type)
+  #       tag_key, tag_val, dig_keys = f.field_name, tags.dig(f.field_name), [f.kind, 'tags']
+  #       param_merge(params: i_params, dig_set: dig_set(k: tag_key, v: tag_val, dig_keys: dig_keys))
+  #     end
+  #   end
+  #   i_params
+  # end
+  # i.i_params(i, i.tags)
+  def i_params(i, tags, h={})
+    i.param_args(i.g_hsh(i)).each do |args|
+      k, t, f_name, f = [:k, :t, :f_name].map{|k| args[k].underscore}.append(args[:f_obj])
+      dig_hsh = dig_hsh(k, t, f_name, f, tags, i.input_attrs.include?(args[:t]))
+      param_merge(params: h, dig_set: dig_set(dig_hsh))
+      fs_params(f.grouped_inputs(f.g_hsh(f)), tags, h) if args[:t] == 'FieldSet'
+    end
+    h
+  end
+
+  #k.underscore, t.underscore, f_name.underscore, f_val, f.input_attrs.include?(t)
+  def dig_hsh(k, t, f_name, f_val, tags, tag_context)
+    {k: f_name, v: tags.dig(f_name), dig_keys: [k, 'tags']} if tag_context
+    {k: tags.key(f_val.id.to_s), v: f_val, dig_keys: [k, t]} if !tag_context
+  end
+
+  def fs_params(field_groups, tags, h)
+    param_args(field_groups).each do |args|
+      k, t, f_name = [args[:k], f_scope(args[:t]), args[:f_name]].map(&:underscore)
+      if f_val = tags.dig(f_name)
+        f_val = format_f_val(t, f_val, args[:f_obj])
+        param_merge(params: h, dig_set: dig_set(k: f_name, v: f_val, dig_keys: [k, t]))
+      end
+    end
+    h
+  end
+
+  def format_f_val(t, f_val, f_obj)
+    return f_val if t == 'tags'
+    f_obj.fieldables.detect{|f| f.id == f_val.to_i && f.field_type == t.classify}
+  end
+
+  ##############################################################################
+
+  def f_scope(field_type)
+    if assoc = input_attr?(field_type)
+      assoc
+    else
+      field_assocs(field_type).first
+    end
+  end
+
+  def input_attr?(field_type)
+    'tags' if input_attrs.include?(field_type)
+  end
+
+  def field_assocs(field_type)
+    field_type.classify.constantize.assoc_names.map{|assoc| assoc.singularize.classify}
   end
 
   ##############################################################################
@@ -159,6 +260,10 @@ module Fieldable
 
 end
 
-# def field_assocs(field_type)
-#   field_type.classify.constantize.assoc_names.map{|assoc| assoc.singularize.classify}
-# end
+
+  # def grouped_input_hsh(t, f_hsh, a=[])
+  #   f_hsh.each do |f_name, f|
+  #     a.append(f)
+  #   end
+  #   {t => a} # {t.underscore => h}
+  # end

@@ -7,6 +7,7 @@ module FSO
         WidthHeight: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height]],
         MountingWidthHeight: [[:NumberField, :Dimension, :MountingWidth], [:NumberField, :Dimension, :MountingHeight]],
         WidthHeightDepth: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Depth]],
+        Diameter: [[:NumberField, :Dimension, :Diameter]],
 
         WidthHeightDepthWeight: [[:NumberField, :Dimension, :Width], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Depth], [:NumberField, :Dimension, :Weight]],
         DiameterHeightWeight: [[:NumberField, :Dimension, :Diameter], [:NumberField, :Dimension, :Height], [:NumberField, :Dimension, :Weight]],
@@ -56,7 +57,8 @@ module FSO
     def self.opts
       {
         StandardNumbering: [[:SelectField, :Numbering, :StandardNumbering], [:NumberField, :Numbering, :Edition], [:NumberField, :Numbering, :EditionSize]],
-        RomanNumbering: [[:SelectField, :Numbering, :RomanNumbering], [:TextField, :Numbering, :Edition], [:TextField, :Numbering, :EditionSize]]
+        RomanNumbering: [[:SelectField, :Numbering, :RomanNumbering], [:TextField, :Numbering, :Edition], [:TextField, :Numbering, :EditionSize]],
+        ProofEdition: [[:SelectField, :Numbering, :ProofEdition]]
       }
     end
   end
