@@ -17,6 +17,47 @@ class Item < ApplicationRecord
   #has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
 
   ##############################################################################
+
+  def input_params(hsh={})
+    param_args(field_groups: g_hsh).each do |h|
+      param_merge(params: hsh, dig_set: dig_set(dig_hsh(*h.values)))
+      unpack_field_set_params(h[:f_obj].g_hsh, hsh) if h[:t] == 'field_set' #unpack_field_set_params
+    end
+    hsh
+  end
+
+  def unpack_field_set_params(field_groups, hsh)
+    param_args(field_groups: field_groups).each do |h|
+      k, t, t_type, f_name, f_obj = h.values
+      if f_val = self.tags.dig(f_name)
+        param_merge(params: hsh, dig_set: dig_set(k: f_name, v: detect_assoc(t_type, f_val, f_obj), dig_keys: [k, t_type]))
+      end
+    end
+    hsh
+  end
+
+  def dig_hsh(k, t, t_type, f_name, f_val)
+    {k: infer_f_name(t, f_val, f_name), v: infer_f_val(t, f_val, f_name), dig_keys: [k, infer_type(t)]}
+  end
+
+  def infer_f_name(t, f_val, f_name)
+    input_attr?(t) ? f_name : self.tags.key(f_val.id.to_s)
+  end
+
+  def infer_f_val(t, f_val, f_name)
+    input_attr?(t) ? self.tags.dig(f_name) : f_val
+  end
+
+  def infer_type(t)
+    input_attr?(t) ? 'tags' : t
+  end
+
+  def detect_assoc(t, f_val, f_obj)
+    return f_val if t == 'tags'
+    f_obj.fieldables.detect{|f| f.id == f_val.to_i && f.field_type == t.classify}
+  end
+
+  ##############################################################################
   def field_items
     field_sets + select_fields + options
   end

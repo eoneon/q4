@@ -17,6 +17,31 @@ class Product < ApplicationRecord
 
   scope :product_group, -> {self.all}
 
+  ## p.prg_hsh(p) #############################################################################
+
+  def input_group_with_params(i=Item.find(97))
+    @i_params = i.input_params
+    input_group(g_hsh)
+  end
+
+  def input_group(field_groups, inputs={})
+    param_args(field_groups: field_groups, unpack: true).each do |h|
+      k, t, t_type, f_name, f_obj = h.values
+      selected = @i_params.dig(k,t_type,f_name)
+      param_merge(params: inputs, dig_set: dig_set(k: f_name, v: f_hsh(t, f_name, f_obj, selected), dig_keys: [k, t_type]))
+      input_group(selected.g_hsh, inputs) if selected && t_type != 'tags' && selected.type == 'FieldSet'
+    end
+    inputs
+  end
+
+  def f_hsh(t, f_name, f_obj, selected)
+    {render_as: t, method: f_name, f_obj: f_obj, selected: format_selected(selected)}
+  end
+
+  def format_selected(selected)
+    return selected if selected.nil? || selected.is_a?(String)
+    selected.id
+  end
   ##############################################################################
 
   def self.builder(f)
