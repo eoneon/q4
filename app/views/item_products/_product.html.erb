@@ -1,0 +1,3 @@
+<button type="button" class="list-group-item list-group-item-action py-1 <%= active_btn(product.id, item.product.try(:id)) %>" id="<%= product.id %>" data-pk_id="<%= item.product.try(:id) %>" data-toggle="list">
+  <span class="text-sm font-weight-light item-name"><%= product.product_name %></span>
+</button>

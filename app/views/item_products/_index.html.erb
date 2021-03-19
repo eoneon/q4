@@ -1,0 +1,12 @@
+<div class="card-header">
+  <%= render "item_products/post", item: item, product: product %>
+  <%= render "item_products/patch", item: item, product: product %>
+  <%= render "item_products/delete", item: item, product: product %>
+</div>
+<div class="card-body" id="tab-pane">
+  <div class="list-group" id="item-products-index" role="tablist">
+    <% products.each do |product| %>
+      <%= render "item_products/product", product: product, item: item %>
+    <% end %>
+  </div>
+</div>

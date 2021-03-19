@@ -48,7 +48,7 @@ module Fieldable
   ##############################################################################
 
   def input_attr?(field_type)
-    'tags' if input_attrs.include?(field_type)
+    'tags' if input_attrs.include?(field_type) || field_type == 'tags'
   end
 
   def input_attrs

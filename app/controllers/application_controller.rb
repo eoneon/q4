@@ -3,6 +3,89 @@ class ApplicationController < ActionController::Base
 
   private
 
+  # object methods #############################################################
+  def add_obj(obj)
+    @item.assoc_unless_included(obj)
+  end
+
+  def remove_obj(f_obj)
+    @item_groups.where(target_id: f_obj.id, target_type: f_obj.class.name).first.destroy
+  end
+
+  def replace_obj(new_obj, old_obj)
+    remove_obj(old_obj)
+    add_obj(new_obj)
+  end
+  ##############################################################################
+
+  # field methods ##############################################################
+  def add_param(f_type, f_name, f_val)
+    if f_type == 'tags'
+      @tags.merge!({f_name => f_val})
+    else
+      add_field(find_target(f_type, f_val.id), f_name)
+    end
+  end
+
+  def remove_param(f_type, f_name, f_val)
+    if f_type == 'tags'
+      remove_tag(f_name)
+    else
+      remove_field(f_val, f_name)
+    end
+  end
+
+  def add_field(f, f_name)
+    @item.assoc_unless_included(f)
+    @tags.merge!({f_name => f.id})
+  end
+
+  def remove_field(f_obj, f_name)
+    remove_obj(f_obj)
+    remove_tag(f_name)
+  end
+
+  def remove_tag(f_name)
+    @tags.reject!{|k,v| f_name == k}
+  end
+  ##############################################################################
+
+  # cascade methods ############################################################
+  def cascade_add(param_args)
+    param_args.each do |f_hsh|
+      if f_obj = default_field(f_hsh[:k], f_hsh[:t], f_hsh[:f_obj])
+        add_field(f_obj, f_hsh[:f_name])
+      end
+    end
+  end
+
+  def cascade_remove(param_args)
+    param_args.each do |f_hsh|
+      remove_param(f_hsh[:t], f_hsh[:f_name], f_hsh[:f_obj])
+    end
+  end
+  ##############################################################################
+
+  # utility methods ############################################################
+  def find_target(target_type, target_id)
+    to_class(target_type).find(target_id)
+  end
+
+  def to_class(type)
+    type.classify.constantize
+  end
+
+  def compound_classify(name)
+    name.split(' ').join('_').classify
+  end
+
+  def hsh_init(h)
+    h ? h : {}
+  end
+  ##############################################################################
+
+
+
   #show ########################################################################
   def search_input_group
     h={type: Product, inputs: search_tag_inputs, selected: selected_search_tag_inputs, item_id: @item.try(:id), product_id: @product.try(:id)}
@@ -272,42 +355,42 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def cascade_remove(f_params)
-    f_params.each do |k, v|
-      if k.split('_').last == 'id'
-        f_params[k] = ""
-      elsif k == 'options' || k == 'tags'
-        f_params[k].each {|key, v| f_params[k][key] = ""}
-      end
-    end
-    f_params
-  end
+  # def cascade_remove(f_params)
+  #   f_params.each do |k, v|
+  #     if k.split('_').last == 'id'
+  #       f_params[k] = ""
+  #     elsif k == 'options' || k == 'tags'
+  #       f_params[k].each {|key, v| f_params[k][key] = ""}
+  #     end
+  #   end
+  #   f_params
+  # end
 
   def skip_field_update(id, param_id)
     (id.blank? && param_id.blank?) || (id == param_id.to_i)
   end
 
-  def remove_field(id, f_params)
-    @item.item_groups.where(target_id: id).first.destroy
-    cascade_remove(f_params) if !f_params.empty?
-  end
+  # def remove_field(id, f_params)
+  #   @item.item_groups.where(target_id: id).first.destroy
+  #   cascade_remove(f_params) if !f_params.empty?
+  # end
 
-  def replace_field(id, param_id, f_params)
-    remove_field(id, f_params)
-    add_field(param_id, f_params)
-  end
+  # def replace_field(id, param_id, f_params)
+  #   remove_field(id, f_params)
+  #   add_field(param_id, f_params)
+  # end
 
-  def add_field(param_id, f_params)
-    target = FieldItem.find(param_id)
-    target = to_class(target.type).find(param_id)
-    @item.assoc_unless_included(target)
-    cascade_remove(f_params) if !f_params.empty?
-  end
+  # def add_field(param_id, f_params)
+  #   target = FieldItem.find(param_id)
+  #   target = to_class(target.type).find(param_id)
+  #   @item.assoc_unless_included(target)
+  #   cascade_remove(f_params) if !f_params.empty?
+  # end
 
   #utility methods #############################################################
-  def to_class(type)
-    type.classify.constantize
-  end
+  # def to_class(type)
+  #   type.classify.constantize
+  # end
 
   def str_to_class(assoc)
     assoc.to_s.singularize.classify.constantize

@@ -74,15 +74,14 @@ $(document).ready(function(){
     $("#edit-item").submit();
   });
 
-  //CRUD ITEM-PRODUCT #update
-  $("body").on("click", "#product-index button.list-group-item", function(e){
-    var product_id = $('#hidden_product_id').val();
-    var type = $('#hidden_search_type').val();
+  //CRUD ITEM-PRODUCT #update -> REFACTOR
+  $("body").on("click", "#item-products-index button.list-group-item", function(e){
+    var product_id = $(this).attr("data-pk_id");
     var id = $(this).attr("id");
-    //toggleTab(id, e);
-    $('#hidden_product_id').val(toggleAttr(product_id, id));
-    $('#hidden_type').val(type);
-    $("#edit-item").submit();
+    var method = toggleHttp(product_id, id);
+    var form = $('#'+method+'-item-product');
+    $(form).find("input[name='product_id']").val(toggleAttr(product_id, id));
+    $(form).submit();
   });
 
   //CRUD ITEM-SEARCH INDEX #update
@@ -165,7 +164,30 @@ $(document).ready(function(){
     }
     return id
   }
+
+  function toggleHttp(v, v2) {
+    if (v.length == 0) {
+      var method = "post"; //id = v2
+    } else if (v != v2) {
+      var method = "patch"; //id = v2
+    } else if (v == v2){
+      var method = "delete"; //id = ""
+    }
+    return method
+  }
 });
+
+
+  //CRUD ITEM-PRODUCT #update - OLDER VER
+  // $("body").on("click", "#product-index button.list-group-item", function(e){
+  //   var product_id = $('#hidden_product_id').val();
+  //   var type = $('#hidden_search_type').val();
+  //   var id = $(this).attr("id");
+  //   //toggleTab(id, e);
+  //   $('#hidden_product_id').val(toggleAttr(product_id, id));
+  //   $('#hidden_type').val(type);
+  //   $("#edit-item").submit();
+  // });
 
 //This worked but switched to dedicated controller#action
 // $("body").on("click", ".reset-select", function(){

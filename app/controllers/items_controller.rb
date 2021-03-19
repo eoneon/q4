@@ -5,10 +5,10 @@ class ItemsController < ApplicationController
     @item = Item.find(params[:id])
     @product = @item.product
     @artist = @item.artist
-
-    @products = products
-    @input_group = search_input_group
-    @product_group = @item.product_group
+    @products = Product.all
+    # @products = products
+    # @input_group = search_input_group
+    # @product_group = @item.product_group
   end
 
   def create

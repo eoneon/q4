@@ -8,6 +8,7 @@ class Item < ApplicationRecord
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :products, through: :item_groups, source: :target, source_type: "Product"
+  #has_one :product, through: :item_groups, source: :target, source_type: "Product" ActiveRecord::HasOneThroughCantAssociateThroughCollection: Cannot have a has_one :through association 'Item#product' where the :through association 'Item#item_groups' is a collection. Specify a has_one or belongs_to association in the :through option instead.
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
