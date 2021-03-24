@@ -8,15 +8,24 @@ class Item < ApplicationRecord
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :products, through: :item_groups, source: :target, source_type: "Product"
-  #has_one :product, through: :item_groups, source: :target, source_type: "Product" ActiveRecord::HasOneThroughCantAssociateThroughCollection: Cannot have a has_one :through association 'Item#product' where the :through association 'Item#item_groups' is a collection. Specify a has_one or belongs_to association in the :through option instead.
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
-  #has_many :standard_products, through: :item_groups, source: :target, source_type: "StandardProduct"
-  #has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
 
+  def grouped_form_fields
+    form_fields.group_by{|h| h[:kind_scope]}
+  end
+
+  def form_fields
+    return {} unless product
+    a = product.input_group_with_params(input_params).each_with_object([]) do |(k, field_groups), a|
+      field_groups.each do |t, fields|
+        fields.values.map {|f_hsh| a.append(f_hsh)}
+      end
+    end
+  end
   ##############################################################################
 
   def input_params(hsh={})
@@ -24,7 +33,7 @@ class Item < ApplicationRecord
       param_merge(params: hsh, dig_set: dig_set(dig_hsh(*h.values)))
       unpack_field_set_params(h[:f_obj].g_hsh, hsh) if h[:t] == 'field_set' #unpack_field_set_params
     end
-    hsh
+    hsh #.merge!({"tags"=> self.tags})
   end
 
   def unpack_field_set_params(field_groups, hsh)
@@ -55,7 +64,7 @@ class Item < ApplicationRecord
 
   def detect_assoc(t, f_val, f_obj)
     return f_val if t == 'tags'
-    f_obj.fieldables.detect{|f| f.id == f_val.to_i && f.field_type == t.classify}
+    f_obj.fieldables.detect{|f| f.id == f_val.to_i && f.type == t.classify}
   end
 
   ##############################################################################

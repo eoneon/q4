@@ -17,7 +17,6 @@ module Fieldable
   def fg_params(k, field_group, a, unpack)
     field_group.each do |t, fields|
       if t == 'FieldSet' && unpack          #repeat_param_arg_loop?(t,unpack)
-        #fields.each{|f_name, f| param_args(field_groups: f.g_hsh(f), a: a, unpack: unpack)}
         fields.each{|f_name, f| param_args(field_groups: f.g_hsh, a: a, unpack: unpack)}
       else
         fields.each{|f_name, f_obj| a.append(input_args(k, t, f_name, f_obj))}
@@ -58,16 +57,13 @@ module Fieldable
   ##############################################################################
 
   def grouped_hsh(enum:, i: 0, attrs: f_attrs)
+    return enum if enum.empty?
     enum, i = enum.group_by(&attrs[i]), i+1 if enum.is_a? Array
     enum.transform_values!{|val_set| val_set.group_by(&attrs[i])} if enum.is_a? Hash
     enum.values.map{|hsh| grouped_hsh(enum: hsh, i: i+1, attrs: attrs)}  if i < attrs.count - 1
     enum.values.map{|hsh| hsh.transform_values!{|v| v[0]}} if i == attrs.count - 1
     enum
   end
-
-  # def g_hsh(context)
-  #   context.grouped_hsh(enum: context.fieldables.select{|f| f.type != "RadioButton"}, attrs: context.f_attrs)
-  # end
 
   def g_hsh
     grouped_hsh(enum: fieldables.select{|f| f.type != "RadioButton"}, attrs: f_attrs)

@@ -1,5 +1,4 @@
-
 <%= form_with model: item, url: item_products_path, method: "post", id: "post-item-product", class: "collapse" do |f| %>
-  <%= hidden_field_tag :id, item.id %>
   <%= number_field_tag :product_id, product.try(:id) %>
+  <%= number_field_tag :id, item.id %>
 <% end %>

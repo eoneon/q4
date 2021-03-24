@@ -71,17 +71,16 @@ $(document).ready(function(){
   });
 
   $("body").on("change", ".field-param", function(){
-    $("#edit-item").submit();
+    $("#edit-item-fields").submit();
   });
 
   //CRUD ITEM-PRODUCT #update -> REFACTOR
   $("body").on("click", "#item-products-index button.list-group-item", function(e){
-    var product_id = $(this).attr("data-pk_id");
-    var id = $(this).attr("id");
-    var method = toggleHttp(product_id, id);
-    var form = $('#'+method+'-item-product');
-    $(form).find("input[name='product_id']").val(toggleAttr(product_id, id));
-    $(form).submit();
+    var new_id = $(this).attr("id");
+    var old_id = $(this).attr("data-selected");
+    var method = toggleHttp(new_id, old_id);
+    $("input[name='product_id']").val(toggleAttr(new_id, old_id));
+    $('#'+method+'-item-product').submit();
   });
 
   //CRUD ITEM-SEARCH INDEX #update
@@ -156,21 +155,21 @@ $(document).ready(function(){
     }
   }
 
-  function toggleAttr(v, v2) {
-    if (v == v2){
+  function toggleAttr(new_id, old_id) {
+    if (new_id == old_id){
       var id = "";
     } else {
-      var id = v2;
+      var id = new_id;
     }
     return id
   }
 
-  function toggleHttp(v, v2) {
-    if (v.length == 0) {
-      var method = "post"; //id = v2
-    } else if (v != v2) {
-      var method = "patch"; //id = v2
-    } else if (v == v2){
+  function toggleHttp(new_id, old_id) {
+    if (old_id.length == 0) {
+      var method = "post"; //id = new_id
+    } else if (new_id != old_id) {
+      var method = "patch"; //id = new_id
+    } else if (new_id == old_id){
       var method = "delete"; //id = ""
     }
     return method

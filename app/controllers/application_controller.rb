@@ -19,11 +19,11 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   # field methods ##############################################################
-  def add_param(f_type, f_name, f_val)
+  def add_param(f_type, f_name, new_val)
     if f_type == 'tags'
-      @tags.merge!({f_name => f_val})
+      @tags.merge!({f_name => new_val})
     else
-      add_field(find_target(f_type, f_val.id), f_name)
+      add_field(new_val, f_name)
     end
   end
 
@@ -35,13 +35,20 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def replace_param(f_type, f_name, new_val, old_val)
+    remove_param(f_type, f_name, old_val)
+    add_param(f_type, f_name, new_val)
+  end
+
   def add_field(f, f_name)
     @item.assoc_unless_included(f)
     @tags.merge!({f_name => f.id})
+    cascade_add(f.param_args(field_groups: f.g_hsh)) if params[:controller] == 'item_fields'
   end
 
-  def remove_field(f_obj, f_name)
-    remove_obj(f_obj)
+  def remove_field(f, f_name)
+    remove_field_set_fields(f.param_args(field_groups: f.g_hsh)) if params[:controller] == 'item_fields'
+    remove_obj(f)
     remove_tag(f_name)
   end
 
@@ -59,11 +66,22 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def cascade_remove(param_args)
-    param_args.each do |f_hsh|
-      remove_param(f_hsh[:t], f_hsh[:f_name], f_hsh[:f_obj])
+  def default_field(k, f_type, f_obj)
+    if f_type == 'select_field'
+      default_option(k, f_obj)
+    elsif k == 'dimension' && f_type == 'select_menu'
+      f_obj.fieldables.first
     end
   end
+
+  def default_option(k, f_obj)
+    if %w[edition material signature certificate].include?(k)
+      f_obj.fieldables.first
+    elsif k == 'medium'
+      f_obj.fieldables.detect{|f| f_obj.field_name == compound_classify(f.field_name)}
+    end
+  end
+
   ##############################################################################
 
   # utility methods ############################################################
@@ -73,6 +91,10 @@ class ApplicationController < ActionController::Base
 
   def to_class(type)
     type.classify.constantize
+  end
+
+  def present_field_attr?(t, val)
+    t.to_s != 'tags' && !val.blank?
   end
 
   def compound_classify(name)

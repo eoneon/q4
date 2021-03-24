@@ -9,41 +9,54 @@ class ItemProductsController < ApplicationController
   def create
     @item = Item.find(params[:id])
     @product = Product.find(params[:product_id])
+    @products = Product.all
     @tags = hsh_init(@item.tags)
     add_product(@product)
     @item.tags = @tags
 
     @item.save
+
+    respond_to do |format|
+      format.js
+    end
   end
 
-  def show
-    @invoice = Invoice.find(params[:invoice_id])
-    @item = Item.find(params[:id])
-    @product = @item.product
-    @products = Product.all
-  end
+  # def show
+  #   @invoice = Invoice.find(params[:invoice_id])
+  #   @item = Item.find(params[:id])
+  #   @product = @item.product
+  #   @products = Product.all
+  # end
 
   def update
     @item = Item.find(params[:id])
     @product = Product.find(params[:product_id])
+    @products = Product.all
     @tags, @item_groups = hsh_init(@item.tags), @item.item_groups
+    #@tags, @item_groups, @input_params = hsh_init(@item.tags), @item.item_groups, @item.input_params
     replace_product(@product, @item.product)
     @item.tags = @tags
 
     @item.save
 
-    # respond_to do |format|
-    #   format.js
-    # end
+    respond_to do |format|
+      format.js
+    end
   end
 
   def destroy
     @item = Item.find(params[:id])
+    @products = Product.all
     @tags, @item_groups = hsh_init(@item.tags), @item.item_groups
+    #@tags, @item_groups, @input_params = hsh_init(@item.tags), @item.item_groups, @item.input_params
     remove_product(@item.product)
     @item.tags = @tags
 
     @item.save
+
+    respond_to do |format|
+      format.js
+    end
   end
 
   private
@@ -64,25 +77,16 @@ class ItemProductsController < ApplicationController
     remove_obj(product)
   end
 
+  def cascade_remove(param_args)
+    param_args.each do |f_hsh|
+      remove_param(f_hsh[:t], f_hsh[:f_name], f_hsh[:f_obj])
+      #remove_param(f_hsh[:t], f_hsh[:t_type], f_hsh[:f_name], f_hsh[:f_obj])
+    end
+  end
+
   def replace_product(product, item_product)
     remove_product(item_product)
     add_product(product)
   end
-  ##############################################################################
 
-  def default_field(k, f_type, f_obj)
-    if f_type == 'select_field'
-      default_option(k, f_obj)
-    elsif k == 'dimension' && f_type == 'select_menu'
-      f_obj.fieldables.first
-    end
-  end
-
-  def default_option(k, f_obj)
-    if %w[edition material signature certificate].include?(k)
-      f_obj.fieldables.first
-    elsif k == 'medium'
-      f_obj.fieldables.detect{|f| f_obj.field_name == compound_classify(f.field_name)}
-    end
-  end
 end

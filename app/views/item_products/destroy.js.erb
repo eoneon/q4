@@ -1,0 +1,5 @@
+$("#item-products-index").replaceWith("<%= j render 'item_products/index', item: @item, products: @products %>");
+$("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item %>");
+// $("#post-item-product").html("<%= j render 'item_products/forms/post', item: @item, product: @item.product %>");
+// $("#patch-item-product").html("<%= j render 'item_products/forms/patch', item: @item, product: @item.product %>");
+// $("#delete-item-product").html("<%= j render 'item_products/forms/delete', item: @item, product: @item.product %>");

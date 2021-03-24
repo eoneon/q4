@@ -18,24 +18,32 @@ class Product < ApplicationRecord
   scope :product_group, -> {self.all}
 
   ## p.prg_hsh(p) #############################################################################
-
-  def input_group_with_params(i=Item.find(97))
-    @i_params = i.input_params
-    input_group(g_hsh)
+  #item.input_params p.input_group_with_params(i.input_params)
+  def input_group_with_params(input_params)
+    input_group(g_hsh, input_params)
   end
 
-  def input_group(field_groups, inputs={})
+  def input_group(field_groups, input_params, inputs={})
     param_args(field_groups: field_groups, unpack: true).each do |h|
       k, t, t_type, f_name, f_obj = h.values
-      selected = @i_params.dig(k,t_type,f_name)
-      param_merge(params: inputs, dig_set: dig_set(k: f_name, v: f_hsh(t, f_name, f_obj, selected), dig_keys: [k, t_type]))
-      input_group(selected.g_hsh, inputs) if selected && t_type != 'tags' && selected.type == 'FieldSet'
+      selected = input_params.dig(k,t_type,f_name)
+      #selected = get_selected(k,t_type,f_name, input_params)
+      param_merge(params: inputs, dig_set: dig_set(k: f_name, v: f_hsh(k, t, t_type, f_name, f_obj, selected), dig_keys: [k, t_type]))
+      input_group(selected.g_hsh, input_params, inputs) if selected && t_type != 'tags' && selected.type == 'FieldSet'
     end
     inputs
   end
 
-  def f_hsh(t, f_name, f_obj, selected)
-    {render_as: t, method: f_name, f_obj: f_obj, selected: format_selected(selected)}
+  def get_selected(k,t_type,f_name, input_params)
+    if t_type == "tags"
+      input_params.dig(t_type, f_name)
+    else
+      input_params.dig(k,t_type,f_name)
+    end
+  end
+
+  def f_hsh(k, t, t_type, f_name, f_obj, selected)
+    {render_as: t, kind_scope: k, type_scope: t_type, method: f_name, f_obj: f_obj, selected: format_selected(selected)}
   end
 
   def format_selected(selected)
@@ -50,18 +58,6 @@ class Product < ApplicationRecord
     f[:options].map {|opt| product.assoc_unless_included(opt)}
     product
   end
-
-  # def nested_fieldables(h={})
-  #   grouped_fieldables.each do |kind, set|
-  #     h.merge!( {kind => set.map{|f| format_nested(f)} })
-  #   end
-  #   h
-  # end
-  #
-  # def format_nested(f)
-  #   #f.type == 'FieldSet' ? f.fieldables : f
-  #   f.is_a? FieldSet ? f.fieldables : f
-  # end
 
   def field_items
     select_menus + field_sets + select_fields + text_area_fields
