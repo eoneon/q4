@@ -4,28 +4,54 @@ class ApplicationController < ActionController::Base
   private
 
   # object methods #############################################################
-  def add_obj(obj)
-    @item.assoc_unless_included(obj)
-  end
-
-  def remove_obj(f_obj)
-    @item_groups.where(target_id: f_obj.id, target_type: f_obj.class.name).first.destroy
-  end
-
-  def replace_obj(new_obj, old_obj)
-    remove_obj(old_obj)
-    add_obj(new_obj)
-  end
+  # def add_obj(obj)
+  #   @item.assoc_unless_included(obj)
+  # end
+  #
+  # def remove_obj(f_obj)
+  #   @item_groups.where(target_id: f_obj.id, target_type: f_obj.class.name).first.destroy
+  # end
+  #
+  # def replace_obj(new_obj, old_obj)
+  #   remove_obj(old_obj)
+  #   add_obj(new_obj)
+  # end
   ##############################################################################
 
-  # field methods ##############################################################
-  def add_param(f_type, f_name, new_val)
-    if f_type == 'tags'
-      @tags.merge!({f_name => new_val})
-    else
-      add_field(new_val, f_name)
-    end
-  end
+
+  # add field methods ##########################################################
+  # def add_param(f_type, f_name, new_val)
+  #   if f_type == 'tags'
+  #     @tags.merge!({f_name => new_val})
+  #   else
+  #     add_field(new_val, f_name)
+  #   end
+  # end
+  #
+  # def add_field(f, f_name)
+  #   @item.assoc_unless_included(f)
+  #   @tags.merge!({f_name => f.id})
+  #   #cascade_add(f.param_args(field_groups: f.g_hsh)) if params[:controller] == 'item_fields'
+  # end
+
+  # def add_param(k, t, f_name, v2)
+  #   if @item.input_attr?(t)
+  #     @tags.merge!(add_tag_assoc(k, t, f_name, v2))
+  #   else
+  #     add_field(k, t, f_name, v2)
+  #   end
+  # end
+  #
+  # def add_field(k, t, f_name, f)
+  #   @item.assoc_unless_included(f)
+  #   @tags.merge!(add_tag_assoc(k, t, f_name, f.id))
+  # end
+
+  # def add_tag_assoc(k, t, f_name, v2)
+  #   {tag_key(k, t, f_name) => v2}
+  # end
+  #
+  ##############################################################################
 
   def remove_param(f_type, f_name, f_val)
     if f_type == 'tags'
@@ -35,26 +61,52 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # def remove_param(k, t, f_name, old_val)
+  #   if @item.input_attr?(t)
+  #     remove_tag_assoc(k, t, f_name, old_val)
+  #   else
+  #     remove_field(k, t, f_name, old_val)
+  #   end
+  # end
+
   def replace_param(f_type, f_name, new_val, old_val)
     remove_param(f_type, f_name, old_val)
     add_param(f_type, f_name, new_val)
   end
 
-  def add_field(f, f_name)
-    @item.assoc_unless_included(f)
-    @tags.merge!({f_name => f.id})
-    cascade_add(f.param_args(field_groups: f.g_hsh)) if params[:controller] == 'item_fields'
+  # def remove_field(k, t, f_name, f)
+  #   remove_field_set_fields(f.field_args(f.g_hsh)) if params[:controller] == 'item_fields' && field_set?(t)
+  #   remove_obj(f)
+  #   remove_tag_assoc(k, t, f_name, f)
+  # end
+
+  def remove_field_set_fields(field_args)
+    field_args.each do |f_hsh|
+      k, t, f_name, f_val = f_hsh.values
+      if old_val = @input_params.dig(k,t,f_name)
+        remove_param(k, t, f_name, old_val)
+      end
+    end
   end
+
+  # def replace_param(k, t, f_name, new_val, old_val)
+  #   remove_param(k, t, f_name, old_val)
+  #   add_param(k, t, f_name, new_val)
+  # end
 
   def remove_field(f, f_name)
     remove_field_set_fields(f.param_args(field_groups: f.g_hsh)) if params[:controller] == 'item_fields'
-    remove_obj(f)
+    @item.remove_obj(f)
     remove_tag(f_name)
   end
 
   def remove_tag(f_name)
     @tags.reject!{|k,v| f_name == k}
   end
+
+  # def remove_tag_assoc(k, t, f_name, old_val)
+  #   @tags.reject!{|key,val| tag_key(k, t, f_name) == key && val == old_val}
+  # end
   ##############################################################################
 
   # cascade methods ############################################################
@@ -66,22 +118,65 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def default_field(k, f_type, f_obj)
-    if f_type == 'select_field'
-      default_option(k, f_obj)
-    elsif k == 'dimension' && f_type == 'select_menu'
-      f_obj.fieldables.first
-    end
-  end
+  # def add_default_fields(field_args)
+  #   field_args.each do |f_hsh|
+  #     add_default(*f_hsh.values)
+  #   end
+  # end
 
-  def default_option(k, f_obj)
-    if %w[edition material signature certificate].include?(k)
-      f_obj.fieldables.first
-    elsif k == 'medium'
-      f_obj.fieldables.detect{|f| f_obj.field_name == compound_classify(f.field_name)}
-    end
-  end
+  # def default_field(k, f_type, f_obj)
+  #   if f_type == 'select_field'
+  #     default_option(k, f_obj)
+  #   elsif k == 'dimension' && f_type == 'select_menu'
+  #     f_obj.fieldables.first
+  #   end
+  # end
+  #
+  # def default_option(k, f_obj)
+  #   if %w[edition material signature certificate].include?(k)
+  #     f_obj.fieldables.first
+  #   elsif k == 'medium'
+  #     f_obj.fieldables.detect{|f| f_obj.field_name == compound_classify(f.field_name)}
+  #   end
+  # end
 
+  # def add_default(k, t, f_name, f_val)
+  #   if f = default_field(k, t, f_val)
+  #      add_field(k, t, f_name, f)
+  #    end
+  # end
+  #
+  # def default_field(k, t, f_val)
+  #   if select_field?(t) && default_option_kind?(k)
+  #     default_option(k, f_val)
+  #   elsif k == 'dimension' && select_menu?(t)
+  #     default_field_set(f_val)
+  #   end
+  # end
+  #
+  # def default_option(k, f_val)
+  #   if k == 'medium'
+  #     f_val.fieldables.detect{|f| classify_name_match?(f.field_name, f_val.field_name)}
+  #   elsif default_option_kind?(k)
+  #     first_fieldable(f_val)
+  #   end
+  # end
+  #
+  # def classify_name_match?(*names)
+  #   names.map{|n| compound_classify(n)}.uniq.one?
+  # end
+  #
+  # def default_option_kind?(k)
+  #   %w[edition medium material signature certificate].include?(k)
+  # end
+  #
+  # def default_field_set(f_val)
+  #   first_fieldable(f_val)
+  # end
+  #
+  # def first_fieldable(f)
+  #   f.fieldables.first
+  # end
   ##############################################################################
 
   # utility methods ############################################################

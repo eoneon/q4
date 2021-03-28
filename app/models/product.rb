@@ -1,6 +1,11 @@
 class Product < ApplicationRecord
-  include STI
+
   include Fieldable
+  include Crudable
+  #include FieldCrud
+  include TypeCheck
+
+  include STI
 
   #validates :type, :product_name, presence: true
   validates :product_name, presence: true
@@ -34,13 +39,13 @@ class Product < ApplicationRecord
     inputs
   end
 
-  def get_selected(k,t_type,f_name, input_params)
-    if t_type == "tags"
-      input_params.dig(t_type, f_name)
-    else
-      input_params.dig(k,t_type,f_name)
-    end
-  end
+  # def get_selected(k,t_type,f_name, input_params)
+  #   if t_type == "tags"
+  #     input_params.dig(t_type, f_name)
+  #   else
+  #     input_params.dig(k,t_type,f_name)
+  #   end
+  # end
 
   def f_hsh(k, t, t_type, f_name, f_obj, selected)
     {render_as: t, kind_scope: k, type_scope: t_type, method: f_name, f_obj: f_obj, selected: format_selected(selected)}

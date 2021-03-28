@@ -3,6 +3,55 @@ require 'active_support/concern'
 module Fieldable
   extend ActiveSupport::Concern
 
+  def field_args(field_groups, set=[])
+    a = field_groups.each_with_object(set) do |(k, field_groups), a|
+      field_groups.each do |t, fields|
+        fields.each do |f_name, f_val|
+          unpack_or_assign(k, t, f_name, f_val, a)
+        end
+      end
+    end
+  end
+
+  def unpack_or_assign(k, t, f_name, f_val, a)
+    if unpack?(t)
+      field_args(f_val.g_hsh, a)
+    else
+      a.append({k: k.underscore, t: t.underscore, f_name: f_name.underscore, f_val: f_val})
+    end
+  end
+
+  def unpack?(t)
+    #field_set?(t) && self.class.name == 'Product'
+    puts "t.underscore: #{t.underscore} & #{self.class.name}"
+    t.underscore == 'field_set' && self.class.name == 'Product'
+  end
+
+  ##############################################################################
+  #boolean test methods ########################################################
+  # def field_set?(t)
+  #   t.underscore == 'field_set'
+  # end
+  #
+  # def select_field?(t)
+  #   t.underscore == 'select_field'
+  # end
+  #
+  # def select_menu?(t)
+  #   t.underscore == 'select_menu'
+  # end
+  #
+  # def tag_attr?(t)
+  #   tag_attrs.include?(t)
+  # end
+  #
+  # def tag_attrs
+  #   %w[number_field text_field text_area_field]
+  # end
+  ##############################################################################
+  # original methods
+  ##############################################################################
+
   def param_args(field_groups:, a:[], unpack: nil)
     field_groups.each do |k, field_group|
       if k == 'FieldSet'
@@ -40,9 +89,7 @@ module Fieldable
 
   ##############################################################################
 
-  def f_attrs
-    [:kind, :type, :field_name]
-  end
+
 
   ##############################################################################
 
@@ -52,6 +99,11 @@ module Fieldable
 
   def input_attrs
     ['NumberField', 'TextField', 'TextAreaField']
+  end
+  ##############################################################################
+
+  def fieldables
+    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
   end
 
   ##############################################################################
@@ -69,8 +121,8 @@ module Fieldable
     grouped_hsh(enum: fieldables.select{|f| f.type != "RadioButton"}, attrs: f_attrs)
   end
 
-  def fieldables
-    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
+  def f_attrs
+    [:kind, :type, :field_name]
   end
 
   ##############################################################################
