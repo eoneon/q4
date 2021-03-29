@@ -3,13 +3,12 @@ class Item < ApplicationRecord
   include Fieldable
   include Crudable
   include FieldCrud
-  include TagParam
+  include ItemProduct
   include TypeCheck
 
   include STI
   include ExportAttrs
   include SkuRange
-  #include ProductGroup
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :products, through: :item_groups, source: :target, source_type: "Product"
@@ -18,65 +17,6 @@ class Item < ApplicationRecord
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
-
-  def grouped_form_fields
-    form_fields.group_by{|h| h[:kind_scope]}
-  end
-
-  def form_fields
-    return {} unless product
-    a = product.input_group_with_params(input_params).each_with_object([]) do |(k, field_groups), a|
-      field_groups.each do |t, fields|
-        fields.values.map {|f_hsh| a.append(f_hsh)}
-      end
-    end
-  end
-
-  ##############################################################################
-
-  # def input_params(hsh={})
-  #   param_args(field_groups: g_hsh).each do |h|
-  #     param_merge(params: hsh, dig_set: dig_set(dig_hsh(*h.values)))
-  #     unpack_field_set_params(h[:f_obj].g_hsh, hsh) if h[:t] == 'field_set' #unpack_field_set_params
-  #   end
-  #   hsh #.merge!({"tags"=> self.tags})
-  # end
-  #
-  # def unpack_field_set_params(field_groups, hsh)
-  #   param_args(field_groups: field_groups).each do |h|
-  #     k, t, t_type, f_name, f_obj = h.values
-  #     if f_val = self.tags.dig(f_name)
-  #       param_merge(params: hsh, dig_set: dig_set(k: f_name, v: detect_assoc(t_type, f_val, f_obj), dig_keys: [k, t_type]))
-  #     end
-  #   end
-  #   hsh
-  # end
-  #
-  # def dig_hsh(k, t, t_type, f_name, f_val)
-  #   {k: infer_f_name(t, f_val, f_name), v: infer_f_val(t, f_val, f_name), dig_keys: [k, infer_type(t)]}
-  # end
-  #
-  # def infer_f_name(t, f_val, f_name)
-  #   input_attr?(t) ? f_name : self.tags.key(f_val.id.to_s)
-  # end
-  #
-  # def infer_f_val(t, f_val, f_name)
-  #   input_attr?(t) ? self.tags.dig(f_name) : f_val
-  # end
-  #
-  # def infer_type(t)
-  #   input_attr?(t) ? 'tags' : t
-  # end
-
-  def detect_assoc(t, f_val, f_obj)
-    return f_val if t == 'tags'
-    f_obj.fieldables.detect{|f| f.id == f_val.to_i && f.type == t.classify}
-  end
-
-  ##############################################################################
-  def field_items
-    field_sets + select_fields + options
-  end
 
   ##############################################################################
 
@@ -314,6 +254,64 @@ class Item < ApplicationRecord
     end
   end
 end
+
+# def field_items
+#   field_sets + select_fields + options
+# end
+
+# def grouped_form_fields
+#   form_fields.group_by{|h| h[:kind_scope]}
+# end
+#
+# def form_fields
+#   return {} unless product
+#   a = product.input_group_with_params(input_params).each_with_object([]) do |(k, field_groups), a|
+#     field_groups.each do |t, fields|
+#       fields.values.map {|f_hsh| a.append(f_hsh)}
+#     end
+#   end
+# end
+
+##############################################################################
+
+# def input_params(hsh={})
+#   param_args(field_groups: g_hsh).each do |h|
+#     param_merge(params: hsh, dig_set: dig_set(dig_hsh(*h.values)))
+#     unpack_field_set_params(h[:f_obj].g_hsh, hsh) if h[:t] == 'field_set' #unpack_field_set_params
+#   end
+#   hsh #.merge!({"tags"=> self.tags})
+# end
+#
+# def unpack_field_set_params(field_groups, hsh)
+#   param_args(field_groups: field_groups).each do |h|
+#     k, t, t_type, f_name, f_obj = h.values
+#     if f_val = self.tags.dig(f_name)
+#       param_merge(params: hsh, dig_set: dig_set(k: f_name, v: detect_assoc(t_type, f_val, f_obj), dig_keys: [k, t_type]))
+#     end
+#   end
+#   hsh
+# end
+#
+# def dig_hsh(k, t, t_type, f_name, f_val)
+#   {k: infer_f_name(t, f_val, f_name), v: infer_f_val(t, f_val, f_name), dig_keys: [k, infer_type(t)]}
+# end
+#
+# def infer_f_name(t, f_val, f_name)
+#   input_attr?(t) ? f_name : self.tags.key(f_val.id.to_s)
+# end
+#
+# def infer_f_val(t, f_val, f_name)
+#   input_attr?(t) ? self.tags.dig(f_name) : f_val
+# end
+#
+# def infer_type(t)
+#   input_attr?(t) ? 'tags' : t
+# end
+
+# def detect_assoc(t, f_val, f_obj)
+#   return f_val if t == 'tags'
+#   f_obj.fieldables.detect{|f| f.id == f_val.to_i && f.type == t.classify}
+# end
 
 # Item.find(53).product_group['params']   Item.find(6).product_group['inputs']
 # Item.find(5).field_targets ## pg = Item.find(5).product_group['params'] ## h['inputs'] ## h['inputs']['field_sets']   Item.find(5).product_group['inputs']['field_sets']

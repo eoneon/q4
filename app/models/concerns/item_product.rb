@@ -1,7 +1,11 @@
 require 'active_support/concern'
 
-module TagParam
+module ItemProduct
   extend ActiveSupport::Concern
+
+  def grouped_inputs
+    product ? product.input_set(product.g_hsh, input_params).group_by{|h| h[:k]} : {}
+  end
 
   def input_params
     h = self.tags.each_with_object({}) do |(tag_key, tag_val), h|

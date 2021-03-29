@@ -44,4 +44,8 @@ module TypeCheck
   def product_class?
     self.class.name == 'Product'
   end
+
+  def type?(obj)
+    obj.class.method_defined?(:type)
+  end
 end

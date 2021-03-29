@@ -45,13 +45,13 @@ module FieldCrud
   end
 
   def valid_field_val?(t, val)
-    !input_attr?(t) && !val.blank?
+    !tag_attr?(t) && !val.blank?
   end
 
   # add methods ################################################################
   # standard add ###############################################################
   def add_param(k, t, f_name, v2)
-    if input_attr?(t)
+    if tag_attr?(t)
       self.tags.merge!(add_tag_assoc(k, t, f_name, v2))
     else
       add_field(k, t, f_name, v2)
@@ -72,7 +72,7 @@ module FieldCrud
   # remove methods #############################################################
   # standard remove ############################################################
   def remove_param(k, t, f_name, old_val)
-    if input_attr?(t)
+    if tag_attr?(t)
       remove_tag_assoc(k, t, f_name, old_val)
     else
       remove_field(k, t, f_name, old_val)
@@ -87,7 +87,7 @@ module FieldCrud
 
   def remove_field_set_fields(field_args)
     field_args.each do |f_hsh|
-      k, t, f_name, f_val = f_hsh.values
+      k, t, f_name, f_val = h_vals(f_hsh, :k, :t, :f_name, :f_val)
       if old_val = input_params.dig(k,t,f_name)
         remove_param(k, t, f_name, old_val)
       end
@@ -98,12 +98,12 @@ module FieldCrud
   def remove_product_fields
     return if self.tags.nil?
     field_args(input_params).each do |f_hsh|
-      remove_product_field_param(*f_hsh.values)
+      remove_product_field_param(*h_vals(f_hsh, :k, :t, :f_name, :f_val))
     end
   end
 
   def remove_product_field_param(k, t, f_name, f_val)
-    if input_attr?(t)
+    if tag_attr?(t)
       remove_tag_assoc(k, t, f_name, f_val)
     else
       remove_hmt(f_val)
@@ -130,15 +130,13 @@ module FieldCrud
   # end
 
   def add_default_fields(field_args)
-    puts "field_args: #{field_args}"
     field_args.each do |f_hsh|
-      add_default(*f_hsh.values)
+      add_default(*h_vals(f_hsh, :k, :t, :f_name, :f_val))
     end
   end
 
   def add_default(k, t, f_name, f_val)
     if f = default_field(k, t, f_val)
-      puts "f: #{f}"
       add_field(k, f.type.underscore, f_name, f)
     end
   end

@@ -1,11 +1,11 @@
 <%= form_with model: item, url: item_field_path(item), id: "edit-item-fields" do |f| %>
-  <% item.grouped_form_fields.each do |k, fields| %>
+  <% item.grouped_inputs.each do |k, fields| %>
     <div class="card border border-secondary p-2 mb-2">
       <div class="row">
         <% fields.each do |f_hsh| %>
-          <%= f.fields_for f_hsh[:kind_scope].to_sym do |kind_scope| %>
-            <%= kind_scope.fields_for f_hsh[:type_scope].to_sym do |type_scope| %>
-              <%= render "item_fields/#{f_hsh[:render_as]}", f: type_scope, f_hsh: f_hsh %>
+          <%= f.fields_for f_hsh[:k].to_sym do |kind_scope| %>
+            <%= kind_scope.fields_for f_hsh[:t_type].to_sym do |type_scope| %>
+              <%= render "item_fields/#{f_hsh[:t]}", f: type_scope, f_hsh: f_hsh %>
             <% end %>
           <% end %>
         <% end %>
