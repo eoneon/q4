@@ -3,7 +3,7 @@ class Product < ApplicationRecord
   include Fieldable
   include Crudable
   include TypeCheck
-
+  include HattrSearch
   include STI
 
   #validates :type, :product_name, presence: true
@@ -19,13 +19,13 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  scope :product_group, -> {self.all}
+  #scope :product_group, -> {self.all}
 
   def input_set(g_hsh, i_hsh, a=[])
     a = field_args(g_hsh).each_with_object(a) do |f_hsh, a|
       f = i_hsh.dig(f_hsh[:k], f_hsh[:t_type], f_hsh[:f_name])
       a.append(f_hsh.merge!({:selected=> format_selected(f)}))
-      input_group(f.g_hsh, i_hsh, hsh) if f && !f.is_a?(String) && field_set?(f.type)
+      input_set(f.g_hsh, i_hsh, a) if f && !f.is_a?(String) && field_set?(f.type)
     end
   end
 
@@ -76,11 +76,50 @@ class Product < ApplicationRecord
   end
 
   #all search keys-> remove?
-  def self.search_keys(search_set)
-    search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
+  # def self.search_keys(search_set)
+  #   search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
+  # end
+
+  # refactor: self.search_query ################################################
+  def self.search(scope: nil, search_params: nil, hstore:)
+    search_params = search_params(scope: scope, search_params: search_params, hstore: hstore)
+    results = hattr_search(scope: self, search_params: search_params, hstore: hstore)
+    a, b = results, search_inputs(search_params, results, hstore)
+  end
+
+  def self.search_params(scope: nil, search_params: nil, hstore:)
+    search_keys.map{|k| [k, search_value(scope, search_params, hstore, k)]}.to_h
+  end
+
+  def self.search_value(scope, search_params, hstore, k)
+    if search_params
+      search_params[k]
+    elsif scope
+      scope.public_send(hstore)[k]
+    end
+  end
+
+  def self.search_inputs(search_params, results, hstore)
+    a = search_params.each_with_object([]) do |(k,v),a|
+      a.append(search_input(k, v, results, hstore))
+    end
+  end
+
+  def self.search_input(k, v, results, hstore)
+    {'input_name'=> k, 'selected'=> v, 'opts'=> results.map{|product| product.public_send(hstore)[k]}.uniq.compact}
+  end
+
+  def self.search_keys
+    %w[category medium product_type product_subtype]
   end
 
 end
+
+# def scoped_search(hstore: 'tags')
+#   inputs = search_set.map{|k| [k, self.public_send(hstore)[k]]}.to_h
+#   results = search_query(self.class, inputs, hstore)
+#   {'inputs' => inputs, 'results' => results}
+# end
 
 # def field_items
 #   select_menus + field_sets + select_fields + text_area_fields

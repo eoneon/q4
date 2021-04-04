@@ -82,9 +82,9 @@ module STI
 
   #AR class methods
   #AR obj: to_class -> expand re: Q3/models/concerns/build_set.rb
-  def to_class
-    self.class.name.constantize
-  end
+  # def to_class
+  #   self.class.name.constantize
+  # end
 
   def to_base_class
     self.class.base_class

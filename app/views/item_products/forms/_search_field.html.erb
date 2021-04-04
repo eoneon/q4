@@ -1,0 +1,8 @@
+<div class="form-row">
+  <div class="input-group input-group-sm mb-1 border border-secondary rounded">
+    <div class="input-group-prepend">
+      <button class="btn btn-sm btn-secondary text-sm text-light font-weight-light reset-select" data-target="<%= name %>" type="button"><%= (fa_icon "repeat") %></button>
+    </div>
+    <%= select_tag "items[search][#{name}]", options_for_select(search_input_options(name, opts), selected), {class: "form-control border-0 search-select"} %>
+  </div>
+</div>

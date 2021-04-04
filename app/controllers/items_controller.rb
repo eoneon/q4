@@ -3,12 +3,8 @@ class ItemsController < ApplicationController
 
   def show
     @item = Item.find(params[:id])
-    @product = @item.product
-    @artist = @item.artist
-    @products = Product.all
-    # @products = products
-    # @input_group = search_input_group
-    # @product_group = @item.product_group
+    #@artist = @item.artist
+    @products, @inputs = Product.search(scope: @item.product, hstore: 'tags')
   end
 
   def create
@@ -43,14 +39,17 @@ class ItemsController < ApplicationController
   end
 
   def search
-    @item = item
-    @product = product
-    @products = products
-    @input_group = search_input_group
+    @item = Item.find(params[:id])
+    #product = @item.product
+    @products, @inputs = Product.search(scope: @item.product, search_params: params[:items][:search], hstore: 'tags')
+    # @item = item
+    # @product = product
+    # @products = products
+    # @input_group = search_input_group
 
     respond_to do |format|
       format.js
-      format.html
+      #format.html
     end
   end
 

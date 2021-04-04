@@ -1,6 +1,10 @@
 module ProductSearchHelper
-  def search_input_options(field_name, opt_set)
-    opt_set.map{|opt| [opt[:text], opt[:value]]}.prepend(["-- select #{split_join(field_name, '_')}--", "all"])
+  # def search_input_options(field_name, opt_set)
+  #   opt_set.map{|opt| [opt[:text], opt[:value]]}.prepend(["-- select #{split_join(field_name, '_')}--", "all"])
+  # end
+
+  def search_input_options(name, opts)
+    opts.map{|opt| [split_join(opt), opt]}.prepend(["-- select #{split_join(name, '_')}--", ""])
   end
 
   def build_inputs(field_name, opt_set)
@@ -30,7 +34,7 @@ module ProductSearchHelper
     type == 'StandardProduct' ? 'Standard Product' : type
   end
 
-  def split_join(snake_word, delim=' ')
+  def split_join(snake_word, delim='_')
     snake_word.split(delim).join(' ')
   end
 

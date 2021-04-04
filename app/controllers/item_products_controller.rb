@@ -4,8 +4,7 @@ class ItemProductsController < ApplicationController
     @item = Item.find(params[:id])
     @item.tags = hsh_init(@item.tags)
     @product = Product.find(params[:product_id])
-    @products = Product.all
-
+    @products, @inputs = Product.search(scope: @product, hstore: 'tags')
     add_product(@product)
 
     @item.save
@@ -19,8 +18,7 @@ class ItemProductsController < ApplicationController
     @item = Item.find(params[:id])
     @item.tags = hsh_init(@item.tags)
     @product = Product.find(params[:product_id])
-    @products = Product.all
-
+    @products, @inputs = Product.search(scope: @product, hstore: 'tags')
     replace_product(@product, @item.product)
 
     @item.save
@@ -32,7 +30,7 @@ class ItemProductsController < ApplicationController
 
   def destroy
     @item = Item.find(params[:id])
-    @products = Product.all
+    @products, @inputs = Product.search(hstore: 'tags')
     remove_product(@item.product)
 
     @item.save

@@ -5,8 +5,8 @@ module FieldCrud
 
   # update context-routing methods #############################################
   # primary method #############################################################
-  def update_field(item_params)
-    field_args(item_params).each do |h|
+  def update_field(param_set)
+    param_set.each do |h|
       update_field_case(field_case_args(*h.values))
     end
   end
@@ -16,15 +16,6 @@ module FieldCrud
       when :add; add_param(k, t, f_name, new_val(t, v2))
       when :remove; remove_param(k, t, f_name, v)
       when :replace; replace_param(k, t, f_name, new_val(t, v2), v)
-    end
-  end
-
-  def update_case(v, v2)
-    case
-      when skip?(v, v2); :skip
-      when remove?(v, v2); :remove
-      when add?(v, v2); :add
-      when replace?(v, v2); :replace
     end
   end
 
@@ -48,6 +39,33 @@ module FieldCrud
     !tag_attr?(t) && !val.blank?
   end
 
+  # update_case ################################################################
+  ##############################################################################
+  def update_case(v, v2)
+    case
+      when skip?(v, v2); :skip
+      when remove?(v, v2); :remove
+      when add?(v, v2); :add
+      when replace?(v, v2); :replace
+    end
+  end
+
+  def skip?(v, v2)
+    v.blank? && v2.blank? || v == v2
+  end
+
+  def remove?(v, v2)
+    !v.blank? && v2.blank?
+  end
+
+  def add?(v, v2)
+    v.blank? && !v2.blank?
+  end
+
+  def replace?(v, v2)
+    !v.blank? && !v2.blank?
+  end
+
   # add methods ################################################################
   # standard add ###############################################################
   def add_param(k, t, f_name, v2)
@@ -60,9 +78,7 @@ module FieldCrud
 
   def add_field(k, t, f_name, f)
     assoc_unless_included(f)
-    puts "self.tags(0): #{self.tags}"
     self.tags.merge!(add_tag_assoc(k, t, f_name, f.id))
-    puts "self.tags(1): #{self.tags}"
   end
 
   def add_tag_assoc(k, t, f_name, v2)
@@ -80,9 +96,9 @@ module FieldCrud
   end
 
   def remove_field(k, t, f_name, f)
-    remove_field_set_fields(f.field_args(f.g_hsh)) #if params[:controller] == 'item_fields' && field_set?(t)
+    remove_field_set_fields(f.field_args(f.g_hsh)) if field_set?(t)#if params[:controller] == 'item_fields' && field_set?(t)
     remove_hmt(f)
-    remove_tag_assoc(k, t, f_name, f)
+    remove_tag_assoc(k, t, f_name, tag_id(f))
   end
 
   def remove_field_set_fields(field_args)
@@ -106,14 +122,14 @@ module FieldCrud
     if tag_attr?(t)
       remove_tag_assoc(k, t, f_name, f_val)
     else
+      remove_tag_assoc(k, t, f_name, tag_id(f_val))
       remove_hmt(f_val)
-      remove_tag_assoc(k, t, f_name, f_val)
     end
   end
   ##############################################################################
 
   def remove_tag_assoc(k, t, f_name, old_val)
-    self.tags.reject!{|key,val| tag_key(k, t, f_name) == key && val == old_val.id.to_s}
+    self.tags.reject!{|key,val| tag_key(k, t, f_name) == key && val == old_val}
   end
 
   # replace methods ############################################################
@@ -123,11 +139,6 @@ module FieldCrud
   end
 
   # default add ################################################################
-  # def add_default_fields(field_args)
-  #   field_args.each do |f_hsh|
-  #     add_default(*f_hsh.values)
-  #   end
-  # end
 
   def add_default_fields(field_args)
     field_args.each do |f_hsh|
@@ -192,7 +203,11 @@ module FieldCrud
     keys.join('::')
   end
 
-  def hsh_init(h)
-    h ? h : {}
+  def tag_id(f)
+    f.id.to_s
   end
+
+  # def hsh_init(h)
+  #   h ? h : {}
+  # end
 end

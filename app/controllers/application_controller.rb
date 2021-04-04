@@ -3,206 +3,9 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # object methods #############################################################
-  # def add_obj(obj)
-  #   @item.assoc_unless_included(obj)
-  # end
-  #
-  # def remove_obj(f_obj)
-  #   @item_groups.where(target_id: f_obj.id, target_type: f_obj.class.name).first.destroy
-  # end
-  #
-  # def replace_obj(new_obj, old_obj)
-  #   remove_obj(old_obj)
-  #   add_obj(new_obj)
-  # end
-  ##############################################################################
-
-
-  # add field methods ##########################################################
-  # def add_param(f_type, f_name, new_val)
-  #   if f_type == 'tags'
-  #     @tags.merge!({f_name => new_val})
-  #   else
-  #     add_field(new_val, f_name)
-  #   end
-  # end
-  #
-  # def add_field(f, f_name)
-  #   @item.assoc_unless_included(f)
-  #   @tags.merge!({f_name => f.id})
-  #   #cascade_add(f.param_args(field_groups: f.g_hsh)) if params[:controller] == 'item_fields'
-  # end
-
-  # def add_param(k, t, f_name, v2)
-  #   if @item.input_attr?(t)
-  #     @tags.merge!(add_tag_assoc(k, t, f_name, v2))
-  #   else
-  #     add_field(k, t, f_name, v2)
-  #   end
-  # end
-  #
-  # def add_field(k, t, f_name, f)
-  #   @item.assoc_unless_included(f)
-  #   @tags.merge!(add_tag_assoc(k, t, f_name, f.id))
-  # end
-
-  # def add_tag_assoc(k, t, f_name, v2)
-  #   {tag_key(k, t, f_name) => v2}
-  # end
-  #
-  ##############################################################################
-
-  def remove_param(f_type, f_name, f_val)
-    if f_type == 'tags'
-      remove_tag(f_name)
-    else
-      remove_field(f_val, f_name)
-    end
+  def hsh_init(tags)
+    tags ? tags : {}
   end
-
-  # def remove_param(k, t, f_name, old_val)
-  #   if @item.input_attr?(t)
-  #     remove_tag_assoc(k, t, f_name, old_val)
-  #   else
-  #     remove_field(k, t, f_name, old_val)
-  #   end
-  # end
-
-  def replace_param(f_type, f_name, new_val, old_val)
-    remove_param(f_type, f_name, old_val)
-    add_param(f_type, f_name, new_val)
-  end
-
-  # def remove_field(k, t, f_name, f)
-  #   remove_field_set_fields(f.field_args(f.g_hsh)) if params[:controller] == 'item_fields' && field_set?(t)
-  #   remove_obj(f)
-  #   remove_tag_assoc(k, t, f_name, f)
-  # end
-
-  def remove_field_set_fields(field_args)
-    field_args.each do |f_hsh|
-      k, t, f_name, f_val = f_hsh.values
-      if old_val = @input_params.dig(k,t,f_name)
-        remove_param(k, t, f_name, old_val)
-      end
-    end
-  end
-
-  # def replace_param(k, t, f_name, new_val, old_val)
-  #   remove_param(k, t, f_name, old_val)
-  #   add_param(k, t, f_name, new_val)
-  # end
-
-  def remove_field(f, f_name)
-    remove_field_set_fields(f.param_args(field_groups: f.g_hsh)) if params[:controller] == 'item_fields'
-    @item.remove_obj(f)
-    remove_tag(f_name)
-  end
-
-  def remove_tag(f_name)
-    @tags.reject!{|k,v| f_name == k}
-  end
-
-  # def remove_tag_assoc(k, t, f_name, old_val)
-  #   @tags.reject!{|key,val| tag_key(k, t, f_name) == key && val == old_val}
-  # end
-  ##############################################################################
-
-  # cascade methods ############################################################
-  def cascade_add(param_args)
-    param_args.each do |f_hsh|
-      if f_obj = default_field(f_hsh[:k], f_hsh[:t], f_hsh[:f_obj])
-        add_field(f_obj, f_hsh[:f_name])
-      end
-    end
-  end
-
-  # def add_default_fields(field_args)
-  #   field_args.each do |f_hsh|
-  #     add_default(*f_hsh.values)
-  #   end
-  # end
-
-  # def default_field(k, f_type, f_obj)
-  #   if f_type == 'select_field'
-  #     default_option(k, f_obj)
-  #   elsif k == 'dimension' && f_type == 'select_menu'
-  #     f_obj.fieldables.first
-  #   end
-  # end
-  #
-  # def default_option(k, f_obj)
-  #   if %w[edition material signature certificate].include?(k)
-  #     f_obj.fieldables.first
-  #   elsif k == 'medium'
-  #     f_obj.fieldables.detect{|f| f_obj.field_name == compound_classify(f.field_name)}
-  #   end
-  # end
-
-  # def add_default(k, t, f_name, f_val)
-  #   if f = default_field(k, t, f_val)
-  #      add_field(k, t, f_name, f)
-  #    end
-  # end
-  #
-  # def default_field(k, t, f_val)
-  #   if select_field?(t) && default_option_kind?(k)
-  #     default_option(k, f_val)
-  #   elsif k == 'dimension' && select_menu?(t)
-  #     default_field_set(f_val)
-  #   end
-  # end
-  #
-  # def default_option(k, f_val)
-  #   if k == 'medium'
-  #     f_val.fieldables.detect{|f| classify_name_match?(f.field_name, f_val.field_name)}
-  #   elsif default_option_kind?(k)
-  #     first_fieldable(f_val)
-  #   end
-  # end
-  #
-  # def classify_name_match?(*names)
-  #   names.map{|n| compound_classify(n)}.uniq.one?
-  # end
-  #
-  # def default_option_kind?(k)
-  #   %w[edition medium material signature certificate].include?(k)
-  # end
-  #
-  # def default_field_set(f_val)
-  #   first_fieldable(f_val)
-  # end
-  #
-  # def first_fieldable(f)
-  #   f.fieldables.first
-  # end
-  ##############################################################################
-
-  # utility methods ############################################################
-  def find_target(target_type, target_id)
-    to_class(target_type).find(target_id)
-  end
-
-  def to_class(type)
-    type.classify.constantize
-  end
-
-  def present_field_attr?(t, val)
-    t.to_s != 'tags' && !val.blank?
-  end
-
-  def compound_classify(name)
-    name.split(' ').join('_').classify
-  end
-
-  def hsh_init(h)
-    h ? h : {}
-  end
-  ##############################################################################
-
-
-
   #show ########################################################################
   def search_input_group
     h={type: Product, inputs: search_tag_inputs, selected: selected_search_tag_inputs, item_id: @item.try(:id), product_id: @product.try(:id)}
@@ -290,187 +93,187 @@ class ApplicationController < ActionController::Base
   end
 
   # update_product #############################################################
-  def update_assocs(origin, target, params_target_type, params_target_id)
-    @context = update_context(origin, target, params_target_type, params_target_id)
-    if @context == :skip
-      a, b = origin, target
-    elsif @context == :remove
-      remove_assoc(origin, target)
-    elsif @context == :replace
-      replace_assoc(origin, target, params_target_type, params_target_id.to_i)
-    elsif @context == :add
-      add_assoc(origin, target, params_target_type, params_target_id)
-    end
-  end
+  # def update_assocs(origin, target, params_target_type, params_target_id)
+  #   @context = update_context(origin, target, params_target_type, params_target_id)
+  #   if @context == :skip
+  #     a, b = origin, target
+  #   elsif @context == :remove
+  #     remove_assoc(origin, target)
+  #   elsif @context == :replace
+  #     replace_assoc(origin, target, params_target_type, params_target_id.to_i)
+  #   elsif @context == :add
+  #     add_assoc(origin, target, params_target_type, params_target_id)
+  #   end
+  # end
 
   # update_product #############################################################
-  def update_context(origin, target, params_target_type, params_target_id)
-    if (params_target_id.blank? && target.blank?) || (params_target_id.to_i == target.try(:id))
-      :skip
-    elsif target.present? && params_target_id.blank?
-      :remove
-    elsif target.present? && (params_target_id.to_i != target.id)
-      :replace
-    elsif target.blank? && params_target_id.present?
-      :add
-    end
-  end
-
-  def remove_assoc(origin, target)
-    remove_item_fields if target.try(:type) && target.base_type == 'Product'
-    origin.item_groups.where(target_id: target.id).first.destroy
-    target = nil
-    a, b = origin, target
-  end
-
-  def replace_assoc(origin, target, params_target_type, params_target_id)
-    remove_assoc(origin, target)
-    a, b = add_assoc(origin, target, params_target_type, params_target_id)
-  end
-
-  def add_assoc(origin, target, params_target_type, params_target_id)
-    target = to_class(params_target_type).find(params_target_id)
-    origin.assoc_unless_included(target)
-    update_default_fields(@item.product_group['inputs']) if target.try(:type) && target.base_type == 'Product'
-    a, b = origin, target
-  end
+  # def update_context(origin, target, params_target_type, params_target_id)
+  #   if (params_target_id.blank? && target.blank?) || (params_target_id.to_i == target.try(:id))
+  #     :skip
+  #   elsif target.present? && params_target_id.blank?
+  #     :remove
+  #   elsif target.present? && (params_target_id.to_i != target.id)
+  #     :replace
+  #   elsif target.blank? && params_target_id.present?
+  #     :add
+  #   end
+  # end
+  #
+  # def remove_assoc(origin, target)
+  #   remove_item_fields if target.try(:type) && target.base_type == 'Product'
+  #   origin.item_groups.where(target_id: target.id).first.destroy
+  #   target = nil
+  #   a, b = origin, target
+  # end
+  #
+  # def replace_assoc(origin, target, params_target_type, params_target_id)
+  #   remove_assoc(origin, target)
+  #   a, b = add_assoc(origin, target, params_target_type, params_target_id)
+  # end
+  #
+  # def add_assoc(origin, target, params_target_type, params_target_id)
+  #   target = to_class(params_target_type).find(params_target_id)
+  #   origin.assoc_unless_included(target)
+  #   update_default_fields(@item.product_group['inputs']) if target.try(:type) && target.base_type == 'Product'
+  #   a, b = origin, target
+  # end
 
   # update_product_fields ####################################################
-  def update_product
-    return if [:add, :remove, :replace, nil].include?(@context)
-    update_fields(@item.product_group['params'], field_params)
-  end
-
-  def update_fields(i_params, f_params)
-    i_params.keys.each do |f_type|
-      if f_type == 'field_sets'
-        update_field_sets(i_params[f_type], f_params[f_type])
-      elsif f_type == 'options'
-        update_options(i_params[f_type], f_params[f_type])
-      end
-    end
-  end
-
-  def update_default_fields(inputs)
-    inputs.keys.each do |f_type|
-      if f_type == 'field_sets'
-        update_default_field_sets_hsh(inputs['field_sets'])
-      elsif f_type == 'options'
-        update_default_options_hsh(inputs['options'])
-      end
-    end
-  end
-
-  def update_default_options_hsh(options_hsh)
-    options_hsh.each do |f_hsh|
-      add_field(f_hsh[:collection][0].id, {}) if %w[category_id material_id medium_id].include?(f_hsh[:method]) #|| f_hsh[:method] == 'medium_id' && f_hsh[:collection].count == 1
-    end
-  end
-
-  def update_default_field_sets_hsh(field_sets_hsh)
-    field_sets_hsh.each do |kind, f_set|
-      f_set.each do |f_hsh|
-        next if %w[dimension numbering signature certificate].exclude?(kind)
-        if f_hsh[:render_as] == 'select_menu'
-          target = f_hsh[:collection][0]
-          add_field(target.id, {})
-          add_nested_defaults(target)
-        elsif f_hsh[:render_as] == 'select_field'
-          target = f_hsh[:collection][0]
-          add_field(target.id, {})
-        end
-      end
-    end
-  end
-
-  def add_nested_defaults(origin)
-    if origin.type == "FieldSet"
-      add_default_field_set_targets(origin.targets)
-    elsif origin.type == "SelectField"
-      add_field(origin.id, {}) #<SelectField>
-      add_field(origin.targets[0].id, {}) #<Option>
-    elsif origin.type == "SelectMenu"
-      add_field(origin.id, {}) #<SelectMenu>
-      if origin.targets[0].type == 'FieldSet'
-        add_field(origin.targets[0].id, {}) #<FieldSet>
-        add_default_field_set_targets(origin.targets[0].targets)
-      elsif origin.targets[0].type == "SelectField"
-        add_field(origin.targets[0].id, {}) #<SelectField>
-        add_field(origin.targets[0].targets[0].id, {}) #<Option>
-      end
-    end
-  end
-
-  def add_default_field_set_targets(targets)
-    targets.each do |target|
-      add_nested_defaults(target)
-    end
-  end
-
-  def field_params
-    {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]} unless [:options, :field_sets].detect {|k| !params[:item].has_key?(k)}
-  end
-
-  def remove_item_fields
-    return if @item.field_targets.empty?
-    @item.tags = nil if @item.tags
-    @item.field_targets.each do |target|
-      @item.item_groups.where(target_id: target.id, target_type: target.type).first.destroy
-    end
-  end
+  # def update_product
+  #   return if [:add, :remove, :replace, nil].include?(@context)
+  #   update_fields(@item.product_group['params'], field_params)
+  # end
+  #
+  # def update_fields(i_params, f_params)
+  #   i_params.keys.each do |f_type|
+  #     if f_type == 'field_sets'
+  #       update_field_sets(i_params[f_type], f_params[f_type])
+  #     elsif f_type == 'options'
+  #       update_options(i_params[f_type], f_params[f_type])
+  #     end
+  #   end
+  # end
+  #
+  # def update_default_fields(inputs)
+  #   inputs.keys.each do |f_type|
+  #     if f_type == 'field_sets'
+  #       update_default_field_sets_hsh(inputs['field_sets'])
+  #     elsif f_type == 'options'
+  #       update_default_options_hsh(inputs['options'])
+  #     end
+  #   end
+  # end
+  #
+  # def update_default_options_hsh(options_hsh)
+  #   options_hsh.each do |f_hsh|
+  #     add_field(f_hsh[:collection][0].id, {}) if %w[category_id material_id medium_id].include?(f_hsh[:method]) #|| f_hsh[:method] == 'medium_id' && f_hsh[:collection].count == 1
+  #   end
+  # end
+  #
+  # def update_default_field_sets_hsh(field_sets_hsh)
+  #   field_sets_hsh.each do |kind, f_set|
+  #     f_set.each do |f_hsh|
+  #       next if %w[dimension numbering signature certificate].exclude?(kind)
+  #       if f_hsh[:render_as] == 'select_menu'
+  #         target = f_hsh[:collection][0]
+  #         add_field(target.id, {})
+  #         add_nested_defaults(target)
+  #       elsif f_hsh[:render_as] == 'select_field'
+  #         target = f_hsh[:collection][0]
+  #         add_field(target.id, {})
+  #       end
+  #     end
+  #   end
+  # end
+  #
+  # def add_nested_defaults(origin)
+  #   if origin.type == "FieldSet"
+  #     add_default_field_set_targets(origin.targets)
+  #   elsif origin.type == "SelectField"
+  #     add_field(origin.id, {}) #<SelectField>
+  #     add_field(origin.targets[0].id, {}) #<Option>
+  #   elsif origin.type == "SelectMenu"
+  #     add_field(origin.id, {}) #<SelectMenu>
+  #     if origin.targets[0].type == 'FieldSet'
+  #       add_field(origin.targets[0].id, {}) #<FieldSet>
+  #       add_default_field_set_targets(origin.targets[0].targets)
+  #     elsif origin.targets[0].type == "SelectField"
+  #       add_field(origin.targets[0].id, {}) #<SelectField>
+  #       add_field(origin.targets[0].targets[0].id, {}) #<Option>
+  #     end
+  #   end
+  # end
+  #
+  # def add_default_field_set_targets(targets)
+  #   targets.each do |target|
+  #     add_nested_defaults(target)
+  #   end
+  # end
+  #
+  # def field_params
+  #   {"options" => params[:item][:options], "field_sets" => params[:item][:field_sets]} unless [:options, :field_sets].detect {|k| !params[:item].has_key?(k)}
+  # end
+  #
+  # def remove_item_fields
+  #   return if @item.field_targets.empty?
+  #   @item.tags = nil if @item.tags
+  #   @item.field_targets.each do |target|
+  #     @item.item_groups.where(target_id: target.id, target_type: target.type).first.destroy
+  #   end
+  # end
 
   ############################
-  def update_field_sets(fs, params_fs)
-    fs.each do |kind_key, kind_hsh|
-      update_kind_hsh(kind_hsh, params_fs[kind_key])
-    end
-  end
-
-  def update_kind_hsh(kind_hsh, params_kind_hsh)
-    kind_hsh.each do |k,v|
-      if k.split('_').last == 'id'
-        update_fk(v.try(:id), params_kind_hsh[k], params_kind_hsh)
-      elsif k == 'options'
-        update_options(kind_hsh[k], params_kind_hsh[k])
-      elsif k == 'tags'
-        update_tags(kind_hsh[k], params_kind_hsh[k])
-      end
-    end
-  end
-
-  def update_options(opts, params_opts)
-    opts.each do |opts_key, opt|
-      update_fk(opt.try(:id), params_opts[opts_key])
-    end
-  end
-
-  def update_tags(tags, param_tags)
-    tags.each do |tag_key, tag|
-      #puts "tags: #{tags}, param_tags[tag_key]: #{param_tags[tag_key]}"
-      param_tag = param_tags[tag_key]
-      assign_or_merge(tag_key, param_tag) unless (tag.blank? && param_tag.blank?) || (tag == param_tag)
-    end
-  end
-
-  def assign_or_merge(tag_key, param_tag)
-    if @item.tags
-      @item.tags[tag_key] = param_tag
-    else
-      @item.tags = {tag_key => param_tag}
-    end
-  end
+  # def update_field_sets(fs, params_fs)
+  #   fs.each do |kind_key, kind_hsh|
+  #     update_kind_hsh(kind_hsh, params_fs[kind_key])
+  #   end
+  # end
+  #
+  # def update_kind_hsh(kind_hsh, params_kind_hsh)
+  #   kind_hsh.each do |k,v|
+  #     if k.split('_').last == 'id'
+  #       update_fk(v.try(:id), params_kind_hsh[k], params_kind_hsh)
+  #     elsif k == 'options'
+  #       update_options(kind_hsh[k], params_kind_hsh[k])
+  #     elsif k == 'tags'
+  #       update_tags(kind_hsh[k], params_kind_hsh[k])
+  #     end
+  #   end
+  # end
+  #
+  # def update_options(opts, params_opts)
+  #   opts.each do |opts_key, opt|
+  #     update_fk(opt.try(:id), params_opts[opts_key])
+  #   end
+  # end
+  #
+  # def update_tags(tags, param_tags)
+  #   tags.each do |tag_key, tag|
+  #     #puts "tags: #{tags}, param_tags[tag_key]: #{param_tags[tag_key]}"
+  #     param_tag = param_tags[tag_key]
+  #     assign_or_merge(tag_key, param_tag) unless (tag.blank? && param_tag.blank?) || (tag == param_tag)
+  #   end
+  # end
+  #
+  # def assign_or_merge(tag_key, param_tag)
+  #   if @item.tags
+  #     @item.tags[tag_key] = param_tag
+  #   else
+  #     @item.tags = {tag_key => param_tag}
+  #   end
+  # end
 
   # CRUD methods for update_fields
-  def update_fk(id, param_id, f_param={})
-    return if skip_field_update(id, param_id)
-    if id.present? && param_id.blank?
-      remove_field(id, f_param)
-    elsif id.present? && (id != param_id.to_i)
-      replace_field(id, param_id, f_param)
-    elsif id.blank? && param_id.present?
-      add_field(param_id, f_param)
-    end
-  end
+  # def update_fk(id, param_id, f_param={})
+  #   return if skip_field_update(id, param_id)
+  #   if id.present? && param_id.blank?
+  #     remove_field(id, f_param)
+  #   elsif id.present? && (id != param_id.to_i)
+  #     replace_field(id, param_id, f_param)
+  #   elsif id.blank? && param_id.present?
+  #     add_field(param_id, f_param)
+  #   end
+  # end
 
   # def cascade_remove(f_params)
   #   f_params.each do |k, v|
@@ -483,9 +286,9 @@ class ApplicationController < ActionController::Base
   #   f_params
   # end
 
-  def skip_field_update(id, param_id)
-    (id.blank? && param_id.blank?) || (id == param_id.to_i)
-  end
+  # def skip_field_update(id, param_id)
+  #   (id.blank? && param_id.blank?) || (id == param_id.to_i)
+  # end
 
   # def remove_field(id, f_params)
   #   @item.item_groups.where(target_id: id).first.destroy
@@ -509,9 +312,9 @@ class ApplicationController < ActionController::Base
   #   type.classify.constantize
   # end
 
-  def str_to_class(assoc)
-    assoc.to_s.singularize.classify.constantize
-  end
+  # def str_to_class(assoc)
+  #   assoc.to_s.singularize.classify.constantize
+  # end
 
   def filter_keys
     %w[medium_category medium material]
