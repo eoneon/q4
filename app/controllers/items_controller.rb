@@ -1,5 +1,4 @@
 class ItemsController < ApplicationController
-  #after_action :product_group, only: [:show, :new, :create]
 
   def show
     @item = Item.find(params[:id])
@@ -22,15 +21,15 @@ class ItemsController < ApplicationController
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
 
-    @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
-    update_product
-    @item, @artist = update_assocs(@item, @item.artist, 'Artist', params[:hidden][:artist_id])
-
-    @products = products
-    @input_group = search_input_group
-
-    @product_group = @item.product_group
-    @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])
+    # @item, @product = update_assocs(@item, @item.product, params[:hidden][:type], params[:hidden][:product_id])
+    # update_product
+    # @item, @artist = update_assocs(@item, @item.artist, 'Artist', params[:hidden][:artist_id])
+    #
+    # @products = products
+    # @input_group = search_input_group
+    #
+    # @product_group = @item.product_group
+    # @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])
     @item.save
 
     respond_to do |format|
@@ -40,12 +39,7 @@ class ItemsController < ApplicationController
 
   def search
     @item = Item.find(params[:id])
-    #product = @item.product
     @products, @inputs = Product.search(scope: @item.product, search_params: params[:items][:search], hstore: 'tags')
-    # @item = item
-    # @product = product
-    # @products = products
-    # @input_group = search_input_group
 
     respond_to do |format|
       format.js
@@ -72,12 +66,12 @@ class ItemsController < ApplicationController
     params.require(:item).permit(:sku, :title, :retail, :qty)
   end
 
-  def product
-    Product.find(params[:hidden][:search][:product_id]) if !params[:hidden][:search][:product_id].blank?
-  end
-
-  def item
-    Item.find(params[:hidden][:search][:item_id]) if params[:hidden][:search][:item_id]
-  end
+  # def product
+  #   Product.find(params[:hidden][:search][:product_id]) if !params[:hidden][:search][:product_id].blank?
+  # end
+  #
+  # def item
+  #   Item.find(params[:hidden][:search][:item_id]) if params[:hidden][:search][:item_id]
+  # end
 
 end
