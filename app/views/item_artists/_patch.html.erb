@@ -1,0 +1,3 @@
+<%= form_with model: item, url: item_artists_path(item), method: "patch", id: "patch-item-artist", class: "collapse" do |f| %>
+  <%= number_field_tag :artist_id, artist.try(:id)  %>
+<% end %>

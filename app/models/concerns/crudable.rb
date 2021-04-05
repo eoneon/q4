@@ -11,9 +11,44 @@ module Crudable
     remove_hmt(obj)
   end
 
-  def replace_obj(new_obj, old_obj)
+  def replace_obj(old_obj, new_obj)
     remove_obj(old_obj)
     add_obj(new_obj)
+  end
+
+  # ############################################################################
+
+  def update_target_case(t, old_val, new_val)
+    case update_case(item_val(t, old_val), new_val)
+      when :add; add_obj(new_val(t, new_val))
+      when :remove; remove_obj(old_val)
+      when :replace; replace_obj(old_val, new_val(t, new_val))
+    end
+  end
+
+  def update_case(old_val, new_val)
+    case
+      when skip?(old_val, new_val); :skip
+      when remove?(old_val, new_val); :remove
+      when add?(old_val, new_val); :add
+      when replace?(old_val, new_val); :replace
+    end
+  end
+
+  def skip?(old_val, new_val)
+    old_val.blank? && new_val.blank? || old_val == new_val
+  end
+
+  def remove?(old_val, new_val)
+    !old_val.blank? && new_val.blank?
+  end
+
+  def add?(old_val, new_val)
+    old_val.blank? && !new_val.blank?
+  end
+
+  def replace?(old_val, new_val)
+    !old_val.blank? && !new_val.blank?
   end
 
   # ############################################################################

@@ -1,0 +1,9 @@
+<div class="dropdown">
+  <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="artist-dropdown" data-toggle="dropdown"><%= artist.try(:artist_name) %></button>
+  <div class="dropdown-menu">
+    <% Artist.all.each do |artist| %>
+      <div class="dropdown-divider"></div>
+      <a class="dropdown-item artist-select" role="button" href='#<%= artist.id %>'><%= artist.artist_name %></a>
+    <% end %>
+  </div>
+</div>

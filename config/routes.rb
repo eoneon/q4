@@ -26,6 +26,7 @@ Rails.application.routes.draw do
 
   resources :item_products
   resources :item_fields
+  resources :item_artists 
 
   resources :items, only: [:search] do
     collection do

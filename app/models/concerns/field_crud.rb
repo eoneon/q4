@@ -41,30 +41,30 @@ module FieldCrud
 
   # update_case ################################################################
   ##############################################################################
-  def update_case(v, v2)
-    case
-      when skip?(v, v2); :skip
-      when remove?(v, v2); :remove
-      when add?(v, v2); :add
-      when replace?(v, v2); :replace
-    end
-  end
-
-  def skip?(v, v2)
-    v.blank? && v2.blank? || v == v2
-  end
-
-  def remove?(v, v2)
-    !v.blank? && v2.blank?
-  end
-
-  def add?(v, v2)
-    v.blank? && !v2.blank?
-  end
-
-  def replace?(v, v2)
-    !v.blank? && !v2.blank?
-  end
+  # def update_case(v, v2)
+  #   case
+  #     when skip?(v, v2); :skip
+  #     when remove?(v, v2); :remove
+  #     when add?(v, v2); :add
+  #     when replace?(v, v2); :replace
+  #   end
+  # end
+  #
+  # def skip?(v, v2)
+  #   v.blank? && v2.blank? || v == v2
+  # end
+  #
+  # def remove?(v, v2)
+  #   !v.blank? && v2.blank?
+  # end
+  #
+  # def add?(v, v2)
+  #   v.blank? && !v2.blank?
+  # end
+  #
+  # def replace?(v, v2)
+  #   !v.blank? && !v2.blank?
+  # end
 
   # add methods ################################################################
   # standard add ###############################################################

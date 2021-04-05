@@ -92,12 +92,8 @@ $(document).ready(function(){
   });
 
   //CRUD ITEM-ARTIST #update
-  $("body").on("change", ".artist-add", function(e){
-    var id = $(this).val();
-    var artist_id = $('#hidden_artist_id').val();
-    //toggleTab(id, e);
-    $('#hidden_artist_id').val(toggleAttr(artist_id, id));
-    $("#edit-item").submit();
+  $("body").on("change", ".artist-update", function(e){
+    $("#patch-item-artist").submit();
   });
 
   $("body").on("change", "select.search-select", function(){
@@ -176,6 +172,15 @@ $(document).ready(function(){
   }
 });
 
+
+
+// $("body").on("change", ".artist-add", function(e){
+//   var id = $(this).val();
+//   var artist_id = $('#hidden_artist_id').val();
+//   //toggleTab(id, e);
+//   $('#hidden_artist_id').val(toggleAttr(artist_id, id));
+//   $("#edit-item").submit();
+// });
 
   //CRUD ITEM-PRODUCT #update - OLDER VER
   // $("body").on("click", "#product-index button.list-group-item", function(e){
