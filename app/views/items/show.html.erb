@@ -46,8 +46,8 @@
 
   <div class="col-8">
     <div id="show-card">
+      <%= render "items/form", invoice: @item.invoice, item: @item %>
       <%= render "item_fields/edit", item: @item %>
-      <%#= render "items/edit", invoice: @item.invoice, item: @item, product: @product, artist: @artist %>
     </div>
   </div>
 </div>

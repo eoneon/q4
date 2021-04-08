@@ -126,6 +126,10 @@ $(document).ready(function(){
     $("input[name='item[title]']").val(title)
   });
 
+  $("body").on("focusout", ".input-field", function(){
+    $(this).closest("form").submit();
+  });
+
   $("body").on("keyup", ".required-field", function(){
     var val = $(this).val();
     var submit = $(this).closest("form").find(".disabled-btn");

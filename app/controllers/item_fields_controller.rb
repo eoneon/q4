@@ -5,7 +5,7 @@ class ItemFieldsController < ApplicationController
     @item.tags = hsh_init(@item.tags)
     @item.update_field(param_set)
 
-    @item.save
+    #@item.save
 
     respond_to do |format|
       format.js

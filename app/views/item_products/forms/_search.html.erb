@@ -1,9 +1,9 @@
-<%= form_with url: search_items_url, method: :get, id: 'search-item-product' do |f| %>
+<%= form_with model: item, url: search_item_products_path, method: :get, id: 'search-item-product' do |f| %>
   <div class="form">
     <div class="collapse">
       <%= number_field_tag :id, item.id %>
     </div>
-    
+
     <% inputs.each do |input| %>
       <%= render "item_products/forms/search_field", name: input['input_name'], opts: input['opts'], selected: input['selected'] %>
     <% end %>

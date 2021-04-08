@@ -2,7 +2,6 @@ class ItemsController < ApplicationController
 
   def show
     @item = Item.find(params[:id])
-    #@artist = @item.artist
     @products, @inputs = Product.search(scope: @item.product, hstore: 'tags')
   end
 
@@ -28,16 +27,6 @@ class ItemsController < ApplicationController
     end
   end
 
-  def search
-    @item = Item.find(params[:id])
-    @products, @inputs = Product.search(scope: @item.product, search_params: params[:items][:search], hstore: 'tags')
-
-    respond_to do |format|
-      format.js
-      #format.html
-    end
-  end
-
   def destroy
     @item = Item.find(params[:id])
     @invoice = @item.invoice
@@ -57,12 +46,13 @@ class ItemsController < ApplicationController
     params.require(:item).permit(:sku, :title, :retail, :qty)
   end
 
-  # def product
-  #   Product.find(params[:hidden][:search][:product_id]) if !params[:hidden][:search][:product_id].blank?
-  # end
-  #
-  # def item
-  #   Item.find(params[:hidden][:search][:item_id]) if params[:hidden][:search][:item_id]
-  # end
-
 end
+
+# def search
+#   @item = Item.find(params[:id])
+#   @products, @inputs = Product.search(scope: @item.product, search_params: params[:items][:search], hstore: 'tags')
+#
+#   respond_to do |format|
+#     format.js
+#   end
+# end

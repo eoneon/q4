@@ -28,6 +28,15 @@ class ItemProductsController < ApplicationController
     end
   end
 
+  def search
+    @item = Item.find(params[:id])
+    @products, @inputs = Product.search(scope: @item.product, search_params: params[:items][:search], hstore: 'tags')
+
+    respond_to do |format|
+      format.js
+    end
+  end
+
   def destroy
     @item = Item.find(params[:id])
     @products, @inputs = Product.search(hstore: 'tags')
@@ -44,7 +53,6 @@ class ItemProductsController < ApplicationController
 
   def item_params
     params.require(:item_products).permit!
-    #params.require(:item).permit(:product)
   end
 
   def add_product(product)

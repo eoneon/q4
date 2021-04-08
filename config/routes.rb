@@ -24,15 +24,14 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :item_products
-  resources :item_fields
-  resources :item_artists 
-
-  resources :items, only: [:search] do
+  resources :item_products do
     collection do
       get :search
     end
   end
+
+  resources :item_fields
+  resources :item_artists
 
   resources :products
   resources :field_items
@@ -41,9 +40,9 @@ Rails.application.routes.draw do
       get :search
     end
   end
+
   resources :product_search, only: [:index, :show]
   resources :product_items
-
 
   resources :item_groups do
     member do
@@ -53,3 +52,9 @@ Rails.application.routes.draw do
 
   root to: 'product_items#index'
 end
+
+# resources :items, only: [:search] do
+#   collection do
+#     get :search
+#   end
+# end

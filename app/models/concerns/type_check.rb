@@ -16,6 +16,10 @@ module TypeCheck
     t.underscore == 'select_menu'
   end
 
+  def option?(t)
+    t.underscore == 'option'
+  end
+
   def tag_attr?(t)
     tag_attrs.include?(t)
   end
@@ -27,6 +31,10 @@ module TypeCheck
   # check kind #################################################################
   def dimension?(k)
     k == 'dimension'
+  end
+
+  def numbering?(k)
+    k == 'numbering'
   end
 
   def medium?(k)

@@ -33,6 +33,17 @@ module Fieldable
     item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
   end
 
+  def param_hsh(params, h={})
+    params.each do |k, field_groups|
+      field_groups.each do |t, fields|
+        fields.each do |f_name, f_val|
+          param_merge(params: h, dig_set: dig_set(k: f_name, v: f_val, dig_keys: []), keys:[k,t])
+        end
+      end
+    end
+    h
+  end
+
   ##############################################################################
 
   def grouped_hsh(enum:, i: 0, attrs: f_attrs)
