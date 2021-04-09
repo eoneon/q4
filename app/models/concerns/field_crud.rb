@@ -58,8 +58,6 @@ module FieldCrud
   def add_param(k, t, f_name, v2)
     if tag_attr?(t)
       add_tag_assoc(k, t, f_name, v2)
-      # self.tags.merge!(add_tag_assoc(k, t, f_name, v2))
-      # self.save
     else
       add_field(k, t, f_name, v2)
     end
@@ -68,18 +66,12 @@ module FieldCrud
   def add_field(k, t, f_name, f)
     assoc_unless_included(f)
     add_tag_assoc(k, t, f_name, f.id)
-    # self.tags.merge!(add_tag_assoc(k, t, f_name, f.id))
-    # self.save
   end
 
   def add_tag_assoc(k, t, f_name, v2)
     self.tags.merge!(tag_assoc(k, t, f_name, v2))
     self.save
   end
-
-  # def add_tag_assoc(k, t, f_name, v2)
-  #   {tag_key(k, t, f_name) => v2}
-  # end
 
   # remove methods #############################################################
   # standard remove ############################################################
