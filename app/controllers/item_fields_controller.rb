@@ -16,7 +16,6 @@ class ItemFieldsController < ApplicationController
 
   def item_params
     params.require(:item_fields).permit!
-    #params.require(:item).permit(:product)
   end
 
   ##############################################################################

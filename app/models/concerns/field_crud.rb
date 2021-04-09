@@ -6,17 +6,10 @@ module FieldCrud
   def update_field(param_set)
     param_set.each do |f_hsh|
       k, t, f_name, param_val = f_hsh.values
-      item_val = input_params.dig(k,t,f_name) #potentially and object
+      item_val = input_params.dig(k,t,f_name)
       context = update_case(item_val(t, item_val), param_val(t, param_val))
       update_actions(k: k, t: t, f_name: f_name, v: item_val, v2: param_val, context: context)
       break if update_complete?(context)
-      #f_hsh = field_case_args(*f_hsh.values)
-      #f_hsh[:context] = update_case(item_val(f_hsh[:t], f_hsh[:v]), f_hsh[:v2])
-      #f_hsh[:context] = update_case(item_val(f_hsh[:v]), f_hsh[:v2])
-      #v, v2 = item_val(f_hsh[:t], f_hsh[:v]), f_hsh[:v2]
-      # puts "f_hsh[:context]: #{f_hsh[:context]}, v: #{v}, v2: #{v2}"
-      # update_actions(f_hsh)
-      #break if update_complete?(f_hsh[:context])
     end
   end
 
@@ -43,23 +36,6 @@ module FieldCrud
 
   # update context-routing methods #############################################
   # primary method #############################################################
-  # def update_field(param_set)
-  #   param_set.each do |h|
-  #     update_field_case(field_case_args(*h.values))
-  #   end
-  # end
-  #
-  # def update_field_case(k:, t:, f_name:, v:, v2:)
-  #   case update_case(item_val(t, v), v2)
-  #     when :add; add_param(k, t, f_name, new_val(t, v2))
-  #     when :remove; remove_param(k, t, f_name, v)
-  #     when :replace; replace_param(k, t, f_name, new_val(t, v2), v)
-  #   end
-  # end
-
-  def field_case_args(k, t, f_name, f_val)
-    {k: k, t: t, f_name: f_name, v: input_params.dig(k,t,f_name), v2: param_val(t.classify, f_val)}
-  end
 
   def param_val(t, v2)
     valid_field_val?(t, v2) ? v2.to_i : v2
@@ -81,8 +57,9 @@ module FieldCrud
   # standard add ###############################################################
   def add_param(k, t, f_name, v2)
     if tag_attr?(t)
-      self.tags.merge!(add_tag_assoc(k, t, f_name, v2))
-      self.save
+      add_tag_assoc(k, t, f_name, v2)
+      # self.tags.merge!(add_tag_assoc(k, t, f_name, v2))
+      # self.save
     else
       add_field(k, t, f_name, v2)
     end
@@ -90,13 +67,19 @@ module FieldCrud
 
   def add_field(k, t, f_name, f)
     assoc_unless_included(f)
-    self.tags.merge!(add_tag_assoc(k, t, f_name, f.id))
-    self.save
+    add_tag_assoc(k, t, f_name, f.id)
+    # self.tags.merge!(add_tag_assoc(k, t, f_name, f.id))
+    # self.save
   end
 
   def add_tag_assoc(k, t, f_name, v2)
-    {tag_key(k, t, f_name) => v2}
+    self.tags.merge!(tag_assoc(k, t, f_name, v2))
+    self.save
   end
+
+  # def add_tag_assoc(k, t, f_name, v2)
+  #   {tag_key(k, t, f_name) => v2}
+  # end
 
   # remove methods #############################################################
   # standard remove ############################################################
@@ -141,11 +124,7 @@ module FieldCrud
   ##############################################################################
 
   def remove_tag_assoc(k, t, f_name, old_val)
-    # puts "self.tags: #{self.tags}"
-    # puts "old_val: #{old_val}"
-    # puts "tag_key(k, t, f_name): #{tag_key(k, t, f_name)}"
     self.tags.reject!{|key,val| tag_key(k, t, f_name) == key && val == old_val}
-    #self.tags = update_tag_assoc(k, t, f_name, old_val)
     self.save
   end
 
@@ -215,6 +194,9 @@ module FieldCrud
   end
 
   # basic utility methods ######################################################
+  def tag_assoc(k, t, f_name, v2)
+    {tag_key(k, t, f_name) => v2}
+  end
 
   def tag_key(*keys)
     keys.join('::')
