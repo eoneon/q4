@@ -5,6 +5,7 @@ class Item < ApplicationRecord
   include FieldCrud
   include ItemProduct
   include TypeCheck
+  include ItemDetail
 
   include STI
   include ExportAttrs
