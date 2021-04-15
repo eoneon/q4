@@ -1,7 +1,13 @@
 module Build
+  extend TypeCheck
+  #include Hashable
   # a = PRD.seed_product_type
   # a.map{|h| {name: h['name'], tags: h['tags']}}
   # a = Build.seed_products
+  # def self.abc
+  #   self.
+  # end
+
   def self.seed_products(store: PRD.seed_fields, products: [])
     [PRD, GBPRD, APRD].each do |prd|
       prd.seed_product_type(store: store)
@@ -132,122 +138,121 @@ module Build
   end
 
   ##############################################################################
+  # h = Build.seed_fields ######################################################
 
-  def seed_fields
-    seed_field_assocs(store: seed_options)
-  end
-
-  def seed_options(store:{})
-    [OPT, NF, TF, TFA].each do |k|
-      k.cascade_build(store: store)
+  def self.seed_fields
+    store = [OPT, NF, TF, TFA, RBTN, SFO, FSO, SMO].each_with_object({}) do |mod, store|
+      mod.cascade_seed(store)
     end
-    store
   end
 
-  def seed_field_assocs(store:{})
-    [RBTN, SFO, FSO, SMO].each do |k|
-      k.cascade_assoc(store: store)
-    end
-    store
-  end
-
-  ##############################################################################
-
-  def cascade_build(store:{})
-    constants.each do |kind|
-      modulize(self,kind).opts.each do |key, key_set|
-        opt_set = key_set.map{|opt| context_build(fieldable: field_class, field_name: opt, kind: kind)}
-        params_merge(params: store, dig_set: dig_set(key, opt_set, field_type.to_sym, kind))
+  def cascade_seed(store)
+    constants.each do |k|
+      target_opts(self,k).each do |f_name, f_val|
+        args = flat_args(f_class, f_name, k, [f_type.to_sym, k], nested_args(f_class, f_val))
+        field_build(args: args, store: store)
       end
     end
-    store
   end
 
-  def cascade_assoc(store:{})
-    constants.each do |kind|
-      modulize(self,kind).opts.each do |key, key_group|
-        build_and_merge(field_class, key, kind, build_targets(key_group, store), store)
-      end
+  def flat_args(f_class, f_name, k, dig_keys, targets)
+    {f_class: f_class, f_name: f_name, kind: k, dig_keys: [f_type.to_sym, k], targets: targets}
+  end
+
+  def nested_args(f_class, target_group)
+    return target_group if f_class.no_assoc?
+    targets = target_group.each_with_object([]) do |field_keys, targets|
+      t,k,f_name = field_keys
+      targets.append({f_class: t.to_s.constantize, f_name: f_name, kind: k, dig_keys: [t,k], targets: nil})
     end
-    store
   end
 
-  def build_and_merge(fieldable, field_name, kind, targets, store)
-    field = context_build(fieldable: fieldable, field_name: field_name, kind: kind, targets: targets)
-    puts "#{params_merge(params: store, dig_set: dig_set(field_name, field, field.type.to_sym, kind))}"
-  end
-
-  def build_targets(key_group, store, targets=[])
-    key_group.each do |key_set|
-      targets << build_target(key_set, store)
-    end
-    targets.compact.flatten
-  end
-
-  def build_target(key_set, store)
-    if !store.dig(*key_set)
-      cascade_build_target(key_set[0], key_set[1], key_set[2], store)
+  def field_build(args:, store:)
+    f_class, f_name, k, dig_keys, targets = args.values
+    if f_class.no_assoc?
+      targets = targets.map{|target_name| add_field(f_class, target_name, k)}
+      merge_field(Item.dig_set(k: f_name, v: targets, dig_keys: dig_keys), store)
     else
-      store.dig(*key_set)
+      add_assoc_and_merge_field(f_class, f_name, k, dig_keys, targets, store)
     end
   end
 
-  def cascade_build_target(type, kind, key, store)
-    key_group = modulize(module_name(type), kind).opts[key]
-    build_and_merge(modulize(type), key, kind, build_targets(key_group, store), store)
+  #####################################################################################
+  #####################################################################################
+
+  def add_field(f_class, f_name, k)
+    f_class.where(field_name: f_name, kind: k).first_or_create
   end
 
-  ##############################################################################
-
-  def context_build(fieldable:, field_name:, kind:, tags:nil, targets:[])
-    field = fieldable.where(field_name: field_name, kind: kind, tags: tags).first_or_create
-    targets.map{|target| field.assoc_unless_included(target)}
-    field
+  def merge_field(dig_set, store)
+    Item.param_merge(params: store, dig_set: dig_set)
   end
 
-  def field_class
-    field_type.constantize
+  # def add_and_merge_field(f_class, f_name, k, dig_keys, store)
+  #   f = add_field(f_class, f_name, k)
+  #   merge_field(Item.dig_set(k: f_name, v: f, dig_keys: dig_keys), store)
+  # end
+
+  # def add_assoc_and_merge_field(f_class, f_name, k, dig_keys, targets, store)
+  #   f = add_field(f_class, f_name, k)
+  #   add_and_merge_field_targets(targets, store).map{|target| f.assoc_unless_included(target)} #if targets
+  #   merge_field(Item.dig_set(k: f_name, v: f, dig_keys: dig_keys), store)
+  # end
+
+  def add_assoc_and_merge_field(f_class, f_name, k, dig_keys, targets, store)
+    f = add_field(f_class, f_name, k)
+    add_and_merge_field_targets(targets, store).map{|target| f.assoc_unless_included(target)} if targets
+    merge_field(Item.dig_set(k: f_name, v: f, dig_keys: dig_keys), store)
+  end
+  #add_field_assoc_any_targets_then_merge
+  def add_and_merge_field_targets(targets, store)
+    set = targets.each_with_object([]) do |args, set|
+      f_class, f_name, k, dig_keys, targets = args.values
+      #puts "targets inside: (add_and_merge_field_targets) #{targets}"
+      #add_and_merge_field(f_class, f_name, k, dig_keys, store)
+      add_assoc_and_merge_field(f_class, f_name, k, dig_keys, targets, store)
+    end
+  end
+  #####################################################################################
+  #####################################################################################
+
+  #methods for accessing opts hsh params #######################################
+  def target_group(t,k,f_name)
+    target_opts(t,k)[f_name]
   end
 
-  def field_module(key)
-    module_name(key).constantize
+  def target_opts(t,k)
+    modulize(t,k).opts
   end
 
-  def field_type
-    field_hsh[name]
-  end
-
+  #infer return value based on arguments #######################################
   def modulize(*keys)
     keys.map{|k| k.to_s}.join('::').constantize
   end
 
-  def module_name(key)
-    field_hsh.invert[key.to_s].to_sym
+  def to_class(t)
+    t.to_s.classify.constantize
   end
 
-  def field_hsh
-    {'OPT' => 'Option', 'RBTN' => 'RadioButton', 'FSO' => 'FieldSet', 'SFO' => 'SelectField', 'SMO' => 'SelectMenu', 'NF' => 'NumberField', 'TF' => 'TextField', 'TFA' => 'TextAreaField'}
-  end
-
-  ##############################################################################
-
-  def params_merge(params:, dig_set:, keys:[])
-    dig_keys, dig_values = dig_set[0], dig_set[1]
-    dig_keys.each_with_index do |k, i|
-      if !params.dig(*keys.append(k))
-        if params.has_key?(dig_keys[0])
-          keys[0..i-1].inject(params, :fetch)[k] = dig_values[i]
-        else
-          params[k] = dig_values[i]
-        end
-      end
+  #infer return value from file name and/or mod_hsh (context: top-level only) ##
+  def mod_name(t)
+    if module_name = mod_hsh.key(t)
+      module_name
+    elsif model_name = mod_hsh[t]
+      model_name
     end
-    params
   end
 
-  def dig_set(k, v, *keys)
-    return {k => v} if keys.empty?
-    keys.map{|key| [key, {}]}.append([k,v]).transpose
+  def f_class
+    f_type.constantize
+  end
+
+  def f_type
+    mod_hsh[name]
+  end
+
+  def mod_hsh
+    {'OPT' => 'Option', 'RBTN' => 'RadioButton', 'FSO' => 'FieldSet', 'SFO' => 'SelectField', 'SMO' => 'SelectMenu', 'NF' => 'NumberField', 'TF' => 'TextField', 'TFA' => 'TextAreaField'}
   end
 
   def build_key_group(set, field_type, kind)
@@ -255,3 +260,137 @@ module Build
   end
 
 end
+
+##############################################################################
+
+# def seed_fields
+#   seed_field_assocs(store: seed_options)
+# end
+
+# def seed_options(store:{})
+#   [OPT, NF, TF, TFA].each do |k|
+#     k.cascade_build(store: store)
+#   end
+#   store
+# end
+#
+# def seed_field_assocs(store:{})
+#   [RBTN, SFO, FSO, SMO].each do |k|
+#     k.cascade_assoc(store: store)
+#   end
+#   store
+# end
+
+##############################################################################
+
+# def cascade_build(store:{})
+#   constants.each do |kind|
+#     modulize(self,kind).opts.each do |key, key_set|
+#       opt_set = key_set.map{|opt| context_build(fieldable: field_class, field_name: opt, kind: kind)}
+#       params_merge(params: store, dig_set: dig_set(key, opt_set, field_type.to_sym, kind))
+#     end
+#   end
+#   store
+# end
+
+# def cascade_assoc(store:{})
+#   constants.each do |kind|
+#     modulize(self,kind).opts.each do |key, key_group|
+#       build_and_merge(field_class, key, kind, build_targets(key_group, store), store)
+#     end
+#   end
+#   store
+# end
+#
+# def build_and_merge(fieldable, field_name, kind, targets, store)
+#   field = context_build(fieldable: fieldable, field_name: field_name, kind: kind, targets: targets)
+#   puts "#{params_merge(params: store, dig_set: dig_set(field_name, field, field.type.to_sym, kind))}"
+# end
+
+# def build_targets(key_group, store, targets=[])
+#   key_group.each do |key_set|
+#     targets << build_target(key_set, store)
+#   end
+#   targets.compact.flatten
+# end
+#
+# def build_target(key_set, store)
+#   if !store.dig(*key_set)
+#     cascade_build_target(key_set[0], key_set[1], key_set[2], store)
+#   else
+#     store.dig(*key_set)
+#   end
+# end
+
+# def cascade_build_target(type, kind, key, store)
+#   key_group = modulize(module_name(type), kind).opts[key]
+#   build_and_merge(modulize(type), key, kind, build_targets(key_group, store), store)
+# end
+
+##############################################################################
+
+# def context_build(fieldable:, field_name:, kind:, tags:nil, targets:[])
+#   field = fieldable.where(field_name: field_name, kind: kind, tags: tags).first_or_create
+#   targets.map{|target| field.assoc_unless_included(target)} unless targets.empty?
+#   field
+# end
+
+# def field_class
+#   field_type.constantize
+# end
+
+# def field_module(key)
+#   module_name(key).constantize
+# end
+#
+# def field_type
+#   field_hsh[name]
+# end
+#
+# def module_name(key)
+#   field_hsh.invert[key.to_s].to_sym
+# end
+
+# def field_hsh
+#   {'OPT' => 'Option', 'RBTN' => 'RadioButton', 'FSO' => 'FieldSet', 'SFO' => 'SelectField', 'SMO' => 'SelectMenu', 'NF' => 'NumberField', 'TF' => 'TextField', 'TFA' => 'TextAreaField'}
+# end
+
+# def build_targets(target_group, store)
+#   targets = target_group.each_with_object([]) do |field_keys, targets|
+#     t, k, f_name = field_keys
+#     targets << build_target(k, t, f_name, store)
+#   end
+# end
+#
+# def build_target(k, t, f_name, store)
+#   if target = store.dig(t, k, f_name)
+#     target
+#   else
+#     f = t.to_s.constantize.where(field_name: f_name, kind: k).first_or_create
+#     Item.param_merge(params: store, dig_set: Item.dig_set(k: f_name, v: f, dig_keys: [t, k]))
+#
+#     puts "HERE!! k: #{k},t: #{t}, f_name: #{f_name}, field_hsh.key(t.to_s): #{field_hsh.key(t.to_s)}"
+#     target_group = target_group(field_hsh.key(t.to_s), k, f_name)
+#     puts "target_group inside build_target: #{target_group}"
+#     build_origin_and_targets(t.to_s.constantize, k, f_name, target_group, store)
+#   end
+# end
+
+##############################################################################
+##############################################################################
+
+# def build_args
+#   a = constants.each_with_object([]) do |k, a|
+#     target_opts(self,k).each do |f_name, f_val|
+#       a.append({f_class: f_class, f_name: f_name, dig_keys: [f_class.type.to_sym, k], targets: target_args(f_class, f_val)})
+#     end
+#   end
+# end
+#
+# def target_args(f_class, target_group)
+#   return target_group if f_class.no_assoc?
+#   targets = target_group.each_with_object([]) do |field_keys, targets|
+#     t,k,f_name = field_keys
+#     targets.append({f_class: t.to_s.constantize, f_name: f_name, dig_keys: [t,k]})
+#   end
+# end

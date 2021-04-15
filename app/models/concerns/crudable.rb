@@ -79,8 +79,4 @@ module Crudable
     to_class(target_type).find(target_id)
   end
 
-  def to_class(type)
-    type.classify.constantize
-  end
-
 end

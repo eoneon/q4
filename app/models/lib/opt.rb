@@ -1,5 +1,6 @@
 module OPT
   extend Build
+  #extend Hashable
 
   module Category
     def self.opts

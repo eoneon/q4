@@ -4,8 +4,10 @@ class Item < ApplicationRecord
   include Crudable
   include FieldCrud
   include ItemProduct
+  include Hashable
   include TypeCheck
   include ItemDetail
+
 
   include STI
   include ExportAttrs

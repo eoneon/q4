@@ -2,8 +2,10 @@ class Product < ApplicationRecord
 
   include Fieldable
   include Crudable
+  include Hashable
   include TypeCheck
   include HattrSearch
+  
   include STI
 
   #validates :type, :product_name, presence: true
@@ -20,6 +22,9 @@ class Product < ApplicationRecord
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
   #scope :product_group, -> {self.all}
+  def radio_options
+    radio_buttons.includes(:options).map(&:options)
+  end
 
   def input_set(g_hsh, i_hsh, a=[])
     a = field_args(g_hsh).each_with_object(a) do |f_hsh, a|

@@ -18,11 +18,6 @@ module FSO
 
   module Mounting
     def self.opts
-      # {
-      #   Framing: [[:SelectField, :Mounting, :Framing], [:FieldSet, :Dimension, :WidthHeight]],
-      #   Border: [[:SelectField, :Mounting, :Border], [:FieldSet, :Dimension, :WidthHeight]],
-      #   Matting: [[:SelectField, :Mounting, :Matting], [:FieldSet, :Dimension, :WidthHeight]]
-      # }
       {
         Framing: [[:SelectField, :Mounting, :Framing], [:FieldSet, :Dimension, :MountingWidthHeight]],
         Border: [[:SelectField, :Mounting, :Border], [:FieldSet, :Dimension, :MountingWidthHeight]],

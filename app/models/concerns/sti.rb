@@ -259,9 +259,9 @@ module STI
     end
 
     #get ALL assoc names except join assoc; first param for: scoped_assoc_names #=> ["select_fields", "text_fields", "check_box_fields", "number_fields", "text_area_fields", "materials", "mountings"]
-    def assoc_names
-      self.reflect_on_all_associations(:has_many).map{|assoc| assoc.name.to_s}.reject {|i| i == 'item_groups'}
-    end
+    # def assoc_names
+    #   self.reflect_on_all_associations(:has_many).map{|assoc| assoc.name.to_s}.reject {|i| i == 'item_groups'}
+    # end
 
     #superclass context methods: ProductItem, FieldItem ########################
     #search and scope methods ########################

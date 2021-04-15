@@ -25,24 +25,9 @@ module Fieldable
     field_set?(t) && product_class?
   end
 
-  def f_assoc(t)
-    tag_attr?(t) ? t : {'select_field' => 'option', 'select_menu'=> 'field_set'}[t]
-  end
-
   def fieldables
     item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
   end
-
-  # def param_hsh(params, h={})
-  #   params.each do |k, field_groups|
-  #     field_groups.each do |t, fields|
-  #       fields.each do |f_name, f_val|
-  #         param_merge(params: h, dig_set: dig_set(k: f_name, v: f_val, dig_keys: []), keys:[k,t])
-  #       end
-  #     end
-  #   end
-  #   h
-  # end
 
   ##############################################################################
 
@@ -65,35 +50,38 @@ module Fieldable
 
   ##############################################################################
 
-  def param_merge(params:, dig_set:, keys:[])
-    dig_keys, dig_values = dig_set[0], dig_set[1]
-    dig_keys.each_with_index do |k, i|
-      if !params.dig(*keys.append(k))
-        if params.has_key?(dig_keys[0])
-          keys[0..i-1].inject(params, :fetch)[k] = dig_values[i]
-        else
-          params[k] = dig_values[i]
-        end
-      end
-    end
-    params
-  end
-
-  def dig_set(k:, v: nil, dig_keys: [])
-    return [[k],[v]] if k && dig_keys.one? && k == dig_keys[0] || k && dig_keys.none?
-    dig_keys.map{|key| [key, {}]}.append([k,v]).transpose
-  end
-
   def h_vals(h,*keys)
     keys.map{|k| h[k]}
   end
 
+  # def h_args(h:, keys: nil, args: nil)
+  #   h_vals = h_vals(h: h, keys: keys)
+  #   args ? h_vals + args : h_vals
+  # end
+  #
+  # def h_vals(h:, keys: nil)
+  #   keys ? keys.map{|k| h[k]} : h.values
+  # end
+
 end
 
-
-
 ##############################################################################
-#
+
+# def f_assoc(t)
+#   tag_attr?(t) ? t : {'select_field' => 'option', 'select_menu'=> 'field_set'}[t]
+# end
+
+# def param_hsh(params, h={})
+#   params.each do |k, field_groups|
+#     field_groups.each do |t, fields|
+#       fields.each do |f_name, f_val|
+#         param_merge(params: h, dig_set: dig_set(k: f_name, v: f_val, dig_keys: []), keys:[k,t])
+#       end
+#     end
+#   end
+#   h
+# end
+
 # def f_scope(field_type)
 #   assoc = input_attr?(field_type)
 #   assoc ? assoc : field_assocs(field_type).first
