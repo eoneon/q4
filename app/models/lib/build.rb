@@ -139,90 +139,76 @@ module Build
 
   ##############################################################################
   # h = Build.seed_fields ######################################################
-
   def self.seed_fields
     store = [OPT, NF, TF, TFA, RBTN, SFO, FSO, SMO].each_with_object({}) do |mod, store|
-      mod.cascade_seed(store)
+      mod.field_module_cascade(store)
     end
   end
 
-  def cascade_seed(store)
-    constants.each do |k|
-      target_opts(self,k).each do |f_name, f_val|
-        args = flat_args(f_class, f_name, k, [f_type.to_sym, k], nested_args(f_class, f_val))
-        field_build(args: args, store: store)
-      end
+  def field_module_cascade(store)
+    cascade_args.each do |f_hsh|
+      mod, sub_mod, opt_key, opt_enum = f_hsh.values
+      field_build(f_class: f_class, f_name: opt_key, kind: sub_mod, dig_keys: [f_type.to_sym, sub_mod], targets: nested_args(f_class, opt_enum), store: store)
     end
   end
 
-  def flat_args(f_class, f_name, k, dig_keys, targets)
-    {f_class: f_class, f_name: f_name, kind: k, dig_keys: [f_type.to_sym, k], targets: targets}
-  end
-
-  def nested_args(f_class, target_group)
-    return target_group if f_class.no_assoc?
-    targets = target_group.each_with_object([]) do |field_keys, targets|
-      t,k,f_name = field_keys
-      targets.append({f_class: t.to_s.constantize, f_name: f_name, kind: k, dig_keys: [t,k], targets: nil})
+  def nested_args(f_class, field_group)
+    return field_group if f_class.no_assoc?
+    targets = field_group.each_with_object([]) do |f_keys, targets|
+      targets.append({f_class: f_keys[0].to_s.constantize, f_name: f_keys[2], kind: f_keys[1], dig_keys: [f_keys[0],f_keys[1]], targets: nil}) #t,k,f_name = field_keys
     end
   end
 
-  def field_build(args:, store:)
-    f_class, f_name, k, dig_keys, targets = args.values
+  def field_build(f_class:, f_name:, kind:, dig_keys:, targets:, store:)
     if f_class.no_assoc?
-      targets = targets.map{|target_name| add_field(f_class, target_name, k)}
-      merge_field(Item.dig_set(k: f_name, v: targets, dig_keys: dig_keys), store)
+      add_field_options(f_class, f_name, kind, dig_keys, targets, store)
     else
-      add_assoc_and_merge_field(f_class, f_name, k, dig_keys, targets, store)
+      add_and_assoc_targets_then_merge_field(f_class, f_name, kind, dig_keys, targets, store)
     end
   end
 
-  #####################################################################################
-  #####################################################################################
+  ##############################################################################
+  #fields: add, assoc & merge methods ##########################################
+  def add_field_options(f_class, f_name, kind, dig_keys, targets, store)
+    targets = targets.map{|target_name| add_field(f_class, target_name, kind)}
+    merge_field(Item.dig_set(k: f_name, v: targets, dig_keys: dig_keys), store)
+  end
 
-  def add_field(f_class, f_name, k)
-    f_class.where(field_name: f_name, kind: k).first_or_create
+  def add_field(f_class, f_name, kind)
+    f_class.where(field_name: f_name, kind: kind).first_or_create
   end
 
   def merge_field(dig_set, store)
     Item.param_merge(params: store, dig_set: dig_set)
   end
 
-  # def add_and_merge_field(f_class, f_name, k, dig_keys, store)
-  #   f = add_field(f_class, f_name, k)
-  #   merge_field(Item.dig_set(k: f_name, v: f, dig_keys: dig_keys), store)
-  # end
-
-  # def add_assoc_and_merge_field(f_class, f_name, k, dig_keys, targets, store)
-  #   f = add_field(f_class, f_name, k)
-  #   add_and_merge_field_targets(targets, store).map{|target| f.assoc_unless_included(target)} #if targets
-  #   merge_field(Item.dig_set(k: f_name, v: f, dig_keys: dig_keys), store)
-  # end
-
-  def add_assoc_and_merge_field(f_class, f_name, k, dig_keys, targets, store)
-    f = add_field(f_class, f_name, k)
+  def add_and_assoc_targets_then_merge_field(f_class, f_name, kind, dig_keys, targets, store)
+    f = add_field(f_class, f_name, kind)
     add_and_merge_field_targets(targets, store).map{|target| f.assoc_unless_included(target)} if targets
     merge_field(Item.dig_set(k: f_name, v: f, dig_keys: dig_keys), store)
   end
-  #add_field_assoc_any_targets_then_merge
+
   def add_and_merge_field_targets(targets, store)
     set = targets.each_with_object([]) do |args, set|
-      f_class, f_name, k, dig_keys, targets = args.values
-      #puts "targets inside: (add_and_merge_field_targets) #{targets}"
-      #add_and_merge_field(f_class, f_name, k, dig_keys, store)
-      add_assoc_and_merge_field(f_class, f_name, k, dig_keys, targets, store)
+      add_and_assoc_targets_then_merge_field(args[:f_class], args[:f_name], args[:kind], args[:dig_keys], args[:targets], store)
     end
   end
-  #####################################################################################
-  #####################################################################################
+  ##############################################################################
+  ##############################################################################
 
-  #methods for accessing opts hsh params #######################################
-  def target_group(t,k,f_name)
-    target_opts(t,k)[f_name]
+  ##############################################################################
+  #cascading loop method (2-levs) for collecting relevant module arguments ######
+  def cascade_args
+    a = constants.each_with_object([]) do |sub_mod, a|
+      mod_opts(self, sub_mod).each do |opt_key, opt_enum|
+        a.append({mod: self, sub_mod: sub_mod, opt_key: opt_key, opt_enum: opt_enum})
+      end
+    end
   end
 
-  def target_opts(t,k)
-    modulize(t,k).opts
+  #methods for accessing opts hsh params #######################################
+  def mod_opts(mod, sub_mod)
+    modulize(mod, sub_mod).opts
   end
 
   #infer return value based on arguments #######################################
@@ -261,7 +247,32 @@ module Build
 
 end
 
+# def target_group(t,k,f_name)
+#   target_opts(t,k)[f_name]
+# end
+#
+# def target_opts(t,k)
+#   modulize(t,k).opts
+# end
+
 ##############################################################################
+#field_build(field_args(*f_hsh.values.append(store)))
+# def field_args(mod, sub_mod, opt_key, opt_enum, store)
+#   {f_class: f_class, f_name: opt_key, kind: sub_mod, dig_keys: [f_type.to_sym, sub_mod], targets: nested_args(f_class, opt_enum), store: store}
+# end
+# def self.seed_fields
+#   store = [OPT, NF, TF, TFA, RBTN, SFO, FSO, SMO].each_with_object({}) do |mod, store|
+#     mod.cascade_seed(store)
+#   end
+# end
+#
+# def cascade_seed(store)
+#   constants.each do |k|
+#     target_opts(self,k).each do |f_name, f_val|
+#       field_build(f_class: f_class, f_name: f_name, kind: k, dig_keys: [f_type.to_sym, k], targets: nested_args(f_class, f_val), store: store)
+#     end
+#   end
+# end
 
 # def seed_fields
 #   seed_field_assocs(store: seed_options)
