@@ -130,12 +130,18 @@ module FieldCrud
 
   def add_default_fields(field_args)
     field_args.each do |f_hsh|
+      # puts "f_hsh: #{f_hsh}"
+      # puts "h_vals: #{h_vals(f_hsh, :k, :t, :f_name, :f_val)}"
       add_default(*h_vals(f_hsh, :k, :t, :f_name, :f_val))
     end
   end
 
   def add_default(k, t, f_name, f_val)
+    #puts "valid_default_option? #{valid_default_option?(k,t)}"
+    #puts "default_option: #{default_option(k, f_val)}"
+    puts "k: #{k}, t: #{t}, f_val: #{f_val}"
     if f = default_field(k, t, f_val)
+      puts "f: #{f}"
       add_field(k, f.type.underscore, f_name, f)
     end
   end
@@ -152,7 +158,10 @@ module FieldCrud
     if medium?(k)
       detect_matching_field_names(f_val)
     elsif default_option_kind?(k)
-      first_fieldable(f_val)
+      puts "f_val: #{f_val}"
+      f = first_fieldable(f_val)
+      puts "first_fieldable: #{f}"
+      f
     end
   end
 

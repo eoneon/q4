@@ -13,8 +13,8 @@ module ItemDetail
   end
 
   def product_params(store)
-    param_merge(params: store, dig_set: dig_set(k: 'tags', v: product.tags, dig_keys: ['product']))
-    param_merge(params: store, dig_set: dig_set(k: 'options', v: product.radio_options, dig_keys: ['product']))
+    Item.param_merge(params: store, dig_set: Item.dig_set(k: 'tags', v: product.tags, dig_keys: ['product']))
+    Item.param_merge(params: store, dig_set: Item.dig_set(k: 'options', v: product.radio_options, dig_keys: ['product']))
   end
 
   def category_params(store)
@@ -26,7 +26,7 @@ module ItemDetail
   def title_params(store)
     export_headers.each do |k|
       v = k == 'body' ? body_title : tagline_title
-      param_merge(params: store, dig_set: dig_set(k: 'title', v: v, dig_keys: ['item', k]))
+      Item.param_merge(params: store, dig_set: dig_set(k: 'title', v: v, dig_keys: ['item', k]))
     end
     store
   end
@@ -41,7 +41,7 @@ module ItemDetail
 
   def item_attr_params(store)
     %w[sku retail qty].each do |k|
-      param_merge(params: store, dig_set: dig_set(k: k, v: self.public_send(k), dig_keys: %w[item export_params]))
+      Item.param_merge(params: store, dig_set: Item.dig_set(k: k, v: self.public_send(k), dig_keys: %w[item export_params]))
     end
     store
   end
@@ -49,7 +49,7 @@ module ItemDetail
   def artist_params(store)
     return if !artist
     artist.artist_params.each do |k,v|
-      param_merge(params: store, dig_set: dig_set(k: k, v: v, dig_keys: ['artist']))
+      Item.param_merge(params: store, dig_set: Item.dig_set(k: k, v: v, dig_keys: ['artist']))
     end
     store
   end

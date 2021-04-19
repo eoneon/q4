@@ -9,14 +9,14 @@ class Category
 
   def kind_params(category, medium, product_type, category_opt, store)
     category_hsh(category_opt).each do |k,v|
-      param_merge(params: store, dig_set: dig_set(k: k, v: v, dig_keys: ['category']))
+      Item.param_merge(params: store, dig_set: Item.dig_set(k: k, v: v, dig_keys: ['category']))
     end
     store
   end
 
   def export_params(category, medium, product_type, store)
     export_hsh(category, medium, product_type).each do |k,v|
-      param_merge(params: store, dig_set: dig_set(k: k, v: v, dig_keys: %w[item export_params]))
+      Item.param_merge(params: store, dig_set: Item.dig_set(k: k, v: v, dig_keys: %w[item export_params]))
     end
     store
   end

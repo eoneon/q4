@@ -54,6 +54,10 @@ module Fieldable
     keys.map{|k| h[k]}
   end
 
+end
+
+##############################################################################
+
   # def h_args(h:, keys: nil, args: nil)
   #   h_vals = h_vals(h: h, keys: keys)
   #   args ? h_vals + args : h_vals
@@ -62,10 +66,6 @@ module Fieldable
   # def h_vals(h:, keys: nil)
   #   keys ? keys.map{|k| h[k]} : h.values
   # end
-
-end
-
-##############################################################################
 
 # def f_assoc(t)
 #   tag_attr?(t) ? t : {'select_field' => 'option', 'select_menu'=> 'field_set'}[t]

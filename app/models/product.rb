@@ -5,10 +5,9 @@ class Product < ApplicationRecord
   include Hashable
   include TypeCheck
   include HattrSearch
-  
+
   include STI
 
-  #validates :type, :product_name, presence: true
   validates :product_name, presence: true
   validates :product_name, uniqueness: true
 
@@ -21,7 +20,6 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  #scope :product_group, -> {self.all}
   def radio_options
     radio_buttons.includes(:options).map(&:options)
   end
@@ -46,13 +44,6 @@ class Product < ApplicationRecord
     update_tags(product, f[:tags])
     f[:options].map {|opt| product.assoc_unless_included(opt)}
     product
-  end
-
-  ##############################################################################
-
-  def field_targets
-    #scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many, reject_set: ['RadioButton'])
-    scoped_targets(scope: 'FieldItem', join: :item_groups, sort: :sort, reject_set: ['RadioButton'])
   end
 
   ##############################################################################
@@ -119,6 +110,11 @@ class Product < ApplicationRecord
   end
 
 end
+
+# def field_targets
+#   #scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many, reject_set: ['RadioButton'])
+#   scoped_targets(scope: 'FieldItem', join: :item_groups, sort: :sort, reject_set: ['RadioButton'])
+# end
 
 # def scoped_search(hstore: 'tags')
 #   inputs = search_set.map{|k| [k, self.public_send(hstore)[k]]}.to_h

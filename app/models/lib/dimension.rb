@@ -5,10 +5,10 @@ class Dimension
     dimensions.each do |kind, keys|
       if scoped_tags = scoped_dimensions(keys, tags)
         measurements = format_measurements(scoped_dimensions)
-        param_merge(params: h, dig_set: dig_set(k: k+'s', v: scoped_tags, dig_keys: [k,kind]))
-        param_merge(params: h, dig_set: dig_set(k: 'measurements', v: measurements, dig_keys: [k,kind]))
+        Item.param_merge(params: h, dig_set: Item.dig_set(k: k+'s', v: scoped_tags, dig_keys: [k,kind]))
+        Item.param_merge(params: h, dig_set: Item.dig_set(k: 'measurements', v: measurements, dig_keys: [k,kind]))
         if material_tags = scoped_tags['material']
-          param_merge(params: h, dig_set: dig_set(k: 'size', v: size_case(material_tags), dig_keys: [k,kind]))
+          Item.param_merge(params: h, dig_set: Item.dig_set(k: 'size', v: size_case(material_tags), dig_keys: [k,kind]))
         end
       end
     end
