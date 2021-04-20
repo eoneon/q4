@@ -3,7 +3,7 @@ module Build
 
   ##############################################################################
   # a = Build.seed_products ####################################################
-
+  #don't need to collect set
   def self.seed_products
     set = [PRD, GBPRD, APRD].each_with_object([]) do |mod, set|
       mod.product_module_cascade(seed_field_groups).each do |p|
@@ -62,7 +62,6 @@ module Build
   end
 
   def dig_fields(target_sets, store)
-    puts "target_sets: #{target_sets}"
     target_sets.map{|f_keys| store.dig(*f_keys)}.flatten
   end
 
