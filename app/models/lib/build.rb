@@ -6,8 +6,8 @@ module Build
 
   def self.seed_products
     set = [PRD, GBPRD, APRD].each_with_object([]) do |mod, set|
-      mod.product_module_cascade(seed_fields).each do |p|
-        mod.build_product(p['p'], p['tags'])
+      mod.product_module_cascade(seed_field_groups).each do |p|
+        set << mod.build_product(p['p'], p['tags'])
       end
     end
   end
@@ -62,6 +62,7 @@ module Build
   end
 
   def dig_fields(target_sets, store)
+    puts "target_sets: #{target_sets}"
     target_sets.map{|f_keys| store.dig(*f_keys)}.flatten
   end
 
@@ -70,15 +71,15 @@ module Build
       p['p'].merge!({f.kind.to_sym => f})
     end
   end
-  ##############################################################################
-  ##############################################################################
-  def build_products(products)
-    products.each do |p|
-      build_product(p['p'], p['tags'])
-    end
-  end
 
+  # def dig_and_assign(target_sets, store, p)
+  #   p = dig_fields(target_sets, store).each_with_object(p) do |f, p|
+  #     merge_field(Item.dig_set(k: f.kind.to_sym, v: f, dig_keys:['p']), p)
+  #   end
+  # end
   ##############################################################################
+  ##############################################################################
+
   def build_product(p, tags, product={})
     product['options'] = sort_fields(p)
     product['tags'] = build_tags(p, tags)
@@ -87,9 +88,13 @@ module Build
   end
 
   def sort_fields(p)
-    p_set = [:Embellished, :Category, :Edition, :Medium, :Material, :Leafing, :Remarque, :Numbering, :Signature, :TextBeforeCOA, :Certificate].each_with_object([]) do |k, p_set|
+    p_set = field_order.each_with_object([]) do |k, p_set|
       p_set << p[k] if p.has_key?(k)
     end
+  end
+
+  def field_order
+    [:Embellished, :Category, :Edition, :Medium, :Material, :Leafing, :Remarque, :Numbering, :Signature, :TextBeforeCOA, :Certificate]
   end
 
   def build_tags(p, tags)
@@ -105,10 +110,15 @@ module Build
   def name_set(tags)
     name_set = name_keys.each_with_object([]) do |k, name_set|
       next if !tags.dig(k)
-      name = tags[k].underscore.split('_').map{|word| word.capitalize}.join(' ')
+      #name = tags[k].underscore.split('_').map{|word| word.capitalize}.join(' ')
+      name = class_to_cap(tags[k])
       name = k == 'material' ? "on #{name}" : name
       name_set << name
     end
+  end
+
+  def class_to_cap(class_word)
+    class_word.underscore.split('_').map{|word| word.capitalize}.join(' ')
   end
 
   def edit_name(name)
@@ -136,53 +146,19 @@ module Build
   end
 
   ##############################################################################
-  # h = Build.seed_fields ######################################################
-  # def self.seed_fields
-  #   store = {'parents'=[]}
-  #   store = [OPT, NF, TF, TFA, RBTN, SFO, FSO, SMO].each_with_object(store) do |mod, store|
-  #     mod.field_module_cascade(store)
-  #   end
-  # end
-
-  # def field_module_cascade(store)
-  #   cascade_args.each do |f_hsh|
-  #     mod, sub_mod, opt_key, opt_enum = f_hsh.values
-  #     targets = f_class.no_assoc? ? opt_enum : nested_args(f_class, opt_enum)
-  #     field_build(f_class: f_class, f_name: opt_key, kind: sub_mod, dig_keys: [f_type.to_sym, sub_mod], targets: targets, store: store)
-  #   end
-  # end
-
-  def nested_args(f_class, field_group)
-    #return field_group if f_class.no_assoc?
-    targets = field_group.each_with_object([]) do |f_keys, targets|
-      targets.append({f_class: f_keys[0].to_s.constantize, f_name: f_keys[2], kind: f_keys[1], dig_keys: [f_keys[0],f_keys[1]], targets: nil}) #t,k,f_name = field_keys
-      #dig_or_add_and_merge
-    end
-  end
-
-  def field_build(f_class:, f_name:, kind:, dig_keys:, targets:, store:)
-    if f_class.no_assoc?
-      add_field_options(f_class, f_name, kind, dig_keys, targets, store)
-    else
-      add_and_assoc_targets_then_merge_field(f_class, f_name, kind, dig_keys, targets, store)
-    end
-  end
-
-
-  ##############################################################################
   #h = Build.seed_field_groups #################################################
   def self.seed_field_groups
-    PRD.assoc_fields(seed_fields)
+    PRD.assoc_fields(PRD.seed_fields)
   end
 
   def assoc_fields(store)
-    store[:parents].each do |parent|
+    store = store[:parents].each_with_object(store) do |parent, store|
       f, targets = parent.values
       dig_and_assoc(f, targets, store)
     end
   end
 
-  def self.seed_fields(store={parents:[]})
+  def seed_fields(store={parents:[]})
     store = [OPT, NF, TF, TFA, RBTN, SFO, FSO, SMO].each_with_object(store) do |mod, store|
       mod.field_module_cascade(store)
     end
@@ -216,13 +192,6 @@ module Build
   ##############################################################################
   ##############################################################################
 
-  ##############################################################################
-  #fields: add, assoc & merge methods ##########################################
-  # def add_field_options(f_class, f_name, kind, dig_keys, targets, store)
-  #   targets = targets.map{|target_name| add_field(f_class, target_name, kind)}
-  #   merge_field(Item.dig_set(k: f_name, v: targets, dig_keys: dig_keys), store)
-  # end
-
   def add_field(f_class, f_name, kind)
     f_class.where(field_name: f_name, kind: kind).first_or_create
   end
@@ -231,17 +200,6 @@ module Build
     Item.param_merge(params: store, dig_set: dig_set)
   end
 
-  def add_and_assoc_targets_then_merge_field(f_class, f_name, kind, dig_keys, targets, store)
-    f = add_field(f_class, f_name, kind)
-    add_and_merge_field_targets(targets, store).map{|target| f.assoc_unless_included(target)} if targets
-    merge_field(Item.dig_set(k: f_name, v: f, dig_keys: dig_keys), store)
-  end
-
-  def add_and_merge_field_targets(targets, store)
-    set = targets.each_with_object([]) do |args, set|
-      add_and_assoc_targets_then_merge_field(args[:f_class], args[:f_name], args[:kind], args[:dig_keys], args[:targets], store)
-    end
-  end
   ##############################################################################
   ##############################################################################
 
@@ -300,6 +258,25 @@ module Build
 
 end
 
+# def build_products(products)
+#   products.each do |p|
+#     build_product(p['p'], p['tags'])
+#   end
+# end
+
+
+
+# def add_and_assoc_targets_then_merge_field(f_class, f_name, kind, dig_keys, targets, store)
+#   f = add_field(f_class, f_name, kind)
+#   add_and_merge_field_targets(targets, store).map{|target| f.assoc_unless_included(target)} if targets
+#   merge_field(Item.dig_set(k: f_name, v: f, dig_keys: dig_keys), store)
+# end
+#
+# def add_and_merge_field_targets(targets, store)
+#   set = targets.each_with_object([]) do |args, set|
+#     add_and_assoc_targets_then_merge_field(args[:f_class], args[:f_name], args[:kind], args[:dig_keys], args[:targets], store)
+#   end
+# end
 
   # def format_product(p, tags, product={})
   #   product['p'] = sort_fields(p)

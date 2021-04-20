@@ -58,35 +58,11 @@ end
 
 ##############################################################################
 
-  # def h_args(h:, keys: nil, args: nil)
-  #   h_vals = h_vals(h: h, keys: keys)
-  #   args ? h_vals + args : h_vals
-  # end
-  #
-  # def h_vals(h:, keys: nil)
-  #   keys ? keys.map{|k| h[k]} : h.values
-  # end
-
-# def f_assoc(t)
-#   tag_attr?(t) ? t : {'select_field' => 'option', 'select_menu'=> 'field_set'}[t]
-# end
-
-# def param_hsh(params, h={})
-#   params.each do |k, field_groups|
-#     field_groups.each do |t, fields|
-#       fields.each do |f_name, f_val|
-#         param_merge(params: h, dig_set: dig_set(k: f_name, v: f_val, dig_keys: []), keys:[k,t])
-#       end
-#     end
-#   end
-#   h
-# end
-
-# def f_scope(field_type)
-#   assoc = input_attr?(field_type)
-#   assoc ? assoc : field_assocs(field_type).first
+# def h_args(h:, keys: nil, args: nil)
+#   h_vals = h_vals(h: h, keys: keys)
+#   args ? h_vals + args : h_vals
 # end
 #
-# def field_assocs(field_type)
-#   field_type.classify.constantize.assoc_names.map{|assoc| assoc.singularize.classify}
+# def h_vals(h:, keys: nil)
+#   keys ? keys.map{|k| h[k]} : h.values
 # end

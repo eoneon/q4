@@ -1,13 +1,16 @@
 module GBPRD
   extend Build
-  # a = GBPRD.seed_product_type   a.map{|p| p['name']}
 
-  def self.build_name(tags, name_set=[])
-    %w[product_type category product_subtype].each do |k|
-      name = k == 'product_type' ? tags[k] : tags[k].underscore.split('_').map{|word| word.capitalize}.join(' ')
-      name_set << name
-    end
-    name_set.join(' ')
+  # def product_name(tags, name_set=[])
+  #   %w[product_type category product_subtype].each do |k|
+  #     name = k == 'product_type' ? tags[k] : tags[k].underscore.split('_').map{|word| word.capitalize}.join(' ')
+  #     name_set << name
+  #   end
+  #   name_set.join(' ')
+  # end
+
+  def self.name_keys
+    %w[product_type category product_subtype]
   end
 
   def self.tag_keys

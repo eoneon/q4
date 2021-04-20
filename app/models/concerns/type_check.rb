@@ -51,7 +51,7 @@ module TypeCheck
 
   # check association ##########################################################
   def f_assoc(t)
-    tag_attr?(t) ? t : to_class(t).assoc_names[0].singularize
+    tag_attr?(t) || option?(t) ? t : to_class(t).assoc_names[0].singularize
   end
 
   # check class ################################################################
