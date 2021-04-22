@@ -16,6 +16,15 @@ module Crudable
     add_obj(new_obj)
   end
 
+  def update_tags(obj, tag_hsh)
+    return if tag_hsh.blank? || tag_hsh.stringify_keys == obj.tags
+    obj.tags = assign_or_merge(obj.tags, tag_hsh.stringify_keys)
+    obj.save
+  end
+
+  def assign_or_merge(h, h2)
+    h.nil? ? h2 : h.merge(h2)
+  end
   # ############################################################################
 
   def update_target_case(t, old_val, new_val)

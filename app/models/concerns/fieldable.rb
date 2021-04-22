@@ -3,6 +3,10 @@ require 'active_support/concern'
 module Fieldable
   extend ActiveSupport::Concern
 
+  included do
+    before_destroy :remove_dependent_item_groups
+  end
+
   def field_args(field_groups, set=[])
     a = field_groups.each_with_object(set) do |(k, field_groups), a|
       field_groups.each do |t, fields|
@@ -52,6 +56,10 @@ module Fieldable
 
   def h_vals(h,*keys)
     keys.map{|k| h[k]}
+  end
+
+  def remove_dependent_item_groups
+    ItemGroup.where(origin_id: self.id).or(ItemGroup.where(target_id: self.id)).destroy_all
   end
 
 end

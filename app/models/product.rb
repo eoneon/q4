@@ -6,8 +6,6 @@ class Product < ApplicationRecord
   include TypeCheck
   include HattrSearch
 
-  include STI
-
   validates :product_name, presence: true
   validates :product_name, uniqueness: true
 
@@ -39,17 +37,26 @@ class Product < ApplicationRecord
 
   ##############################################################################
 
-  def self.builder(f)
-    product = self.where(product_name: f[:product_name]).first_or_create
-    update_tags(product, f[:tags])
-    f[:options].map {|opt| product.assoc_unless_included(opt)}
-    product
+  def self.builder(product_name, options, tags=nil)
+    product = self.where(product_name: product_name).first_or_create
+    update_tags(product, tags)
+    options.map {|opt| product.assoc_unless_included(opt)}
+  end
+
+  def self.update_tags(obj, tag_hsh)
+    return if tag_hsh.blank? || tag_hsh.stringify_keys == obj.tags
+    obj.tags = assign_or_merge(obj.tags, tag_hsh.stringify_keys)
+    obj.save
+  end
+
+  def self.assign_or_merge(h, h2)
+    h.nil? ? h2 : h.merge(h2)
   end
 
   # refactor: self.search_query ################################################
-  def self.search(scope: nil, search_params: nil, hstore:)
+  def self.search(scope: nil, search_params: nil, restrict: nil, hstore:)
     search_params = search_params(scope: scope, search_params: search_params, hstore: hstore)
-    results = hattr_search(scope: self, search_params: search_params, hstore: hstore)
+    results = hattr_search(scope: self, search_params: search_params, restrict: restrict, hstore: hstore)
     a, b = results, search_inputs(search_params, results, hstore)
   end
 
@@ -76,46 +83,33 @@ class Product < ApplicationRecord
   end
 
   def self.search_keys
-    %w[category medium product_type product_subtype]
+    %w[category medium]
   end
 
 end
 
 ##############################################################################
-
+#  product_type product_subtype
 # def self.tag_search_field_group(search_keys:, products: product_group, h: {})
 #   search_keys.map{|search_key| h[:"#{search_key}"] = search_values(products, search_key)}
 #   h
 # end
-#
+
 # def self.valid_search_keys(products=product_group)
 #   filter_keys.keep_if {|k| uniq_tag_keys_from_set(products).include?(k)}
 # end
-#
+
 # def self.uniq_tag_keys_from_set(products=product_group)
 #   products.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
 # end
-#
+
 # def self.search_values(products, search_key)
 #   products.map{|product| product.tags[search_key]}.uniq.compact
-# end
-#
-# def self.filter_keys
-#   %w[medium_category medium material]
 # end
 
 #all search keys-> remove?
 # def self.search_keys(search_set)
 #   search_set.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
-# end
-
-# def field_targets
-#   #scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many, reject_set: ['RadioButton'])
-#   scoped_targets(scope: 'FieldItem', join: :item_groups, sort: :sort, reject_set: ['RadioButton'])
-# end
-
-# def field_items
-#   select_menus + field_sets + select_fields + text_area_fields
 # end
 
 # # targets.includes(item_groups: :target).map(&:target)

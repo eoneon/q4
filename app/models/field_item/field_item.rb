@@ -1,5 +1,5 @@
 class FieldItem < ApplicationRecord
-  include STI
+  
   include Fieldable
   include Crudable
   include TypeCheck

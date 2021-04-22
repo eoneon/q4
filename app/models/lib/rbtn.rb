@@ -1,26 +1,29 @@
 module RBTN
-  extend Build
 
   module Category
     def self.opts
       {
         Original: [[:Option, :Category, :Original]],
+        BrittoOriginal: [[:Option, :Category, :Original]],
         OneOfAKind: [[:Option, :Category, :OneOfAKind]],
+        PeterMaxOneOfAKind: [[:Option, :Category, :OneOfAKind]],
+        BrittoOneOfAKind: [[:Option, :Category, :OneOfAKind]],
         OneOfOne: [[:Option, :Category, :OneOfAKind]],
         Production: [[:Option, :Category, :Production]],
 
         UniqueVariation: [[:Option, :Category, :UniqueVariation]],
         LimitedEdition: [[:Option, :Category, :LimitedEdition]],
+        PeterMaxLimitedEdition: [[:Option, :Category, :LimitedEdition]],
+        EverhartLimitedEdition: [[:Option, :Category, :LimitedEdition]],
         BatchEdition: [[:Option, :Category, :LimitedEdition]],
 
         Reproduction: [[:Option, :Category, :Reproduction]],
-        #Unique: [[:Option, :Category, :Unique]],
-        HandBlownGlass: [[:Option, :Category, :HandBlownGlass]]
+        HandBlownGlass: [[:Option, :Category, :HandBlownGlass]],
+        GartnerBladeGlass: [[:Option, :Category, :HandBlownGlass]]
       }
     end
   end
 
-  #each one of these has its own TextBeforeCOA on OPT
   module GartnerBladeSculpture
     def self.opts
       {
@@ -57,25 +60,4 @@ module RBTN
     end
   end
 
-  # module TextBeforeCOA
-  #   def self.opts
-  #     {
-  #       Everhart: [[:Option, :TextBeforeCOA, :Everhart]],
-  #       SingleExposure: [[:Option, :TextBeforeCOA, :SingleExposure]]
-  #     }
-  #   end
-  # end
-
 end
-
-# module Medium
-#   def self.opts
-#     {
-#       BasicMixedMedia: ['mixed media'],
-#       Seriolithograph: ['seriolithograph'],
-#       AcrylicMixedMedia: ['acrylic mixed media'],
-#       EverhartLithograph: ['hand pulled lithograph'],
-#       HandBlownGlass: ['hand blown glass']
-#     }
-#   end
-# end

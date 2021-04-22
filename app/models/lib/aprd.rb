@@ -1,23 +1,16 @@
 module APRD
   extend Build
-  # a = APRD.seed_products
-
-  def self.name_keys
-    %w[product_subtype category medium material]
-  end
-
-  ##############################################################################
 
   module MixedMedia
     def self.opts
       {
         PeterMax: {
-          key_group: [[:RadioButton, :Category, :OneOfAKind], [:SelectField, :Medium, :AcrylicMixedMedia], [:FieldSet, :Material, :Paper]],
+          key_group: [[:RadioButton, :Category, :PeterMaxOneOfAKind], [:SelectField, :Medium, :AcrylicMixedMedia], [:FieldSet, :Material, :Paper]],
           FGS: [[:FGS, :Authentication, :PeterMax]]
         },
 
         Britto: {
-          FGO: [[:FGO, :Category, :Original_OneOfAKind], [:FGO, :Material, :Paper_Canvas_Board]],
+          FGO: [[:FGO, :Category, :BrittoOriginal_OneOfAKind], [:FGO, :Material, :Paper_Canvas_Board]],
           key_group: [[:SelectField, :Medium, :BasicMixedMedia]],
           FGS: [[:FGS, :Authentication, :Britto]]
         }
@@ -30,16 +23,12 @@ module APRD
       {
         Everhart: {
           key_group: [[:SelectField, :Medium, :HandPulledLithograph], [:FieldSet, :Material, :Paper], [:RadioButton, :TextBeforeCOA, :Everhart]],
-          FGS: [[:FGS, :Edition, :LimitedEdition], [:FGS, :Authentication, :Standard]]
-        }
-      }
-    end
+          FGS: [[:FGS, :Edition, :EverhartLimitedEdition], [:FGS, :Authentication, :Standard]]
+        },
 
-    def self.opts
-      {
         PeterMax: {
-          key_group: [[:SelectField, :Medium, :Lithograph], [:FieldSet, :Material, :Paper], [:RadioButton, :TextBeforeCOA, :Everhart]],
-          FGS: [[:FGS, :Edition, :LimitedEdition], [:FGS, :Authentication, :PeterMax]]
+          key_group: [[:SelectField, :Medium, :Lithograph], [:FieldSet, :Material, :Paper]],
+          FGS: [[:FGS, :Edition, :PeterMaxLimitedEdition], [:FGS, :Authentication, :PeterMax]]
         }
       }
     end

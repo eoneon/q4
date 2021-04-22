@@ -1,5 +1,4 @@
 module SFO
-  extend Build
 
   module Medium
     def self.opts
@@ -8,6 +7,7 @@ module SFO
         PaintingOnPaper: [[:Option, :Medium, :PaintingOnPaper]],
 
         StandardDrawing: [[:Option, :Medium, :StandardDrawing]],
+        MixedMediaDrawing: [[:Option, :Medium, :StandardDrawing]],
 
         Silkscreen: [[:Option, :Medium, :Silkscreen]],
         Giclee: [[:Option, :Medium, :Giclee]],
@@ -91,7 +91,6 @@ module SFO
     def self.opts
       {
         Decorative: [[:Option, :SculptureType, :Decorative]]
-        #GartnerBlade: ['Saturn Oil Lamp', 'Ikebana Flower Bowl', 'Primitive Bowl', 'Primitive Shell', 'Sphere']
       }
     end
   end

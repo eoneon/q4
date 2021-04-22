@@ -27,7 +27,7 @@ module PRD
         },
 
         MixedMediaDrawing: {
-          key_group: [[:RadioButton, :Category, :Original], [:SelectField, :Medium, :StandardDrawing], [:FieldSet, :Material, :Paper]],
+          key_group: [[:RadioButton, :Category, :Original], [:SelectField, :Medium, :MixedMediaDrawing], [:FieldSet, :Material, :Paper]],
           FGS: [[:FGS, :Submedia, :ForDrawing], [:FGS, :Authentication, :Standard]]
         }
       }

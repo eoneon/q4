@@ -1,5 +1,4 @@
 module FSO
-  extend Build
 
   module Dimension
     def self.opts

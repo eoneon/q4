@@ -5,16 +5,8 @@ module STI
 
   #relations, callbacks, validations, scopes and others...######################
 
-  included do
-    before_destroy :remove_dependent_item_groups
-  end
-
-  # module Leafing
-  #   def self.opts
-  #     {
-  #       Leafing: ['gold leaf', 'hand laid gold leaf', 'silver leaf', 'hand laid silver leaf', 'hand laid gold and silver leaf', 'hand laid copper leaf']
-  #     }
-  #   end
+  # included do
+  #   before_destroy :remove_dependent_item_groups
   # end
 
   #one more refactor ###########################################################
@@ -76,9 +68,9 @@ module STI
     item_groups.order(nil)
   end
 
-  def remove_dependent_item_groups
-    ItemGroup.where(origin_id: self.id).or(ItemGroup.where(target_id: self.id)).destroy_all
-  end
+  # def remove_dependent_item_groups
+  #   ItemGroup.where(origin_id: self.id).or(ItemGroup.where(target_id: self.id)).destroy_all
+  # end
 
   #AR class methods
   #AR obj: to_class -> expand re: Q3/models/concerns/build_set.rb

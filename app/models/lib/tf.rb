@@ -1,5 +1,4 @@
 module TF
-  extend Build
 
   module Date
     def self.opts

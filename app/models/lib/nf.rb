@@ -1,5 +1,4 @@
 module NF
-  extend Build
 
   module Numbering
     def self.opts
@@ -24,18 +23,3 @@ module NF
     end
   end
 end
-
-
-# module Dimension
-#   def self.opts
-#     {
-#       WidthHeight: %w[width height],
-#       Diameter: %w[image-diameter],
-#       WidthHeightDepth: %w[width height depth],
-#
-#       WidthHeightDepthWeight: %w[width height depth weight],
-#       DiameterHeightWeight: %w[diameter height weight],
-#       DiameterWeight: %w[diameter weight]
-#     }
-#   end
-# end

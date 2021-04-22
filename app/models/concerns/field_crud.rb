@@ -130,8 +130,6 @@ module FieldCrud
 
   def add_default_fields(field_args)
     field_args.each do |f_hsh|
-      # puts "f_hsh: #{f_hsh}"
-      # puts "h_vals: #{h_vals(f_hsh, :k, :t, :f_name, :f_val)}"
       add_default(*h_vals(f_hsh, :k, :t, :f_name, :f_val))
     end
   end

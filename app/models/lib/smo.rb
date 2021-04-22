@@ -1,5 +1,4 @@
 module SMO
-  extend Build
 
   module Dimension
     def self.opts

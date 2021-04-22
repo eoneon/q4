@@ -8,8 +8,6 @@ class Item < ApplicationRecord
   include TypeCheck
   include ItemDetail
 
-
-  include STI
   include ExportAttrs
   include SkuRange
 
@@ -218,11 +216,6 @@ class Item < ApplicationRecord
     csv_tags['body'] unless csv_tags.nil?
   end
 
-  def field_targets
-    #scoped_sti_targets_by_type(scope: 'FieldItem', rel: :has_many)
-    scoped_targets(scope: 'FieldItem', join: :item_groups, sort: :sort, reject_set: ['RadioButton'])
-  end
-
   def product
     products.first if products.any? #scoped_targets(scope: 'Product', join: :item_groups).first
   end
@@ -281,10 +274,4 @@ end
 #   else
 #     delim_format(words: f.field_name, join_delim: '_', split_delims: [' ', '-'])
 #   end
-# end
-
-# def fieldables
-#   item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
-#   # set = item_groups.where(base_type: 'FieldItem').order(:sort) #.map(&:target)
-#   # set.includes(:target).map(&:target)
 # end

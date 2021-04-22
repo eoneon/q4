@@ -1,14 +1,6 @@
 module GBPRD
   extend Build
 
-  # def product_name(tags, name_set=[])
-  #   %w[product_type category product_subtype].each do |k|
-  #     name = k == 'product_type' ? tags[k] : tags[k].underscore.split('_').map{|word| word.capitalize}.join(' ')
-  #     name_set << name
-  #   end
-  #   name_set.join(' ')
-  # end
-
   def self.name_keys
     %w[product_type category product_subtype]
   end
@@ -27,40 +19,40 @@ module GBPRD
     def self.opts
       {
         IkebanaFlowerBowl: {
-          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :GartnerBladeSculpture, :Ikebana], [:RadioButton, :GartnerBladeMedium, :Ikebana], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+          key_group: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :GartnerBladeSculpture, :Ikebana], [:RadioButton, :GartnerBladeMedium, :Ikebana], [:FieldSet, :Dimension, :DiameterHeightWeight], [:SelectField, :Signature, :StandardSignature]],
           FGS: [[:FGS, :GartnerBladeSizeColor, :SizeColor]]
         },
 
         SaturnOilLamp: {
-          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :GartnerBladeSculpture, :SaturnLamp], [:RadioButton, :GartnerBladeMedium, :SaturnLamp], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+          key_group: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :GartnerBladeSculpture, :SaturnLamp], [:RadioButton, :GartnerBladeMedium, :SaturnLamp], [:FieldSet, :Dimension, :DiameterHeightWeight], [:SelectField, :Signature, :StandardSignature]],
           FGS: [[:FGS, :GartnerBladeSizeColor, :SizeColor]]
         },
 
         PrimitiveShell: {
-          key_group: [[:SelectField, :GartnerBladeSize, :Size], [:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :GartnerBladeSculpture, :PrimitiveShell], [:RadioButton, :GartnerBladeMedium, :Primitive], [:FieldSet, :Dimension, :WidthHeightDepthWeight]]
+          key_group: [[:SelectField, :GartnerBladeSize, :Size], [:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :GartnerBladeSculpture, :PrimitiveShell], [:RadioButton, :GartnerBladeMedium, :Primitive], [:FieldSet, :Dimension, :WidthHeightDepthWeight], [:SelectField, :Signature, :StandardSignature]]
         },
 
         ArborSculpture: {
-          key_group: [[:SelectField, :GartnerBladeSize, :Size], [:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :GartnerBladeSculpture, :Arbor], [:RadioButton, :GartnerBladeMedium, :Arbor], [:FieldSet, :Dimension, :WidthHeightDepthWeight]]
+          key_group: [[:SelectField, :GartnerBladeSize, :Size], [:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :GartnerBladeSculpture, :Arbor], [:RadioButton, :GartnerBladeMedium, :Arbor], [:FieldSet, :Dimension, :WidthHeightDepthWeight], [:SelectField, :Signature, :StandardSignature]]
         },
 
         OpenBowl: {
-          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :GartnerBladeSculpture, :OpenBowl], [:RadioButton, :GartnerBladeMedium, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+          key_group: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :GartnerBladeSculpture, :OpenBowl], [:RadioButton, :GartnerBladeMedium, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight], [:SelectField, :Signature, :StandardSignature]],
           FGS: [[:FGS, :GartnerBladeSizeColor, :SizeColor]]
         },
 
         OpenVase: {
-          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :GartnerBladeSculpture, :OpenVase], [:RadioButton, :GartnerBladeMedium, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+          key_group: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :GartnerBladeSculpture, :OpenVase], [:RadioButton, :GartnerBladeMedium, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight], [:SelectField, :Signature, :StandardSignature]],
           FGS: [[:FGS, :GartnerBladeSizeColor, :SizeColor]]
         },
 
         CoveredBowl: {
-          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :GartnerBladeSculpture, :CoveredBowl], [:RadioButton, :GartnerBladeMedium, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+          key_group: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :GartnerBladeSculpture, :CoveredBowl], [:RadioButton, :GartnerBladeMedium, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight], [:SelectField, :Signature, :StandardSignature]],
           FGS: [[:FGS, :GartnerBladeSizeColorLid, :SizeColorLid]]
         },
 
         CoveredVase: {
-          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :GartnerBladeSculpture, :CoveredBowl], [:RadioButton, :GartnerBladeMedium, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+          key_group: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :GartnerBladeSculpture, :CoveredBowl], [:RadioButton, :GartnerBladeMedium, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight], [:SelectField, :Signature, :StandardSignature]],
           FGS: [[:FGS, :GartnerBladeSizeColorLid, :SizeColorLid]]
         }
       }
@@ -71,16 +63,16 @@ end
 # module GartnerBlade
 #   def self.opts
 #     {
-#       Ikebana: [[:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :GartnerBladeSculpture, :Ikebana], [:RadioButton, :GartnerBladeMedium, :Ikebana], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#       SaturnLamp: [[:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :GartnerBladeSculpture, :SaturnLamp], [:RadioButton, :GartnerBladeMedium, :SaturnLamp], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#       PrimitiveShell: [[:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :GartnerBladeSculpture, :PrimitiveShell], [:RadioButton, :GartnerBladeMedium, :Primitive], [:FieldSet, :Dimension, :WidthHeightDepthWeight]],
-#       Arbor: [[:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :GartnerBladeSculpture, :Arbor], [:RadioButton, :GartnerBladeMedium, :Arbor], [:FieldSet, :Dimension, :WidthHeightDepthWeight]],
+#       Ikebana: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :GartnerBladeSculpture, :Ikebana], [:RadioButton, :GartnerBladeMedium, :Ikebana], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+#       SaturnLamp: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :GartnerBladeSculpture, :SaturnLamp], [:RadioButton, :GartnerBladeMedium, :SaturnLamp], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+#       PrimitiveShell: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :GartnerBladeSculpture, :PrimitiveShell], [:RadioButton, :GartnerBladeMedium, :Primitive], [:FieldSet, :Dimension, :WidthHeightDepthWeight]],
+#       Arbor: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :GartnerBladeSculpture, :Arbor], [:RadioButton, :GartnerBladeMedium, :Arbor], [:FieldSet, :Dimension, :WidthHeightDepthWeight]],
 #
-#       OpenBowl: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :GartnerBladeSculpture, :Bowl], [:RadioButton, :GartnerBladeMedium, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#       OpenVase: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :GartnerBladeSculpture, :OpenVase], [:RadioButton, :GartnerBladeMedium, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+#       OpenBowl: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :GartnerBladeSculpture, :Bowl], [:RadioButton, :GartnerBladeMedium, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+#       OpenVase: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :GartnerBladeSculpture, :OpenVase], [:RadioButton, :GartnerBladeMedium, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
 #
-#       CoveredBowl: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :GartnerBladeSculpture, :CoveredBowl], [:RadioButton, :GartnerBladeMedium, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#       CoveredVase: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :GartnerBladeSculpture, :CoveredBowl], [:RadioButton, :GartnerBladeMedium, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]]
+#       CoveredBowl: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :GartnerBladeSculpture, :CoveredBowl], [:RadioButton, :GartnerBladeMedium, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
+#       CoveredVase: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :GartnerBladeSculpture, :CoveredBowl], [:RadioButton, :GartnerBladeMedium, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]]
 #     }
 #   end
 # end

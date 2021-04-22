@@ -1,6 +1,4 @@
 module OPT
-  extend Build
-  #extend Hashable
 
   module Category
     def self.opts
@@ -108,7 +106,6 @@ module OPT
     def self.opts
       {
         Decorative: ['bowl', 'vase', 'platter', 'sculpture']
-        #GartnerBlade: ['Saturn Oil Lamp', 'Ikebana Flower Bowl', 'Primitive Bowl', 'Primitive Shell', 'Sphere']
       }
     end
   end
@@ -219,7 +216,6 @@ module OPT
     def self.opts
       {
         Size: ['large', 'medium', 'small']
-        #ArborSize: ['large', 'medium', 'small', 'mini'],
       }
     end
   end
@@ -228,7 +224,6 @@ module OPT
     def self.opts
       {
         Color: ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
-        # IkebanaSaturn: ['amethyst', 'cobalt', 'lime', 'ruby', 'tangerine']
       }
     end
   end

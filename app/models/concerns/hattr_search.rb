@@ -5,13 +5,13 @@ module HattrSearch
 
   class_methods do
 
-    def hattr_search(scope:, search_params:, hstore:)
-      hattr_query_case(scope: scope, search_params: search_params, hstore: hstore)
+    def hattr_search(scope:, search_params:, restrict:, hstore:)
+      hattr_query_case(scope: scope, search_params: search_params, restrict: restrict, hstore: hstore)
     end
 
-    def hattr_query_case(scope:, search_params:, hstore:)
+    def hattr_query_case(scope:, search_params:, restrict:, hstore:)
       if search_params.values.reject{|v| v.blank?}.empty?
-        index_query(scope, search_params.keys, hstore)
+        index_query(scope, search_params.keys, restrict, hstore)
       else
         search_query(scope, search_params.reject{|k,v| v.blank?}, hstore)
       end
@@ -19,8 +19,8 @@ module HattrSearch
 
     ##############################################################################
 
-    def index_query(set, keys, hstore)
-      set.where("#{hstore}?& ARRAY[:keys]", keys: keys)
+    def index_query(set, keys, restrict, hstore)
+      restrict ? set.where("#{hstore}?& ARRAY[:keys]", keys: keys) : set.all
     end
 
     def search_query(set, hattrs, hstore)
