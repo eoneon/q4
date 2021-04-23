@@ -3,7 +3,8 @@ module FGS
   module Edition
     def self.opts
       {
-        SingleEdition: [[:RadioButton, :Category, :OneOfOne], [:SelectField, :Numbering, :OneOfOneNumbering]],
+        #SingleEdition: [[:RadioButton, :Category, :OneOfOne], [:SelectField, :Numbering, :OneOfOneNumbering]],
+        SingleEdition: [[:RadioButton, :Category, :OneOfAKindOfOne], [:SelectField, :Numbering, :OneOfOneNumbering]],
         LimitedEdition: [[:RadioButton, :Category, :LimitedEdition], [:SelectField, :Edition, :LimitedEdition], [:SelectMenu, :Numbering, :Numbering]],
         EverhartLimitedEdition: [[:RadioButton, :Category, :EverhartLimitedEdition], [:SelectField, :Edition, :LimitedEdition], [:SelectMenu, :Numbering, :Numbering]],
         PeterMaxLimitedEdition: [[:RadioButton, :Category, :PeterMaxLimitedEdition], [:SelectField, :Edition, :LimitedEdition], [:SelectMenu, :Numbering, :Numbering]],

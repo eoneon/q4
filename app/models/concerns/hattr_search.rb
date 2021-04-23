@@ -6,7 +6,9 @@ module HattrSearch
   class_methods do
 
     def hattr_search(scope:, search_params:, restrict:, hstore:)
-      hattr_query_case(scope: scope, search_params: search_params, restrict: restrict, hstore: hstore)
+      results = hattr_query_case(scope: scope, search_params: search_params, restrict: restrict, hstore: hstore)
+      #order_search(results, search_params.keys, hstore)
+      order_search(results, %w[category_type medium_type], hstore) # 
     end
 
     def hattr_query_case(scope:, search_params:, restrict:, hstore:)
@@ -17,7 +19,7 @@ module HattrSearch
       end
     end
 
-    ##############################################################################
+    ############################################################################
 
     def index_query(set, keys, restrict, hstore)
       restrict ? set.where("#{hstore}?& ARRAY[:keys]", keys: keys) : set.all
@@ -39,6 +41,19 @@ module HattrSearch
       keys.map{|k| "#{hstore} -> \'#{k}\'"}.join(', ')
     end
 
+    ############################################################################
+
+    def order_search(search_results, sort_keys, hstore)
+      search_results.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
+    end
+
+    def sort_value(val)
+      is_numeric?(val) ? val.to_i : val
+    end
+
+    def is_numeric?(s)
+      !!Float(s) rescue false
+    end
   end
 
 end

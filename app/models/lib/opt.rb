@@ -1,4 +1,5 @@
 module OPT
+  extend Build
 
   module Category
     def self.opts
@@ -102,13 +103,13 @@ module OPT
     end
   end
 
-  module SculptureType
-    def self.opts
-      {
-        Decorative: ['bowl', 'vase', 'platter', 'sculpture']
-      }
-    end
-  end
+  # module SculptureType
+  #   def self.opts
+  #     {
+  #       Decorative: ['bowl', 'vase', 'platter', 'sculpture']
+  #     }
+  #   end
+  # end
 
   module Mounting
     def self.opts
@@ -185,21 +186,39 @@ module OPT
   end
 
   #add method to generate title based on: sculpture type, size, lid, etc...
-  module GartnerBladeSculpture
+  # module GartnerBladeSculpture
+  #   def self.opts
+  #     {
+  #       OpenBowl: ['bowl', 'sphere'],
+  #       OpenVase: ['cone', 'footed cone', 'traditional urn', 'closed urn', 'flat vessel', 'cylinder'],
+  #
+  #       CoveredBowl: ['bowl', 'covered bowl'],
+  #       CoveredVase: ['covered jar'],
+  #
+  #       PrimitiveBowl: ['primitive bowl'],
+  #       Ikebana: ['ikebana flower bowl'],
+  #       SaturnLamp: ['Saturn oil lamp'],
+  #
+  #       Arbor: ['arbor sculpture'],
+  #       PrimitiveShell: ['primitive shell']
+  #     }
+  #   end
+  # end
+
+  module SculptureType
     def self.opts
       {
         OpenBowl: ['bowl', 'sphere'],
         OpenVase: ['cone', 'footed cone', 'traditional urn', 'closed urn', 'flat vessel', 'cylinder'],
-
         CoveredBowl: ['bowl', 'covered bowl'],
-        CoveredVase: ['covered jar'],
 
+        CoveredVase: ['covered jar'],
         PrimitiveBowl: ['primitive bowl'],
+        PrimitiveShell: ['primitive shell'],
         Ikebana: ['ikebana flower bowl'],
         SaturnLamp: ['Saturn oil lamp'],
-
         Arbor: ['arbor sculpture'],
-        PrimitiveShell: ['primitive shell']
+        Decorative: ['bowl', 'vase', 'platter', 'sculpture']
       }
     end
   end
@@ -228,7 +247,7 @@ module OPT
     end
   end
 
-  module GartnerBladeMedium
+  module TextAfterTitle
     def self.opts
       {
         Ikebana: ['sculpture features a secured Kenzan spiked disc inside - the key to any fine Ikebana style flower arrangement'],

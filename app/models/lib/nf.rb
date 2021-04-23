@@ -1,5 +1,6 @@
 module NF
-
+  extend Build
+  
   module Numbering
     def self.opts
       {

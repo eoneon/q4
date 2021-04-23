@@ -1,4 +1,5 @@
 module SFO
+  extend Build
 
   module Medium
     def self.opts
@@ -35,7 +36,7 @@ module SFO
         Sericel: [[:Option, :Medium, :Sericel]],
         ProductionCel: [[:Option, :Medium, :ProductionCel]],
 
-        HandBlownGlass: [[:Option, :Medium, :HandBlownGlass]],
+        #HandBlownGlass: [[:Option, :Medium, :HandBlownGlass]],
         Sculpture: [[:Option, :Medium, :Sculpture]]
       }
     end
@@ -90,6 +91,9 @@ module SFO
   module SculptureType
     def self.opts
       {
+        OpenBowl: [[:Option, :SculptureType, :OpenBowl]],
+        OpenVase: [[:Option, :SculptureType, :OpenVase]],
+        CoveredBowl: [[:Option, :SculptureType, :CoveredBowl]],
         Decorative: [[:Option, :SculptureType, :Decorative]]
       }
     end
@@ -150,13 +154,13 @@ module SFO
     end
   end
 
-  module GartnerBladeSculpture
+  module SculptureType
     def self.opts
       {
-        OpenBowl: [[:Option, :GartnerBladeSculpture, :OpenBowl]],
-        OpenVase: [[:Option, :GartnerBladeSculpture, :OpenVase]],
-        CoveredBowl: [[:Option, :GartnerBladeSculpture, :CoveredBowl]],
-        CoveredVase: [[:Option, :GartnerBladeSculpture, :CoveredVase]]
+        OpenBowl: [[:Option, :SculptureType, :OpenBowl]],
+        OpenVase: [[:Option, :SculptureType, :OpenVase]],
+        CoveredBowl: [[:Option, :SculptureType, :CoveredBowl]],
+        CoveredVase: [[:Option, :SculptureType, :CoveredVase]]
       }
     end
   end

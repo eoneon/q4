@@ -94,10 +94,41 @@ module Build
     [:Embellished, :Category, :Edition, :Medium, :Material, :Leafing, :Remarque, :Numbering, :Signature, :TextBeforeCOA, :Certificate]
   end
 
+  # def build_tags(p, tags)
+  #   tags = tag_keys.each_with_object(tags) do |k,tags|
+  #     tags[k.to_s.underscore] = p[k].field_name if p.has_key?(k)
+  #   end
+  # end
+
   def build_tags(p, tags)
     tags = tag_keys.each_with_object(tags) do |k,tags|
-      tags[k.to_s.underscore] = p[k].field_name if p.has_key?(k)
+      if p.has_key?(k)
+        tag_val = p[k].field_name
+        tags[k.to_s.underscore] = tag_val
+        tags['category_type'] = category_type(tag_val) if k == :Category
+        tags['medium_type'] = medium_type(tag_val) if k == :Medium
+      end
     end
+  end
+
+  def category_type(category)
+    categories.detect{|c| category.index(c)}
+  end
+
+  def categories
+    RBTN::Category.opts.values.flatten(1).uniq.map{|a| a[-1].to_s}
+  end
+
+  def medium_type(medium)
+    if medium_type = media.detect{|m| medium.index(m)}
+      medium_type
+    else
+      'MixedMedia'
+    end
+  end
+
+  def media
+    %W[Painting Drawing Silkscreen Lithograph Giclee Etching Relief BasicPrint Poster Photograph Sericel ProductionCel HandBlownGlass Sculpture]
   end
 
   def product_name(tags)
@@ -118,9 +149,14 @@ module Build
   end
 
   def edit_name(name)
-    name = [['Standard',''], ['Reproduction',''], ['On Paper', ''], ['One Of A Kind', 'One-of-a-Kind'], ['One Of One', 'One-of-One']].each_with_object(name) do |word_set|
+    #name = [['Standard',''], ['Reproduction',''], ['On Paper', ''], ['One Of A Kind', 'One-of-a-Kind'], ['One Of One', 'One-of-One']].each_with_object(name) do |word_set|
+    name = edit_list.each_with_object(name) do |word_set|
       name.sub!(word_set[0], word_set[1])
     end
+  end
+
+  def edit_list
+    [['Standard',''], ['Reproduction',''], ['On Paper', ''], ['One Of A Kind', 'One-of-a-Kind'], ['Of One', ' 1/1']]
   end
 
   def format_name(name)

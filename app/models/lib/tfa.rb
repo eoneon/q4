@@ -1,5 +1,6 @@
 module TFA
-
+  extend Build
+  
   module Disclaimer
     def self.opts
       {

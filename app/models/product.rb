@@ -83,7 +83,8 @@ class Product < ApplicationRecord
   end
 
   def self.search_keys
-    %w[category medium]
+    #%w[category medium]
+    %w[category_type medium_type]
   end
 
 end
