@@ -36,7 +36,6 @@ module SFO
         Sericel: [[:Option, :Medium, :Sericel]],
         ProductionCel: [[:Option, :Medium, :ProductionCel]],
 
-        #HandBlownGlass: [[:Option, :Medium, :HandBlownGlass]],
         Sculpture: [[:Option, :Medium, :Sculpture]]
       }
     end
@@ -94,7 +93,8 @@ module SFO
         OpenBowl: [[:Option, :SculptureType, :OpenBowl]],
         OpenVase: [[:Option, :SculptureType, :OpenVase]],
         CoveredBowl: [[:Option, :SculptureType, :CoveredBowl]],
-        Decorative: [[:Option, :SculptureType, :Decorative]]
+        Bowl: [[:Option, :SculptureType, :Bowl]],
+        Vase: [[:Option, :SculptureType, :Vase]]
       }
     end
   end
@@ -154,16 +154,16 @@ module SFO
     end
   end
 
-  module SculptureType
-    def self.opts
-      {
-        OpenBowl: [[:Option, :SculptureType, :OpenBowl]],
-        OpenVase: [[:Option, :SculptureType, :OpenVase]],
-        CoveredBowl: [[:Option, :SculptureType, :CoveredBowl]],
-        CoveredVase: [[:Option, :SculptureType, :CoveredVase]]
-      }
-    end
-  end
+  # module SculptureType
+  #   def self.opts
+  #     {
+  #       OpenBowl: [[:Option, :SculptureType, :OpenBowl]],
+  #       OpenVase: [[:Option, :SculptureType, :OpenVase]],
+  #       CoveredBowl: [[:Option, :SculptureType, :CoveredBowl]],
+  #       CoveredVase: [[:Option, :SculptureType, :CoveredVase]]
+  #     }
+  #   end
+  # end
 
   module GartnerBladeLid
     def self.opts

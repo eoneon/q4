@@ -9,7 +9,6 @@ module RBTN
         OneOfAKind: [[:Option, :Category, :OneOfAKind]],
         PeterMaxOneOfAKind: [[:Option, :Category, :OneOfAKind]],
         BrittoOneOfAKind: [[:Option, :Category, :OneOfAKind]],
-        #OneOfOne: [[:Option, :Category, :OneOfAKind]],
         OneOfAKindOfOne: [[:Option, :Category, :OneOfAKind]],
         Production: [[:Option, :Category, :Production]],
 
@@ -18,13 +17,8 @@ module RBTN
         PeterMaxLimitedEdition: [[:Option, :Category, :LimitedEdition]],
         EverhartLimitedEdition: [[:Option, :Category, :LimitedEdition]],
         #BatchLimitedEdition: [[:Option, :Category, :LimitedEdition]],
-        #BatchEdition: [[:Option, :Category, :LimitedEdition]],
-
         Reproduction: [[:Option, :Category, :Reproduction]],
-        #ReproductionPrintMedia: [[:Option, :Category, :ReproductionPrintMedia]],
-        #ReproductionSculpture: [[:Option, :Category, :ReproductionSculpture]],
         HandBlownGlass: [[:Option, :Category, :HandBlownGlass]],
-        #GartnerBladeGlass: [[:Option, :Category, :HandBlownGlass]]
         GartnerBladeHandBlownGlass: [[:Option, :Category, :HandBlownGlass]]
       }
     end
@@ -34,6 +28,7 @@ module RBTN
     def self.opts
       {
         HandBlownGlass: [[:Option, :Medium, :HandBlownGlass]]
+        #GartnerBlade: [[:Option, :Medium, :HandBlownGlass]]
       }
     end
   end
@@ -46,7 +41,8 @@ module RBTN
         PrimitiveShell: [[:Option, :SculptureType, :PrimitiveShell]],
         Ikebana: [[:Option, :SculptureType, :Ikebana]],
         SaturnLamp: [[:Option, :SculptureType, :SaturnLamp]],
-        Arbor: [[:Option, :SculptureType, :Arbor]]
+        Arbor: [[:Option, :SculptureType, :Arbor]],
+        Sculpture: [[:Option, :SculptureType, :Sculpture]]
       }
     end
   end

@@ -124,12 +124,14 @@ module PRD
     def self.opts
       {
         ReproductionPhotograph: {
-          key_group: [[:RadioButton, :Category, :Reproduction], [:SelectField, :Medium, :Photograph], [:FieldSet, :Material, :PhotoPaper]],
+          key_group: [[:RadioButton, :Category, :Reproduction], [:FieldSet, :Material, :PhotoPaper]],
+          FGO: [[:FGO, :PhotoMedia, :Reproduction]],
           FGS: [[:FGS, :Authentication, :Standard]]
         },
 
         LimitedEditionPhotograph: {
-          key_group: [[:SelectField, :Medium, :Photograph], [:FieldSet, :Material, :PhotoPaper]],
+          key_group: [[:FieldSet, :Material, :PhotoPaper]],
+          FGO: [[:FGO, :PhotoMedia, :LimitedEdition]],
           FGS: [[:FGS, :Edition, :LimitedEdition], [:FGS, :Authentication, :Standard]]
         },
 

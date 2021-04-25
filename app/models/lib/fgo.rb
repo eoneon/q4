@@ -46,4 +46,13 @@ module FGO
     end
   end
 
+  module PhotoMedia
+    def self.opts
+      {
+        Reproduction: FGO.build_key_group([:Photograph, :SportsPhotograph, :ConcertPhotograph], :SelectField, :Medium),
+        LimitedEdition: FGO.build_key_group([:Photograph, :SportsPhotograph, :ConcertPhotograph], :SelectField, :Medium)
+      }
+    end
+  end
+
 end

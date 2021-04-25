@@ -1,10 +1,6 @@
 module GBPRD
   extend Build
 
-  # def self.name_keys
-  #   %w[product_type category product_subtype]
-  # end
-
   def self.name_keys
     %w[category sculpture_type]
   end
@@ -14,7 +10,7 @@ module GBPRD
   end
 
   def self.field_order
-    [:GartnerBladeSize, :GartnerBladeColor, :Category, :SculptureType, :GartnerBladeLid, :Medium, :TextAfterTitle, :Signature]
+    [:GartnerBladeSize, :GartnerBladeColor, :Category, :SculptureType, :GartnerBladeLid, :Medium, :TextAfterTitle, :Signature, :Dimension]
   end
 
   ##############################################################################
@@ -62,21 +58,23 @@ module GBPRD
       }
     end
   end
-end
 
-# module GartnerBlade
-#   def self.opts
-#     {
-#       Ikebana: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :SculptureType, :Ikebana], [:RadioButton, :TextAfterTitle, :Ikebana], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#       SaturnLamp: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :SculptureType, :SaturnLamp], [:RadioButton, :TextAfterTitle, :SaturnLamp], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#       PrimitiveShell: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :SculptureType, :PrimitiveShell], [:RadioButton, :TextAfterTitle, :Primitive], [:FieldSet, :Dimension, :WidthHeightDepthWeight]],
-#       Arbor: [[:RadioButton, :Category, :GartnerBladeGlass], [:RadioButton, :SculptureType, :Arbor], [:RadioButton, :TextAfterTitle, :Arbor], [:FieldSet, :Dimension, :WidthHeightDepthWeight]],
-#
-#       OpenBowl: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :SculptureType, :Bowl], [:RadioButton, :TextAfterTitle, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#       OpenVase: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :SculptureType, :OpenVase], [:RadioButton, :TextAfterTitle, :OpenBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#
-#       CoveredBowl: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :SculptureType, :CoveredBowl], [:RadioButton, :TextAfterTitle, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]],
-#       CoveredVase: [[:RadioButton, :Category, :GartnerBladeGlass], [:SelectField, :SculptureType, :CoveredBowl], [:RadioButton, :TextAfterTitle, :CoveredBowlVase], [:FieldSet, :Dimension, :DiameterHeightWeight]]
-#     }
-#   end
-# end
+  module HandBlownGlass
+    def self.opts
+      {
+        Bowl: {
+          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :SculptureType, :Bowl], [:RadioButton, :Medium, :HandBlownGlass], [:FieldSet, :Dimension, :DiameterHeightWeight], [:SelectField, :Signature, :StandardSignature]]
+        },
+
+        Vase: {
+          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:SelectField, :SculptureType, :Vase], [:RadioButton, :Medium, :HandBlownGlass], [:FieldSet, :Dimension, :DiameterHeightWeight], [:SelectField, :Signature, :StandardSignature]]
+        },
+
+        Sculpture: {
+          key_group: [[:RadioButton, :Category, :HandBlownGlass], [:RadioButton, :SculptureType, :Sculpture], [:RadioButton, :Medium, :HandBlownGlass], [:SelectMenu, :Dimension, :DepthDimension], [:SelectField, :Signature, :StandardSignature]]
+        }
+      }
+    end
+  end
+
+end

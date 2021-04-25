@@ -103,14 +103,6 @@ module OPT
     end
   end
 
-  # module SculptureType
-  #   def self.opts
-  #     {
-  #       Decorative: ['bowl', 'vase', 'platter', 'sculpture']
-  #     }
-  #   end
-  # end
-
   module Mounting
     def self.opts
       {
@@ -185,26 +177,6 @@ module OPT
     end
   end
 
-  #add method to generate title based on: sculpture type, size, lid, etc...
-  # module GartnerBladeSculpture
-  #   def self.opts
-  #     {
-  #       OpenBowl: ['bowl', 'sphere'],
-  #       OpenVase: ['cone', 'footed cone', 'traditional urn', 'closed urn', 'flat vessel', 'cylinder'],
-  #
-  #       CoveredBowl: ['bowl', 'covered bowl'],
-  #       CoveredVase: ['covered jar'],
-  #
-  #       PrimitiveBowl: ['primitive bowl'],
-  #       Ikebana: ['ikebana flower bowl'],
-  #       SaturnLamp: ['Saturn oil lamp'],
-  #
-  #       Arbor: ['arbor sculpture'],
-  #       PrimitiveShell: ['primitive shell']
-  #     }
-  #   end
-  # end
-
   module SculptureType
     def self.opts
       {
@@ -218,7 +190,10 @@ module OPT
         Ikebana: ['ikebana flower bowl'],
         SaturnLamp: ['Saturn oil lamp'],
         Arbor: ['arbor sculpture'],
-        Decorative: ['bowl', 'vase', 'platter', 'sculpture']
+
+        Bowl: ['bowl', 'covered bowl'],
+        Vase: ['vase', 'flat vessel', 'jar'],
+        Sculpture: ['sculpture']
       }
     end
   end

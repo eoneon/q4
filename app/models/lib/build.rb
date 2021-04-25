@@ -68,6 +68,16 @@ module Build
     target_sets.map{|f_keys| store.dig(*f_keys)}.flatten
   end
 
+  # def dig_fields(target_sets, store)
+  #   set =[]
+  #   target_sets.each do |f_keys|
+  #     puts "f_keys: #{f_keys}"
+  #     #puts "store.dig(*f_keys): #{store.dig(*f_keys)}"
+  #     set << store.dig(*f_keys)
+  #   end
+  #   set.flatten
+  # end
+
   def dig_and_assign(target_sets, store, p)
     p = dig_fields(target_sets, store).each_with_object(p) do |f, p|
       p['p'].merge!({f.kind.to_sym => f})
@@ -93,12 +103,6 @@ module Build
   def field_order
     [:Embellished, :Category, :Edition, :Medium, :Material, :Leafing, :Remarque, :Numbering, :Signature, :TextBeforeCOA, :Certificate]
   end
-
-  # def build_tags(p, tags)
-  #   tags = tag_keys.each_with_object(tags) do |k,tags|
-  #     tags[k.to_s.underscore] = p[k].field_name if p.has_key?(k)
-  #   end
-  # end
 
   def build_tags(p, tags)
     tags = tag_keys.each_with_object(tags) do |k,tags|
@@ -128,7 +132,7 @@ module Build
   end
 
   def media
-    %W[Painting Drawing Silkscreen Lithograph Giclee Etching Relief BasicPrint Poster Photograph Sericel ProductionCel HandBlownGlass Sculpture]
+    %W[Painting Drawing Silkscreen Lithograph Giclee Etching Relief BasicPrint Poster Photograph Sericel ProductionCel GartnerBlade HandBlownGlass Sculpture]
   end
 
   def product_name(tags)
@@ -149,7 +153,6 @@ module Build
   end
 
   def edit_name(name)
-    #name = [['Standard',''], ['Reproduction',''], ['On Paper', ''], ['One Of A Kind', 'One-of-a-Kind'], ['One Of One', 'One-of-One']].each_with_object(name) do |word_set|
     name = edit_list.each_with_object(name) do |word_set|
       name.sub!(word_set[0], word_set[1])
     end
@@ -279,13 +282,3 @@ module Build
   end
 
 end
-
-# def dig_and_assign(target_sets, store, p)
-#   p = dig_fields(target_sets, store).each_with_object(p) do |f, p|
-#     merge_field(Item.dig_set(k: f.kind.to_sym, v: f, dig_keys:['p']), p)
-#   end
-# end
-
-# def module_name(key)
-#   field_hsh.invert[key.to_s].to_sym
-# end
