@@ -1,7 +1,7 @@
 module FieldKind
   # FieldKind.field_group FieldKind::Tags::Medium
   def self.field_group
-    store = [Medium].each_with_object({}) do |class_a, store|
+    store = [Category].each_with_object({}) do |class_a, store|
       class_a.class_cascade(store)
     end
   end
