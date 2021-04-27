@@ -10,8 +10,8 @@ module Context
     end
   end
 
-  def const
-    to_s.split('::')[-1]
+  def const(i=-1)
+    to_s.split('::')[i]
   end
 
   def to_class(f_type)
@@ -20,6 +20,10 @@ module Context
 
   def dig_fields(target_sets, store)
     target_sets.map{|f_keys| store.dig(*f_keys)}.flatten
+  end
+
+  def detect_method(meth, class_set)
+    class_set.detect{|c| c.method_exists?(meth)}
   end
 
   def method_exists?(method)

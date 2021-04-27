@@ -6,466 +6,292 @@ class Medium
 
     def self.cascade_build(class_a, class_b, class_c, class_d, store)
       f_kind, f_type, subkind, f_name = [class_a, class_b, class_c, class_d].map(&:const)
-      f = add_field_and_assoc_targets(f_class: to_class(f_type), f_name: f_name, f_kind: f_kind, targets: class_d.targets, tags: {'subkind'=> subkind})
+      f = add_field_and_assoc_targets(f_class: to_class(f_type), f_name: f_name, f_kind: f_kind, targets: class_d.add_targets(Option, f_kind), tags: build_tags(args: {subkind: subkind, f_name: f_name}, tag_set: tag_set, class_set: [class_d, class_c, class_b]))
       merge_field(Item.dig_set(k: f_name.to_sym, v: f, dig_keys: [f_kind.to_sym, f_type.to_sym]), store)
     end
 
-    def self.targets
-      ['Medium::OptionTarget', const.to_s].join('::').constantize.targets.map{|f_name| add_field(Option, f_name, 'Medium')}
+    def self.tag_set
+      [:product_name, :search, :subsearch, :medium_attr]
+    end
+
+    def self.product_name(subkind, f_name)
+      class_to_cap(f_name.sub('Standard', ''), %w[and])
+    end
+
+    def self.search(subkind, f_name)
+      subkind
+    end
+
+    def self.subsearch(subkind, f_name)
+      f_name.sub('Standard', '')
+    end
+
+    def self.medium_attr(subkind, f_name)
+      subkind
     end
 
     class Painting < SelectField
-      class StandardPainting < Painting
+
+      def self.medium_attr(subkind, f_name) #f_name...
+        f_name.sub('Painting','')
       end
 
-      class PaintingOnPaper < Painting
+      class OilPainting < Painting
+        def self.targets
+          ['oil painting', 'mixed media oil painting']
+        end
+      end
+
+      class AcylicPainting < Painting
+        def self.targets
+          ['acrylic painting', 'mixed media painting']
+        end
+      end
+
+      class WatercolorPainting < Painting
+        def self.targets
+          ['watercolor painting', 'sumi ink painting']
+        end
+      end
+
+      class PastelPainting < Painting
+        def self.targets
+          ['pastel painting']
+        end
+      end
+
+      class GuachePainting < Painting
+        def self.targets
+          ['guache painting']
+        end
+      end
+
+      class MixedMediaPainting < Painting
+        def self.targets
+          ['mixed media painting', 'overpaint', 'oil and acrylic painting']
+        end
+      end
+
+      class UnknownPainting < Painting
+        def self.targets
+          ['painting']
+        end
       end
     end
 
     class Drawing < SelectField
-      class StandardPainting < Drawing
+
+      def self.medium_attr(subkind, f_name) #f_name...
+        f_name.index('Pencil') ? 'Pencil' : 'Pen and Ink'
       end
 
-      class MixedMediaDrawing < Drawing
+      class PencilDrawing < Drawing
+        def self.targets
+          ['pencil drawing', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing']
+        end
+      end
+
+      class PenAndInkDrawing < Drawing
+        def self.targets
+          ['pen and ink drawing', 'pen and ink study']
+        end
+      end
+
+      class MixedMediaPencilDrawing < Drawing
+        def self.targets
+          ['pencil drawing', 'colored pencil drawing']
+        end
+      end
+
+      class MixedMediaPenAndInkDrawing < Drawing
+        def self.targets
+          ['pen and ink drawing']
+        end
       end
     end
 
-    class Silkscreen < SelectField
-      class StandardSilkscreen < Silkscreen
+    class Serigraph < SelectField
+
+      class StandardSerigraph < Serigraph
+        def self.targets
+          ['serigraph', 'original serigraph', 'silkscreen']
+        end
       end
 
-      class HandPulledSilkscreen < Silkscreen
+      class HandPulledSerigraph < Serigraph
+        def self.targets
+          ['hand pulled serigraph', 'hand pulled original serigraph', 'hand pulled silkscreen']
+        end
       end
     end
 
     class Lithograph < SelectField
+
       class StandardLithograph < Lithograph
+        def self.targets
+          ['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph', 'hand pulled original lithograph']
+        end
       end
 
       class HandPulledLithograph < Lithograph
+        def self.targets
+          ['hand pulled lithograph', 'hand pulled original lithograph']
+        end
       end
     end
 
     class Giclee < SelectField
+
       class StandardGiclee < Giclee
+        def self.targets
+          ['giclee', 'textured giclee']
+        end
       end
     end
 
     class Etching < SelectField
+
       class StandardEtching < Etching
+        def self.targets
+          ['etching', 'etching (black)', 'etching (sepia)', 'hand pulled etching', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint']
+        end
       end
     end
 
     class Relief < SelectField
+
+      def self.medium_attr(subkind, f_name) #subkind
+        'Mixed Media'
+      end
+
       class StandardRelief < Relief
+        def self.targets
+          ['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print']
+        end
       end
     end
 
     class MixedMedia < SelectField
+
       class StandardMixedMedia < MixedMedia
+        def self.targets
+          ['mixed media']
+        end
       end
 
       class AcrylicMixedMedia < MixedMedia
+        def self.targets
+          ['acrylic mixed media']
+        end
       end
 
       class Monotype < MixedMedia
+        def self.targets
+          ['monotype', 'monoprint']
+        end
       end
 
       class Seriolithograph < MixedMedia
+        def self.targets
+          ['seriolithograph']
+        end
       end
     end
 
     class PrintMedia < SelectField
+
       class StandardPrint < PrintMedia
+        def self.targets
+          ['print', 'fine art print', 'vintage style print']
+        end
       end
     end
 
     class Poster < SelectField
+
       class StandardPoster < Poster
+        def self.targets
+          ['poster', 'vintage poster', 'concert poster']
+        end
       end
     end
 
     class Photograph < SelectField
+
       class StandardPhotograph < Photograph
+        def self.targets
+          ['photograph']
+        end
       end
 
       class SingleExposurePhotograph < Photograph
+        def self.targets
+          ['single exposure photograph']
+        end
       end
 
       class SportsPhotograph < Photograph
+        def self.targets
+          ['photograph', 'archival sports photograph']
+        end
       end
 
       class ConcertPhotograph < Photograph
+        def self.targets
+          ['photograph', 'concert photograph', 'archival concert photograph']
+        end
       end
 
       class PressPhotograph < Photograph
+        def self.targets
+          ['vintage press photograph']
+        end
       end
     end
 
     class Sericel < SelectField
+
       class StandardSericel < Sericel
+        def self.targets
+          ['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline']
+        end
       end
     end
 
     class ProductionArt < SelectField
+
       class ProductionCel < ProductionArt
+        def self.targets
+          ['production cel', 'production cel and matching drawing', 'production cel and two matching drawings', 'production cel and three matching drawings']
+        end
       end
 
       class ProductionDrawing < ProductionArt
+        def self.targets
+          ['production drawing', 'production drawing set']
+        end
       end
     end
 
     class Sculpture < SelectField
+
       class StandardSculpture < Sculpture
+        def self.targets
+          ['glass', 'ceramic', 'bronze', 'acrylic', 'lucite', 'resin', 'pewter', 'mixed media']
+        end
       end
 
       class HandBlownGlass < Sculpture
+        def self.targets
+          ['hand blown glass']
+        end
       end
 
       class GartnerBladeGlass < Sculpture
+        def self.targets
+          ['hand blown glass']
+        end
       end
     end
-  end
-
-  module OptionTarget
-    module StandardPainting
-      def self.targets
-        ['oil painting', 'acrylic painting', 'mixed media painting', 'painting']
-      end
-    end
-
-    module PaintingOnPaper
-      def self.targets
-        ['watercolor painting', 'pastel painting', 'guache painting', 'sumi ink painting', 'oil painting', 'acrylic painting', 'mixed media painting', 'painting']
-      end
-    end
-
-    module StandardDrawing
-      def self.targets
-        ['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing']
-      end
-    end
-
-    module MixedMediaDrawing
-      def self.targets
-        StandardDrawing.targets
-      end
-    end
-
-    module StandardSilkscreen
-      def self.targets
-        ['serigraph', 'original serigraph', 'silkscreen']
-      end
-    end
-
-    module HandPulledSilkscreen
-      def self.targets
-        ['hand pulled serigraph', 'hand pulled original serigraph', 'hand pulled silkscreen']
-      end
-    end
-
-    module StandardLithograph
-      def self.targets
-        ['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph', 'hand pulled original lithograph']
-      end
-    end
-
-    module HandPulledLithograph
-      def self.targets
-        ['hand pulled lithograph', 'hand pulled original lithograph']
-      end
-    end
-
-    module StandardGiclee
-      def self.targets
-        ['giclee', 'textured giclee']
-      end
-    end
-
-    module StandardEtching
-      def self.targets
-        ['etching', 'etching (black)', 'etching (sepia)', 'hand pulled etching', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint']
-      end
-    end
-
-    module StandardRelief
-      def self.targets
-        ['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print']
-      end
-    end
-
-    module StandardMixedMedia
-      def self.targets
-        ['mixed media']
-      end
-    end
-
-    module AcrylicMixedMedia
-      def self.targets
-        ['acrylic mixed media']
-      end
-    end
-
-    module Monotype
-      def self.targets
-        ['monotype', 'monoprint']
-      end
-    end
-
-    module Seriolithograph
-      def self.targets
-        ['seriolithograph']
-      end
-    end
-
-    module StandardPrint
-      def self.targets
-        ['print', 'fine art print', 'vintage style print']
-      end
-    end
-
-    module StandardPoster
-      def self.targets
-        ['poster', 'vintage poster', 'concert poster']
-      end
-    end
-
-    module StandardPhotograph
-      def self.targets
-        ['photograph']
-      end
-    end
-
-    module SingleExposurePhotograph
-      def self.targets
-        ['single exposure photograph']
-      end
-    end
-
-    module SportsPhotograph
-      def self.targets
-        ['photograph', 'archival sports photograph']
-      end
-    end
-
-    module ConcertPhotograph
-      def self.targets
-        ['photograph', 'concert photograph', 'archival concert photograph']
-      end
-    end
-
-    module PressPhotograph
-      def self.targets
-        ['vintage press photograph']
-      end
-    end
-
-    module StandardSericel
-      def self.targets
-        ['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline']
-      end
-    end
-
-    module ProductionCel
-      def self.targets
-        ['production cel', 'production cel and matching drawing', 'production cel and two matching drawings', 'production cel and three matching drawings']
-      end
-    end
-
-    module ProductionDrawing
-      def self.targets
-        ['production drawing', 'production drawing set']
-      end
-    end
-
-    module StandardSculpture
-      def self.targets
-        ['glass', 'ceramic', 'bronze', 'acrylic', 'lucite', 'resin', 'pewter', 'mixed media']
-      end
-    end
-
-    module HandBlownGlass
-      def self.targets
-        ['hand blown glass']
-      end
-    end
-
-    module GartnerBladeGlass
-      def self.targets
-        HandBlownGlass.targets
-      end
-    end
-
   end
 end
-
-# class Target < Medium
-#   class StandardPainting < Target
-#     def self.targets
-#       ['oil painting', 'acrylic painting', 'mixed media painting', 'painting']
-#     end
-#   end
-#
-#   class PaintingOnPaper < Target
-#     def self.targets
-#       ['watercolor painting', 'pastel painting', 'guache painting', 'sumi ink painting', 'oil painting', 'acrylic painting', 'mixed media painting', 'painting']
-#     end
-#   end
-#
-#   class StandardDrawing < Target
-#     def self.targets
-#       ['pen and ink drawing', 'pen and ink sketch', 'pen and ink study', 'pencil drawing', 'pencil sketch', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing']
-#     end
-#   end
-#
-#   class MixedMediaDrawing < Target
-#     def self.targets
-#       StandardDrawing.targets
-#     end
-#   end
-#
-#   class StandardSilkscreen < Target
-#     def self.targets
-#       ['serigraph', 'original serigraph', 'silkscreen']
-#     end
-#   end
-#
-#   class HandPulledSilkscreen < Target
-#     def self.targets
-#       ['hand pulled serigraph', 'hand pulled original serigraph', 'hand pulled silkscreen']
-#     end
-#   end
-#
-#   class StandardLithograph < Target
-#     def self.targets
-#       ['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph', 'hand pulled original lithograph']
-#     end
-#   end
-#
-#   class HandPulledLithograph < Target
-#     def self.targets
-#       ['hand pulled lithograph', 'hand pulled original lithograph']
-#     end
-#   end
-#
-#   class StandardGiclee < Target
-#     def self.targets
-#       ['giclee', 'textured giclee']
-#     end
-#   end
-#
-#   class StandardEtching < Target
-#     def self.targets
-#       ['etching', 'etching (black)', 'etching (sepia)', 'hand pulled etching', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint']
-#     end
-#   end
-#
-#   class StandardRelief < Target
-#     def self.targets
-#       ['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print']
-#     end
-#   end
-#
-#   class StandardMixedMedia < Target
-#     def self.targets
-#       ['mixed media']
-#     end
-#   end
-#
-#   class AcrylicMixedMedia < Target
-#     def self.targets
-#       ['acrylic mixed media']
-#     end
-#   end
-#
-#   class Monotype < Target
-#     def self.targets
-#       ['monotype', 'monoprint']
-#     end
-#   end
-#
-#   class Seriolithograph < Target
-#     def self.targets
-#       ['seriolithograph']
-#     end
-#   end
-#
-#   class StandardPrint < Target
-#     def self.targets
-#       ['print', 'fine art print', 'vintage style print']
-#     end
-#   end
-#
-#   class StandardPoster < Target
-#     def self.targets
-#       ['poster', 'vintage poster', 'concert poster']
-#     end
-#   end
-#
-#   class StandardPhotograph < Target
-#     def self.targets
-#       ['photograph']
-#     end
-#   end
-#
-#   class SingleExposurePhotograph < Target
-#     def self.targets
-#       ['single exposure photograph']
-#     end
-#   end
-#
-#   class SportsPhotograph < Target
-#     def self.targets
-#       ['photograph', 'archival sports photograph']
-#     end
-#   end
-#
-#   class ConcertPhotograph < Target
-#     def self.targets
-#       ['photograph', 'concert photograph', 'archival concert photograph']
-#     end
-#   end
-#
-#   class PressPhotograph < Target
-#     def self.targets
-#       ['vintage press photograph']
-#     end
-#   end
-#
-#   class StandardSericel < Target
-#     def self.targets
-#       ['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline']
-#     end
-#   end
-#
-#   class ProductionCel < Target
-#     def self.targets
-#       ['production cel', 'production cel and matching drawing', 'production cel and two matching drawings', 'production cel and three matching drawings']
-#     end
-#   end
-#
-#   class ProductionDrawing < Target
-#     def self.targets
-#       ['production drawing', 'production drawing set']
-#     end
-#   end
-#
-#   class StandardSculpture < Target
-#     def self.targets
-#       ['glass', 'ceramic', 'bronze', 'acrylic', 'lucite', 'resin', 'pewter', 'mixed media']
-#     end
-#   end
-#
-#   class HandBlownGlass < Target
-#     def self.targets
-#       ['hand blown glass']
-#     end
-#   end
-#
-#   class GartnerBladeGlass < Target
-#     def self.targets
-#       HandBlownGlass.targets
-#     end
-#   end
-#
-# end
