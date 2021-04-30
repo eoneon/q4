@@ -41,6 +41,10 @@ module TypeCheck
     t.underscore == 'option'
   end
 
+  def radio_button?(t)
+    t.underscore == 'radio_button'
+  end
+
   def tag_attr?(t)
     tag_attrs.include?(t)
   end

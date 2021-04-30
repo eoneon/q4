@@ -5,8 +5,7 @@ class Category
   def self.cascade_build(class_a, class_b, class_c, class_d, store)
     f_kind, f_type, subkind, f_name = [class_a, class_b, class_c, class_d].map(&:const)
     tags = build_tags(args: {subkind: subkind, f_name: f_name}, tag_set: tag_set, class_set: [class_d, class_c, class_b])
-    f = add_field_and_assoc_targets(f_class: to_class(f_type), f_name: f_name, f_kind: f_kind, tags: tags)
-    merge_field(Item.dig_set(k: f_name.to_sym, v: f, dig_keys: [f_kind.to_sym, f_type.to_sym]), store)
+    add_field_group(to_class(f_type), class_d, f_type, f_kind, f_name, store, tags)
   end
 
   def self.tag_set
@@ -154,3 +153,6 @@ class Category
     end
   end
 end
+
+#f = add_field_and_assoc_targets(f_class: to_class(f_type), f_name: f_name, f_kind: f_kind, tags: tags)
+#merge_field(Item.dig_set(k: f_name.to_sym, v: f, dig_keys: [f_kind.to_sym, f_type.to_sym]), store)
