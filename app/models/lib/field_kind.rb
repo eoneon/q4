@@ -1,7 +1,7 @@
 module FieldKind
   # h = FieldKind.field_group FieldKind::Tags::Medium /  h[:Material][:FieldSet]
   def self.field_group
-    store = [Material].each_with_object({}) do |class_a, store|
+    store = [Authentication, Category, Detail, Dimension, Disclaimer, GartnerBlade, LimitedEdition, Material, Medium, Mounting, Sculpture, Submedium].each_with_object({}) do |class_a, store|
       class_a.class_cascade(store)
     end
   end
@@ -10,7 +10,7 @@ module FieldKind
   ##############################################################################
   def add_field_group(f_class, member_class, f_type, f_kind, f_name, store, tags=nil)
     f = add_field(f_class, f_name, f_kind, tags)
-    f.add_and_assoc_targets(member_class.targets) unless f_type == 'RadioButton'
+    f.add_and_assoc_targets(member_class.targets) if member_class.method_exists?(:targets) #unless f_type == 'RadioButton'
     merge_field(Item.dig_set(k: f_name.to_sym, v: f, dig_keys: [f_kind.to_sym, f_type.to_sym]), store)
   end
 
