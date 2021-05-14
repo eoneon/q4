@@ -1,12 +1,12 @@
 module FieldKind
-  # h = FieldKind.field_group FieldKind::Tags::Medium /  h[:Material][:FieldSet]
-  def self.field_group
-    store = [Authentication, Category, Detail, Dimension, Disclaimer, GartnerBlade, LimitedEdition, Material, Medium, Mounting, Sculpture, Submedium].each_with_object({}) do |class_a, store|
-      class_a.class_cascade(store)
-    end
-  end
+  # h = FieldKind.field_group 
 
   ##############################################################################
+  def self.field_group
+    store = [Authentication, Category, Detail, Dimension, Disclaimer, GartnerBlade, LimitedEdition, Material, Medium, Mounting, Sculpture, Submedium].each_with_object({}) do |klass, store|
+      klass.class_cascade(store)
+    end
+  end
   ##############################################################################
   def add_field_group(f_class, member_class, f_type, f_kind, f_name, store, tags=nil)
     f = add_field(f_class, f_name, f_kind, tags)
@@ -82,22 +82,13 @@ module FieldKind
     %w[a e i o u].include?(noun.first.downcase) && noun.split('-').first != 'one' || noun == 'HC' ? 'an' : 'a'
   end
 
-  # module SelectField
-  #   def add_targets(f_kind=nil)
-  #     targets.map{|f_name| add_field(Option, f_name, f_kind)}
-  #   end
-  # end
-
-  # module FieldSet
-  #   def add_targets
-  #     set = targets.each_with_object([]) do |f_keys, set|
-  #       f_type, f_kind, f_name = f_keys.map(&:to_s)
-  #       add_field(to_class(f_type), f_name, f_kind)
-  #     end
-  #   end
-  # end
-
 end
+
+# def self.field_group
+#   store = [Authentication, Category, Detail, Dimension, Disclaimer, GartnerBlade, LimitedEdition, Material, Medium, Mounting, Sculpture, Submedium].each_with_object({}) do |class_a, store|
+#     class_a.class_cascade(store)
+#   end
+# end
 
 # def add_and_assoc_targets(f, member_class)
 #   member_class.targets(f.kind).map{|target| f.assoc_unless_included(target)}

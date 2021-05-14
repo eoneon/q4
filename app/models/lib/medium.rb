@@ -2,37 +2,37 @@ class Medium
   extend Context
   extend FieldKind
 
-  def self.cascade_build(class_a, class_b, class_c, class_d, store)
-    f_kind, f_type, subkind, f_name = [class_a, class_b, class_c, class_d].map(&:const)
-    tags = build_tags(args: {subkind: subkind, f_name: f_name}, tag_set: tag_set, class_set: [class_d, class_c, class_b])
-    add_field_group(to_class(f_type), class_d, f_type, f_kind, f_name, store, tags)
+  def self.cascade_build(store)
+    f_kind, f_type, subkind, f_name = f_attrs(0, 1, 2, 3)
+    tags = build_tags(args: {subkind: subkind, f_name: f_name}, tag_set: tag_set, class_set: class_tree(0,3))
+    add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store, tags)
+  end
+
+  def self.tag_set
+    [:product_name, :search, :subsearch, :medium_attr]
+  end
+
+  def self.product_name(subkind, f_name)
+    class_to_cap(f_name.sub('Standard', ''), %w[and])
+  end
+
+  def self.search(subkind, f_name)
+    subkind
+  end
+
+  def self.subsearch(subkind, f_name)
+    f_name.sub('Standard', '')
+  end
+
+  def self.medium_attr(subkind, f_name)
+    subkind
   end
 
   class SelectField < Medium
 
-    def self.tag_set
-      [:product_name, :search, :subsearch, :medium_attr]
-    end
-
-    def self.product_name(subkind, f_name)
-      class_to_cap(f_name.sub('Standard', ''), %w[and])
-    end
-
-    def self.search(subkind, f_name)
-      subkind
-    end
-
-    def self.subsearch(subkind, f_name)
-      f_name.sub('Standard', '')
-    end
-
-    def self.medium_attr(subkind, f_name)
-      subkind
-    end
-
     class Painting < SelectField
 
-      def self.medium_attr(subkind, f_name) #f_name...
+      def self.medium_attr(subkind, f_name)
         f_name.sub('Painting','')
       end
 

@@ -2,9 +2,9 @@ class Detail
   extend Context
   extend FieldKind
 
-  def self.cascade_build(class_a, class_b, class_c, class_d, store)
-    f_type, f_kind, f_name = [class_b, class_c, class_d].map(&:const)
-    add_field_group(to_class(f_type), class_d, f_type, f_kind, f_name, store, {'field_value' =>class_d.field_value})
+  def self.cascade_build(store)
+    f_type, f_kind, f_name = f_attrs(1, 2, 3)
+    add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store, {'field_value' => field_value})
   end
 
   class RadioButton < Detail
@@ -62,3 +62,9 @@ class Detail
     end
   end
 end
+
+
+# def self.cascade_build(class_a, class_b, class_c, class_d, store)
+#   f_type, f_kind, f_name = [class_b, class_c, class_d].map(&:const)
+#   add_field_group(to_class(f_type), class_d, f_type, f_kind, f_name, store, {'field_value' =>class_d.field_value})
+# end

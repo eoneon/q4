@@ -2,9 +2,9 @@ class Mounting
   extend Context
   extend FieldKind
 
-  def self.cascade_build(class_a, class_b, class_c, class_d, store)
-    f_kind, f_type, subkind, f_name = [class_a, class_b, class_c, class_d].map(&:const)
-    add_field_group(to_class(f_type), class_d, f_type, f_kind, f_name, store)
+  def self.cascade_build(store)
+    f_kind, f_type, f_name = f_attrs(0, 1, 3)
+    add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store)
   end
 
   class SelectField < Mounting

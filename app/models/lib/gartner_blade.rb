@@ -2,9 +2,9 @@ class GartnerBlade
   extend Context
   extend FieldKind
 
-  def self.cascade_build(class_a, class_b, class_c, class_d, store)
-    f_type, f_kind, f_name = [class_b, class_c, class_d].map(&:const)
-    add_field_group(to_class(f_type), class_d, f_type, f_kind, f_name, store)
+  def self.cascade_build(store)
+    f_type, f_kind, f_name = f_attrs(1, 2, 3)
+    add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store)
   end
 
   class SelectField < GartnerBlade
@@ -59,29 +59,29 @@ class GartnerBlade
       end
     end
 
-  end
-
-  class Lid < SelectField
-    class GartnerBladeLid < Lid
-      def self.targets
-        ['bowl', 'sphere']
+    class Lid < SelectField
+      class GartnerBladeLid < Lid
+        def self.targets
+          ['bowl', 'sphere']
+        end
       end
     end
-  end
 
-  class Size < SelectField
-    class GartnerBladeSize < Size
-      def self.targets
-        ['large', 'medium', 'small', 'mini']
+    class Size < SelectField
+      class GartnerBladeSize < Size
+        def self.targets
+          ['large', 'medium', 'small', 'mini']
+        end
       end
     end
-  end
 
-  class Color < SelectField
-    class GartnerBladeColor < Color
-      def self.targets
-        ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
+    class Color < SelectField
+      class GartnerBladeColor < Color
+        def self.targets
+          ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
+        end
       end
     end
+
   end
 end
