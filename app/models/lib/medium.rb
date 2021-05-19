@@ -48,6 +48,18 @@ class Medium
         end
       end
 
+      class MixedMediaPainting < Painting
+        def self.targets
+          ['mixed media painting', 'overpaint', 'oil and acrylic painting']
+        end
+      end
+
+      class UnknownPainting < Painting
+        def self.targets
+          ['painting']
+        end
+      end
+
       class WatercolorPainting < Painting
         def self.targets
           ['watercolor painting', 'sumi ink painting']
@@ -66,17 +78,6 @@ class Medium
         end
       end
 
-      class MixedMediaPainting < Painting
-        def self.targets
-          ['mixed media painting', 'overpaint', 'oil and acrylic painting']
-        end
-      end
-
-      class UnknownPainting < Painting
-        def self.targets
-          ['painting']
-        end
-      end
     end
 
     class Drawing < SelectField

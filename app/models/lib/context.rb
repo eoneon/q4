@@ -21,13 +21,16 @@ module Context
   end
 
   ######################
-
-  def const_tree
-    to_s.split('::')
+  def filtered_class_tree(n, n2, meth)
+    class_tree(n,n2).select{|klass| klass.method_exists?(meth)}
   end
 
   def class_tree(n,n2)
     (n..n2).map{|i| const_tree[0..i].join('::').constantize}.reverse
+  end
+
+  def const_tree
+    to_s.split('::')
   end
 
   def const(i=-1)
@@ -52,23 +55,15 @@ module Context
     methods(false).include?(method)
   end
 
+  def build_opts(set, k, k2)
+    set.map{|k3| [k, k2, k3]}
+  end
+
 end
 
 # def targets(opts, f_kind, f_type)
 #   opts.map{|key| [f_kind, f_type, key].map(&:to_sym)}
 # end
-
-# def class_cascade(store) #kind/Medium
-#   store = subclasses.each_with_object(store) do |class_b, store| #f_type
-#     class_b.subclasses.each do |class_c| #subkind
-#       class_c.subclasses.each do |class_d| #f_name
-#         class_b.cascade_build(self, class_b, class_c, class_d, store)
-#       end
-#     end
-#   end
-# end
-
-
 
 # def f_attrs(k)
 #   attr_set[k].map{|i| const_tree[i]}
@@ -77,34 +72,3 @@ end
 # def attr_set
 #   {a: [1, 2, 3], b: [0, 1, 2, 3]}
 # end
-
-######################
-# def class_cascade(store:, class_set: [])
-#   class_set.append(self)
-#
-#   if subclasses.any?
-#     get_subclasses(store, subclasses, class_set)
-#     #puts "class_set: #{class_set}"
-#   else
-#     cascade_build(store, class_set)
-#   end
-# end
-
-# def get_subclasses(store, class_set)
-#   store = subclasses.each_with_object(store) do |klass, store|
-#     class_cascade(store, class_set.append(klass))
-#   end
-# end
-
-# def get_subclasses(store, subclasses, class_set)
-#   class_set = subclasses.each_with_object(class_set) do |subklass, class_set|
-#     subklass.class_cascade(store: store, class_set: class_set)
-#   end
-# end
-######################
-
-# def const(i=-1)
-#   to_s.split('::')[i]
-# end
-
-######################
