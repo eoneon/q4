@@ -1,6 +1,6 @@
 class LimitedEdition
-  extend Context
-  extend FieldKind
+  include ClassContext
+  include FieldSeed
 
   def self.cascade_build(store)
     f_type, f_kind, f_name = f_attrs(1, 2, 3)

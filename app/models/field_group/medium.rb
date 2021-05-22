@@ -1,39 +1,52 @@
 class Medium
-  extend Context
-  extend FieldKind
+  include ClassContext
+  include FieldSeed
 
   def self.cascade_build(store)
-    f_kind, f_type, subkind, f_name = f_attrs(0, 1, 2, 3)
-    tags = build_tags(args: {subkind: subkind, f_name: f_name}, tag_set: tag_set, class_set: class_tree(0,3))
-    add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store, tags)
+    #f_kind, f_type, subkind, f_name = f_attrs(0, 1, 2, 3)
+    #f_kind, f_type, subkind, f_name = f_attrs(class_tree, :kind, :type, :subkind).merge({f_name: const}) #(0, 1, 2, 3)
+    #f_kind, f_type, subkind, f_name = f_attrs(class_tree, :kind, :type, :subkind, :f_name).values #.merge({f_name: const})
+    #tags = build_tags(args: {subkind: subkind, f_name: f_name}, tag_set: tag_set, class_set: class_tree)
+    args = collect_params(:attrs)
+    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args, :product_name, :search, :subsearch, :medium_attr))
   end
 
-  def self.tag_set
+  def self.attrs
+    {kind: 0, type: 1, f_name: -1}
+  end
+
+  ##############################################################################
+  def self.tag_methods
     [:product_name, :search, :subsearch, :medium_attr]
   end
 
-  def self.product_name(subkind, f_name)
-    class_to_cap(f_name.sub('Standard', ''), %w[and])
+  def self.product_name(args)
+    class_to_cap(args[:f_name].sub('Standard', ''), %w[and])
   end
 
-  def self.search(subkind, f_name)
-    subkind
+  def self.search(args)
+    args[:subkind]
   end
 
-  def self.subsearch(subkind, f_name)
-    f_name.sub('Standard', '')
+  def self.subsearch(args)
+    args[:f_name].sub('Standard', '')
   end
 
-  def self.medium_attr(subkind, f_name)
-    subkind
+  def self.medium_attr(args)
+    args[:f_name]
   end
+
 
   class SelectField < Medium
 
     class Painting < SelectField
 
-      def self.medium_attr(subkind, f_name)
-        f_name.sub('Painting','')
+      def self.attrs
+        {subkind: -2}
+      end
+
+      def self.medium_attr(args)
+        args[:f_name].sub('Painting','')
       end
 
       class OilPainting < Painting
@@ -82,8 +95,12 @@ class Medium
 
     class Drawing < SelectField
 
-      def self.medium_attr(subkind, f_name) #f_name...
-        f_name.index('Pencil') ? 'Pencil' : 'Pen and Ink'
+      def self.attrs
+        {subkind: -2}
+      end
+
+      def self.medium_attr(args)
+        args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink'
       end
 
       class PencilDrawing < Drawing
@@ -112,6 +129,9 @@ class Medium
     end
 
     class Serigraph < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class StandardSerigraph < Serigraph
         def self.targets
@@ -127,6 +147,9 @@ class Medium
     end
 
     class Lithograph < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class StandardLithograph < Lithograph
         def self.targets
@@ -142,6 +165,9 @@ class Medium
     end
 
     class Giclee < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class StandardGiclee < Giclee
         def self.targets
@@ -151,6 +177,9 @@ class Medium
     end
 
     class Etching < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class StandardEtching < Etching
         def self.targets
@@ -160,8 +189,11 @@ class Medium
     end
 
     class Relief < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
-      def self.medium_attr(subkind, f_name) #subkind
+      def self.medium_attr(args)
         'Mixed Media'
       end
 
@@ -173,7 +205,9 @@ class Medium
     end
 
     class MixedMedia < SelectField
-
+      def self.attrs
+        {subkind: -2}
+      end
       class StandardMixedMedia < MixedMedia
         def self.targets
           ['mixed media']
@@ -200,6 +234,9 @@ class Medium
     end
 
     class PrintMedia < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class StandardPrint < PrintMedia
         def self.targets
@@ -209,6 +246,9 @@ class Medium
     end
 
     class Poster < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class StandardPoster < Poster
         def self.targets
@@ -218,6 +258,9 @@ class Medium
     end
 
     class Photograph < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class StandardPhotograph < Photograph
         def self.targets
@@ -251,7 +294,9 @@ class Medium
     end
 
     class Sericel < SelectField
-
+      def self.attrs
+        {subkind: -2}
+      end
       class StandardSericel < Sericel
         def self.targets
           ['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline']
@@ -260,6 +305,9 @@ class Medium
     end
 
     class ProductionArt < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class ProductionCel < ProductionArt
         def self.targets
@@ -275,6 +323,9 @@ class Medium
     end
 
     class Sculpture < SelectField
+      def self.attrs
+        {subkind: -2}
+      end
 
       class StandardSculpture < Sculpture
         def self.targets

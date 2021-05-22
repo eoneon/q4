@@ -60,15 +60,3 @@ module Context
   end
 
 end
-
-# def targets(opts, f_kind, f_type)
-#   opts.map{|key| [f_kind, f_type, key].map(&:to_sym)}
-# end
-
-# def f_attrs(k)
-#   attr_set[k].map{|i| const_tree[i]}
-# end
-
-# def attr_set
-#   {a: [1, 2, 3], b: [0, 1, 2, 3]}
-# end

@@ -18,6 +18,13 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
+  def self.seed
+    store = FieldItem.seed
+    Medium.class_group('ProductGroup').each do |c|
+      c.class_cascade(store)
+    end
+  end
+
   def radio_options
     radio_buttons.includes(:options).map(&:options)
   end

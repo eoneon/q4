@@ -24,6 +24,8 @@ module Q4
     #config.autoload_paths += %W(#{config.root}/app/models/product)
     config.autoload_paths += %W(#{config.root}/app/models/product_item)
     config.autoload_paths += %W(#{config.root}/app/models/field_item)
+    config.autoload_paths += %W(#{config.root}/app/models/product_group)
+    config.autoload_paths += %W(#{config.root}/app/models/field_group)
     config.autoload_paths += %W(#{config.root}/app/models/lib)
     #config.autoload_paths += %W(#{config.root}/lib/seed)
     #config.autoload_paths += %W(#{config.root}/lib)

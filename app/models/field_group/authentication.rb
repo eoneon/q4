@@ -1,6 +1,6 @@
 class Authentication
-  extend Context
-  extend FieldKind
+  include ClassContext
+  include FieldSeed
 
   def self.cascade_build(store)
     f_type, f_kind, f_name = f_attrs(1, 2, 3)
@@ -38,8 +38,16 @@ class Authentication
     end
 
   end
+
 end
 
+# class FieldSet < Authentication
+#
+#   class Standard < FieldSet
+#     class StandardAuthentication < Standard
+#     end
+#   end
+# end
   #f_type, f_kind, f_name = [1, 2, 3].map{|i| const_tree[i]}
 
   # def self.cascade_build(class_a, class_b, class_c, class_d, store)

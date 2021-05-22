@@ -1,6 +1,6 @@
 class Submedium
-  extend Context
-  extend FieldKind
+  include ClassContext
+  include FieldSeed
 
   def self.cascade_build(store)
     f_kind, f_type, f_name = f_attrs(0, 1, 3)

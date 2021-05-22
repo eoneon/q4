@@ -1,16 +1,17 @@
 module ProductKind
   extend Context
   #a = ProductKind.product_seed
-  def self.product_seed
-    products = [FlatArt].each_with_object([]) do |klass, products|
-      products << klass.class_cascade(FieldKind.field_group)
-    end
-  end
+  # def self.product_seed
+  #   products = [FlatArt].each_with_object([]) do |klass, products|
+  #     products << klass.class_cascade(FieldKind.field_group)
+  #   end
+  # end
 
   ##############################################################################
   def build_product_group(store)
     p_set = uncombined_product_set(store)
-    p_set = format_set(combine_set(split_group_by_attr(p_set.flatten, :kind)))
+    # puts "p_set: #{p_set}"
+    format_set(combine_set(split_group_by_attr(p_set.flatten, :kind)))
   end
   ##############################################################################
 
@@ -23,7 +24,11 @@ module ProductKind
   end
 
   def combine_set(p_set)
-    p_set[0].product(*p_set[1..-1])
+    if p_set.detect{|a| a.count > 1}
+      p_set[0].product(*p_set[1..-1])
+    else
+      p_set.map{|a| a[0]}
+    end
   end
 
   def format_set(p_set)
