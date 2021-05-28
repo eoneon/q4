@@ -4,16 +4,10 @@ module ProductSeed
   extend ActiveSupport::Concern
 
   class_methods do
-    # def self.product_seed
-    #   products = [FlatArt].each_with_object([]) do |klass, products|
-    #     products << klass.class_cascade(FieldKind.field_group)
-    #   end
-    # end
 
     ##############################################################################
     def build_product_group(store)
       p_set = uncombined_product_set(store)
-      # puts "p_set: #{p_set}"
       format_set(combine_set(split_group_by_attr(p_set.flatten, :kind)))
     end
     ##############################################################################
@@ -45,7 +39,7 @@ module ProductSeed
     ##############################################################################
 
     def merged_assocs_from_class_tree
-      p_group = select_classes_from_tree(:assocs).each_with_object({}) do |c, p_group|
+      p_group = asc_select_classes(:assocs).each_with_object({}) do |c, p_group|
         c.assocs.each do |k, mod|
           mod.assocs.each do |f_type, f_names|
             merge_assocs(k, f_type, f_names, p_group)

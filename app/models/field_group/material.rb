@@ -1,15 +1,15 @@
 class Material
   include ClassContext
   include FieldSeed
-  # h[:Material][:FieldSet]
-  def self.cascade_build(store)
-    f_kind, f_type, subkind, f_name = f_attrs(0, 1, 2, 3)
-    tags = build_tags(args: {subkind: subkind, f_name: f_name}, tag_set: tag_set, class_set: class_tree(0,3))
-    add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store, tags)
+  include Hashable
+
+  def self.builder(store)
+    args = build_attrs(:attrs)
+    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args, :product_name, :search, :material_attr))
   end
 
-  def self.tag_set
-    [:product_name, :search, :material_attr]
+  def self.attrs
+    {kind: 0, type: 1, f_name: -1}
   end
 
   class SelectField < Material
@@ -36,10 +36,6 @@ class Material
       end
 
       class PhotoPaper < Paper
-        def self.product_name(subkind, f_name)
-          'Paper'
-        end
-
         def self.targets
           ['paper', 'photography paper', 'archival grade paper']
         end
@@ -96,19 +92,36 @@ class Material
 
   class FieldSet < Material
 
-    def self.product_name(subkind, f_name)
-      class_to_cap(f_name.sub('Standard', ''))
+    # def self.assoc_group
+    #   kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
+    #   merge_enum(:targets, :group).each_with_object({}) do |(k,v), assocs|
+    #     case_merge(assocs, k, v, kind, type)
+    #   end
+    # end
+
+    def self.assoc_group
+      kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
+      merge_enum(:targets, :group, kind, type)
     end
 
-    def self.search(subkind, f_name)
-      f_name.sub('Standard', '')
+    def self.product_name(args)
+      class_to_cap(args[:f_name].sub('Standard', ''))
     end
 
-    def self.material_attr(subkind, f_name)
-      subkind
+    def self.search(args)
+      args[:subkind]
+    end
+
+    def self.medium_attr(args)
+      args[:f_name]
     end
 
     class Canvas < FieldSet
+
+      def self.group
+        [:OnStandard, :OnCanvas, :OnPaperAndCanvas]
+      end
+
       class StandardCanvas < Canvas
         def self.targets
           [%W[SelectField Material Canvas], %W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
@@ -124,18 +137,30 @@ class Material
 
     class Paper < FieldSet
       class StandardPaper < Paper
+        def self.group
+          [:OnStandard, :OnPaper, :OnPaperAndCanvas]
+        end
+
         def self.targets
           [%W[SelectField Material StandardPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
         end
       end
 
       class PhotoPaper < Paper
+        def self.group
+          [:OnPhotoPaper]
+        end
+
         def self.targets
           [%W[SelectField Material PhotoPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
         end
       end
 
       class AnimationPaper < Paper
+        def self.group
+          [:OnAnimationPaper]
+        end
+
         def self.targets
           [%W[SelectField Material AnimationPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
         end
@@ -143,6 +168,10 @@ class Material
     end
 
     class Board < FieldSet
+      def self.group
+        [:OnStandard]
+      end
+
       class StandardBoard < Board
         def self.targets
           [%W[SelectField Material StandardBoard], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
@@ -169,6 +198,10 @@ class Material
     end
 
     class Metal < FieldSet
+      def self.group
+        [:OnStandard]
+      end
+
       class StandardMetal < Metal
         def self.targets
           [%W[SelectField Material StandardMetal], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
@@ -183,82 +216,17 @@ class Material
     end
 
   end
+
 end
 
-# class FieldSet < Material
-#   class Canvas < FieldSet
-#     class StandardCanvas < Canvas
-#       def self.targets
-#         [%W[SelectField Material Canvas], %W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
-#       end
-#     end
+# def self.product_name(subkind, f_name)
+#   class_to_cap(f_name.sub('Standard', ''))
+# end
+
+# def self.search(subkind, f_name)
+#   f_name.sub('Standard', '')
+# end
 #
-#     class WrappedCanvas < Canvas
-#       def self.targets
-#         [%W[SelectField Material WrappedCanvas], %W[FieldSet Dimension WidthHeight]]
-#       end
-#     end
-#   end
-#
-#   class Paper < FieldSet
-    # class StandardPaper < Paper
-    #   def self.targets
-    #     [%W[SelectField Material StandardPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-    #   end
-    # end
-    #
-    # class PhotoPaper < Paper
-    #   def self.targets
-    #     [%W[SelectField Material PhotoPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-    #   end
-    # end
-    #
-    # class AnimationPaper < Paper
-    #   def self.targets
-    #     [%W[SelectField Material AnimationPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-    #   end
-    # end
-#   end
-#
-#   class Wood < FieldSet
-#     class StandardWood < Wood
-#       def self.targets
-#         [%W[SelectField Material Wood], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-#       end
-#     end
-#
-#     class WoodBox < Wood
-#       def self.targets
-#         [%W[SelectField Material WoodBox], %W[FieldSet Dimension WidthHeightDepth]]
-#       end
-#     end
-#
-#     class Board < Wood
-#       def self.targets
-#         [%W[SelectField Material Board], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-#       end
-#     end
-#
-#     class Acrylic < Wood
-#       def self.targets
-#         [%W[SelectField Material Acrylic], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-#       end
-#     end
-#   end
-#
-#   class Metal < FieldSet
-#     class StandardMetal < Metal
-#       def self.targets
-#         [%W[SelectField Material StandardMetal], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-#       end
-#     end
-#
-#     class MetalBox < Metal
-#       def self.targets
-#         [%W[SelectField Material MetalBox], %W[FieldSet Dimension WidthHeightDepth]]
-#       end
-#     end
-#   end
-#
-#
+# def self.material_attr(subkind, f_name)
+#   subkind
 # end

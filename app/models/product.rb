@@ -21,7 +21,7 @@ class Product < ApplicationRecord
   def self.seed
     store = FieldItem.seed
     Medium.class_group('ProductGroup').each do |c|
-      c.class_cascade(store)
+      c.build_selected_targets(:method_exists?, :targets, store)
     end
   end
 

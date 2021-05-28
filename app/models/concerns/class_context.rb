@@ -4,125 +4,69 @@ module ClassContext
   extend ActiveSupport::Concern
 
   class_methods do
-    def class_cascade(store)
-      if subclasses.any?
-        cascade_subclasses(store)
-      else
-        cascade_build(store)
-      end
-    end
-
-    def cascade_subclasses(store)
-      subclasses.each do |klass|
-        klass.class_cascade(store)
-      end
-    end
 
     ############################################################################
+    def build_and_store(meth, store)
+      desc_select_classes(:method_exists?, meth).each_with_object(store){|c, store| c.builder(store)}
+    end
 
-    # def f_attrs(*idxs)
-    #   idxs.map{|i| const_tree[i]}
-    # end
-
-    # def f_attrs
-    #   vals = [:kind, :type, :subkind].each_with_object([]) do |meth, vals|
-    #     if c = detect_method(meth, class_tree)
-    #   subkind = detect_and_call(:subkind, class_tree)
-    #   f_type = detect_file(const_tree, 'FieldItem')
-    #   kind = detect_file(const_tree, 'FieldGroup')
-    #   [kind, f_type, subkind, const]
-    # end
-
-    # def f_attrs(class_tree, *meths)
-    #   h = meths.each_with_object({}) do |meth, h|
-    #     if val = detect_and_call(meth, class_tree)
-    #       h[meth] = val
-    #     end
-    #   end
-    # end
-
-    def f_attrs(class_tree, *meths)
-      h = meths.each_with_object({}) do |meth, h|
-        if idx = detect_and_call(meth, class_tree)
-          h[meth] = const_tree[idx]
-        end
+    def merge_asc_selected_hash_methods(meth)
+      h = asc_select_classes(meth).each_with_object({}) do |c, h|
+        h.merge!(c.public_send(meth))
       end
     end
 
-    def detect_file(set, folder)
-      set.detect{|i| classified_files(folder).include?(i)}
-    end
-
-    ############################################################################
-
-    # def build_tags(args:, tag_set:, class_set:)
-    #   tags = tag_set.each_with_object({}) do |meth, tags|
-    #     if c = detect_method(meth, class_set)
-    #       tags.merge!({meth.to_s => c.public_send(meth, *args.values)})
-    #     end
-    #   end
-    # end
-
-    def build_tags(args, *methods)
-      tags = detect_classes_from_tree(methods).each_with_object({}) do |(m,c), tags|
-        tags.merge!({m => c.public_send(m, args)})
-        #h.each{|m,c| tags.merge{m => c.public_send(m, args)}}
-      end
-    end
-
-    # def build_tags(args, tag_methods)
-    #   tags = tag_methods.each_with_object({}) do |m, tags|
-    #     if c = detect_method(m, class_tree)
-    #       tags.merge!({m.to_s => c.public_send(m, args)})
-    #     end
-    #   end
-    # end
-
-    def detect_and_call(meth, class_tree)
-      if c = detect_method(meth, class_tree)
-        c.public_send(meth)
-      end
-    end
-
-    def detect_method(meth, class_tree)
-      class_tree.detect{|c| c.method_exists?(meth)}
-    end
-
-    ######################
-    # def filtered_class_tree(n, n2, meth)
-    #   class_tree(n,n2).select{|klass| klass.method_exists?(meth)}
-    # end
-    def collect_params(params)
-      merge_selected_hashes_from_tree(params).each_with_object({}){|(attr,idx), h| h.merge!({attr => const_tree[idx]}) }
-      # h = attrs.each_with_object({}) do |(attr,idx), h|
-      #   h[attr] = const_tree[idx]
-      # end
-    end
-
-    def merge_selected_hashes_from_tree(method)
-      h = select_classes_from_tree(method).each_with_object({}) do |c, h|
-        h.merge!(c.public_send(method))
-      end
-    end
-
-    def select_classes_from_tree(meth)
-      class_tree.select{|c| c.method_exists?(meth)}
-    end
-
-    def detect_classes_from_tree(methods)
+    def asc_detect_classes_with_methods(methods)
       h = methods.each_with_object({}) do |m, h|
-        if c = detect_method(m, class_tree)
+        if c = asc_detect_class(m, class_tree)
           h.merge!({m => c})
         end
       end
     end
-    # def detected_class_tree(meth)
-    #   class_tree.select{|c| c.method_exists?(meth)}
-    # end
 
-    # def class_tree(n,n2)
-    #   (n..n2).map{|i| const_tree[0..i].join('::').constantize}.reverse
-    # end
+    ############################################################################
+    #SELECT/DETECT CLASSES: ASC/DESC using: method_exists?(method)/respond_to?(method)
+    def desc_select_classes(test_meth, meth, set=[])
+      public_send(test_meth, meth) ? set.append(self) : subclasses.each_with_object(set) {|c, set| c.desc_select_classes(test_meth, meth, set)}
+    end
+
+    def asc_select_classes(meth)
+      class_tree.select{|c| c.method_exists?(meth)}
+    end
+
+    def asc_detect_class(meth)
+      class_tree.detect{|c| c.method_exists?(meth)}
+    end
+
+    def desc_select_then_asc_detect(desc_meth, asc_meth)
+      desc_select_classes(:method_exists?, desc_meth).each_with_object([]) do |c, set|
+        if asc_c = c.asc_detect_class(asc_meth)
+          set.append(asc_c) if set.exclude?(asc_c)
+        end
+      end
+    end
+
+    def desc_select_asc_detect_and_call(desc_meth, asc_meth)
+      desc_select_then_asc_detect(desc_meth, asc_meth).each_with_object({}) do |c, h|
+        h.merge!({c.const.to_sym => c.public_send(asc_meth)})
+      end
+    end
+
+    def asc_detect_and_call(meth)
+      if c = asc_detect_class(meth)
+        c.public_send(meth)
+      end
+    end
+
+    def desc_select_classes_then_asc_select(desc_meth, asc_meth)
+      desc_select_classes(:method_exists?, desc_meth).each_with_object([]) do |c, set|
+        if asc_c = c.asc_select_classes(asc_meth)
+          set.append(asc_c) if set.exclude?(asc_c)
+        end
+      end
+    end
+
+    ############################################################################
 
     def class_tree
       (0..const_tree.count-1).map{|i| const_tree[0..i].join('::').constantize}.reverse
@@ -136,7 +80,7 @@ module ClassContext
       const_tree[i]
     end
 
-    ######################
+    ############################################################################
 
     def to_class(f_type)
       f_type.to_s.classify.constantize
@@ -146,10 +90,6 @@ module ClassContext
       target_sets.map{|f_keys| store.dig(*f_keys)}.flatten
     end
 
-    # def detect_method(meth, class_set)
-    #   class_set.detect{|c| c.method_exists?(meth)}
-    # end
-
     def method_exists?(method)
       methods(false).include?(method)
     end
@@ -158,7 +98,12 @@ module ClassContext
       set.map{|k3| [k, k2, k3]}
     end
 
-    ######################
+    ############################################################################
+
+    def detect_file(set, folder)
+      set.detect{|i| classified_files(folder).include?(i)}
+    end
+
     def class_group(folder)
       classified_files(folder).map{|c| c.constantize}
     end
@@ -172,3 +117,28 @@ module ClassContext
     end
   end
 end
+
+############################################################################
+# def merge_assocs(meth)
+#   desc_select_classes(:respond_to?, meth).each_with_object({}) do |c, h|
+#     c.subclasses.none? ? collect_assocs(c, h) : c.subclasses.each_with_object(h){|c2,h | collect_assocs(c2, h)}
+#   end
+# end
+
+
+
+
+# def detect_method(meth, class_tree)
+#   class_tree.detect{|c| c.method_exists?(meth)}
+# end
+
+# def merge_assocs(meth)
+#   desc_select_classes(:respond_to?, meth).each_with_object({}) do |c, h|
+#     c.subclasses.none? ? collect_assocs(c, h) : c.subclasses.each_with_object(h){|c2,h | collect_assocs(c2, h)}
+#     # if c.subclasses.none?
+#     #   collect_assocs(c, h)
+#     # else
+#     #   c.subclasses.each_with_object(h){|c2,h | collect_assocs(c2, h)}
+#     # end
+#   end
+# end

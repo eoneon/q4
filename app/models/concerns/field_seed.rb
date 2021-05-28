@@ -4,14 +4,8 @@ module FieldSeed
   extend ActiveSupport::Concern
 
   class_methods do
-    # h = FieldKind.field_group
 
-    ############################################################################
-    # def self.field_group
-    #   store = [Authentication, Category, Detail, Dimension, Disclaimer, GartnerBlade, LimitedEdition, Material, Medium, Mounting, Sculpture, Submedium].each_with_object({}) do |klass, store|
-    #     klass.class_cascade(store)
-    #   end
-    # end
+    # CRUD #####################################################################
     ############################################################################
     def add_field_group(f_class, member_class, f_type, f_kind, f_name, store, tags=nil)
       f = add_field(f_class, f_name, f_kind, tags)
@@ -32,6 +26,41 @@ module FieldSeed
     end
 
     ############################################################################
+    #asc_build_detected_tags_and_merge
+    def build_tags(args, *methods)
+      asc_detect_classes_with_methods(methods).each_with_object({}) do |(m,c), tags|
+        tags.merge!({m => c.public_send(m, args)})
+      end
+    end
+
+    #asc_select_hash_method_and_merge
+    def build_attrs(meth)
+      merge_asc_selected_hash_methods(meth).each_with_object({}) do |(attr,idx), h|
+        h.merge!({attr => const_tree[idx]})
+      end
+    end
+    ############################################################################
+
+    def merge_enum(desc_meth, asc_meth, *dig_keys)
+      desc_select_asc_detect_and_call(desc_meth, asc_meth).each_with_object({}) do |(c,set),h|
+        #c.public_send(asc_meth).map {|k| (h.has_key?(k) ? h[k].append(c.const) : h[k] = [c.const])}
+        set.map {|k| case_merge(h,k,[c], *dig_keys)}
+      end
+    end
+
+    # def merge_enum(desc_meth, asc_meth)
+    #   desc_select_then_asc_detect(desc_meth, asc_meth).each_with_object({}) do |c, h|
+    #     #c.public_send(asc_meth).map {|k| (h.has_key?(k) ? h[k].append(c.const) : h[k] = [c.const])}
+    #     c.public_send(asc_meth).each {|k| case_merge(h,k,[c.const])}
+    #   end
+    # end
+
+    # def merge_enum(desc_meth, asc_meth)
+    #   desc_select_then_asc_detect(desc_meth, asc_meth).each do |c|
+    #     #c.public_send(asc_meth).map {|k| (h.has_key?(k) ? h[k].append(c.const) : h[k] = [c.const])}
+    #     c.public_send(asc_meth).each_with_object(h) {|k| case_merge(h,k,[c.const])}
+    #   end
+    # end
 
     ############################################################################
 
@@ -84,6 +113,27 @@ module FieldSeed
     end
   end
 end
+
+
+############################################################################
+# def merge_groups
+#   desc_select_classes(:method_exists?, :targets).each_with_object({}) do |c, h|
+#     c.asc_detect_and_call(:group).each_with_object(h){|k| merge_hash_set(h, k, c.const)}
+#   end
+# end
+
+# def merge_hash_set(h, k, v)
+#   h.has_key?(k) ? h[k].append(v) : h[k] = [v]
+# end
+
+# def collect_assocs(c, h)
+#   c.group.each_with_object(h){|k| merge_hash_set(k, c.const, h)}
+# end
+# def self.field_group
+#   store = [Authentication, Category, Detail, Dimension, Disclaimer, GartnerBlade, LimitedEdition, Material, Medium, Mounting, Sculpture, Submedium].each_with_object({}) do |klass, store|
+#     klass.class_cascade(store)
+#   end
+# end
 
 # def build_tags(args:, tag_set:, class_set:)
 #   tags = tag_set.each_with_object({}) do |meth, tags|

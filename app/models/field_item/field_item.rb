@@ -9,7 +9,7 @@ class FieldItem < ApplicationRecord
 
   def self.seed
     store = Medium.class_group('FieldGroup').each_with_object({}) do |c, store|
-      c.class_cascade(store)
+      c.build_and_store(:targets, store)
     end
   end
 end
