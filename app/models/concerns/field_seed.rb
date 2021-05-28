@@ -27,22 +27,22 @@ module FieldSeed
 
     ############################################################################
     #asc_build_detected_tags_and_merge
-    def build_tags(args, *methods)
-      asc_detect_classes_with_methods(methods).each_with_object({}) do |(m,c), tags|
+    def build_tags(args, *meths)
+      asc_detect_classes_with_methods(meths).each_with_object({}) do |(m,c), tags|
         tags.merge!({m => c.public_send(m, args)})
       end
     end
 
     #asc_select_hash_method_and_merge
-    def build_attrs(meth)
-      merge_asc_selected_hash_methods(meth).each_with_object({}) do |(attr,idx), h|
+    def build_attrs(m)
+      merge_asc_selected_hash_methods(m).each_with_object({}) do |(attr,idx), h|
         h.merge!({attr => const_tree[idx]})
       end
     end
     ############################################################################
 
-    def merge_enum(desc_meth, asc_meth, *dig_keys)
-      desc_select_asc_detect_and_call(desc_meth, asc_meth).each_with_object({}) do |(c,set),h|
+    def merge_enum(desc_m, asc_m, *dig_keys)
+      desc_select_asc_detect_and_call(desc_m, asc_m, :respond_to?).each_with_object({}) do |(c,set),h|
         #c.public_send(asc_meth).map {|k| (h.has_key?(k) ? h[k].append(c.const) : h[k] = [c.const])}
         set.map {|k| case_merge(h,k,[c], *dig_keys)}
       end

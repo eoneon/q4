@@ -6,19 +6,19 @@ module ClassContext
   class_methods do
 
     ############################################################################
-    def build_and_store(meth, store)
-      desc_select_classes(:method_exists?, meth).each_with_object(store){|c, store| c.builder(store)}
+    def build_and_store(m, store)
+      desc_select_classes(m: m).each_with_object(store){|c, store| c.builder(store)}
     end
 
-    def merge_asc_selected_hash_methods(meth)
-      h = asc_select_classes(meth).each_with_object({}) do |c, h|
-        h.merge!(c.public_send(meth))
+    def merge_asc_selected_hash_methods(m)
+      h = asc_select_classes(m).each_with_object({}) do |c, h|
+        h.merge!(c.public_send(m))
       end
     end
-
-    def asc_detect_classes_with_methods(methods)
-      h = methods.each_with_object({}) do |m, h|
-        if c = asc_detect_class(m, class_tree)
+    #seems like a duplicate:
+    def asc_detect_classes_with_methods(meths, asc_test=:method_exists?)
+      h = meths.each_with_object({}) do |m, h|
+        if c = asc_detect_class(m, asc_test)
           h.merge!({m => c})
         end
       end
@@ -26,31 +26,57 @@ module ClassContext
 
     ############################################################################
     #SELECT/DETECT CLASSES: ASC/DESC using: method_exists?(method)/respond_to?(method)
-    def desc_select_classes(test_meth, meth, set=[])
-      public_send(test_meth, meth) ? set.append(self) : subclasses.each_with_object(set) {|c, set| c.desc_select_classes(test_meth, meth, set)}
+    def desc_select_classes(test_m: :method_exists?, m:, set:[])
+      public_send(test_m, m) ? set.append(self) : subclasses.each_with_object(set) {|c, set| c.desc_select_classes(m: m, set: set)}
     end
 
-    def asc_select_classes(meth)
-      class_tree.select{|c| c.method_exists?(meth)}
+    # def asc_select_classes(meth)
+    #   class_tree.select{|c| c.method_exists?(meth)}
+    # end
+
+    def asc_select_classes(m, test_m=:method_exists?)
+      class_tree.select{|c| c.public_send(test_m, m)}
     end
 
-    def asc_detect_class(meth)
-      class_tree.detect{|c| c.method_exists?(meth)}
+    # def asc_select_classes(meth)
+    #   class_tree.select{|c| c.method_exists?(meth)}
+    # end
+
+    def asc_detect_class(m, test_m=:method_exists?)
+      class_tree.detect{|c| c.public_send(test_m, m)}
     end
 
-    def desc_select_then_asc_detect(desc_meth, asc_meth)
-      desc_select_classes(:method_exists?, desc_meth).each_with_object([]) do |c, set|
-        if asc_c = c.asc_detect_class(asc_meth)
+    # def asc_detect_class(meth)
+    #   class_tree.detect{|c| c.method_exists?(meth)}
+    # end
+
+    def desc_select_then_asc_detect(desc_m, asc_m, asc_test)
+      desc_select_classes(m: desc_m).each_with_object([]) do |c, set|
+        if asc_c = c.asc_detect_class(asc_m, asc_test)
           set.append(asc_c) if set.exclude?(asc_c)
         end
       end
     end
 
-    def desc_select_asc_detect_and_call(desc_meth, asc_meth)
-      desc_select_then_asc_detect(desc_meth, asc_meth).each_with_object({}) do |c, h|
-        h.merge!({c.const.to_sym => c.public_send(asc_meth)})
+    # def desc_select_then_asc_detect(desc_meth, asc_meth)
+    #   desc_select_classes(m: desc_meth).each_with_object([]) do |c, set|
+    #     if asc_c = c.asc_detect_class(asc_meth)
+    #       set.append(asc_c) if set.exclude?(asc_c)
+    #     end
+    #   end
+    # end
+
+    def desc_select_asc_detect_and_call(desc_m, asc_m, asc_test)
+      desc_select_then_asc_detect(desc_m, asc_m, asc_test).each_with_object({}) do |c, h|
+        h.merge!({c.const.to_sym => c.public_send(asc_m)})
       end
     end
+
+    # def desc_select_asc_detect_and_call(desc_meth, asc_meth)
+    #   desc_select_then_asc_detect(desc_meth, asc_meth).each_with_object({}) do |c, h|
+    #     h.merge!({c.const.to_sym => c.public_send(asc_meth)})
+    #   end
+    # end
 
     def asc_detect_and_call(meth)
       if c = asc_detect_class(meth)
@@ -58,9 +84,9 @@ module ClassContext
       end
     end
 
-    def desc_select_classes_then_asc_select(desc_meth, asc_meth)
-      desc_select_classes(:method_exists?, desc_meth).each_with_object([]) do |c, set|
-        if asc_c = c.asc_select_classes(asc_meth)
+    def desc_select_classes_then_asc_select(desc_m, asc_m, asc_test)
+      desc_select_classes(m: desc_m).each_with_object([]) do |c, set|
+        if asc_c = c.asc_select_classes(asc_m, asc_test)
           set.append(asc_c) if set.exclude?(asc_c)
         end
       end
