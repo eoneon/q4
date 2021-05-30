@@ -6,11 +6,10 @@ module Hashable
   class_methods do
 
     def case_merge(h, k, v, *dig_keys)
-      puts "h: #{h}, k: #{k}, v: #{v}, dig_keys: #{dig_keys}"
+      #puts "h: #{h}, k: #{k}, v: #{v}, dig_keys: #{dig_keys}"
       case
         when dig_keys.any?; nested_merge(h, k, v, dig_keys)
         when h.empty?; h.merge!({k=>v})
-        #when h.keys.include?(k) && concat_arr?(h[k], v); h.merge!({k=>(h[k]+v)})
         when h.keys.include?(k) && h[k].is_a?(Array); h.merge!({k=>dig_val(v, h[k])}) # dig_val(v, h[k])
         when v.is_a?(Hash); infer_dig_keys_and_merge(h, k, v)
       end
@@ -21,7 +20,8 @@ module Hashable
       keys.each_with_object(h) do |k, hsh|
         existing_val, i = h.dig(*set.append(k)), keys.index(k)
         #next unless !existing_val || concat_arr?(vals[i], existing_val)
-        next unless !existing_val || existing_val.is_a?(Array)
+        #next unless !existing_val || existing_val.is_a?(Array)
+        next if existing_val && !existing_val.is_a?(Array)
         inject_merge(h, k, dig_val(vals[i], existing_val), set, (i-1))
       end
     end

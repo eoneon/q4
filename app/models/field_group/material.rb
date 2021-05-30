@@ -4,12 +4,13 @@ class Material
   include Hashable
 
   def self.builder(store)
-    args = build_attrs(:attrs)
-    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args, :product_name, :search, :material_attr))
+    field_group(m, store)
+    #args = build_attrs(:attrs)
+    #add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args))
   end
 
   def self.attrs
-    {kind: 0, type: 1, f_name: -1}
+    {kind: 0, type: 1, subkind: 2, f_name: -1}
   end
 
   class SelectField < Material
@@ -94,14 +95,11 @@ class Material
 
     # def self.assoc_group
     #   kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-    #   merge_enum(:targets, :group).each_with_object({}) do |(k,v), assocs|
-    #     case_merge(assocs, k, v, kind, type)
-    #   end
+    #   merge_enum(:targets, :group, kind, type)
     # end
 
-    def self.assoc_group
-      kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-      merge_enum(:targets, :group, kind, type)
+    def self.tag_meths
+      [:product_name, :search, :material_attr]
     end
 
     def self.product_name(args)
@@ -113,13 +111,13 @@ class Material
     end
 
     def self.medium_attr(args)
-      args[:f_name]
+      args[:subkind]
     end
 
     class Canvas < FieldSet
 
       def self.group
-        [:OnStandard, :OnCanvas, :OnPaperAndCanvas]
+        [:OnStandard, :OnCanvas, :OnPaperOrCanvas]
       end
 
       class StandardCanvas < Canvas
@@ -138,7 +136,7 @@ class Material
     class Paper < FieldSet
       class StandardPaper < Paper
         def self.group
-          [:OnStandard, :OnPaper, :OnPaperAndCanvas]
+          [:OnStandard, :OnPaper, :OnPaperOrCanvas]
         end
 
         def self.targets

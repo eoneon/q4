@@ -1,10 +1,15 @@
 class LimitedEdition
   include ClassContext
   include FieldSeed
+  include Hashable
 
-  def self.cascade_build(store)
-    f_type, f_kind, f_name = f_attrs(1, 2, 3)
-    add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store)
+  def self.builder(store)
+    args = build_attrs(:attrs)
+    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store)
+  end
+
+  def self.attrs
+    {kind: 2, type: 1, f_name: -1}
   end
 
   class SelectField < LimitedEdition
@@ -90,6 +95,7 @@ class LimitedEdition
   end
 end
 
-#f = add_field(to_class(f_type), f_name, f_kind)
-#f = add_field_and_assoc_targets(f_class: to_class(f_type), f_name: f_name, f_kind: f_kind, targets: class_d.add_targets(f_kind))
-#merge_field(Item.dig_set(k: f_name.to_sym, v: f, dig_keys: [f_kind.to_sym, f_type.to_sym]), store)
+# def self.cascade_build(store)
+#   f_type, f_kind, f_name = f_attrs(1, 2, 3)
+#   add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store)
+# end

@@ -57,10 +57,13 @@ class Medium
         args[:f_name].sub('Painting','')
       end
 
+      def self.assocs
+        {Category: {RadioButton: :IsOriginal}}
+      end
+
       class OnStandard < Painting
         def self.assocs
-          # {Material: {FieldSet: :OnStandard}}
-          [:Material, :FieldSet, :OnStandard]
+          {Material: {FieldSet: :OnStandard}}
         end
 
         class OilPainting < OnStandard
@@ -92,6 +95,7 @@ class Medium
         def self.assocs
           {Material: {FieldSet: :OnPaper}}
         end
+
         class WatercolorPainting < OnPaper
           def self.targets
             ['watercolor painting', 'sumi ink painting']
@@ -122,7 +126,16 @@ class Medium
         args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink'
       end
 
+      def self.assocs
+        {Category: {RadioButton: :IsOriginal}}
+      end
+
       class OnPaper < Drawing
+
+        def self.assocs
+          {Material: {FieldSet: :OnPaper}}
+        end
+
         class PencilDrawing < OnPaper
           def self.targets
             ['pencil drawing', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing']
@@ -155,6 +168,10 @@ class Medium
       end
 
       class OnStandard < Serigraph
+        def self.assocs
+          {Material: {FieldSet: :OnStandard}}
+        end
+
         class StandardSerigraph < OnStandard
           def self.targets
             ['serigraph', 'original serigraph', 'silkscreen']
@@ -162,8 +179,12 @@ class Medium
         end
       end
 
-      class OnPaperAndCanvas < Serigraph
-        class HandPulledSerigraph < OnPaperAndCanvas
+      class OnPaperOrCanvas < Serigraph
+        def self.assocs
+          {Material: {FieldSet: :OnPaperOrCanvas}}
+        end
+
+        class HandPulledSerigraph < OnPaperOrCanvas
           def self.targets
             ['hand pulled serigraph', 'hand pulled original serigraph', 'hand pulled silkscreen']
           end
@@ -177,6 +198,10 @@ class Medium
       end
 
       class OnPaper < Lithograph
+        def self.assocs
+          {Material: {FieldSet: :OnPaper}}
+        end
+
         class StandardLithograph < OnPaper
           def self.targets
             ['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph', 'hand pulled original lithograph']
@@ -197,6 +222,10 @@ class Medium
       end
 
       class OnStandard < Giclee
+        def self.assocs
+          {Material: {FieldSet: :OnStandard}}
+        end
+
         class StandardGiclee < OnStandard
           def self.targets
             ['giclee', 'textured giclee']
@@ -211,6 +240,10 @@ class Medium
       end
 
       class OnPaper < Etching
+        def self.assocs
+          {Material: {FieldSet: :OnPaper}}
+        end
+
         class StandardEtching < OnPaper
           def self.targets
             ['etching', 'etching (black)', 'etching (sepia)', 'hand pulled etching', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint']
@@ -229,6 +262,10 @@ class Medium
       end
 
       class OnPaper < Relief
+        def self.assocs
+          {Material: {FieldSet: :OnPaper}}
+        end
+
         class StandardRelief < OnPaper
           def self.targets
             ['relief', 'mixed media relief', 'linocut', 'woodblock print', 'block print']
@@ -243,6 +280,10 @@ class Medium
       end
 
       class OnStandard < MixedMedia
+        def self.assocs
+          {Material: {FieldSet: :OnStandard}}
+        end
+
         class StandardMixedMedia < OnStandard
           def self.targets
             ['mixed media']
@@ -250,8 +291,8 @@ class Medium
         end
       end
 
-      class OnPaperAndCanvas < Serigraph
-        class AcrylicMixedMedia < OnPaperAndCanvas
+      class OnPaperOrCanvas < Serigraph
+        class AcrylicMixedMedia < OnPaperOrCanvas
           def self.targets
             ['acrylic mixed media']
           end
@@ -280,6 +321,10 @@ class Medium
       end
 
       class OnStandard < PrintMedia
+        def self.assocs
+          {Material: {FieldSet: :OnStandard}}
+        end
+
         class StandardPrint < OnStandard
           def self.targets
             ['print', 'fine art print', 'vintage style print']
@@ -294,6 +339,10 @@ class Medium
       end
 
       class OnPaper < Poster
+        def self.assocs
+          {Material: {FieldSet: :OnPaper}}
+        end
+
         class StandardPoster < OnPaper
           def self.targets
             ['poster', 'vintage poster', 'concert poster']
@@ -308,6 +357,10 @@ class Medium
       end
 
       class OnPhotoPaper < Photograph
+        def self.assocs
+          {Material: {FieldSet: :OnPhotoPaper}}
+        end
+
         class StandardPhotograph < OnPhotoPaper
           def self.targets
             ['photograph']
@@ -365,6 +418,10 @@ class Medium
       end
 
       class OnAnimationPaper < ProductionArt
+        def self.assocs
+          {Material: {FieldSet: :OnAnimationPaper}}
+        end
+
         class ProductionDrawing < OnAnimationPaper
           def self.targets
             ['production drawing', 'production drawing set']

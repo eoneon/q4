@@ -14,12 +14,12 @@ class Authentication
 
   class SelectField < Authentication
 
-    def self.assoc_group
-      kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-      merge_groups.each_with_object({}) do |(k,v), assocs|
-        case_merge(assocs, k, v, kind, type)
-      end
-    end
+    # def self.assoc_group
+    #   kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
+    #   merge_groups.each_with_object({}) do |(k,v), assocs|
+    #     case_merge(assocs, k, v, kind, type)
+    #   end
+    # end
 
     class Signature < SelectField
       class StandardSignature < Signature
