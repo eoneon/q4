@@ -4,8 +4,7 @@ class Category
   include Hashable
 
   def self.builder(store)
-    args = build_attrs(:attrs)
-    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args, :art_type, :art_category, :search, :product_name, :field_value))
+    field_group(:targets, store)
   end
 
   def self.attrs
@@ -16,12 +15,11 @@ class Category
     {'Original'=> 'Original Painting', 'StandardOriginal'=> 'Original', 'OneOfAKind'=> 'One-of-a-Kind', 'OneOfAKindOfOne'=> 'One-of-a-Kind 1/1', 'UniqueVariation'=> 'Unique Variation', 'ReproductionPrint'=> 'Print', 'LimitedEdition'=> 'Limited Edition', 'Sculpture'=> 'Sculpture/Glass'}
   end
 
-  class RadioButton < Category
+  def self.tag_meths
+    [:product_name, :search, :material_attr]
+  end
 
-    def self.assoc_group
-      kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-      merge_enum(:targets, :group, kind, type)
-    end
+  class RadioButton < Category
 
     class Original < RadioButton
       def self.art_type(args)
@@ -43,10 +41,6 @@ class Category
       def self.field_value(args)
         cat_hsh[args[:f_name]]
       end
-
-      # def self.group
-      #   [:IsOriginal, :IsOriginalOrOneOfAKind, :IsOneOfAKindOfOne]
-      # end
 
       class StandardOriginal < Original
         def self.group

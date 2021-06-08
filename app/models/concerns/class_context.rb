@@ -21,14 +21,17 @@ module ClassContext
         asc_detect_and_merge(h, m, asc_test)
       end
     end
-    ############################################################################
-    # def build_assocs(*assoc_meths)
-    #   asc_detect_methods_call_and_merge(meths: assoc_meths, asc_test: :respond_to?)
-    # end
 
+    def asc_detect_and_merge(h, m, asc_test)
+      if c = asc_detect(m, asc_test)
+        h.merge!({m => c})
+      end
+    end
+
+    ############################################################################
+    ############################################################################
     def asc_detect_methods_call_and_merge(meths:, asc_test: :method_exists?)
       h = meths.each_with_object({}) do |m, h|
-        #next unless public_send(asc_test, m)
         asc_detect_call_and_merge(h, m, asc_test) #if public_send(asc_test, m)
       end
     end
@@ -39,18 +42,30 @@ module ClassContext
       end
     end
     ############################################################################
-    def asc_detect_and_merge(h, m, asc_test)
-      if c = asc_detect(m, asc_test)
-        h.merge!({m => c})
+    ############################################################################
+
+    ############################################################################
+    ############################################################################
+    def asc_select_methods_call_and_merge(meths:)
+      h = meths.each_with_object({}) do |m, h|
+        asc_select_call_and_merge(h, m) 
       end
     end
+
+    def asc_select_call_and_merge(h, m)
+      asc_select(m).each_with_object(h){|c| case_merge(h, m, c.public_send(m))}
+    end
+    ############################################################################
+    ############################################################################
+
+
 
     ############################################################################
 
     def desc_select_field_with_attrs_tags_targets_and_assocs(m)
       desc_select(m: m).each_with_object([]) do |c, set|
         attrs = c.build_attrs(:attrs)
-        set.append({attrs: attrs, tags: c.build_tags(attrs), assocs: c.build_assocs(:set, :group), targets: c.targets})
+        set.append({attrs: attrs, tags: c.build_tags(attrs), assocs: c.build_assocs(:origin, :set, :group), targets: c.targets})
       end
     end
 

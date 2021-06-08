@@ -4,8 +4,7 @@ class GartnerBlade
   include Hashable
 
   def self.builder(store)
-    args = build_attrs(:attrs)
-    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store)
+    field_group(:targets, store)
   end
 
   def self.attrs
@@ -15,6 +14,10 @@ class GartnerBlade
   class SelectField < GartnerBlade
 
     class SculptureType < SelectField
+      # def self.set
+      #   [:ForGartnerBlade]
+      # end
+
       class OpenBowl < SculptureType
         def self.targets
           ['bowl', 'sphere']
@@ -27,27 +30,39 @@ class GartnerBlade
         end
       end
 
-      class CoveredBowl < SculptureType
-        def self.targets
-          ['bowl', 'covered bowl']
+      class ForCovered < SculptureType
+        # def self.set
+        #   [:ForCovered]
+        # end
+
+        class CoveredBowl < ForCovered
+          def self.targets
+            ['bowl', 'covered bowl']
+          end
+        end
+
+        class CoveredVase < ForCovered
+          def self.targets
+            ['covered jar']
+          end
         end
       end
 
-      class CoveredVase < SculptureType
-        def self.targets
-          ['covered jar']
+      class ForPrimitive < SculptureType
+        def self.set
+          [:ForPrimitive]
         end
-      end
 
-      class PrimitiveBowl < SculptureType
-        def self.targets
-          ['primitive bowl']
+        class PrimitiveBowl < ForPrimitive
+          def self.targets
+            ['primitive bowl']
+          end
         end
-      end
 
-      class PrimitiveShell < SculptureType
-        def self.targets
-          ['primitive shell']
+        class PrimitiveShell < ForPrimitive
+          def self.targets
+            ['primitive shell']
+          end
         end
       end
 
@@ -90,8 +105,3 @@ class GartnerBlade
 
   end
 end
-
-# def self.cascade_build(store)
-#   f_type, f_kind, f_name = f_attrs(1, 2, 3)
-#   add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store)
-# end

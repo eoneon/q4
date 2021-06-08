@@ -4,8 +4,7 @@ class Disclaimer
   include Hashable
 
   def self.builder(store)
-    args = build_attrs(:attrs)
-    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store)
+    field_group(:targets, store)
   end
 
   def self.attrs
@@ -34,6 +33,10 @@ class Disclaimer
 
     class Standard < FieldSet
       class StandardDisclaimer < Standard
+        def self.set
+          [:IsDisclaimer]
+        end
+        
         def self.targets
           [%W[SelectField Disclaimer Severity], %W[TextAreaField Disclaimer Damage]]
         end

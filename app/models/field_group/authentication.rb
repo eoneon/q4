@@ -4,8 +4,7 @@ class Authentication
   include Hashable
 
   def self.builder(store)
-    args = build_attrs(:attrs)
-    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store)
+    field_group(:targets, store)
   end
 
   def self.attrs
@@ -13,13 +12,6 @@ class Authentication
   end
 
   class SelectField < Authentication
-
-    # def self.assoc_group
-    #   kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-    #   merge_groups.each_with_object({}) do |(k,v), assocs|
-    #     case_merge(assocs, k, v, kind, type)
-    #   end
-    # end
 
     class Signature < SelectField
       class StandardSignature < Signature

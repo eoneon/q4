@@ -4,12 +4,15 @@ class Medium
   include Hashable
 
   def self.builder(store)
-    args = build_attrs(:attrs)
-    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args, :product_name, :search, :subsearch, :medium_attr))
+    field_group(:targets, store)
   end
 
   def self.attrs
     {kind: 0, type: 1, f_name: -1}
+  end
+
+  def self.tag_meths
+    [:product_name, :search, :subsearch, :medium_attr]
   end
 
   ##############################################################################
@@ -33,19 +36,12 @@ class Medium
   ##############################################################################
 
   class SelectField < Medium
-
-    def self.assoc_group
-      kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-      desc_select_then_asc_detect(:targets, :assocs).each_with_object({}) do |(k,v), assocs|
-        case_merge(assocs, k, v, kind, type)
-      end
+    def self.origin
+      [:StandardAuthentication, :IsDisclaimer]
     end
 
-    # def self.assoc_group
-    #   kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-    #   merge_enum(:targets, :group).each_with_object({}) do |(k,v), assocs|
-    #     case_merge(assocs, k, v, kind, type)
-    #   end
+    # def self.origin
+    #   {Authentication: :StandardAuthentication, Disclaimer: :IsDisclaimer}
     # end
 
     class Painting < SelectField
@@ -57,14 +53,18 @@ class Medium
         args[:f_name].sub('Painting','')
       end
 
-      def self.assocs
-        {Category: {RadioButton: :IsOriginal}}
+      def self.origin
+        [:IsOriginal]
       end
 
       class OnStandard < Painting
-        def self.assocs
-          {Material: {FieldSet: :OnStandard}}
+        def self.origin
+          [:OnStandard]
         end
+
+        # def self.origin
+        #   {Material: :OnStandard}
+        # end
 
         class OilPainting < OnStandard
           def self.targets
@@ -92,9 +92,13 @@ class Medium
       end
 
       class OnPaper < Painting
-        def self.assocs
-          {Material: {FieldSet: :OnPaper}}
+        def self.origin
+          [:OnPaper]
         end
+
+        # def self.origin
+        #   {Material: :OnPaper}
+        # end
 
         class WatercolorPainting < OnPaper
           def self.targets
@@ -126,16 +130,15 @@ class Medium
         args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink'
       end
 
-      def self.assocs
-        {Category: {RadioButton: :IsOriginal}}
+      def self.origin
+        [:IsOriginal, :OnPaper]
       end
 
+      # def self.origin
+      #   {Category: :IsOriginal, Material: :OnPaper}
+      # end
+
       class OnPaper < Drawing
-
-        def self.assocs
-          {Material: {FieldSet: :OnPaper}}
-        end
-
         class PencilDrawing < OnPaper
           def self.targets
             ['pencil drawing', 'colored pencil drawing', 'charcoal drawing', 'wax crayon drawing']
@@ -149,12 +152,28 @@ class Medium
         end
 
         class MixedMediaPencilDrawing < OnPaper
+          def self.origin
+            [:OriginalPaperSubmedia]
+          end
+
+          # def self.origin
+          #   {Submedia: :OriginalPaperSubmedia}
+          # end
+
           def self.targets
             ['pencil drawing', 'colored pencil drawing']
           end
         end
 
         class MixedMediaPenAndInkDrawing < OnPaper
+          def self.origin
+            [:OriginalPaperSubmedia]
+          end
+
+          # def self.origin
+          #   {Submedia: :OriginalPaperSubmedia}
+          # end
+
           def self.targets
             ['pen and ink drawing']
           end
@@ -167,10 +186,22 @@ class Medium
         {subkind: 2}
       end
 
+      def self.origin
+        [:IsLimitedEditionOrUniqueVariationOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne]
+      end
+
+      # def self.origin
+      #   {Category: [:IsLimitedEditionOrUniqueVariationOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne]}
+      # end
+
       class OnStandard < Serigraph
-        def self.assocs
-          {Material: {FieldSet: :OnStandard}}
+        def self.origin
+          [:OnStandard]
         end
+
+        # def self.origin
+        #   {Material: :OnStandard}
+        # end
 
         class StandardSerigraph < OnStandard
           def self.targets
@@ -180,9 +211,13 @@ class Medium
       end
 
       class OnPaperOrCanvas < Serigraph
-        def self.assocs
-          {Material: {FieldSet: :OnPaperOrCanvas}}
+        def self.origin
+          [:OnPaperOrCanvas]
         end
+
+        # def self.origin
+        #   {Material: :OnPaperOrCanvas}
+        # end
 
         class HandPulledSerigraph < OnPaperOrCanvas
           def self.targets
@@ -197,11 +232,15 @@ class Medium
         {subkind: 2}
       end
 
-      class OnPaper < Lithograph
-        def self.assocs
-          {Material: {FieldSet: :OnPaper}}
-        end
+      def self.origin
+        [:IsLimitedEditionOrReproduction, :OnPaper]
+      end
 
+      # def self.origin
+      #   {Category: :IsLimitedEditionOrReproduction, Material: :OnPaper}
+      # end
+
+      class OnPaper < Lithograph
         class StandardLithograph < OnPaper
           def self.targets
             ['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph', 'hand pulled original lithograph']
@@ -222,9 +261,13 @@ class Medium
       end
 
       class OnStandard < Giclee
-        def self.assocs
-          {Material: {FieldSet: :OnStandard}}
+        def self.origin
+          [:IsLimitedEditionOrReproduction, :OnStandard]
         end
+
+        # def self.origin
+        #   {Category: :IsLimitedEditionOrReproduction, Material: :OnStandard}
+        # end
 
         class StandardGiclee < OnStandard
           def self.targets
@@ -240,8 +283,12 @@ class Medium
       end
 
       class OnPaper < Etching
-        def self.assocs
-          {Material: {FieldSet: :OnPaper}}
+        # def self.origin
+        #   {Category: [:IsLimitedEditionOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne], Material: :OnPaper}
+        # end
+
+        def self.origin
+          [:IsLimitedEditionOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne, :OnPaper]
         end
 
         class StandardEtching < OnPaper
@@ -262,9 +309,13 @@ class Medium
       end
 
       class OnPaper < Relief
-        def self.assocs
-          {Material: {FieldSet: :OnPaper}}
+        def self.origin
+          [:IsLimitedEditionOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne, :OnPaper]
         end
+
+        # def self.origin
+        #   {Category: [:IsLimitedEditionOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne], Material: :OnPaper}
+        # end
 
         class StandardRelief < OnPaper
           def self.targets
@@ -280,9 +331,13 @@ class Medium
       end
 
       class OnStandard < MixedMedia
-        def self.assocs
-          {Material: {FieldSet: :OnStandard}}
+        def self.origin
+          [:IsLimitedEditionOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne, :OnStandard]
         end
+
+        # def self.origin
+        #   {Category: [:IsLimitedEditionOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne], Material: :OnStandard}
+        # end
 
         class StandardMixedMedia < OnStandard
           def self.targets
@@ -292,6 +347,10 @@ class Medium
       end
 
       class OnPaperOrCanvas < Serigraph
+        def self.origin
+          [:IsLimitedEditionOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne, :OnPaperOrCanvas]
+        end
+
         class AcrylicMixedMedia < OnPaperOrCanvas
           def self.targets
             ['acrylic mixed media']
@@ -300,13 +359,25 @@ class Medium
       end
 
       class OnPaper < MixedMedia
+        def self.origin
+          [:OnPaper]
+        end
+
         class Monotype < OnPaper
+          def self.origin
+            [:IsOneOfAKindOrOneOfAKindOfOne]
+          end
+
           def self.targets
             ['monotype', 'monoprint']
           end
         end
 
         class Seriolithograph < OnPaper
+          def self.origin
+            [:IsLimitedEditionOrReproduction]
+          end
+
           def self.targets
             ['seriolithograph']
           end
@@ -321,8 +392,8 @@ class Medium
       end
 
       class OnStandard < PrintMedia
-        def self.assocs
-          {Material: {FieldSet: :OnStandard}}
+        def self.origin
+          [:IsLimitedEditionOrReproduction, :OnStandard]
         end
 
         class StandardPrint < OnStandard
@@ -339,8 +410,8 @@ class Medium
       end
 
       class OnPaper < Poster
-        def self.assocs
-          {Material: {FieldSet: :OnPaper}}
+        def self.origin
+          [:IsReproduction, :OnPaper]
         end
 
         class StandardPoster < OnPaper
@@ -357,8 +428,8 @@ class Medium
       end
 
       class OnPhotoPaper < Photograph
-        def self.assocs
-          {Material: {FieldSet: :OnPhotoPaper}}
+        def self.origin
+          [:IsLimitedEditionOrReproduction, :OnPhotoPaper]
         end
 
         class StandardPhotograph < OnPhotoPaper
@@ -399,6 +470,10 @@ class Medium
       end
 
       class StandardSericel < Sericel
+        def self.origin
+          [:IsLimitedEditionOrReproduction]
+        end
+
         def self.targets
           ['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline']
         end
@@ -411,6 +486,10 @@ class Medium
         {subkind: 2}
       end
 
+      def self.origin
+        [:IsOriginal]
+      end
+
       class ProductionCel < ProductionArt
         def self.targets
           ['production cel', 'production cel and matching drawing', 'production cel and two matching drawings', 'production cel and three matching drawings']
@@ -418,8 +497,8 @@ class Medium
       end
 
       class OnAnimationPaper < ProductionArt
-        def self.assocs
-          {Material: {FieldSet: :OnAnimationPaper}}
+        def self.origin
+          [:OnAnimationPaper]
         end
 
         class ProductionDrawing < OnAnimationPaper
@@ -436,18 +515,30 @@ class Medium
       end
 
       class StandardSculpture < Sculpture
+        def self.origin
+          [:IsLimitedEditionSculptureOrSculpture]
+        end
+
         def self.targets
           ['glass', 'ceramic', 'bronze', 'acrylic', 'lucite', 'resin', 'pewter', 'mixed media']
         end
       end
 
       class HandBlownGlass < Sculpture
+        def self.origin
+          [:IsHandBlownGlass]
+        end
+
         def self.targets
           ['hand blown glass']
         end
       end
 
       class GartnerBladeGlass < Sculpture
+        def self.origin
+          [:IsHandBlownGlass]
+        end
+
         def self.targets
           ['hand blown glass']
         end
@@ -455,3 +546,10 @@ class Medium
     end
   end
 end
+
+# def self.assoc_group
+#   kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
+#   desc_select_then_asc_detect(:targets, :assocs).each_with_object({}) do |(k,v), assocs|
+#     case_merge(assocs, k, v, kind, type)
+#   end
+# end

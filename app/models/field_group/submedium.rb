@@ -4,25 +4,14 @@ class Submedium
   include Hashable
 
   def self.builder(store)
-    args = build_attrs(:attrs)
-    add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store)
+    field_group(:targets, store)
   end
 
   def self.attrs
     {kind: 2, type: 1, f_name: -1}
   end
 
-  def self.assoc_group
-    #kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-    merge_enum(:targets, :set)
-  end
-
   class SelectField < Submedium
-
-    def self.assoc_group
-      #kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-      merge_enum(:targets, :set)
-    end
 
     class Embellishing < SelectField
       class StandardEmbellishing < Embellishing
@@ -37,7 +26,7 @@ class Submedium
 
       class PaperEmbellishing < Embellishing
         def self.set
-          [:PaperSubmedia]
+          [:PaperSubmedia, :OriginalPaperSubmedia]
         end
 
         def self.targets
@@ -49,7 +38,7 @@ class Submedium
     class Leafing < SelectField
       class StandardLeafing < Leafing
         def self.set
-          [:PaperSubmedia]
+          [:PaperSubmedia, :OriginalPaperSubmedia]
         end
 
         def self.targets

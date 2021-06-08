@@ -4,9 +4,7 @@ class Material
   include Hashable
 
   def self.builder(store)
-    field_group(m, store)
-    #args = build_attrs(:attrs)
-    #add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args))
+    field_group(:targets, store)
   end
 
   def self.attrs
@@ -92,11 +90,6 @@ class Material
   end
 
   class FieldSet < Material
-
-    # def self.assoc_group
-    #   kind, type = [:kind,:type].map{|k| build_attrs(:attrs)[k].to_sym}
-    #   merge_enum(:targets, :group, kind, type)
-    # end
 
     def self.tag_meths
       [:product_name, :search, :material_attr]
@@ -216,6 +209,9 @@ class Material
   end
 
 end
+
+#args = build_attrs(:attrs)
+#add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args))
 
 # def self.product_name(subkind, f_name)
 #   class_to_cap(f_name.sub('Standard', ''))

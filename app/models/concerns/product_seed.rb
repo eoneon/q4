@@ -4,7 +4,11 @@ module ProductSeed
   extend ActiveSupport::Concern
 
   class_methods do
+    ##############################################################################
+    # Medium.origins_and_assocs(h[:origin], Medium.assoc_fields(h), h)
+    ##############################################################################
 
+    ##############################################################################
     ##############################################################################
     def build_product_group(store)
       p_set = uncombined_product_set(store)
