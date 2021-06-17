@@ -61,8 +61,3 @@ class Submedium
 
   end
 end
-
-# def self.cascade_build(store)
-#   f_kind, f_type, f_name = f_attrs(0, 1, 3)
-#   add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store)
-# end

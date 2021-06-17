@@ -2,6 +2,7 @@ class Material
   include ClassContext
   include FieldSeed
   include Hashable
+  include Textable
 
   def self.builder(store)
     field_group(:targets, store)
@@ -92,18 +93,18 @@ class Material
   class FieldSet < Material
 
     def self.tag_meths
-      [:product_name, :search, :material_attr]
+      [:product_name, :material_search, :material]
     end
 
     def self.product_name(args)
-      class_to_cap(args[:f_name].sub('Standard', ''))
+      "on #{class_to_cap(args[:f_name].sub('Standard', ''))}"
     end
 
-    def self.search(args)
+    def self.material_search(args)
       args[:subkind]
     end
 
-    def self.medium_attr(args)
+    def self.material(args)
       args[:subkind]
     end
 

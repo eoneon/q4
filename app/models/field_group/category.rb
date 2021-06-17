@@ -2,6 +2,7 @@ class Category
   include ClassContext
   include FieldSeed
   include Hashable
+  include Textable
 
   def self.builder(store)
     field_group(:targets, store)
@@ -16,21 +17,21 @@ class Category
   end
 
   def self.tag_meths
-    [:product_name, :search, :material_attr]
+    [:product_name, :category_search, :art_type, :art_category, :item_category, :item_type]
   end
 
   class RadioButton < Category
 
     class Original < RadioButton
       def self.art_type(args)
-        cat_hsh[args[:subkind]]
+        args[:subkind]
       end
 
       def self.art_category(args)
         cat_hsh[args[:subkind]]
       end
 
-      def self.search(args)
+      def self.category_search(args)
         args[:f_name]
       end
 
@@ -82,7 +83,7 @@ class Category
           cat_hsh[args[:f_name]]
         end
 
-        def self.search(args)
+        def self.category_search(args)
           args[:f_name]
         end
 
@@ -112,7 +113,7 @@ class Category
         cat_hsh[args[:subkind]]
       end
 
-      def self.search(args)
+      def self.category_search(args)
         args[:subkind]
       end
 
@@ -136,7 +137,7 @@ class Category
         cat_hsh['LimitedEdition']
       end
 
-      def self.search(args)
+      def self.category_search(args)
         args[:subkind]
       end
 
@@ -155,11 +156,11 @@ class Category
         cat_hsh[args[:subkind]]
       end
 
-      def self.art_category(args)
+      def self.item_category(args)
         args[:subkind]
       end
 
-      def self.search(args)
+      def self.category_search(args)
         args[:subkind]
       end
 
@@ -181,7 +182,7 @@ class Category
           cat_hsh['LimitedEdition']
         end
 
-        def self.search(args)
+        def self.category_search(args)
           args[:f_name]
         end
 
@@ -194,11 +195,15 @@ class Category
       end
 
       class HandBlownGlass < Sculpture
-        def self.art_category(args)
+        def self.item_type(args)
+          args[:subkind]
+        end
+
+        def self.item_category(args)
           cat_hsh[args[:f_name]]
         end
 
-        def self.search(args)
+        def self.category_search(args)
           args[:f_name]
         end
 
@@ -213,14 +218,3 @@ class Category
     end
   end
 end
-
-
-  # def self.cascade_build(store)
-  #   f_kind, f_type, subkind, f_name = f_attrs(0, 1, 2, 3)
-  #   tags = build_tags(args: {subkind: subkind, f_name: f_name}, tag_set: tag_set, class_set: class_tree(0,3))
-  #   add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store, tags)
-  # end
-
-  # def self.tag_set
-  #   [:art_type, :art_category, :search, :product_name, :field_value]
-  # end

@@ -2,6 +2,7 @@ class LimitedEdition
   include ClassContext
   include FieldSeed
   include Hashable
+  include Textable
 
   def self.builder(store)
     field_group(:targets, store)

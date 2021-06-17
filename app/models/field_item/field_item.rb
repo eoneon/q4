@@ -26,4 +26,5 @@ class FieldItem < ApplicationRecord
       c.build_and_store(:targets, store)
     end
   end
+
 end
