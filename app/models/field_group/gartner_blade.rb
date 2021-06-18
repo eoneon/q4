@@ -4,10 +4,6 @@ class GartnerBlade
   include Hashable
   include Textable
 
-  def self.builder(store)
-    field_group(:targets, store)
-  end
-
   def self.attrs
     {kind: 2, type: 1, f_name: -1}
   end
@@ -15,7 +11,7 @@ class GartnerBlade
   class SelectField < GartnerBlade
 
     class SculptureType < SelectField
-      # def self.set
+      # def self.assocs
       #   [:ForGartnerBlade]
       # end
 
@@ -32,7 +28,7 @@ class GartnerBlade
       end
 
       class ForCovered < SculptureType
-        # def self.set
+        # def self.assocs
         #   [:ForCovered]
         # end
 
@@ -50,9 +46,9 @@ class GartnerBlade
       end
 
       class ForPrimitive < SculptureType
-        def self.set
-          [:ForPrimitive]
-        end
+        # def self.assocs
+        #   [:ForPrimitive]
+        # end
 
         class PrimitiveBowl < ForPrimitive
           def self.targets

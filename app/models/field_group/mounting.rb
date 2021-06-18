@@ -3,10 +3,6 @@ class Mounting
   include FieldSeed
   include Hashable
 
-  def self.builder(store)
-    field_group(:targets, store)
-  end
-
   def self.attrs
     {kind: 0, type: 1, f_name: -1}
   end

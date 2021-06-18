@@ -3,10 +3,6 @@ class Disclaimer
   include FieldSeed
   include Hashable
 
-  def self.builder(store)
-    field_group(:targets, store)
-  end
-
   def self.attrs
     {kind: 0, type: 1, f_name: -1}
   end
@@ -33,10 +29,10 @@ class Disclaimer
 
     class Standard < FieldSet
       class StandardDisclaimer < Standard
-        def self.set
+        def self.assocs
           [:IsDisclaimer]
         end
-        
+
         def self.targets
           [%W[SelectField Disclaimer Severity], %W[TextAreaField Disclaimer Damage]]
         end

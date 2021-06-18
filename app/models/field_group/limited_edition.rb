@@ -4,10 +4,6 @@ class LimitedEdition
   include Hashable
   include Textable
 
-  def self.builder(store)
-    field_group(:targets, store)
-  end
-
   def self.attrs
     {kind: 2, type: 1, f_name: -1}
   end
@@ -87,7 +83,7 @@ class LimitedEdition
   class SelectMenu < LimitedEdition
     class Numbering < SelectMenu
       class NumberingType < Numbering
-        def self.set
+        def self.assocs
           [:NumberedEdition]
         end
 

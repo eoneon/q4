@@ -3,10 +3,6 @@ class Authentication
   include FieldSeed
   include Hashable
 
-  def self.builder(store)
-    field_group(:targets, store)
-  end
-
   def self.attrs
     {kind: 2, type: 1, f_name: -1}
   end
@@ -15,7 +11,7 @@ class Authentication
 
     class Signature < SelectField
       class StandardSignature < Signature
-        def self.set
+        def self.assocs
           [:StandardAuthentication, :PeterMaxAuthentication, :BrittoAuthentication]
         end
 
@@ -27,7 +23,7 @@ class Authentication
 
     class Certificate < SelectField
       class StandardCertificate < Certificate
-        def self.set
+        def self.assocs
           [:StandardAuthentication]
         end
 
@@ -37,7 +33,7 @@ class Authentication
       end
 
       class PeterMaxCertificate < Certificate
-        def self.set
+        def self.assocs
           [:PeterMaxAuthentication]
         end
 
@@ -47,7 +43,7 @@ class Authentication
       end
 
       class BrittoCertificate < Certificate
-        def self.set
+        def self.assocs
           [:BrittoAuthentication]
         end
 
@@ -66,9 +62,9 @@ end
 #   add_field_group(to_class(f_type), self, f_type, f_kind, f_name, store)
 # end
 
-# class FieldSet < Authentication
+# class Fieldassocs < Authentication
 #
-#   class Standard < FieldSet
+#   class Standard < Fieldassocs
 #     class StandardAuthentication < Standard
 #     end
 #   end
@@ -80,8 +76,8 @@ end
   #   add_field_group(to_class(f_type), class_d, f_type, f_kind, f_name, store)
   # end
 
-  # def self.cascade_build(store, class_set)
-  #   f_type, f_kind, f_name = class_set[1..-1].map(&:const)
-  #   puts "class_set: #{class_set}"
-  #   add_field_group(to_class(f_type), class_set[-1], f_type, f_kind, f_name, store)
+  # def self.cascade_build(store, class_assocs)
+  #   f_type, f_kind, f_name = class_assocs[1..-1].map(&:const)
+  #   puts "class_assocs: #{class_assocs}"
+  #   add_field_group(to_class(f_type), class_assocs[-1], f_type, f_kind, f_name, store)
   # end

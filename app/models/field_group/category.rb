@@ -4,10 +4,6 @@ class Category
   include Hashable
   include Textable
 
-  def self.builder(store)
-    field_group(:targets, store)
-  end
-
   def self.attrs
     {kind: 0, type: 1, subkind: 2, f_name: -1}
   end
@@ -44,7 +40,7 @@ class Category
       end
 
       class StandardOriginal < Original
-        def self.group
+        def self.assocs
           [:IsOriginal, :IsOriginalOrOneOfAKind]
         end
 
@@ -53,7 +49,7 @@ class Category
       end
 
       class OneOfAKind < Original
-        def self.group
+        def self.assocs
           [:IsOneOfAKind, :IsOriginalOrOneOfAKind, :IsOneOfAKindOrOneOfAKindOfOne]
         end
 
@@ -66,7 +62,7 @@ class Category
           cat_hsh['OneOfAKind']
         end
 
-        def self.group
+        def self.assocs
           [:IsOneOfAKindOrOneOfAKindOfOne]
         end
 
@@ -87,7 +83,7 @@ class Category
           args[:f_name]
         end
 
-        def self.group
+        def self.assocs
           [:IsUniqueVariation, :IsLimitedEditionOrUniqueVariation, :IsLimitedEditionOrUniqueVariationOrReproduction]
         end
 
@@ -118,7 +114,7 @@ class Category
       end
 
       class StandardLimitedEdition < LimitedEdition
-        def self.group
+        def self.assocs
           [:IsLimitedEdition, :IsLimitedEditionOrReproduction, :IsLimitedEditionOrUniqueVariation, :IsLimitedEditionOrUniqueVariationOrReproduction]
         end
 
@@ -145,7 +141,7 @@ class Category
         def self.targets
         end
 
-        def self.group
+        def self.assocs
           [:IsReproduction, :IsLimitedEditionOrReproduction, :IsLimitedEditionOrUniqueVariationOrReproduction]
         end
       end
@@ -165,7 +161,7 @@ class Category
       end
 
       class StandardSculpture < Sculpture
-        def self.group
+        def self.assocs
           [:IsSculpture, :IsLimitedEditionSculptureOrSculpture]
         end
 
@@ -186,7 +182,7 @@ class Category
           args[:f_name]
         end
 
-        def self.group
+        def self.assocs
           [:IsLimitedEditionSculpture, :IsLimitedEditionSculptureOrSculpture]
         end
 
@@ -207,7 +203,7 @@ class Category
           args[:f_name]
         end
 
-        def self.group
+        def self.assocs
           [:IsHandBlownGlass]
         end
 

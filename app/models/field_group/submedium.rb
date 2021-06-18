@@ -3,10 +3,6 @@ class Submedium
   include FieldSeed
   include Hashable
 
-  def self.builder(store)
-    field_group(:targets, store)
-  end
-
   def self.attrs
     {kind: 2, type: 1, f_name: -1}
   end
@@ -15,7 +11,7 @@ class Submedium
 
     class Embellishing < SelectField
       class StandardEmbellishing < Embellishing
-        def self.set
+        def self.assocs
           [:StandardSubmedia]
         end
 
@@ -25,7 +21,7 @@ class Submedium
       end
 
       class PaperEmbellishing < Embellishing
-        def self.set
+        def self.assocs
           [:PaperSubmedia, :OriginalPaperSubmedia]
         end
 
@@ -37,7 +33,7 @@ class Submedium
 
     class Leafing < SelectField
       class StandardLeafing < Leafing
-        def self.set
+        def self.assocs
           [:PaperSubmedia, :OriginalPaperSubmedia]
         end
 
@@ -49,7 +45,7 @@ class Submedium
 
     class Remarque < SelectField
       class StandardRemarque < Remarque
-        def self.set
+        def self.assocs
           [:PaperSubmedia]
         end
 

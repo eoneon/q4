@@ -4,10 +4,6 @@ class Material
   include Hashable
   include Textable
 
-  def self.builder(store)
-    field_group(:targets, store)
-  end
-
   def self.attrs
     {kind: 0, type: 1, subkind: 2, f_name: -1}
   end
@@ -110,7 +106,7 @@ class Material
 
     class Canvas < FieldSet
 
-      def self.group
+      def self.assocs
         [:OnStandard, :OnCanvas, :OnPaperOrCanvas]
       end
 
@@ -129,7 +125,7 @@ class Material
 
     class Paper < FieldSet
       class StandardPaper < Paper
-        def self.group
+        def self.assocs
           [:OnStandard, :OnPaper, :OnPaperOrCanvas]
         end
 
@@ -139,7 +135,7 @@ class Material
       end
 
       class PhotoPaper < Paper
-        def self.group
+        def self.assocs
           [:OnPhotoPaper]
         end
 
@@ -149,7 +145,7 @@ class Material
       end
 
       class AnimationPaper < Paper
-        def self.group
+        def self.assocs
           [:OnAnimationPaper]
         end
 
@@ -160,7 +156,7 @@ class Material
     end
 
     class Board < FieldSet
-      def self.group
+      def self.assocs
         [:OnStandard]
       end
 
@@ -190,7 +186,7 @@ class Material
     end
 
     class Metal < FieldSet
-      def self.group
+      def self.assocs
         [:OnStandard]
       end
 
