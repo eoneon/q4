@@ -9,26 +9,13 @@ class Medium
     {kind: 0, type: 1, f_name: -1}
   end
 
-  def self.tag_meths
-    [:product_name, :medium_search, :medium_search, :medium]
-  end
-
   ##############################################################################
-
-  def self.product_name(args)
-    class_to_cap(args[:f_name].sub('Standard', ''), %w[and])
+  def self.admin_attrs(args)
+    {medium: name_from_class(args[:f_name], [], [['Standard', ''], ['Painting', ''], ['Production',''], ['Sculpture', '']])}
   end
 
-  def self.medium_search(args)
-    args[:subkind]
-  end
-
-  def self.medium_search(args)
-    args[:f_name].sub('Standard', '')
-  end
-
-  def self.medium(args)
-    args[:f_name]
+  def self.name_values(args)
+    {medium_search: args[:subkind], product_name: class_to_cap(args[:f_name].sub('Standard', ''))}
   end
 
   ##############################################################################
@@ -41,10 +28,6 @@ class Medium
     class Painting < SelectField
       def self.attrs
         {subkind: 2}
-      end
-
-      def self.medium(args)
-        args[:f_name].sub('Painting','')
       end
 
       def self.origin
@@ -112,8 +95,8 @@ class Medium
         {subkind: 2}
       end
 
-      def self.medium(args)
-        args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink'
+      def self.admin_attrs(args)
+        {medium: (args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink')}
       end
 
       def self.origin
@@ -351,6 +334,10 @@ class Medium
         {subkind: -2}
       end
 
+      # def self.admin_attrs(args)
+      #   {medium: (args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink')}
+      # end
+
       class OnPaper < Poster
         def self.origin
           [:IsReproduction, :OnPaper]
@@ -453,7 +440,7 @@ class Medium
 
     class Sculpture < SelectField
       def self.attrs
-        {subkind: 2}
+        {subkind: 3}
       end
 
       class StandardSculpture < Sculpture
@@ -461,30 +448,85 @@ class Medium
           [:IsLimitedEditionSculptureOrSculpture]
         end
 
-        def self.targets
-          ['glass', 'ceramic', 'bronze', 'acrylic', 'lucite', 'resin', 'pewter', 'mixed media']
+        class AcrylicSculpture < StandardSculpture
+          def self.targets
+            ['acrylic', 'lucite']
+          end
+        end
+
+        class GlassSculpture < StandardSculpture
+          def self.targets
+            ['glass']
+          end
+        end
+
+        class PewterSculpture < StandardSculpture
+          def self.targets
+            ['pewter', 'mixed media pewter']
+          end
+        end
+
+        class PorcelainSculpture < StandardSculpture
+          def self.targets
+            ['porcelain']
+          end
+        end
+
+        class ResinSculpture < StandardSculpture
+          def self.targets
+            ['resin', 'mixed media resin']
+          end
+        end
+
+        class MixedMediaSculpture < StandardSculpture
+          def self.targets
+            ['mixed media', 'lucite and pewter']
+          end
         end
       end
 
-      class HandBlownGlass < Sculpture
-        def self.origin
-          [:IsHandBlownGlass]
+      class HandMadeSculpture < Sculpture
+        class HandMadeCeramicSculpture < HandMadeSculpture
+          def self.medium(args)
+            'Ceramic'
+          end
+
+          def self.targets
+            ['hand made ceramic']
+          end
         end
 
-        def self.targets
-          ['hand blown glass']
+        class HandBlownGlass < Sculpture
+          def self.origin
+            [:IsHandBlownGlass]
+          end
+
+          def self.targets
+            ['hand blown glass']
+          end
         end
+
       end
 
-      class GartnerBladeGlass < Sculpture
-        def self.origin
-          [:IsHandBlownGlass]
-        end
-
-        def self.targets
-          ['hand blown glass']
-        end
-      end
+      # class GartnerBladeGlass < Sculpture
+      #   def self.origin
+      #     [:IsHandBlownGlass]
+      #   end
+      #
+      #   def self.targets
+      #     ['hand blown glass']
+      #   end
+      # end
     end
   end
 end
+
+# class StandardSculpture < Sculpture
+#   def self.origin
+#     [:IsLimitedEditionSculptureOrSculpture]
+#   end
+#
+#   def self.targets
+#     ['glass', 'ceramic', 'bronze', 'acrylic', 'lucite', 'resin', 'pewter', 'mixed media']
+#   end
+# end

@@ -87,25 +87,15 @@ class Material
   end
 
   class FieldSet < Material
-
-    def self.tag_meths
-      [:product_name, :material_search, :material]
+    def self.admin_attrs(args)
+      {material: args[:subkind]}
     end
 
-    def self.product_name(args)
-      "on #{class_to_cap(args[:f_name].sub('Standard', ''))}"
-    end
-
-    def self.material_search(args)
-      args[:subkind]
-    end
-
-    def self.material(args)
-      args[:subkind]
+    def self.name_values(args)
+      {material_search: args[:subkind], product_name: "on #{class_to_cap(args[:f_name].sub('Standard', ''))}"}
     end
 
     class Canvas < FieldSet
-
       def self.assocs
         [:OnStandard, :OnCanvas, :OnPaperOrCanvas]
       end
@@ -206,18 +196,3 @@ class Material
   end
 
 end
-
-#args = build_attrs(:attrs)
-#add_field_group(to_class(args[:type]), self, args[:type], args[:kind], args[:f_name], store, build_tags(args))
-
-# def self.product_name(subkind, f_name)
-#   class_to_cap(f_name.sub('Standard', ''))
-# end
-
-# def self.search(subkind, f_name)
-#   f_name.sub('Standard', '')
-# end
-#
-# def self.material_attr(subkind, f_name)
-#   subkind
-# end

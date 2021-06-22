@@ -5,14 +5,14 @@ module ClassContext
 
   class_methods do
 
-    def merge_asc_selected_hash_methods(m)
-      h = asc_select(m).each_with_object({}) do |c, h|
-        h.merge!(c.public_send(m))
+    def asc_select_merge(m,args={})
+      asc_select(m).each_with_object({}) do |c, h|
+        c.call_meth(m,args).each {|k, v| case_merge(h,v,k)}
       end
     end
 
     def asc_detect_with_methods(meths, asc_test=:method_exists?)
-      h = meths.each_with_object({}) do |m, h|
+      meths.each_with_object({}) do |m, h|
         asc_detect_and_merge(h, m, asc_test)
       end
     end
@@ -76,6 +76,11 @@ module ClassContext
           set.append(asc_c) if set.exclude?(asc_c)
         end
       end
+    end
+
+    def call_meth(m,args)
+      method(m).arity > 0 ? public_send(m,args) : public_send(m) #
+      #public_send(*[m,args].reject{|x| x.blank?})
     end
 
     ############################################################################

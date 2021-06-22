@@ -4,9 +4,10 @@ module ProductSeed
   extend ActiveSupport::Concern
 
   class_methods do
-    # a = Medium.build_product_group(h)
+    # a = StandardFlatArt.build_product_group(h)
     def build_product_group(store)
-      origin, assocs, tag_keys = origin_hsh(store[:origin],store), assocs_hsh(:assocs, store)[:assocs], tag_sets.map(&:to_s)
+      #origin, assocs, tag_keys = origin_hsh(store[:origin],store), assocs_hsh(:assocs, store)[:assocs], tag_sets.map(&:to_s)
+      origin, assocs, tag_keys = origin_hsh(store[:origin],store), assocs_hsh(:assocs, store)[:assocs], (item_tags+search_tags).map(&:to_s)
       origin.each_with_object([]) do |p_hsh, set|
 
         p_hsh = push_one_or_many(p_hsh, assoc_fields(assocs, p_hsh[:assocs]))
@@ -25,8 +26,14 @@ module ProductSeed
       p.select{|f| f.tags&.has_key?(tag)}.map{|f| f.tags[tag]}.join(' ')
     end
 
-    def build_product_tags(p, tag_keys)
-      tag_keys.each_with_object({}) do |tag_key, tags|
+    # def build_product_tags(p, tag_keys)
+    #   tag_keys.each_with_object({}) do |tag_key, tags|
+    #     p.map{|f| tags.merge!({tag_key.to_s => f.tags[tag_key.to_s]}) if f.tags&.has_key?(tag_key.to_s)}
+    #   end
+    # end
+
+    def build_product_tags(p, tag_keys, tags={})
+      tag_keys.each_with_object(tags) do |tag_key, tags|
         p.map{|f| tags.merge!({tag_key.to_s => f.tags[tag_key.to_s]}) if f.tags&.has_key?(tag_key.to_s)}
       end
     end

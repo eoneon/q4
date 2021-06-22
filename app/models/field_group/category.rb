@@ -8,38 +8,19 @@ class Category
     {kind: 0, type: 1, subkind: 2, f_name: -1}
   end
 
-  def self.cat_hsh
-    {'Original'=> 'Original Painting', 'StandardOriginal'=> 'Original', 'OneOfAKind'=> 'One-of-a-Kind', 'OneOfAKindOfOne'=> 'One-of-a-Kind 1/1', 'UniqueVariation'=> 'Unique Variation', 'ReproductionPrint'=> 'Print', 'LimitedEdition'=> 'Limited Edition', 'Sculpture'=> 'Sculpture/Glass'}
-  end
-
-  def self.tag_meths
-    [:product_name, :category_search, :art_type, :art_category, :item_category, :item_type]
-  end
-
   class RadioButton < Category
 
-    class Original < RadioButton
-      def self.art_type(args)
-        args[:subkind]
+    class Original < RadioButton #2
+      def self.admin_attrs
+        {art_type: 'Original', art_category: 'Original Painting'}
       end
 
-      def self.art_category(args)
-        cat_hsh[args[:subkind]]
+      def self.name_values(args)
+        name = name_from_class(args[:f_name], %w[of a], [['One of a Kind', 'One-of-a-Kind'], ['of One', ' 1/1']])
+        {category_search: args[:f_name], product_name: name, item_name: name}
       end
 
-      def self.category_search(args)
-        args[:f_name]
-      end
-
-      def self.product_name(args)
-        cat_hsh[args[:f_name]]
-      end
-
-      def self.field_value(args)
-        cat_hsh[args[:f_name]]
-      end
-
-      class StandardOriginal < Original
+      class StandardOriginal < Original #3
         def self.assocs
           [:IsOriginal, :IsOriginalOrOneOfAKind]
         end
@@ -58,12 +39,8 @@ class Category
       end
 
       class OneOfAKindOfOne < Original
-        def self.field_value(args)
-          cat_hsh['OneOfAKind']
-        end
-
         def self.assocs
-          [:IsOneOfAKindOrOneOfAKindOfOne]
+          [:IsOneOfAKindOfOne, :IsOneOfAKindOrOneOfAKindOfOne]
         end
 
         def self.targets
@@ -71,18 +48,6 @@ class Category
       end
 
       class UniqueVariation < Original
-        def self.product_name(args)
-          cat_hsh[args[:f_name]]
-        end
-
-        def self.field_value(args)
-          cat_hsh[args[:f_name]]
-        end
-
-        def self.category_search(args)
-          args[:f_name]
-        end
-
         def self.assocs
           [:IsUniqueVariation, :IsLimitedEditionOrUniqueVariation, :IsLimitedEditionOrUniqueVariationOrReproduction]
         end
@@ -93,71 +58,46 @@ class Category
     end
 
     class LimitedEdition < RadioButton
-      def self.art_type(args)
-        cat_hsh[args[:subkind]]
+      def self.admin_attrs
+        {art_type: 'Limited Edition', art_category: 'Limited Edition'}
       end
 
-      def self.art_category(args)
-        cat_hsh[args[:subkind]]
+      def self.name_values(args)
+        {category_search: 'LimitedEdition', product_name: 'Limited Edition', item_name: 'Limited Edition'}
       end
 
-      def self.product_name(args)
-        cat_hsh[args[:subkind]]
+      def self.assocs
+        [:IsLimitedEdition, :IsLimitedEditionOrReproduction, :IsLimitedEditionOrUniqueVariation, :IsLimitedEditionOrUniqueVariationOrReproduction]
       end
 
-      def self.field_value(args)
-        cat_hsh[args[:subkind]]
+      def self.targets
       end
-
-      def self.category_search(args)
-        args[:subkind]
-      end
-
-      class StandardLimitedEdition < LimitedEdition
-        def self.assocs
-          [:IsLimitedEdition, :IsLimitedEditionOrReproduction, :IsLimitedEditionOrUniqueVariation, :IsLimitedEditionOrUniqueVariationOrReproduction]
-        end
-
-        def self.targets
-        end
-      end
-
     end
 
     class ReproductionPrint < RadioButton
-      def self.art_type(args)
-        cat_hsh[args[:subkind]]
+      def self.admin_attrs
+        {art_type: 'Print', art_category: 'Limited Edition'}
       end
 
-      def self.art_category(args)
-        cat_hsh['LimitedEdition']
+      def self.name_values(args)
+        {category_search: args[:f_name]}
       end
 
-      def self.category_search(args)
-        args[:subkind]
+      def self.assocs
+        [:IsReproduction, :IsLimitedEditionOrReproduction, :IsLimitedEditionOrUniqueVariationOrReproduction]
       end
 
-      class StandardReproductionPrint < ReproductionPrint
-        def self.targets
-        end
-
-        def self.assocs
-          [:IsReproduction, :IsLimitedEditionOrReproduction, :IsLimitedEditionOrUniqueVariationOrReproduction]
-        end
+      def self.targets
       end
     end
 
     class Sculpture < RadioButton
-      def self.art_type(args)
-        cat_hsh[args[:subkind]]
+      def self.admin_attrs
+        {art_type: 'Sculpture/Glass', item_category: 'Sculpture'}
       end
 
-      def self.item_category(args)
-        args[:subkind]
-      end
-
-      def self.category_search(args)
-        args[:subkind]
+      def self.name_values(args)
+        {category_search: args[:subkind]} #fname
       end
 
       class StandardSculpture < Sculpture
@@ -170,16 +110,8 @@ class Category
       end
 
       class LimitedEditionSculpture < Sculpture
-        def self.product_name(args)
-          cat_hsh['LimitedEdition']
-        end
-
-        def self.field_value(args)
-          cat_hsh['LimitedEdition']
-        end
-
-        def self.category_search(args)
-          args[:f_name]
+        def self.name_values(args)
+          {product_name: 'Limited Edition', item_name: 'Limited Edition'}
         end
 
         def self.assocs
@@ -191,26 +123,78 @@ class Category
       end
 
       class HandBlownGlass < Sculpture
-        def self.item_type(args)
-          args[:subkind]
+        def self.attrs
+          {subkind: -1}
         end
 
-        def self.item_category(args)
-          cat_hsh[args[:f_name]]
+        def self.admin_attrs
+          {item_type: 'Sculpture', item_category: 'Hand Blown Glass'}
         end
 
-        def self.category_search(args)
-          args[:f_name]
+        def self.name_values(args)
+          {category_search: args[:f_name]}
         end
 
-        def self.assocs
-          [:IsHandBlownGlass]
+        class StandardHandBlownGlass < HandBlownGlass
+          def self.assocs
+            [:IsHandBlownGlass]
+          end
+
+          def self.targets
+          end
         end
 
-        def self.targets
+        class GartnerBlade < HandBlownGlass
+          def self.assocs
+            [:IsGartnerBlade]
+          end
+
+          def self.targets
+          end
         end
       end
 
     end
   end
 end
+
+
+  # def self.edit_list
+  #   [['One of a Kind', 'One-of-a-Kind'], ['of One', ' 1/1']]
+  # end
+
+  # def self.skip_list
+  #   ['of', 'a']
+  # end
+
+# class StandardLimitedEdition < LimitedEdition
+#   def self.assocs
+#     [:IsLimitedEdition, :IsLimitedEditionOrReproduction, :IsLimitedEditionOrUniqueVariation, :IsLimitedEditionOrUniqueVariationOrReproduction]
+#   end
+#
+#   def self.targets
+#   end
+# end
+
+# class ReproductionPrint < RadioButton
+#   def self.art_type(args)
+#     cat_hsh[args[:subkind]]
+#   end
+#
+#   def self.art_category(args)
+#     cat_hsh['LimitedEdition']
+#   end
+#
+#   def self.category_search(args)
+#     args[:subkind]
+#   end
+#
+#   class StandardReproductionPrint < ReproductionPrint
+#     def self.targets
+#     end
+#
+#     def self.assocs
+#       [:IsReproduction, :IsLimitedEditionOrReproduction, :IsLimitedEditionOrUniqueVariationOrReproduction]
+#     end
+#   end
+# end

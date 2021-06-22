@@ -3,10 +3,9 @@ require 'active_support/concern'
 module FieldSeed
   extend ActiveSupport::Concern
   # h = FieldItem.seed_fields
-  # a = Medium.build_product_group(h)
+  # a = StandardFlatArt.build_product_group(h)
   # Medium.assoc_hsh(:set, h)
   class_methods do
-
 
     # BUILD METHODS ############################################################ set = Medium.assoc_hsh(:set, h)
     ############################################################################
@@ -25,8 +24,9 @@ module FieldSeed
 
     def field_data(m)
       desc_select(m: m).each_with_object([]) do |c, f_set|
-        attrs = c.build_attrs(:attrs)
-        f_set.append({attrs: attrs, tags: c.build_tags(attrs), origin: c.build_assoc(:origin), assocs: c.build_assoc(:assocs), targets: c.targets})
+        f_attrs = c.build_attrs(:attrs)
+        tags = [c.asc_select_merge(:name_values, f_attrs), c.asc_select_merge(:admin_attrs,f_attrs)].each_with_object({}) {|h,tags| tags.merge!(h)} #tags = [:name_values, :admin_attrs].each_with_object({}) {|m,tags| tags.merge!(c.asc_select_merge(call_meth(m,f_attrs))) }
+        f_set.append({attrs: f_attrs, tags: tags, origin: c.asc_select_concat(:origin), assocs: c.asc_select_concat(:assocs), targets: c.targets})
       end
     end
 
@@ -56,25 +56,27 @@ module FieldSeed
       f.tags = assign_or_merge(f.tags, tags.stringify_keys)
       f.save
     end
-    ############################################################################
 
     ############################################################################
 
     def build_attrs(m)
-      merge_asc_selected_hash_methods(m).each_with_object({}) do |(attr,idx), h|
+      asc_select_merge(m).each_with_object({}) do |(attr,idx), h|
         h.merge!({attr => const_tree[idx]})
       end
     end
 
-    def build_tags(args)
-      return unless respond_to?(:tag_meths)
-      asc_detect_with_methods(tag_meths).each_with_object({}) do |(m,c), tags|
-        tags.merge!({m => c.public_send(m, args)})
-      end
+    def asc_select_concat(m)
+      asc_select(m).map{|c| c.public_send(m)}.flatten
     end
 
-    def build_assoc(assoc_meth)
-      asc_select(assoc_meth).map{|c| c.public_send(assoc_meth)}.flatten
+    ############################################################################
+
+    def item_tags
+      [:art_type, :art_category, :item_type, :item_category, :medium, :material]
+    end
+
+    def search_tags
+      [:category_search, :medium_search, :material_search]
     end
 
     ############################################################################
@@ -96,6 +98,26 @@ module FieldSeed
 
   end
 end
+
+
+
+    # def build_tags(args)
+    #   return unless respond_to?(:tag_meths)
+    #   asc_detect_with_methods(tag_meths).each_with_object({}) do |(m,c), tags|
+    #     tags.merge!({m => c.public_send(m, args)})
+    #   end
+    # end
+
+    # def build_assoc(assoc_meth)
+    #   asc_select(assoc_meth).map{|c| c.public_send(assoc_meth)}.flatten
+    # end
+
+# def field_data(m)
+#   desc_select(m: m).each_with_object([]) do |c, f_set|
+#     attrs = c.build_attrs(:attrs)
+#     f_set.append({attrs: attrs, tags: c.build_tags(attrs), origin: c.build_assoc(:origin), assocs: c.build_assoc(:assocs), targets: c.targets})
+#   end
+# end
 
 # def product_fields(store)
 #   set, group = [:set, :group].map{|assoc| assoc_hsh(assoc, store)}

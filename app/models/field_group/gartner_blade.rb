@@ -11,26 +11,36 @@ class GartnerBlade
   class SelectField < GartnerBlade
 
     class SculptureType < SelectField
-      # def self.assocs
-      #   [:ForGartnerBlade]
-      # end
-
-      class OpenBowl < SculptureType
-        def self.targets
-          ['bowl', 'sphere']
-        end
+      def self.name_values(args)
+        {medium_search: args[:f_name], product_name: class_to_cap(args[:f_name])}
       end
 
-      class OpenVase < SculptureType
-        def self.targets
-          ['cone', 'footed cone', 'traditional urn', 'closed urn', 'flat vessel', 'cylinder']
+      def self.origin
+        [:ForGartnerBlade]
+      end
+
+      class OpenBowlVase < SculptureType
+        def self.origin
+          [:OpenBowlVase]
+        end
+
+        class OpenBowl < OpenBowlVase
+          def self.targets
+            ['bowl', 'sphere']
+          end
+        end
+
+        class OpenVase < OpenBowlVase
+          def self.targets
+            ['cone', 'footed cone', 'traditional urn', 'flat vessel', 'cylinder']
+          end
         end
       end
 
       class ForCovered < SculptureType
-        # def self.assocs
-        #   [:ForCovered]
-        # end
+        def self.origin
+          [:ForCovered]
+        end
 
         class CoveredBowl < ForCovered
           def self.targets
@@ -40,15 +50,15 @@ class GartnerBlade
 
         class CoveredVase < ForCovered
           def self.targets
-            ['covered jar']
+            ['covered jar', 'closed urn']
           end
         end
       end
 
       class ForPrimitive < SculptureType
-        # def self.assocs
-        #   [:ForPrimitive]
-        # end
+        def self.origin
+          [:ForPrimitive]
+        end
 
         class PrimitiveBowl < ForPrimitive
           def self.targets
@@ -63,41 +73,68 @@ class GartnerBlade
         end
       end
 
-      class Ikebana < SculptureType
+      class IkebanaFlowerBowl < SculptureType
+        def self.origin
+          [:ForIkebana]
+        end
+
         def self.targets
           ['ikebana flower bowl']
         end
       end
 
-      class SaturnLamp < SculptureType
+      class SaturnOilLamp < SculptureType
+        def self.origin
+          [:ForSaturn]
+        end
+
         def self.targets
-          ['Saturn oil lamp']
+          ['saturn oil lamp']
+        end
+      end
+
+      class ArborSculpture < SculptureType
+        def self.origin
+          [:ForArbor]
+        end
+
+        def self.targets
+          ['arbor sculpture']
         end
       end
     end
 
-    class Lid < SelectField
-      class GartnerBladeLid < Lid
+    class GartnerBladeElement < SelectField
+      class GartnerBladeLid < GartnerBladeElement
+        def self.assocs
+          [:ForCovered]
+        end
+
         def self.targets
-          ['bowl', 'sphere']
+          ['marble finial lid', 'avian finial lid', 'leaf and tendril lid', 'bone and tendril lid']
         end
       end
-    end
 
-    class Size < SelectField
-      class GartnerBladeSize < Size
+      class GartnerBladeSize < GartnerBladeElement
+        def self.assocs
+          [:ForGartnerBlade]
+        end
+
         def self.targets
           ['large', 'medium', 'small', 'mini']
         end
       end
-    end
 
-    class Color < SelectField
-      class GartnerBladeColor < Color
+      class GartnerBladeColor < GartnerBladeElement
+        def self.assocs
+          [:ForGartnerBlade]
+        end
+
         def self.targets
           ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
         end
       end
+
     end
 
   end

@@ -5,6 +5,10 @@ module Textable
 
   class_methods do
 
+    def name_from_class(name, skip_list, edit_list)
+      format_name(edit_name(class_to_cap(name, skip_list), edit_list))
+    end
+
     def class_to_cap(class_word, skip_list=[])
       class_word.underscore.split('_').map{|word| cap_word(word, skip_list)}.join(' ')
     end
@@ -19,9 +23,9 @@ module Textable
       end
     end
 
-    def edit_list
-      [['Standard',''], ['Reproduction',''], ['On Paper', ''], ['One Of A Kind', 'One-of-a-Kind'], ['Of One', ' 1/1']]
-    end
+    # def edit_list
+    #   [['Standard',''], ['Reproduction',''], ['On Paper', ''], ['One Of A Kind', 'One-of-a-Kind'], ['Of One', ' 1/1']]
+    # end
 
     def format_name(name)
       name.split(' ').map(&:strip).join(' ')
