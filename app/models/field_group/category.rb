@@ -16,7 +16,7 @@ class Category
       end
 
       def self.name_values(args)
-        name = name_from_class(args[:f_name], %w[of a], [['One of a Kind', 'One-of-a-Kind'], ['of One', ' 1/1']])
+        name = name_from_class(args[:f_name], %w[of a], [['Standard', ''], ['One of a Kind', 'One-of-a-Kind'], ['of One', ' 1/1']])
         {category_search: args[:f_name], product_name: name, item_name: name}
       end
 

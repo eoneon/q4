@@ -3,6 +3,7 @@ class GartnerBlade
   include FieldSeed
   include Hashable
   include Textable
+  include ProductSeed
 
   def self.attrs
     {kind: 2, type: 1, f_name: -1}
@@ -16,7 +17,7 @@ class GartnerBlade
       end
 
       def self.origin
-        [:ForGartnerBlade]
+        [:IsGartnerBlade, :ForGartnerBlade]
       end
 
       class OpenBowlVase < SculptureType
@@ -104,37 +105,34 @@ class GartnerBlade
       end
     end
 
-    class GartnerBladeElement < SelectField
-      class GartnerBladeLid < GartnerBladeElement
-        def self.assocs
-          [:ForCovered]
-        end
-
-        def self.targets
-          ['marble finial lid', 'avian finial lid', 'leaf and tendril lid', 'bone and tendril lid']
-        end
+    class Lid < SelectField
+      def self.assocs
+        [:ForCovered]
       end
 
-      class GartnerBladeSize < GartnerBladeElement
-        def self.assocs
-          [:ForGartnerBlade]
-        end
+      def self.targets
+        ['marble finial lid', 'avian finial lid', 'leaf and tendril lid', 'bone and tendril lid']
+      end
+    end
 
-        def self.targets
-          ['large', 'medium', 'small', 'mini']
-        end
+    class Size < SelectField
+      def self.assocs
+        [:ForGartnerBlade]
       end
 
-      class GartnerBladeColor < GartnerBladeElement
-        def self.assocs
-          [:ForGartnerBlade]
-        end
+      def self.targets
+        ['large', 'medium', 'small', 'mini']
+      end
+    end
 
-        def self.targets
-          ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
-        end
+    class Color < SelectField
+      def self.assocs
+        [:ForGartnerBlade]
       end
 
+      def self.targets
+        ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
+      end
     end
 
   end

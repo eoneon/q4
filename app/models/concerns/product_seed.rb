@@ -6,31 +6,23 @@ module ProductSeed
   class_methods do
     # a = StandardFlatArt.build_product_group(h)
     def build_product_group(store)
-      #origin, assocs, tag_keys = origin_hsh(store[:origin],store), assocs_hsh(:assocs, store)[:assocs], tag_sets.map(&:to_s)
       origin, assocs, tag_keys = origin_hsh(store[:origin],store), assocs_hsh(:assocs, store)[:assocs], (item_tags+search_tags).map(&:to_s)
       origin.each_with_object([]) do |p_hsh, set|
-
         p_hsh = push_one_or_many(p_hsh, assoc_fields(assocs, p_hsh[:assocs]))
-        combine_fields(p_hsh).each do |p|
-          p = build_product(sort_fields(p.group_by(&:kind)), tag_keys)
-          set.append(p)
+        combine_fields(p_hsh).each do |p_set|
+          build_product(sort_fields(p_set.group_by(&:kind)), tag_keys)
+          #set.append(p)
         end
       end
     end
 
-    def build_product(p,tag_keys)
-      {product_name: build_product_name(p), tags: build_product_tags(p, tag_keys)}
+    def build_product(p_set,tag_keys)
+      Product.builder(build_product_name(p_set), p_set, build_product_tags(p_set, tag_keys))
     end
 
     def build_product_name(p, tag='product_name')
       p.select{|f| f.tags&.has_key?(tag)}.map{|f| f.tags[tag]}.join(' ')
     end
-
-    # def build_product_tags(p, tag_keys)
-    #   tag_keys.each_with_object({}) do |tag_key, tags|
-    #     p.map{|f| tags.merge!({tag_key.to_s => f.tags[tag_key.to_s]}) if f.tags&.has_key?(tag_key.to_s)}
-    #   end
-    # end
 
     def build_product_tags(p, tag_keys, tags={})
       tag_keys.each_with_object(tags) do |tag_key, tags|
@@ -75,13 +67,6 @@ module ProductSeed
       end
     end
     ############################################################################
-    def tag_sets
-      class_group('FieldGroup').each_with_object([]) do |c, set|
-        if klass = c.desc_select(test_m: :respond_to?, m: :tag_meths)&.first
-          klass.tag_meths.map{|tag| set.append(tag) if set.exclude?(tag) && tag != :product_name}
-        end
-      end
-    end
 
     def sort_fields(p_hsh)
       p_set = field_order.each_with_object([]) {|k, p_set| p_set.append(p_hsh[k]) if p_hsh.has_key?(k)}
@@ -89,8 +74,16 @@ module ProductSeed
     end
 
     def field_order
-      %w[Embellishing Category Medium Material Leafing Remarque Numbering Signature TextBeforeCOA Certificate TextAfterTitle]
+      %w[Size Color Embellishing Category Medium SculptureType Lid Material Leafing Remarque Numbering Signature TextBeforeCOA Certificate TextAfterTitle]
     end
 
   end
 end
+
+# def tag_sets
+#   class_group('FieldGroup').each_with_object([]) do |c, set|
+#     if klass = c.desc_select(test_m: :respond_to?, m: :tag_meths)&.first
+#       klass.tag_meths.map{|tag| set.append(tag) if set.exclude?(tag) && tag != :product_name}
+#     end
+#   end
+# end

@@ -19,10 +19,7 @@ class Product < ApplicationRecord
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
   def self.seed
-    store = FieldItem.seed
-    Medium.class_group('ProductGroup').each do |c|
-      c.build_selected_targets(:method_exists?, :targets, store)
-    end
+    StandardFlatArt.build_product_group(FieldItem.seed)
   end
 
   def radio_options

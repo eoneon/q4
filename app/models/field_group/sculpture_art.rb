@@ -9,7 +9,7 @@ class SculptureArt
     {kind: 2, type: 1, subkind: 3, f_name: -1}
   end
 
-  class SelectField < Sculpture
+  class SelectField < SculptureArt
     class Medium < SelectField
       def self.admin_attrs(args)
         {item_type: name_from_class(args[:f_name], [], [['Sculpture', ''], ['Hand Made', '']])}
@@ -23,7 +23,7 @@ class SculptureArt
         [:ForSculptureType, :StandardAuthentication, :IsDisclaimer]
       end
 
-      class StandardSculpture < Sculpture
+      class StandardSculpture < Medium
         def self.origin
           [:IsLimitedEditionSculptureOrSculpture]
         end
@@ -65,12 +65,16 @@ class SculptureArt
         end
       end
 
-      class HandMadeSculpture < Sculpture
+      class HandMadeSculpture < Medium
         def self.origin
           [:ForSculptureType]
         end
 
         class HandMadeCeramic < HandMadeSculpture
+          def self.origin
+            [:IsSculpture]
+          end
+
           def self.targets
             ['hand made ceramic']
           end
@@ -93,15 +97,21 @@ class SculptureArt
         [:ForSculptureType]
       end
 
-      class Bowl < SculptureType
-        def self.targets
-          ['bowl', 'covered bowl']
+      class Flatware < SculptureType
+        def self.name_values(args)
+          {product_name: class_to_cap(args[:f_name])}
         end
-      end
 
-      class Vase < SculptureType
-        def self.targets
-          ['vase', 'flat vessel', 'jar']
+        class Bowl < Flatware
+          def self.targets
+            ['bowl', 'covered bowl']
+          end
+        end
+
+        class Vase < Flatware
+          def self.targets
+            ['vase', 'flat vessel', 'jar']
+          end
         end
       end
 
