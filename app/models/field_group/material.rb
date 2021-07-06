@@ -9,7 +9,6 @@ class Material
   end
 
   class SelectField < Material
-
     class Canvas < SelectField
       class StandardCanvas < Canvas
         def self.targets
@@ -96,10 +95,6 @@ class Material
     end
 
     class Canvas < FieldSet
-      def self.assocs
-        [:OnStandard, :OnCanvas, :OnPaperOrCanvas]
-      end
-
       class StandardCanvas < Canvas
         def self.targets
           [%W[SelectField Material Canvas], %W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
@@ -115,30 +110,18 @@ class Material
 
     class Paper < FieldSet
       class StandardPaper < Paper
-        def self.assocs
-          [:OnStandard, :OnPaper, :OnPaperOrCanvas]
-        end
-
         def self.targets
           [%W[SelectField Material StandardPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
         end
       end
 
       class PhotoPaper < Paper
-        def self.assocs
-          [:OnPhotoPaper]
-        end
-
         def self.targets
           [%W[SelectField Material PhotoPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
         end
       end
 
       class AnimationPaper < Paper
-        def self.assocs
-          [:OnAnimationPaper]
-        end
-
         def self.targets
           [%W[SelectField Material AnimationPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
         end
@@ -146,10 +129,6 @@ class Material
     end
 
     class Board < FieldSet
-      def self.assocs
-        [:OnStandard]
-      end
-
       class StandardBoard < Board
         def self.targets
           [%W[SelectField Material StandardBoard], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
@@ -176,10 +155,6 @@ class Material
     end
 
     class Metal < FieldSet
-      def self.assocs
-        [:OnStandard]
-      end
-
       class StandardMetal < Metal
         def self.targets
           [%W[SelectField Material StandardMetal], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]

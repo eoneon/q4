@@ -25,6 +25,18 @@ module ClassContext
 
     ############################################################################
 
+    def select_end_classes(set=[])
+      subclasses.none? ? set.append(self) : subclasses.each_with_object(set) {|c, set| c.select_end_classes(set)}
+    end
+
+    def asc_merge(m,h={})
+      asc_select(m).each_with_object(h) do |c, h|
+        c.public_send.each {|k, v| case_merge(h,v,k)}
+      end
+    end
+
+    ############################################################################
+
     def asc_detect_methods_call_and_merge(meths:, asc_test: :method_exists?)
       h = meths.each_with_object({}) do |m, h|
         asc_detect_call_and_merge(h, m, asc_test) #if public_send(asc_test, m)
@@ -79,8 +91,11 @@ module ClassContext
     end
 
     def call_meth(m,args)
-      method(m).arity > 0 ? public_send(m,args) : public_send(m) #
-      #public_send(*[m,args].reject{|x| x.blank?})
+      method(m).arity > 0 ? public_send(m,args) : public_send(m)
+    end
+
+    def call_if(m)
+      public_send(m) if respond_to?(m) 
     end
 
     ############################################################################

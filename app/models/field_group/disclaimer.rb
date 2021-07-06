@@ -21,6 +21,8 @@ class Disclaimer
   class TextAreaField < Disclaimer
     class DisclaimerDamage < TextAreaField
       class Damage < DisclaimerDamage
+        def self.targets
+        end
       end
     end
   end
@@ -29,10 +31,6 @@ class Disclaimer
 
     class Standard < FieldSet
       class StandardDisclaimer < Standard
-        def self.assocs
-          [:IsDisclaimer]
-        end
-
         def self.targets
           [%W[SelectField Disclaimer Severity], %W[TextAreaField Disclaimer Damage]]
         end

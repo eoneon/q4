@@ -8,9 +8,8 @@ class FieldItem < ApplicationRecord
   validates :type, :field_name, presence: true
 
   def self.seed
-    StandardFlatArt.class_group('FieldGroup').each_with_object({}) do |c, store|
+    Medium.class_group('FieldGroup').reverse.each_with_object({}) do |c, store|
       c.build_and_store(:targets, store)
     end
   end
-
 end

@@ -19,18 +19,18 @@ class StandardFlatArt
     end
 
     class SelectField < Medium
-      def self.origin
-        [:StandardAuthentication, :IsDisclaimer]
+      def self.assocs
+        {Signature: [[:SelectField, :StandardSignature]], Certificate: [[:SelectField, :StandardCertificate]], Disclaimer: [[:SelectField, :StandardDisclaimer]]}
       end
 
       class Painting < SelectField #3
-        def self.origin
-          [:IsOriginal]
+        def self.assocs
+          {Category: [[:RadioButton, :StandardOriginal]]}
         end
 
         class OnStandard < Painting
-          def self.origin
-            [:OnStandard]
+          def self.assocs
+            {Material: end_keys(:FieldSet, :StandardCanvas, :WrappedCanvas, :StandardPaper, :StandardBoard, :Wood, :WoodBox, :Acrylic, :StandardMetal, :MetalBox)}
           end
 
           class OilPainting < OnStandard
@@ -59,8 +59,8 @@ class StandardFlatArt
         end
 
         class OnPaper < Painting
-          def self.origin
-            [:OnPaper]
+          def self.assocs
+            {Material: [[:FieldSet, :StandardPaper]]}
           end
 
           class WatercolorPainting < OnPaper
@@ -88,8 +88,8 @@ class StandardFlatArt
           {medium: (args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink')}
         end
 
-        def self.origin
-          [:IsOriginal, :OnPaper]
+        def self.assocs
+          {Category: [[:RadioButton, :StandardOriginal]], Material: [[:FieldSet, :StandardPaper]]}
         end
 
         class PencilDrawing < Drawing
@@ -105,8 +105,8 @@ class StandardFlatArt
         end
 
         class MixedMediaDrawing < Drawing
-          def self.origin
-            [:OriginalPaperSubmedia]
+          def self.assocs
+            {Embellishing: [[:SelectField, :StandardEmbellishing]], Leafing: [[:SelectField, :StandardLeafing]], Remarque: [[:SelectField, :StandardRemarque]]}
           end
 
           class MixedMediaPencilDrawing < MixedMediaDrawing
@@ -124,9 +124,13 @@ class StandardFlatArt
       end
 
       class Serigraph < SelectField
-        def self.origin
-          [:IsLimitedEditionOrUniqueVariationOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne]
-        end
+        # def self.origin
+        #   [:IsLimitedEditionOrUniqueVariationOrReproduction, :IsOneOfAKindOrOneOfAKindOfOne]
+        # end
+
+        # def self.assocs
+        #   {Category: [[:RadioButton, :OneOfAKind]], }
+        # end
 
         class OnStandard < Serigraph
           def self.origin

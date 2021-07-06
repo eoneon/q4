@@ -9,7 +9,6 @@ class LimitedEdition
   end
 
   class SelectField < LimitedEdition
-
     class Numbering < SelectField
       def self.editions(edition_type)
         set = [nil, 'AP', 'EA', 'CP', 'GP', 'PP', 'IP', 'HC', 'TC'].each_with_object([]) do |edition, set|
@@ -72,6 +71,12 @@ class LimitedEdition
         end
       end
 
+      class NumberedOneOfOne < Numbering
+        def self.targets
+          [%W[SelectField Numbering NumberedOneOfOne]]
+        end
+      end
+
       class ProofEdition < Numbering
         def self.targets
           [%W[SelectField Numbering ProofEdition]]
@@ -83,10 +88,6 @@ class LimitedEdition
   class SelectMenu < LimitedEdition
     class Numbering < SelectMenu
       class NumberingType < Numbering
-        def self.assocs
-          [:NumberedEdition]
-        end
-
         def self.targets
           build_target_group(%W[Numbered RomanNumbered ProofEdition], 'FieldSet', 'Numbering')
         end
@@ -94,3 +95,11 @@ class LimitedEdition
     end
   end
 end
+
+
+
+# class SingleEdition < Numbering
+#   def self.targets
+#     [%W[SelectField Numbering NumberedOneOfOne]]
+#   end
+# end

@@ -16,10 +16,10 @@ module Crudable
     add_obj(new_obj)
   end
 
-  def update_tags(obj, tag_hsh)
-    return if tag_hsh.blank? || tag_hsh.stringify_keys == obj.tags
-    obj.tags = assign_or_merge(obj.tags, tag_hsh.stringify_keys)
-    obj.save
+  def update_tags(tag_hsh)
+    return if tag_hsh.blank? || tag_hsh.stringify_keys == self.tags
+    self.tags = assign_or_merge(self.tags, tag_hsh.stringify_keys)
+    self.save
   end
 
   def assign_or_merge(h, h2)
@@ -63,7 +63,7 @@ module Crudable
   # ############################################################################
 
   def assoc_unless_included(target)
-    self.target_collection(target) << target unless self.target_included?(target)
+    target_collection(target) << target unless target_included?(target)
   end
 
   def target_collection(target)
@@ -71,11 +71,11 @@ module Crudable
   end
 
   def target_included?(target)
-    self.target_collection(target).include?(target)
+    target_collection(target).include?(target)
   end
 
   def scoped_target_collection(assoc)
-    self.public_send(assoc)
+    public_send(assoc)
   end
 
   def remove_hmt(obj, join_assoc=:item_groups)

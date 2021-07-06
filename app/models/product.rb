@@ -18,12 +18,18 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  def self.seed
-    StandardFlatArt.build_product_group(FieldItem.seed)
+  def self.seed(store)
+    Medium.class_group('ProductGroup').each_with_object(store) do |c, store|
+      c.product_group(store)
+    end
   end
 
   def radio_options
     radio_buttons.includes(:options).map(&:options)
+  end
+
+  def assoc_targets(targets)
+    targets.each_with_object(self){|target,p| assoc_unless_included(target)}
   end
 
   def input_set(g_hsh, i_hsh, a=[])
@@ -41,19 +47,13 @@ class Product < ApplicationRecord
 
   ##############################################################################
 
-  def self.builder(product_name, options, tags=nil)
-    product = self.where(product_name: product_name).first_or_create
-    update_tags(product, tags)
-    options.map {|opt| product.assoc_unless_included(opt)}
+  def self.builder(product_name, fields, tags=nil)
+    p = Product.where(product_name: product_name).first_or_create
+    p.update_tags(tags)
+    p.assoc_targets(fields)
   end
 
-  def self.update_tags(obj, tag_hsh)
-    return if tag_hsh.blank? || tag_hsh.stringify_keys == obj.tags
-    obj.tags = assign_or_merge(obj.tags, tag_hsh.stringify_keys)
-    obj.save
-  end
-
-  def self.assign_or_merge(h, h2)
+  def assign_or_merge(h, h2)
     h.nil? ? h2 : h.merge(h2)
   end
 
@@ -91,6 +91,16 @@ class Product < ApplicationRecord
   end
 
 end
+
+
+
+
+
+
+
+
+
+
 
 ##############################################################################
 #  product_type product_subtype

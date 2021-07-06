@@ -10,6 +10,6 @@ class SelectField < FieldItem
   end
 
   def assoc_targets(targets)
-    targets.map{|target| self.assoc_unless_included(target)}
+    targets.map{|target| assoc_unless_included(target)}
   end
 end
