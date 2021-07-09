@@ -60,15 +60,21 @@ class Mounting
   class SelectMenu < Mounting
     class FlatMounting < SelectMenu
       class StandardMounting < FlatMounting
-        build_target_group(%W[StandardFraming StandardMatting StandardBorder], 'FieldSet', 'Mounting')
+        def self.targets
+          build_target_group(%W[StandardFraming StandardMatting StandardBorder], 'FieldSet', 'Mounting')
+        end
       end
 
-      class CanvashMounting < FlatMounting
-        build_target_group(%W[StandardFraming StandardMatting], 'FieldSet', 'Mounting')
+      class CanvasMounting < FlatMounting
+        def self.targets
+          build_target_group(%W[StandardFraming StandardMatting], 'FieldSet', 'Mounting')
+        end
       end
 
       class SericelMounting < FlatMounting
-        build_target_group(%W[StandardFraming StandardMatting], 'FieldSet', 'Mounting')
+        def self.targets
+          build_target_group(%W[StandardFraming StandardMatting], 'FieldSet', 'Mounting')
+        end
       end
     end
   end

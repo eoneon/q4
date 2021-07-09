@@ -84,9 +84,6 @@ end
 
 ##############################################################################
 ##############################################################################
-# def assign_or_merge(h, h2)
-#   h.nil? ? h2 : h.merge(h2)
-# end
 
 # def field_group(m, store)
 #   field_data(m).each_with_object(store) do |f_hsh, store|
@@ -96,17 +93,7 @@ end
 #     #merge_assocs(f_hsh[:assocs], :assocs, kind, type, f_name, store)
 #   end
 # end
-#
-# def field_data(m)
-#   desc_select(m: m).each_with_object([]) do |c, f_set|
-#     f_attrs = c.build_attrs(:attrs)
-#     f_set.append({attrs: f_attrs, targets: c.targets}) #test
-#     tags = [c.asc_select_merge(:name_values, f_attrs), c.asc_select_merge(:admin_attrs,f_attrs)].each_with_object({}) {|h,tags| tags.merge!(h)} #tags = [:name_values, :admin_attrs].each_with_object({}) {|m,tags| tags.merge!(c.asc_select_merge(call_meth(m,f_attrs))) }
-#     #f_set.append({attrs: f_attrs, tags: tags, origin: c.asc_select_concat(:origin), assocs: c.asc_select_concat(:assocs), targets: c.targets})
-#     f_set.append({attrs: f_attrs, tags: tags, targets: c.targets})
-#   end
-# end
-#
+
 ##############################################################################
 ##############################################################################
 
@@ -116,20 +103,6 @@ end
 #
 # def merge_assocs(assoc_set, k, kind, type, f_name, store)
 #   assoc_set.each_with_object(store) {|assoc, store| case_merge(store, [f_name], k, kind, type, assoc)} if assoc_set&.any?
-# end
-
-# def build_tags(args)
-#   return unless respond_to?(:tag_meths)
-#   asc_detect_with_methods(tag_meths).each_with_object({}) do |(m,c), tags|
-#     tags.merge!({m => c.public_send(m, args)})
-#   end
-# end
-
-# def field_data(m)
-#   desc_select(m: m).each_with_object([]) do |c, f_set|
-#     attrs = c.build_attrs(:attrs)
-#     f_set.append({attrs: attrs, tags: c.build_tags(attrs), origin: c.build_assoc(:origin), assocs: c.build_assoc(:assocs), targets: c.targets})
-#   end
 # end
 
 # def product_vals(p, tag)
@@ -150,18 +123,6 @@ end
 #     a_key, f_names = vals.pop(2)
 #     f_names.map{|f_name| case_merge(a_hsh, [store.dig(*vals[0..1].append(f_name))], assoc, a_key)}
 #   end
-# end
-
-##############################################################################
-#STRING methods
-##############################################################################
-
-# def format_name(name)
-#   name.split(' ').map(&:strip).join(' ')
-# end
-
-# def indefinite_article(noun)
-#   %w[a e i o u].include?(noun.first.downcase) && noun.split('-').first != 'one' || noun == 'HC' ? 'an' : 'a'
 # end
 
 #p_hsh: p_hsh, a_hsh: assoc_hsh[a_key], assocs: h[:assocs]

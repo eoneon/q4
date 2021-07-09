@@ -6,7 +6,7 @@ class MartaWiley
   include ProductSeed
 
   def self.product_name
-    class_to_cap(const)
+    class_to_cap(const(0))
   end
 
   def self.assocs

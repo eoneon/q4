@@ -24,16 +24,10 @@ class Product < ApplicationRecord
     end
   end
 
-  def radio_options
-    radio_buttons.includes(:options).map(&:options)
-  end
-
-  def assoc_targets(targets)
-    targets.each_with_object(self){|target,p| assoc_unless_included(target)}
-  end
+  ##############################################################################
 
   def input_set(g_hsh, i_hsh, a=[])
-    a = field_args(g_hsh).each_with_object(a) do |f_hsh, a|
+    f_args(g_hsh).each_with_object(a) do |f_hsh, a|
       f = i_hsh.dig(f_hsh[:k], f_hsh[:t_type], f_hsh[:f_name])
       a.append(f_hsh.merge!({:selected=> format_selected(f)}))
       input_set(f.g_hsh, i_hsh, a) if f && !f.is_a?(String) && field_set?(f.type)
@@ -53,9 +47,11 @@ class Product < ApplicationRecord
     p.assoc_targets(fields)
   end
 
-  def assign_or_merge(h, h2)
-    h.nil? ? h2 : h.merge(h2)
+  def assoc_targets(targets)
+    targets.each_with_object(self){|target,p| assoc_unless_included(target)}
   end
+
+  ##############################################################################
 
   # refactor: self.search_query ################################################
   def self.search(scope: nil, search_params: nil, restrict: nil, hstore:)
@@ -87,22 +83,20 @@ class Product < ApplicationRecord
   end
 
   def self.search_keys
-    %w[category_type medium_type]
+    %w[category_search medium_search material_search]
   end
 
 end
 
+################################################################################
+# def radio_options
+#   radio_buttons.includes(:options).map(&:options)
+# end
 
+# def assign_or_merge(h, h2)
+#   h.nil? ? h2 : h.merge(h2)
+# end
 
-
-
-
-
-
-
-
-
-##############################################################################
 #  product_type product_subtype
 # def self.tag_search_field_group(search_keys:, products: product_group, h: {})
 #   search_keys.map{|search_key| h[:"#{search_key}"] = search_values(products, search_key)}

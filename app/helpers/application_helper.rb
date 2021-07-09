@@ -8,7 +8,6 @@ module ApplicationHelper
       tag.to_s
     elsif tag.respond_to?(:id)
       [tag.class.name.underscore, tag.id].join("-")
-      #[tag == :sup ? tag.class.superclass.name.underscore : tag.type.underscore, tag.id].join("-")
     end
   end
 

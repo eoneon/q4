@@ -9,6 +9,10 @@ class Sculpture
     {kind: 2, type: 1, subkind: 3, f_name: -1}
   end
 
+  def self.input_group
+    [1, %w[size color sculpture_type lid]]
+  end
+
   class SelectField < Sculpture
     class SculptureType < SelectField
       def self.name_values(args)

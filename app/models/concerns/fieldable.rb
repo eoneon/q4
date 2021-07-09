@@ -7,22 +7,14 @@ module Fieldable
     before_destroy :remove_dependent_item_groups
   end
 
-  def field_args(field_groups, set=[])
-    a = field_groups.each_with_object(set) do |(k, field_groups), a|
-      field_groups.each do |t, fields|
-        fields.each do |f_name, f_val|
-          unpack_or_assign(k.underscore, t.underscore, f_name.underscore, f_val, a)
-        end
-      end
+  def f_args(f_groups, set=[])
+    Product.dig_keys_with_end_val(h: f_groups).each_with_object(set) do |args, set|
+      unpack?(args[1]) ? f_args(args[-1].g_hsh, set) : set.append(input_hsh(*args[0..-2].map!(&:underscore).append(args[-1])))
     end
   end
 
-  def unpack_or_assign(k, t, f_name, f_val, a)
-    if unpack?(t)
-      field_args(f_val.g_hsh, a)
-    else
-      a.append({k: k, t: t, t_type: f_assoc(t), f_name: f_name, f_val: f_val})
-    end
+  def input_hsh(k, t, f_name, f_val)
+    [[:k,:t,:t_type,:f_name,:f_val], [k, t, f_assoc(t), f_name, f_val]].transpose.to_h
   end
 
   def unpack?(t)
@@ -65,12 +57,20 @@ module Fieldable
 end
 
 ##############################################################################
-
-# def h_args(h:, keys: nil, args: nil)
-#   h_vals = h_vals(h: h, keys: keys)
-#   args ? h_vals + args : h_vals
+# def field_args(field_groups, set=[])
+#   a = field_groups.each_with_object(set) do |(k, field_groups), a|
+#     field_groups.each do |t, fields|
+#       fields.each do |f_name, f_val|
+#         unpack_or_assign(k.underscore, t.underscore, f_name.underscore, f_val, a)
+#       end
+#     end
+#   end
 # end
-#
-# def h_vals(h:, keys: nil)
-#   keys ? keys.map{|k| h[k]} : h.values
+
+# def unpack_or_assign(k, t, f_name, f_val, a)
+#   if unpack?(t)
+#     field_args(f_val.g_hsh, a)
+#   else
+#     a.append({k: k, t: t, t_type: f_assoc(t), f_name: f_name, f_val: f_val})
+#   end
 # end

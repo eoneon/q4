@@ -57,7 +57,8 @@ class ItemProductsController < ApplicationController
 
   def add_product(product)
     @item.add_obj(product)
-    @item.add_default_fields(product.field_args(product.g_hsh))
+    #@item.add_default_fields(product.field_args(product.g_hsh))
+    @item.add_default_fields(product.f_args(product.g_hsh))
   end
 
   def remove_product(product)

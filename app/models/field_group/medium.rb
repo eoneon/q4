@@ -14,7 +14,11 @@ class Medium
   end
 
   def self.name_values(args)
-    {medium_search: args[:subkind], product_name: class_to_cap(args[:f_name].sub('Standard', '')), origin: args[:f_name]}
+    {medium_search: args[:subkind], product_name: name_from_class(args[:f_name], [], [['Standard', ''],['Sculpture', '']]), origin: args[:f_name]}
+  end
+
+  def self.input_group
+    [0, %w[medium embellishing leafing remarque]]
   end
 
   class SelectField < Medium

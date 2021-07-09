@@ -3,7 +3,7 @@ class Category
   include FieldSeed
   include Hashable
   include Textable
-  # h = Category.build_and_store(:targets, {})
+  
   def self.attrs
     {kind: 0, type: 1, subkind: 2, f_name: -1}
   end
@@ -88,8 +88,12 @@ class Category
       end
 
       class OneOfAKindOfOne < Original
+        def self.name_values(args)
+          {item_name: 'One-of-a-Kind'}
+        end
+
         def self.targets
-          [%W[SelectField Numbering SingleEdition]]
+          [%W[SelectField Numbering NumberedOneOfOne]]
         end
       end
 

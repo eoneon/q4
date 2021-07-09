@@ -14,7 +14,7 @@ module FieldCrud
   end
 
   def update_actions(k:, t:, f_name:, v:, v2:, context:)
-    remove_field_set_fields(v.field_args(v.g_hsh)) if remove_field_set?(t, context)
+    remove_field_set_fields(v.f_args(v.g_hsh)) if remove_field_set?(t, context)
     update_field_case(k: k, t: t, f_name: f_name, v: v, v2: v2, context: context) unless context == :skip
   end
 
@@ -100,7 +100,7 @@ module FieldCrud
   # product_fields remove ######################################################
   def remove_product_fields
     return if self.tags.nil?
-    field_args(input_params).each do |f_hsh|
+    f_args(input_params).each do |f_hsh|
       remove_product_field_param(*h_vals(f_hsh, :k, :t, :f_name, :f_val))
     end
   end

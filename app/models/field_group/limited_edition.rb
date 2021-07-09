@@ -8,6 +8,10 @@ class LimitedEdition
     {kind: 2, type: 1, f_name: -1}
   end
 
+  def self.input_group
+    [4, %w[numbering]]
+  end
+
   class SelectField < LimitedEdition
     class Numbering < SelectField
       def self.editions(edition_type)
@@ -68,12 +72,6 @@ class LimitedEdition
       class RomanNumbered < Numbering
         def self.targets
           [%W[SelectField Numbering Numbered], %W[TextField Numbering Edition], %W[TextField Numbering Edition]]
-        end
-      end
-
-      class NumberedOneOfOne < Numbering
-        def self.targets
-          [%W[SelectField Numbering NumberedOneOfOne]]
         end
       end
 

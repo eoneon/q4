@@ -40,10 +40,6 @@ class Item < ApplicationRecord
     input_group['search_results'] = uniq_hattrs(search_results, search_keys, hstore) if search_keys
   end
 
-  # def self.order_search(input_group, sort_keys, hstore)
-  #   input_group['search_results'].sort_by!{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
-  # end
-
   def self.order_search(search_results, sort_keys, hstore)
     search_results.sort_by!{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
   end
@@ -224,32 +220,32 @@ class Item < ApplicationRecord
     artists.first if artists.any?
   end
 
-  ##############################################################################
-
-  def format_vowel(word, exception_set=[])
-    %w[a e i o u].include?(word.first.downcase) && exception_set.exclude?(word) ? 'an' : 'a'
-  end
-
-  def cap_words(words, set=[])
-    return set << words if words && words[0] == "\""
-    format_word_set(words.split(' '), set)
-  end
-
-  def format_word_set(word_set, set)
-    word_set.each do |word|
-      set << cap_case(word)
-    end
-    set.join(' ')
-  end
-
-  def cap_case(word)
-    if ('A'..'Z').include?(word[0]) || %w[a an and from with].include?(word)
-      word
-    else
-      word.capitalize
-    end
-  end
 end
+
+# def format_vowel(word, exception_set=[])
+#   %w[a e i o u].include?(word.first.downcase) && exception_set.exclude?(word) ? 'an' : 'a'
+# end
+
+# def cap_words(words, set=[])
+#   return set << words if words && words[0] == "\""
+#   format_word_set(words.split(' '), set)
+# end
+
+# def format_word_set(word_set, set)
+#   word_set.each do |word|
+#     set << cap_case(word)
+#   end
+#   set.join(' ')
+# end
+
+# def cap_case(word)
+#   if ('A'..'Z').include?(word[0]) || %w[a an and from with].include?(word)
+#     word
+#   else
+#     word.capitalize
+#   end
+# end
+##############################################################################
 
 # def grouped_form_fields
 #   form_fields.group_by{|h| h[:kind_scope]}

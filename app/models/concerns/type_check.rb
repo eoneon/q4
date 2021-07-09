@@ -21,7 +21,7 @@ module TypeCheck
   end
 
   def default_option_kind?(k)
-    %w[edition medium material signature certificate].include?(k)
+    %w[sculpture_type numbering medium material signature certificate].include?(k)
   end
 
   # check type #################################################################

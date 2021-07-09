@@ -7,10 +7,12 @@ class Dimension
     {kind: 0, type: 1, f_name: -1}
   end
 
+  def self.input_group
+    [3, %w[dimension]]
+  end
+
   class FieldSet < Dimension
-
     class FlatArt < FieldSet
-
       class WidthHeight < FlatArt
         def self.targets
           build_target_group(%W[Width Height], 'NumberField', 'Dimension')

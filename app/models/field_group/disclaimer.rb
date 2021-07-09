@@ -7,6 +7,10 @@ class Disclaimer
     {kind: 0, type: 1, f_name: -1}
   end
 
+  def self.input_group
+    [6, %w[disclaimer]]
+  end
+
   class SelectField < Disclaimer
 
     class DisclaimerSeverity < SelectField

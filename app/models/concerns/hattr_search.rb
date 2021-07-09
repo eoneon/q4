@@ -7,8 +7,7 @@ module HattrSearch
 
     def hattr_search(scope:, search_params:, restrict:, hstore:)
       results = hattr_query_case(scope: scope, search_params: search_params, restrict: restrict, hstore: hstore)
-      #order_search(results, search_params.keys, hstore)
-      order_search(results, %w[category_type medium_type], hstore) # 
+      order_search(results, %w[category_search medium_search], hstore) 
     end
 
     def hattr_query_case(scope:, search_params:, restrict:, hstore:)

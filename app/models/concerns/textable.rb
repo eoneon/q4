@@ -23,10 +23,6 @@ module Textable
       end
     end
 
-    # def edit_list
-    #   [['Standard',''], ['Reproduction',''], ['On Paper', ''], ['One Of A Kind', 'One-of-a-Kind'], ['Of One', ' 1/1']]
-    # end
-
     def format_name(name)
       name.split(' ').map(&:strip).join(' ')
     end

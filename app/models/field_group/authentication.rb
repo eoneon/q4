@@ -7,6 +7,10 @@ class Authentication
     {kind: 2, type: 1, f_name: -1}
   end
 
+  def self.input_group
+    [5, %w[dated signature seal certificate verification]]
+  end
+
   class SelectField < Authentication
     class Dated < SelectField
       class StandardDated < Dated

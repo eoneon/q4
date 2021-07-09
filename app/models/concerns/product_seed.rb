@@ -61,7 +61,7 @@ module ProductSeed
 
     ############################################################################
     ############################################################################
-    
+
     def split_set(set, subset)
       a, b = subset, (set-subset)
     end
@@ -78,26 +78,6 @@ module ProductSeed
   end
 end
 
-# def product_group(store)
-#   select_end_classes.each_with_object([]) do |c,set|
-#     fields = c.dig_product_fields(:assocs, store)
-#     origins, fields = split_set(fields, fields.select{|f| f.tags&.has_key?('origin')})
-#     set << combine_and_build(origins, fields, c.tag_keys, c.call_if(:product_name)) #c.respond_to?()
-#   end
-# end
-
-# def combine_and_build(origins, fields, tag_keys, product_name)
-#   origins.each_with_object([]) do |origin_field, set|
-#     combine_fields(push_one_or_many({f: origin_field, set:[], group:[]}, fields)).each do |p_fields|
-#       p_fields = sort_fields(p_fields.group_by(&:kind))
-#       set << build_product(p_fields, tag_keys, product_name)
-#     end
-#   end
-# end
-
-# def assoc_fields(h, assocs)
-#   assocs.each_with_object([]) {|assoc, fields| h[assoc].map{|f| fields.append(f)}}
-# end
 
 # def origin_hsh(o_hsh, store)
 #   dig_keys_with_end_val(o_hsh).each_with_object([]) do |vals, set|
@@ -110,8 +90,4 @@ end
 #     assoc, f_names = vals.pop(2)
 #     f_names.map{|f_name| case_merge(h, [store.dig(*vals[0..1].append(f_name))], k, assoc)}
 #   end
-# end
-
-# def merge_assocs(m)
-#   select_end_classes.each_with_object([]) {|c,set| set << c.asc_select_merge(m)}
 # end

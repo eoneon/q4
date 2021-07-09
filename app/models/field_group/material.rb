@@ -8,6 +8,10 @@ class Material
     {kind: 0, type: 1, subkind: 2, f_name: -1}
   end
 
+  def self.input_group
+    [2, %w[material mounting]]
+  end
+
   class SelectField < Material
     class Canvas < SelectField
       class StandardCanvas < Canvas
@@ -82,7 +86,6 @@ class Material
         end
       end
     end
-
   end
 
   class FieldSet < Material
@@ -97,7 +100,7 @@ class Material
     class Canvas < FieldSet
       class StandardCanvas < Canvas
         def self.targets
-          [%W[SelectField Material Canvas], %W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
+          [%W[SelectField Material StandardCanvas], %W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
         end
       end
 
