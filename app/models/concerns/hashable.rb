@@ -36,6 +36,12 @@ module Hashable
       v.each_with_object(h){|(k,v),h| nested_assign(h, v, infer_keys(h, m_key, m_val))}
     end
 
+    #replaces param_set ########################################################
+    def build_params(params, *args)
+      hsh = dig_keys_with_end_val(h: params)
+      map_args(hsh,*args) 
+    end
+
     #loop method for nested hshs ###############################################
 
     def dig_keys_with_end_val(h:, keys:[], i:0, set:[])

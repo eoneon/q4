@@ -6,7 +6,7 @@ class PeterMax
   include ProductSeed
 
   def self.product_name
-    class_to_cap(const(0))
+    'Peter Max'
   end
 
   def self.assocs

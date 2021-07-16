@@ -14,9 +14,13 @@ class Sculpture
   end
 
   class SelectField < Sculpture
+    def self.target_tags(f_name)
+      {tagline: str_edit(str: uncamel(f_name), skip:['and']), body: f_name}
+    end
+
     class SculptureType < SelectField
       def self.name_values(args)
-        {product_name: class_to_cap(args[:f_name])}
+        {product_name: str_edit(str: uncamel(args[:f_name]))}
       end
 
       class Bowl < SculptureType
@@ -41,7 +45,7 @@ class Sculpture
     class GartnerBlade < SelectField
       class SculptureType < GartnerBlade
         def self.name_values(args)
-          {medium_search: args[:f_name], product_name: class_to_cap(args[:f_name])}
+          {medium_search: args[:f_name], product_name: str_edit(str: uncamel(args[:f_name]))}
         end
 
         class OpenBowl < SculptureType
@@ -178,7 +182,7 @@ class Sculpture
   class FieldSet < Sculpture
     class SculptureType < FieldSet
       def self.name_values(args)
-        {medium_search: args[:f_name], product_name: class_to_cap(args[:f_name]), origin: args[:f_name]}
+        {medium_search: args[:f_name], product_name: str_edit(str: uncamel(args[:f_name])), origin: args[:f_name]}
       end
 
       class PrimitiveBowl < SculptureType

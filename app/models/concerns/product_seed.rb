@@ -49,8 +49,10 @@ module ProductSeed
       Product.builder(build_product_name(p_fields, product_name), p_fields, build_product_tags(p_fields, tag_keys))
     end
 
-    def build_product_name(p, product_name, tag='product_name')
-      p.select{|f| f.tags&.has_key?(tag)}.map{|f| f.tags[tag]}.prepend(product_name).compact.join(' ')
+    def build_product_name(p_fields, product_name, tag='product_name')
+      p_fields = p_fields.select{|f| f.tags&.has_key?(tag)}
+      p_fields = p_fields.reject{|f| f.kind == 'Material'} if p_fields.detect{|f| f.tags.has_key?('paper_only')}
+      p_fields.map{|f| f.tags[tag]}.prepend(product_name).compact.join(' ') 
     end
 
     def build_product_tags(p, tag_keys, tags={})

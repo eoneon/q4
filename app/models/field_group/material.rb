@@ -13,6 +13,18 @@ class Material
   end
 
   class SelectField < Material
+    def self.target_tags(f_name)
+      {tagline: "on #{tagline(f_name)}", body: "on #{body(f_name)}"}
+    end
+
+    def self.tagline(f_name)
+      str_edit(str: f_name, swap: ['stretched', ''])
+    end
+
+    def self.body(f_name)
+      swap_str(f_name, ['gallery wrapped', ''])
+    end
+
     class Canvas < SelectField
       class StandardCanvas < Canvas
         def self.targets
@@ -94,7 +106,7 @@ class Material
     end
 
     def self.name_values(args)
-      {material_search: args[:subkind], product_name: "on #{class_to_cap(args[:f_name].sub('Standard', ''))}"}
+      {material_search: args[:subkind], product_name: "on #{str_edit(str: uncamel(args[:f_name]), swap: ['Standard', ''])}"}
     end
 
     class Canvas < FieldSet
@@ -119,12 +131,20 @@ class Material
       end
 
       class PhotoPaper < Paper
+        def self.name_values(args)
+          {product_name: ""}
+        end
+
         def self.targets
           [%W[SelectField Material PhotoPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
         end
       end
 
       class AnimationPaper < Paper
+        def self.name_values(args)
+          {product_name: ""}
+        end
+
         def self.targets
           [%W[SelectField Material AnimationPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
         end

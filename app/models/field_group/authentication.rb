@@ -2,6 +2,7 @@ class Authentication
   include ClassContext
   include FieldSeed
   include Hashable
+  include Textable
 
   def self.attrs
     {kind: 2, type: 1, f_name: -1}
@@ -13,14 +14,38 @@ class Authentication
 
   class SelectField < Authentication
     class Dated < SelectField
+      def self.target_tags(f_name)
+        {body: f_name}
+      end
+
       class StandardDated < Dated
         def self.targets
-          ['Dated', 'Dated Circa']
+          ['dated', 'dated circa']
         end
       end
     end
 
     class Signature < SelectField
+      def self.target_tags(f_name)
+        {tagline: tagline(f_name), body: body(f_name)}
+      end
+
+      def self.tagline(f_name)
+        case
+          when %w[estate authorized].any? {|i| f_name.split(' ').include?(i)}; 'Signed'
+          when f_name == 'unsigned'; "(#{f_name.capitalize})"
+          else str_edit(str:f_name, skip:['and']);
+        end
+      end
+
+      def self.body(f_name)
+        case
+          when %w[plate authorized].any? {|i| f_name.split(' ').include?(i)}; "bearing the #{f_name} of the artist"
+          when f_name == 'unsigned'; "This piece is unsigned."
+          else f_name;
+        end
+      end
+
       class StandardSignature < Signature
         def self.targets
           ['hand signed', 'hand signed inverso', 'plate signed', 'authorized signature', 'estate signed', 'unsigned']
@@ -35,6 +60,23 @@ class Authentication
     end
 
     class Certificate < SelectField
+      def self.target_tags(f_name)
+        {tagline: tagline(f_name), body: body(f_name)}
+      end
+
+      def self.tagline(f_name)
+        "with #{str_edit(str: f_name, swap: swap_list, skip: %w[from of])}"
+      end
+
+      def self.body(f_name)
+        swap_str(f_name, swap_list)
+        f_name.index('Britto Stamp') ? "This piece bears an #{f_name}." : "Includes #{f_name}."
+      end
+
+      def self.swap_list
+        ['COA', 'Certificate of Authenticity', 'LOA', 'Letter of Authenticity']
+      end
+
       class StandardCertificate < Certificate
         def self.targets
           ['LOA', 'COA']
@@ -49,12 +91,20 @@ class Authentication
 
       class BrittoCertificate < Certificate
         def self.targets
-          ['LOA', 'COA from Britto Rommero fine art', 'official Britto Stamp inverso']
+          ['LOA', 'COA from Britto Rommero Fine Art', 'official Britto Stamp inverso']
         end
       end
     end
 
     class Seal < SelectField
+      def self.target_tags(f_name)
+        {body: body(f_name)}
+      end
+
+      def self.body(f_name)
+        "This piece bears the official #{f_name} seal"
+      end
+
       class AnimationSeal < Seal
         def self.targets
           ['Warner Bros.', 'Looney Tunes']
@@ -67,18 +117,34 @@ class Authentication
         end
       end
     end
+
+    class Verification < SelectField
+      def self.target_tags(f_name)
+        {body: body(f_name)}
+      end
+
+      def self.body(f_name)
+        "This piece includes #{f_name}"
+      end
+
+      class VerificationType < Verification
+        def self.targets
+          ['verification number', 'verification number inverso', 'registration number', 'registration number inverso']
+        end
+      end
+    end
   end
 
   class TextField < Authentication
     class Verification < TextField
-      class RegistrationNumber < Verification
+      class VerificationNumber < Verification
         def self.targets
         end
       end
     end
 
     class Dated < TextField
-      class StandardDated < Dated
+      class Date < Dated
         def self.targets
         end
       end
@@ -89,7 +155,7 @@ class Authentication
     class Dated < FieldSet
       class StandardDated < Dated
         def self.targets
-          [%W[SelectField Dated StandardDated], %W[TextField Dated StandardDated]]
+          [%W[SelectField Dated StandardDated], %W[TextField Dated Date]]
         end
       end
     end
@@ -98,6 +164,14 @@ class Authentication
       class AnimationSeal < Seal
         def self.targets
           [%W[SelectField Seal AnimationSeal], %W[SelectField Seal SportsSeal]]
+        end
+      end
+    end
+
+    class Verification < FieldSet
+      class StandardVerification < Verification
+        def self.targets
+          [%W[SelectField Verification VerificationType], %W[TextField Verification VerificationNumber]]
         end
       end
     end
@@ -115,7 +189,7 @@ class Authentication
 
       class PeterMaxAuthentication < GroupA
         def self.targets
-          [%W[TextField Verification RegistrationNumber], %W[SelectField Signature StandardSignature], %W[SelectField Certificate PeterMaxCertificate]]
+          [%W[FieldSet Verification StandardVerification], %W[SelectField Signature StandardSignature], %W[SelectField Certificate PeterMaxCertificate]]
         end
       end
 

@@ -21,9 +21,14 @@ module FieldSeed
     def field_data(m)
       desc_select(m: m).each_with_object([]) do |c, f_set|
         f_attrs = c.build_attrs(:attrs)
-        tags = [c.asc_select_merge(:name_values, f_attrs), c.asc_select_merge(:admin_attrs,f_attrs)].each_with_object({}) {|h,tags| tags.merge!(h)}
-        f_set.append({attrs: f_attrs, tags: tags, targets: c.targets})
+        tags = [c.asc_select_merge(:name_values, f_attrs).reject{|k,v| v.blank?}, c.asc_select_merge(:admin_attrs,f_attrs)].each_with_object({}) {|h,tags| tags.merge!(h)}
+        targets = build_targets(c, c.targets, f_attrs[:kind], c.asc_detect(:target_tags, :respond_to?))
+        f_set.append({attrs: f_attrs, tags: tags, targets: targets})
       end
+    end
+
+    def build_targets(c, targets, k, target_tags)
+      !target_tags ? targets : targets.each_with_object([]){|f_name,a| a.append([f_name, k, c.asc_select_merge(:target_tags, f_name).reject{|k,v| v.blank?}].compact)}
     end
 
     # CRUD METHODS #############################################################

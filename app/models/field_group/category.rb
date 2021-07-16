@@ -3,7 +3,7 @@ class Category
   include FieldSeed
   include Hashable
   include Textable
-  
+
   def self.attrs
     {kind: 0, type: 1, subkind: 2, f_name: -1}
   end
@@ -15,8 +15,8 @@ class Category
       end
 
       def self.name_values(args)
-        name = name_from_class(args[:f_name], %w[of a], [['Standard', ''], ['One of a Kind', 'One-of-a-Kind'], ['of One', ' 1/1']])
-        {category_search: args[:f_name], product_name: name, item_name: name}
+        name = str_edit(str: uncamel(args[:f_name]), swap: ['Standard', '', 'One Of A Kind', 'One-of-a-Kind'])
+        {category_search: args[:f_name], product_name: name, tagline: name, body: name.downcase}
       end
 
       class StandardOriginal < Original #3
@@ -83,13 +83,13 @@ class Category
       end
 
       def self.name_values(args)
-        name = name_from_class(args[:f_name], %w[of a], [['One of a Kind', 'One-of-a-Kind'], ['of One', ' 1/1']])
-        {category_search: args[:f_name], product_name: name, item_name: name}
+        name = str_edit(str: uncamel(args[:f_name]), swap: ['One Of A Kind', 'One-of-a-Kind', 'Of One', '1/1'])
+        {category_search: args[:f_name], product_name: name, tagline: name, body: name.downcase}
       end
 
       class OneOfAKindOfOne < Original
-        def self.name_values(args)
-          {item_name: 'One-of-a-Kind'}
+        def self.name_values
+          {tagline: 'One-of-a-Kind', body: 'one-of-a-kind'}
         end
 
         def self.targets

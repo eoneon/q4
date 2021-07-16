@@ -6,7 +6,7 @@ class GartnerBlade
   include ProductSeed
 
   def self.product_name
-    class_to_cap(const)
+    'GartnerBlade'
   end
 
   def self.assocs

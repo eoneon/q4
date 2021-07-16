@@ -37,7 +37,7 @@ module Fieldable
   end
 
   def g_hsh
-    grouped_hsh(enum: fieldables.select{|f| f.type != "RadioButton"}, attrs: f_attrs)
+    grouped_hsh(enum: fieldables.select{|f| f.type != "RadioButton"})
   end
 
   def f_attrs

@@ -6,7 +6,7 @@ class Everhart
   include ProductSeed
 
   def self.product_name
-    class_to_cap(const)
+    'Everhart'
   end
 
   def self.assocs

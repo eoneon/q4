@@ -18,8 +18,8 @@ class ItemsController < ApplicationController
   def update
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
-    @item.assign_attributes(item_params)
-    # @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])
+    @item.assign_attributes(item_params) # @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])
+
     @item.save
 
     respond_to do |format|

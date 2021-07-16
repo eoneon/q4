@@ -14,50 +14,58 @@ class LimitedEdition
 
   class SelectField < LimitedEdition
     class Numbering < SelectField
+      def self.swap_list
+        ['Proof', '', 'One Of One', '1/1']
+      end
+
       def self.editions(edition_type)
         set = [nil, 'AP', 'EA', 'CP', 'GP', 'PP', 'IP', 'HC', 'TC'].each_with_object([]) do |edition, set|
-          next if edition_type == 'Edition' && edition.nil?
+          next if edition_type == 'edition' && edition.nil?
           set.append(build_edition(edition, edition_type).join(' '))
         end
       end
 
       def self.build_edition(edition, edition_type)
-        if edition_type == 'Edition'
-          ['from', indefinite_article(edition), edition_type]
-        else
-          [edition, edition_type].compact
-        end
+        edition_type == 'edition' ? ['from', indefinite_article(edition), edition, edition_type] : [edition, edition_type].compact
+      end
+
+      def self.target_tags(f_name)
+        {tagline: str_edit(str: f_name, skip: %w[from a an of]), body: f_name}
+      end
+
+      def self.body(f_name)
+        f_name.split(' ').map{|word| word.split('').all?{|char| is_upper?(char)} ? word : word.downcase}.join(' ')
       end
 
       class Numbered < Numbering
         def self.targets
-          editions(class_to_cap(const))
+          editions(const.downcase)
         end
       end
 
       class RomanNumbered < Numbering
         def self.targets
-          editions(class_to_cap(const))
+          editions(str_edit(str: uncamel(const), skip:['Roman'], cntxt: :downcase))
         end
       end
 
       class NumberedOneOfOne < Numbering
         def self.targets
-          editions(class_to_cap(const).sub('One Of One', '1/1'))
+          editions(str_edit(str: uncamel(const), skip:['Roman'], swap: swap_list, cntxt: :downcase))
         end
       end
 
       class ProofEdition < Numbering
         def self.targets
-          editions(class_to_cap(const).sub('Proof', ''))
+          editions(str_edit(str: uncamel(const), swap: swap_list, cntxt: :downcase))
         end
       end
 
-      class BatchEdition < Numbering
-        def self.targets
-          ['from an edition of']
-        end
-      end
+      # class BatchEdition < Numbering
+      #   def self.targets
+      #     ['from an edition of']
+      #   end
+      # end
     end
   end
 
@@ -93,11 +101,3 @@ class LimitedEdition
     end
   end
 end
-
-
-
-# class SingleEdition < Numbering
-#   def self.targets
-#     [%W[SelectField Numbering NumberedOneOfOne]]
-#   end
-# end

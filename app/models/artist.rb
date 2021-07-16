@@ -1,7 +1,6 @@
 class Artist < ApplicationRecord
   has_many :item_groups, as: :origin
 
-  ##############################################################################
   def self.tag_field_sets
     [%w[first_name last_name], %w[title_tag], %w[yob yod]]
   end
@@ -39,10 +38,6 @@ class Artist < ApplicationRecord
 
 end
 
-# def self.tag_field_sets
-#   [%w[first_name middle_name last_name], %w[tagline body], %w[yob yod]]
-# end
-#
 # def artist_tag
 #   [artist_name, life_span].compact.join(' ')
 # end
@@ -53,12 +48,6 @@ end
 
 # def export_headers
 #   %w[tagline search_line body export_tag]
-# end
-
-# def artist_hsh
-#   h = export_headers.each_with_object({}) do |k,h|
-#     v =
-#   end
 # end
 
 # def body_tag

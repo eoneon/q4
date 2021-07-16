@@ -18,28 +18,41 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
+  # GROUPING METHODS: CRUD/VIEW ################################################
+  def input_set(g_hsh, i_hsh, a=[])
+    f_args(g_hsh).each_with_object(a) do |f_hsh, a|
+      f = i_hsh.dig(f_hsh[:k], f_hsh[:t_type], f_hsh[:f_name])
+      a.append(f_hsh.merge!({:selected=> format_selected(f,:id), :value=>format_selected(f,:field_name)}))
+      input_set(f.g_hsh, i_hsh, a) if f && !f.is_a?(String) && field_set?(f.type)
+    end
+  end
+
+  def format_selected(selected, attr)
+    return selected if selected.nil? || selected.is_a?(String)
+    selected.public_send(attr)
+  end
+  ##############################################################################
+  ##############################################################################
+
+  # SEARCH METHODS #############################################################
+  def self.search(scope: nil, search_params: nil, restrict: nil, hstore:)
+    search_params = search_params(scope: scope, search_params: search_params, hstore: hstore)
+    results = hattr_search(scope: self, search_params: search_params, restrict: restrict, hstore: hstore)
+    a, b = results, search_inputs(search_params, results, hstore)
+  end
+
+  def self.search_keys
+    %w[category_search medium_search material_search]
+  end
+  ##############################################################################
+  ##############################################################################
+
+  # SEEDING METHODS ############################################################
   def self.seed(store)
     Medium.class_group('ProductGroup').each_with_object(store) do |c, store|
       c.product_group(store)
     end
   end
-
-  ##############################################################################
-
-  def input_set(g_hsh, i_hsh, a=[])
-    f_args(g_hsh).each_with_object(a) do |f_hsh, a|
-      f = i_hsh.dig(f_hsh[:k], f_hsh[:t_type], f_hsh[:f_name])
-      a.append(f_hsh.merge!({:selected=> format_selected(f)}))
-      input_set(f.g_hsh, i_hsh, a) if f && !f.is_a?(String) && field_set?(f.type)
-    end
-  end
-
-  def format_selected(selected)
-    return selected if selected.nil? || selected.is_a?(String)
-    selected.id
-  end
-
-  ##############################################################################
 
   def self.builder(product_name, fields, tags=nil)
     p = Product.where(product_name: product_name).first_or_create
@@ -51,42 +64,39 @@ class Product < ApplicationRecord
     targets.each_with_object(self){|target,p| assoc_unless_included(target)}
   end
 
-  ##############################################################################
-
-  # refactor: self.search_query ################################################
-  def self.search(scope: nil, search_params: nil, restrict: nil, hstore:)
-    search_params = search_params(scope: scope, search_params: search_params, hstore: hstore)
-    results = hattr_search(scope: self, search_params: search_params, restrict: restrict, hstore: hstore)
-    a, b = results, search_inputs(search_params, results, hstore)
-  end
-
-  def self.search_params(scope: nil, search_params: nil, hstore:)
-    search_keys.map{|k| [k, search_value(scope, search_params, hstore, k)]}.to_h
-  end
-
-  def self.search_value(scope, search_params, hstore, k)
-    if search_params
-      search_params[k]
-    elsif scope
-      scope.public_send(hstore)[k]
-    end
-  end
-
-  def self.search_inputs(search_params, results, hstore)
-    a = search_params.each_with_object([]) do |(k,v),a|
-      a.append(search_input(k, v, results, hstore))
-    end
-  end
-
-  def self.search_input(k, v, results, hstore)
-    {'input_name'=> k, 'selected'=> v, 'opts'=> results.map{|product| product.public_send(hstore)[k]}.uniq.compact}
-  end
-
-  def self.search_keys
-    %w[category_search medium_search material_search]
-  end
-
 end
+
+
+
+#a = lambda {puts "dog"}#{Medium.class_group('FieldGroup').map{|c| c.call_if(:input_group)}.compact.sort_by(&:first).map(&:last)}
+# def my_lambda
+#   lambda {puts "dog"}
+#   #a.call
+# end
+
+################################################################################
+
+# def self.search_params(scope: nil, search_params: nil, hstore:)
+#   search_keys.map{|k| [k, search_value(scope, search_params, hstore, k)]}.to_h
+# end
+
+# def self.search_value(scope, search_params, hstore, k)
+#   if search_params
+#     search_params[k]
+#   elsif scope
+#     scope.public_send(hstore)[k]
+#   end
+# end
+
+# def self.search_inputs(search_params, results, hstore)
+#   a = search_params.each_with_object([]) do |(k,v),a|
+#     a.append(search_input(k, v, results, hstore))
+#   end
+# end
+#
+# def self.search_input(k, v, results, hstore)
+#   {'input_name'=> k, 'selected'=> v, 'opts'=> results.map{|product| product.public_send(hstore)[k]}.uniq.compact}
+# end
 
 ################################################################################
 # def radio_options

@@ -8,16 +8,33 @@ class Mounting
   end
 
   class SelectField < Mounting
-
     class Framing < SelectField
+      def self.target_tags(f_name)
+        {tagline: 'Framed', body: body(f_name), mounting_dimension: '(frame)'}
+      end
+
+      def self.body(f_name)
+        if f_name.split(' ').include?('(floated)');
+          "This piece comes floating in a #{f_name}."
+        elsif f_name.split(' ').include?('box');
+          "This piece comes in a #{f_name}."
+        else
+          "This piece comes #{f_name+'ed'}."
+        end
+      end
+
       class StandardFraming < Framing
         def self.targets
-          ['framed', 'custom framed', 'box frame', 'simple box frame']
+          ['frame', 'frame (floated)', 'custom frame', 'custom frame (floated)', 'box frame', 'simple box frame']
         end
       end
     end
 
     class Matting < SelectField
+      def self.target_tags(f_name)
+        {body: "This piece comes matted.", mounting_dimension: '(matting)'}
+      end
+
       class StandardMatting < Matting
         def self.targets
           ['matted']
@@ -26,6 +43,10 @@ class Mounting
     end
 
     class Border < SelectField
+      def self.target_tags(f_name)
+        {mounting_dimension: '(border)'}
+      end
+
       class StandardBorder < Border
         def self.targets
           ['border', 'oversized border']

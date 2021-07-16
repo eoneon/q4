@@ -13,6 +13,10 @@ class Dimension
 
   class FieldSet < Dimension
     class FlatArt < FieldSet
+      def self.name_values
+        {material_dimension: '(image)'}
+      end
+
       class WidthHeight < FlatArt
         def self.targets
           build_target_group(%W[Width Height], 'NumberField', 'Dimension')
@@ -26,6 +30,10 @@ class Dimension
       end
 
       class Diameter < FlatArt
+        def self.name_values
+          {material_dimension: '(image-diameter)'}
+        end
+
         def self.targets
           [%W[NumberField Dimension Diameter]]
         end
@@ -54,6 +62,10 @@ class Dimension
       end
 
       class DiameterWeight < DepthArt
+        def self.name_values
+          {material_dimension: '(diameter)'}
+        end
+
         def self.targets
           build_target_group(%W[Diameter Weight], 'NumberField', 'Dimension')
         end

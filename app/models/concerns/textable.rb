@@ -5,26 +5,30 @@ module Textable
 
   class_methods do
 
-    def name_from_class(name, skip_list, edit_list)
-      format_name(edit_name(class_to_cap(name, skip_list), edit_list))
+    def str_edit(str:, swap:[], skip:[], cntxt: :capitalize)
+      swap_str(str, swap).split(' ').map{|substr| cap_case(substr,skip,cntxt)}.join(' ')
     end
 
-    def class_to_cap(class_word, skip_list=[])
-      class_word.underscore.split('_').map{|word| cap_word(word, skip_list)}.join(' ')
+    def swap_str(str, swap_sets)
+      strip_space(trans_args(swap_sets).each_with_object(str) {|replace_this_with_that,str| str.sub!(*replace_this_with_that)})
     end
 
-    def cap_word(word, skip_list)
-      skip_list.include?(word) ? word : word.capitalize
+    def cap_case(words, skip_set, cntxt)
+      strip_space(words).split(' ').map{|str| format_cap_word(str,skip_set,cntxt)}.join(' ')
     end
 
-    def edit_name(name, edit_list)
-      name = edit_list.each_with_object(name) do |word_set|
-        name.sub!(word_set[0], word_set[1])
-      end
+    def format_cap_word(words, skip_set, cntxt)
+      words.split(' ').map{|str| is_upper?(str) || skip_set.include?(str) ? str : nested_format_cap(str, cntxt)}.join(' ')
     end
 
-    def format_name(name)
-      name.split(' ').map(&:strip).join(' ')
+    def nested_format_cap(str, cntxt)
+      str[0] == '(' ? '('+str[1..-1].public_send(cntxt) : str.public_send(cntxt)
+    end
+
+    ############################################################################
+    
+    def uncamel(class_word)
+      class_word.underscore.split('_').map{|str| str.capitalize}.join(' ')
     end
 
     def indefinite_article(noun)
@@ -40,5 +44,26 @@ module Textable
         arr[0]
       end
     end
+
+    def strip_space(str)
+      str.split(' ').map(&:strip).join(' ')
+    end
+
+    ############################################################################
+
+    def is_acronym?(word)
+      word.split('').all?{|char| is_upper?(char)}
+    end
+
+    def is_upper?(word)
+      /[[:upper:]]/.match(word[0])
+    end
+
+    ############################################################################
+
+    def trans_args(arg_list)
+      arg_list.each_with_object({a:[],b:[]}) {|i,args| arg_list.index(i).even? ? args[:a].append(i) : args[:b].append(i)}.values.transpose
+    end
+
   end
 end

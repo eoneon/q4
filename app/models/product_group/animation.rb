@@ -38,7 +38,7 @@ class Animation
 
   class WarnerBrosEtching < Animation
     def self.product_name
-      class_to_cap(const)
+      'Warner Bros'
     end
 
     def self.assocs

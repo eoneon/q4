@@ -2,6 +2,7 @@ class Submedium
   include ClassContext
   include FieldSeed
   include Hashable
+  include Textable
 
   def self.attrs
     {kind: 2, type: 1, f_name: -1}
@@ -9,6 +10,10 @@ class Submedium
 
   class SelectField < Submedium
     class Embellishing < SelectField
+      def self.target_tags(f_name)
+        {tagline: str_edit(str: uncamel(f_name)), body: f_name}
+      end
+
       class StandardEmbellishing < Embellishing
         def self.targets
           ['hand embellished', 'hand painted', 'artist embellished']
@@ -23,14 +28,22 @@ class Submedium
     end
 
     class Leafing < SelectField
+      def self.target_tags(f_name)
+        {tagline: "with #{str_edit(str: uncamel(f_name), skip:['and'])}", body: "with #{f_name}"}
+      end
+
       class StandardLeafing < Leafing
         def self.targets
-          ['gold leaf', 'hand laid gold leaf', 'silver leaf', 'hand laid silver leaf', 'hand laid gold and silver leaf', 'hand laid copper leaf']
+          ['goldleaf', 'hand laid goldleaf', 'silverleaf', 'hand laid silverleaf', 'hand laid gold and silver leaf', 'hand laid copperleaf']
         end
       end
     end
 
     class Remarque < SelectField
+      def self.target_tags(f_name)
+        {tagline: "with #{str_edit(str: uncamel(f_name), skip:['and'])}", body: "with #{f_name}"}
+      end
+
       class StandardRemarque < Remarque
         def self.targets
           ['remarque', 'hand drawn remarque', 'hand colored remarque', 'hand drawn and colored remarque']
@@ -63,6 +76,8 @@ class Submedium
     end
   end
 end
+
+
 
 # module Assocs
 #   module ReproductionOnPaper

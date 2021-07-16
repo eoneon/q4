@@ -10,11 +10,11 @@ class Medium
   end
 
   def self.admin_attrs(args)
-    {medium: name_from_class(args[:f_name], [], [['Standard', ''], ['Painting', ''], ['Production',''], ['Sculpture', ''], ['Hand Made', '']])}
+    {medium: str_edit(str: uncamel(args[:f_name]), swap: ['Standard', '', 'Painting', '', 'Production','', 'Sculpture', '', 'Hand Made', ''])}
   end
 
   def self.name_values(args)
-    {medium_search: args[:subkind], product_name: name_from_class(args[:f_name], [], [['Standard', ''],['Sculpture', '']]), origin: args[:f_name]}
+    {medium_search: args[:subkind], product_name: str_edit(str: uncamel(args[:f_name]), swap: ['Standard', '', 'Sculpture', '', 'Unknown', '', ' And ', ' and '], skip:['and']), origin: args[:f_name]}
   end
 
   def self.input_group
@@ -22,6 +22,10 @@ class Medium
   end
 
   class SelectField < Medium
+    def self.target_tags(f_name)
+      {tagline: str_edit(str: f_name, skip:['and', 'on']), body: f_name}
+    end
+
     class Painting < SelectField
       class OilPainting < Painting
         def self.targets
@@ -47,28 +51,34 @@ class Medium
         end
       end
 
-      class WatercolorPainting < Painting
-        def self.targets
-          ['watercolor painting', 'sumi ink painting']
+      class PaperOnly < Painting
+        def self.admin_attrs
+          {paper_only: 'paper_only'}
         end
-      end
 
-      class PastelPainting < Painting
-        def self.targets
-          ['pastel painting']
+        class WatercolorPainting < PaperOnly
+          def self.targets
+            ['watercolor painting', 'sumi ink painting']
+          end
         end
-      end
 
-      class GuachePainting < Painting
-        def self.targets
-          ['guache painting']
+        class PastelPainting < PaperOnly
+          def self.targets
+            ['pastel painting']
+          end
+        end
+
+        class GuachePainting < PaperOnly
+          def self.targets
+            ['guache painting']
+          end
         end
       end
     end
 
     class Drawing < SelectField
       def self.admin_attrs(args)
-        {medium: (args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink')}
+        {medium: (args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink'), paper_only: 'paper_only'}
       end
 
       class PencilDrawing < Drawing
@@ -94,7 +104,6 @@ class Medium
           ['pen and ink drawing']
         end
       end
-
     end
 
     class Serigraph < SelectField
@@ -111,7 +120,19 @@ class Medium
       end
     end
 
+    class Giclee < SelectField
+      class StandardGiclee < Giclee
+        def self.targets
+          ['giclee', 'textured giclee']
+        end
+      end
+    end
+    
     class Lithograph < SelectField
+      def self.admin_attrs
+        {paper_only: 'paper_only'}
+      end
+
       class StandardLithograph < Lithograph
         def self.targets
           ['lithograph', 'offset lithograph', 'original lithograph', 'hand pulled lithograph', 'hand pulled original lithograph']
@@ -125,15 +146,11 @@ class Medium
       end
     end
 
-    class Giclee < SelectField
-      class StandardGiclee < Giclee
-        def self.targets
-          ['giclee', 'textured giclee']
-        end
-      end
-    end
-
     class Etching < SelectField
+      def self.admin_attrs
+        {paper_only: 'paper_only'}
+      end
+
       class StandardEtching < Etching
         def self.targets
           ['etching', 'etching (black)', 'etching (sepia)', 'hand pulled etching', 'drypoint etching', 'colograph', 'mezzotint', 'aquatint']
@@ -143,7 +160,7 @@ class Medium
 
     class Relief < SelectField
       def self.admin_attrs
-        {medium: 'Mixed Media'}
+        {medium: 'Mixed Media', paper_only: 'paper_only'}
       end
 
       class StandardRelief < Relief
@@ -166,15 +183,21 @@ class Medium
         end
       end
 
-      class Monotype < MixedMedia
-        def self.targets
-          ['monotype', 'monoprint']
+      class PaperOnly < MixedMedia
+        def self.admin_attrs
+          {paper_only: 'paper_only'}
         end
-      end
 
-      class Seriolithograph < MixedMedia
-        def self.targets
-          ['seriolithograph']
+        class Monotype < PaperOnly
+          def self.targets
+            ['monotype', 'monoprint']
+          end
+        end
+
+        class Seriolithograph < PaperOnly
+          def self.targets
+            ['seriolithograph']
+          end
         end
       end
     end
@@ -187,6 +210,10 @@ class Medium
       end
 
       class Poster < PrintMedia
+        def self.admin_attrs
+          {paper_only: 'paper_only'}
+        end
+
         def self.targets
           ['poster', 'vintage poster', 'concert poster']
         end
@@ -194,6 +221,10 @@ class Medium
     end
 
     class Photograph < SelectField
+      def self.admin_attrs
+        {paper_only: 'paper_only'}
+      end
+
       class StandardPhotograph < Photograph
         def self.targets
           ['photograph']
@@ -241,6 +272,10 @@ class Medium
       end
 
       class ProductionDrawing < ProductionArt
+        def self.admin_attrs
+          {paper_only: 'paper_only'}
+        end
+
         def self.targets
           ['production drawing', 'production drawing set']
         end

@@ -11,7 +11,7 @@ class Detail
     class TextBeforeCOA < RadioButton
       class Everhart < TextBeforeCOA
         def self.name_values
-          {item_name: "This is one of the final Everhart editions to be created on a rare, antique Marinoni Voirin lithograph press that dates back to the 1800's."}
+          {body: "This is one of the final Everhart editions to be created on a rare, antique Marinoni Voirin lithograph press that dates back to the 1800's."}
         end
 
         def self.targets
@@ -20,7 +20,7 @@ class Detail
 
       class SingleExposure < TextBeforeCOA
         def self.name_values
-          {item_name: "This piece was created using a single-exposure over time in which the artist walks into the shot creating figures on film; no photoshop or digital manipulation is involved."}
+          {body: "This piece was created using a single-exposure over time in which the artist walks into the shot creating figures on film; no photoshop or digital manipulation is involved."}
         end
 
         def self.targets

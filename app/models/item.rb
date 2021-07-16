@@ -222,31 +222,6 @@ class Item < ApplicationRecord
 
 end
 
-# def format_vowel(word, exception_set=[])
-#   %w[a e i o u].include?(word.first.downcase) && exception_set.exclude?(word) ? 'an' : 'a'
-# end
-
-# def cap_words(words, set=[])
-#   return set << words if words && words[0] == "\""
-#   format_word_set(words.split(' '), set)
-# end
-
-# def format_word_set(word_set, set)
-#   word_set.each do |word|
-#     set << cap_case(word)
-#   end
-#   set.join(' ')
-# end
-
-# def cap_case(word)
-#   if ('A'..'Z').include?(word[0]) || %w[a an and from with].include?(word)
-#     word
-#   else
-#     word.capitalize
-#   end
-# end
-##############################################################################
-
 # def grouped_form_fields
 #   form_fields.group_by{|h| h[:kind_scope]}
 # end
