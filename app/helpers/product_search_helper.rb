@@ -1,7 +1,11 @@
 module ProductSearchHelper
 
+  # def search_input_options(name, opts)
+  #   opts.map{|opt| [PRD.format_name(edit_name(PRD.class_to_cap(opt))), opt]}.prepend(["-- select #{split_join(name, '_')}--", ""])
+  # end
+
   def search_input_options(name, opts)
-    opts.map{|opt| [PRD.format_name(edit_name(PRD.class_to_cap(opt))), opt]}.prepend(["-- select #{split_join(name, '_')}--", ""])
+    opts.map{|opt| [opt, opt]}.prepend(["-- select #{split_join(name, '_')}--", ""])
   end
 
   def edit_name(name)

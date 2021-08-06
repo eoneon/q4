@@ -127,7 +127,7 @@ class Medium
         end
       end
     end
-    
+
     class Lithograph < SelectField
       def self.admin_attrs
         {paper_only: 'paper_only'}

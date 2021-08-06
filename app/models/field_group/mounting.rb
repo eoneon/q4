@@ -19,7 +19,7 @@ class Mounting
         elsif f_name.split(' ').include?('box');
           "This piece comes in a #{f_name}."
         else
-          "This piece comes #{f_name+'ed'}."
+          "This piece comes #{f_name+'d'}."
         end
       end
 

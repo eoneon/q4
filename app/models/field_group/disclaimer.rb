@@ -13,7 +13,7 @@ class Disclaimer
 
   class SelectField < Disclaimer
     def self.target_tags(f_name)
-      {tagline: ('(Disclaimer)' if f_name == 'danger'), body: 'Please note:'}
+      {tagline: ('(Disclaimer)' if f_name == 'danger'), body: f_name}
     end
 
     class DisclaimerSeverity < SelectField

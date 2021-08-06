@@ -40,7 +40,7 @@ class Authentication
 
       def self.body(f_name)
         case
-          when %w[plate authorized].any? {|i| f_name.split(' ').include?(i)}; "bearing the #{f_name} of the artist"
+          when %w[plate authorized].any? {|i| f_name.split(' ').include?(i)}; "bearing the #{f_name} signature of the artist"
           when f_name == 'unsigned'; "This piece is unsigned."
           else f_name;
         end
@@ -48,7 +48,7 @@ class Authentication
 
       class StandardSignature < Signature
         def self.targets
-          ['hand signed', 'hand signed inverso', 'plate signed', 'authorized signature', 'estate signed', 'unsigned']
+          ['hand signed', 'hand signed inverso', 'plate', 'authorized', 'estate signed', 'estate signed inverso', 'unsigned']
         end
       end
 
@@ -105,7 +105,7 @@ class Authentication
         "This piece bears the official #{f_name} seal"
       end
 
-      class AnimationSeal < Seal
+      class AnimatorSeal < Seal
         def self.targets
           ['Warner Bros.', 'Looney Tunes']
         end
@@ -118,13 +118,14 @@ class Authentication
       end
     end
 
+    #note: another field designating: includes/bears/bears inverso/
     class Verification < SelectField
       def self.target_tags(f_name)
         {body: body(f_name)}
       end
 
       def self.body(f_name)
-        "This piece includes #{f_name}"
+        "This piece is authenticated by a unique #{f_name}"
       end
 
       class VerificationType < Verification
@@ -163,7 +164,7 @@ class Authentication
     class Seal < FieldSet
       class AnimationSeal < Seal
         def self.targets
-          [%W[SelectField Seal AnimationSeal], %W[SelectField Seal SportsSeal]]
+          [%W[SelectField Seal AnimatorSeal], %W[SelectField Seal SportsSeal]]
         end
       end
     end
@@ -207,13 +208,13 @@ class Authentication
 
       class StandardSericelAuthentication < GroupA
         def self.targets
-          [%W[SelectField Signature StandardSignature], %W[FieldSet Seal AnimationSeal], %W[SelectField Certificate StandardCertificate]]
+          [%W[SelectField Signature StandardSignature], %W[SelectField Seal AnimatorSeal], %W[SelectField Certificate StandardCertificate]]
         end
       end
 
       class SericelAuthentication < GroupA
         def self.targets
-          [%W[FieldSet Dated StandardDated], %W[SelectField Signature StandardSignature], %W[SelectField Seal AnimationSeal], %W[SelectField Certificate StandardCertificate]]
+          [%W[FieldSet Dated StandardDated], %W[SelectField Signature StandardSignature], %W[FieldSet Seal AnimationSeal], %W[SelectField Certificate StandardCertificate]]
         end
       end
     end

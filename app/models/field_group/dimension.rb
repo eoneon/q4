@@ -24,6 +24,10 @@ class Dimension
       end
 
       class WidthHeightDepth < FlatArt
+        def self.name_values
+          {material_dimension: 'n/a'}
+        end
+        
         def self.targets
           build_target_group(%W[Width Height Depth], 'NumberField', 'Dimension')
         end
@@ -41,6 +45,10 @@ class Dimension
     end
 
     class FlatMounting < FieldSet
+      def self.name_values
+        {material_dimension: 'n/a'}
+      end
+
       class MountingWidthHeight < FlatMounting
         def self.targets
           build_target_group(%W[MountingWidth MountingHeight], 'NumberField', 'Dimension')
@@ -49,6 +57,10 @@ class Dimension
     end
 
     class DepthArt < FieldSet
+      def self.name_values
+        {material_dimension: 'n/a'}
+      end
+
       class WidthHeightDepthWeight < DepthArt
         def self.targets
           build_target_group(%W[Width Height Depth Weight], 'NumberField', 'Dimension')

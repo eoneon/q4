@@ -14,7 +14,7 @@ class Material
 
   class SelectField < Material
     def self.target_tags(f_name)
-      {tagline: "on #{tagline(f_name)}", body: "on #{body(f_name)}"}
+      {tagline: "on #{tagline(f_name)}", body: "on #{body(f_name)}", material_mounting: ('This piece comes gallery wrapped' if f_name.index('gallery'))}
     end
 
     def self.tagline(f_name)

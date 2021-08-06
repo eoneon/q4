@@ -6,7 +6,7 @@ class Item < ApplicationRecord
   include ItemProduct
   include Hashable
   include TypeCheck
-  include ItemDetail
+  include Description
 
   include ExportAttrs
   include SkuRange

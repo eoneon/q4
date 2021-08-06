@@ -19,11 +19,71 @@ class Product < ApplicationRecord
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
   # GROUPING METHODS: CRUD/VIEW ################################################
-  def input_set(g_hsh, i_hsh, a=[])
-    f_args(g_hsh).each_with_object(a) do |f_hsh, a|
-      f = i_hsh.dig(f_hsh[:k], f_hsh[:t_type], f_hsh[:f_name])
-      a.append(f_hsh.merge!({:selected=> format_selected(f,:id), :value=>format_selected(f,:field_name)}))
-      input_set(f.g_hsh, i_hsh, a) if f && !f.is_a?(String) && field_set?(f.type)
+  def d_hsh_and_row_params(g_hsh, i_hsh, f_grp)
+    d_hsh_and_row_loop(g_hsh, i_hsh, f_grp)
+    f_grp.merge!({rows: assign_row(f_grp[:rows].group_by{|h| h[:k]})})
+  end
+
+  def d_hsh_and_row_loop(g_hsh, i_hsh, f_grp)
+    f_args(g_hsh).each_with_object(f_grp) do |f_hsh, f_grp|
+      k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
+      if radio_button?(t)
+        d_hsh_loop(:d_hsh, k, f_name, f, f_grp, 'tagline', 'body')
+      else
+        selected = i_hsh.dig(k, t_type, f_name)
+        f_grp[:rows].append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
+        tags_and_rows(k, f_name, selected, i_hsh, f_grp) if selected
+      end
+    end
+  end
+
+  def d_hsh_loop(d_key, k, f_name, f, f_grp, *tag_keys)
+    tag_keys.each_with_object(f_grp) do |tag, f_grp|
+      Item.case_merge(f_grp[d_key], f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag) #puts "selected b: #{f}, f.f_name: #{f.field_name}, f_name: #{f_name}"
+    end
+  end
+
+  def tags_and_rows(k, f_name, selected, i_hsh, f_grp)
+    if selected.is_a?(String)
+      Item.case_merge(f_grp[:d_hsh], selected, k, f_name)
+    else
+      d_hsh_loop(:d_hsh, k, format_fname(k, selected, f_name), selected, f_grp, 'tagline', 'body', 'material_dimension', 'mounting_dimension', 'material_mounting')
+      d_hsh_and_row_loop(selected.g_hsh, i_hsh, f_grp) if field_set?(selected.type)
+    end
+  end
+
+  # def input_build(g_hsh, i_hsh, f_grp)
+  #   f_args(g_hsh).each_with_object(f_grp) do |f_hsh, f_grp|
+  #     k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
+  #     if radio_button?(t)
+  #       description_tags(:d_hsh, k, f_name, f, f_grp, 'tagline', 'body')
+  #     else
+  #       selected = i_hsh.dig(k, t_type, f_name)
+  #       f_grp[:rows].append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
+  #       tags_and_rows(k, f_name, selected, i_hsh, f_grp) if selected
+  #     end
+  #   end
+  # end
+
+  # def tags_and_rows(k, f_name, selected, i_hsh, f_grp)
+  #   if selected.is_a?(String)
+  #     Item.case_merge(f_grp[:d_hsh], selected, k, f_name)
+  #   else
+  #     description_tags(:d_hsh, k, format_fname(k, selected, f_name), selected, f_grp, 'tagline', 'body', 'material_dimension', 'mounting_dimension')
+  #     input_build(selected.g_hsh, i_hsh, f_grp) if field_set?(selected.type)
+  #   end
+  # end
+
+  # def description_tags(d_key, k, f_name, f, f_grp, *tag_keys)
+  #   tag_keys.each_with_object(f_grp) do |tag, f_grp|
+  #     Item.case_merge(f_grp[d_key], f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag) #puts "selected b: #{f}, f.f_name: #{f.field_name}, f_name: #{f_name}"
+  #   end
+  # end
+
+  def assign_row(f_grp)
+    kinds.each_with_object([]) do |form_row, rows|
+      row = form_row.select{|col| f_grp.has_key?(col)}
+      rows.append(row.map!{|col| f_grp[col]}.flatten!) if row.any?
     end
   end
 
@@ -31,6 +91,15 @@ class Product < ApplicationRecord
     return selected if selected.nil? || selected.is_a?(String)
     selected.public_send(attr)
   end
+
+  def format_fname(k, selected, f_name)
+    k == 'dimension' && field_set?(selected.type) ? selected.field_name : f_name
+  end
+
+  def kinds
+    Medium.class_group('FieldGroup').map{|c| c.call_if(:input_group)}.compact.sort_by(&:first).map(&:last)
+  end
+
   ##############################################################################
   ##############################################################################
 
@@ -66,7 +135,9 @@ class Product < ApplicationRecord
 
 end
 
-
+# THE END ######################################################################
+################################################################################
+# DRAFT/REPLACED METHODS #######################################################
 
 #a = lambda {puts "dog"}#{Medium.class_group('FieldGroup').map{|c| c.call_if(:input_group)}.compact.sort_by(&:first).map(&:last)}
 # def my_lambda

@@ -4,7 +4,7 @@ module FieldSeed
   extend ActiveSupport::Concern
 
   class_methods do
-
+    # Material.build_and_store(:targets, {})
     # BUILD METHODS ############################################################
     ############################################################################
     def build_and_store(m, store)
@@ -30,6 +30,16 @@ module FieldSeed
     def build_targets(c, targets, k, target_tags)
       !target_tags ? targets : targets.each_with_object([]){|f_name,a| a.append([f_name, k, c.asc_select_merge(:target_tags, f_name).reject{|k,v| v.blank?}].compact)}
     end
+
+    # def build_targets(c, targets, k, target_tags)
+    #   return targets if !target_tags
+    #   # puts "targets!!!!! #{targets}"
+    #   # puts "c!!!!! #{c}"
+    #   targets.each_with_object([]) do |f_name,a|
+    #     #puts "f_name!!!!! #{f_name}"
+    #     a.append([f_name, k, c.asc_select_merge(:target_tags, f_name).reject{|k,v| v.blank?}].compact)
+    #   end
+    # end
 
     # CRUD METHODS #############################################################
     def add_field_and_merge(f_class, kind, type, f_name, tags, targets, store)

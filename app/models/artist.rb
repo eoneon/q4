@@ -5,60 +5,41 @@ class Artist < ApplicationRecord
     [%w[first_name last_name], %w[title_tag], %w[yob yod]]
   end
 
-  def life_span
-    v = %w[yob yod].map{|k| tags.try(:[], k)}.reject{|i| i.blank?}.join('-')
-    "(#{v})" if v.present?
-  end
-
-  def yod
-    v = tags.try(:[], 'yod')
-    "(d.#{v})" if v.present?
-  end
-
   def formal_name
     [artist_name, life_span].compact.join(' ')
   end
 
   def tagline
-    name = formal_name
-    title_tag ? "#{name} (#{title_tag})," : name
+    title_tag ? "#{formal_name} #{title_tag}," : formal_name
   end
 
-  def search_line
-    [tags.try(:[], 'last_name'), yod].compact.join(' ')
+  def life_span(tag_keys=%w[yob yod])
+    "(#{tag_keys.map{|k| tags[k]}.join('-')})" if tags &&  tag_keys.all?{|k| !tags.dig(k).blank?}
   end
 
-  def title_tag
-    tags.try(:[], 'title_tag')
+  def title_tag(tag_key='title_tag')
+    "(#{tags[tag_key]})" if tags && !tags[tag_key].blank?
   end
 
   def artist_params
-    {'tagline'=> tagline, 'search_line'=> search_line, 'body'=> formal_name, 'export_tag'=> artist_name}
+    {'d_hsh'=>{'tagline'=> tagline, 'body'=> formal_name}, 'attrs'=> {'artist'=> artist_name, 'artist_id'=> artist_id}}
   end
 
 end
 
-# def artist_tag
-#   [artist_name, life_span].compact.join(' ')
-# end
-#
-# def artist_data
-#   {'artist_tag'=> artist_tag, 'yod'=> yod}.merge!(%w[last_name tagline body].map{|k| [k, tags.try(:[], k)]}.to_h)
+# def title_tag
+#   tags.try(:[], 'title_tag')
 # end
 
-# def export_headers
-#   %w[tagline search_line body export_tag]
+# def yod
+#   v = tags.try(:[], 'yod')
+#   "(d.#{v})" if v.present?
 # end
 
-# def body_tag
-#   tags.try(:[], 'body_tag')
+# def search_line
+#   [tags.try(:[], 'last_name'), yod].compact.join(' ')
 # end
 
-# def body
-#   name = [artist_name, life_span].compact.join(' ')
-#   body_tag ? "#{name}, #{body_tag}" : name
-# end
-
-# def self.product_items(artist_id)
-#   Item.joins(:item_groups).where(item_groups: {target_type: 'Artist', target_id: artist_id})
+# def artist_params
+#   {'tagline'=> tagline, 'search_line'=> search_line, 'body'=> formal_name, 'export_tag'=> artist_name}
 # end

@@ -3,6 +3,28 @@ require 'active_support/concern'
 module Hashable
   extend ActiveSupport::Concern
 
+  def trans_args(arg_list)
+    arg_list.each_with_object({a:[],b:[]}) {|i,args| arg_list.index(i).even? ? args[:a].append(i) : args[:b].append(i)}.values.transpose
+  end
+
+  # update sorted tag_keys  ####################################################
+  def remove_keys(keys, *reject_set)
+    reject_set.each_with_object(keys){|k, keys| remove_key(keys, k)}
+  end
+
+  def remove_key(keys, k)
+    keys.slice!(keys.index(k))
+  end
+
+  def reorder_keys(keys:, k:, ref: nil, i: 0)
+    remove_key(keys, k)
+    keys.insert(reorder_idx(i, ref, keys), k)
+  end
+
+  def reorder_idx(i, ref, keys)
+    ref.nil? ? i : keys.index(ref)+i
+  end
+
   class_methods do
 
     def case_merge(h, v, *dig_keys)
@@ -39,7 +61,7 @@ module Hashable
     #replaces param_set ########################################################
     def build_params(params, *args)
       hsh = dig_keys_with_end_val(h: params)
-      map_args(hsh,*args) 
+      map_args(hsh,*args)
     end
 
     #loop method for nested hshs ###############################################
@@ -59,6 +81,26 @@ module Hashable
     def map_args(set, *args)
       args = args.none? ? ('a'..'z').to_a.map(&:to_sym)[0...set[0].count] : args[0...set[0].count]
       set.map{|vals| [args,vals].transpose.to_h}
+    end
+
+    #hash filter methods #######################################################
+    def filter_hsh(h, key_set, reject_set=[])
+      if h = filter_hsh_by_keys(h, key_set)
+        h = filter_hsh_vals(h, reject_set)
+        h if hsh_keys_exist?(h, key_set)
+      end
+    end
+
+    def filter_hsh_by_keys(h, valid_keys)
+      h.select{|k,v| key_set.include?(k)} if hsh_keys_exist?(h, key_set)
+    end
+
+    def hsh_keys_exist?(h, key_set)
+      h && key_set.all?{|k| h.keys.include?(k)}
+    end
+
+    def filter_hsh_vals(h, invalid_vals)
+      h.select{|k,v| invalid_vals.exclude?(v)} if h
     end
 
     #array methods #############################################################

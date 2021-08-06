@@ -20,13 +20,14 @@ class LimitedEdition
 
       def self.editions(edition_type)
         set = [nil, 'AP', 'EA', 'CP', 'GP', 'PP', 'IP', 'HC', 'TC'].each_with_object([]) do |edition, set|
-          next if edition_type == 'edition' && edition.nil?
+          puts "edition_type: #{edition_type}"
+          next if edition_type == 'Edition' && edition.nil?
           set.append(build_edition(edition, edition_type).join(' '))
         end
       end
 
       def self.build_edition(edition, edition_type)
-        edition_type == 'edition' ? ['from', indefinite_article(edition), edition, edition_type] : [edition, edition_type].compact
+        edition_type == 'Edition' ? ['from', indefinite_article(edition), edition, edition_type] : [edition, edition_type].compact
       end
 
       def self.target_tags(f_name)

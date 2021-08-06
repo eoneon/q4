@@ -52,11 +52,11 @@ module ProductSeed
     def build_product_name(p_fields, product_name, tag='product_name')
       p_fields = p_fields.select{|f| f.tags&.has_key?(tag)}
       p_fields = p_fields.reject{|f| f.kind == 'Material'} if p_fields.detect{|f| f.tags.has_key?('paper_only')}
-      p_fields.map{|f| f.tags[tag]}.prepend(product_name).compact.join(' ') 
+      p_fields.map{|f| f.tags[tag]}.prepend(product_name).compact.join(' ')
     end
 
-    def build_product_tags(p, tag_keys, tags={})
-      tag_keys.each_with_object(tags) do |tag_key, tags|
+    def build_product_tags(p, tag_keys)
+      tag_keys.each_with_object({'product_type'=> const(0)}) do |tag_key, tags|
         p.map{|f| tags.merge!({tag_key.to_s => f.tags[tag_key.to_s]}) if f.tags&.has_key?(tag_key.to_s)}
       end
     end

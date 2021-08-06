@@ -8,6 +8,10 @@ class Category
     {kind: 0, type: 1, subkind: 2, f_name: -1}
   end
 
+  def self.input_group
+    [0, %w[category]]
+  end
+
   class RadioButton < Category
     class Original < RadioButton #2
       def self.admin_attrs
@@ -75,6 +79,20 @@ class Category
 
     end
   end
+  
+  class SelectField < Category
+    class Edition < SelectField
+      class EditionType < Edition
+        def self.target_tags(f_name)
+          {tagline: str_edit(str: f_name, swap: ['SOLD OUT', 'sold out']), body: f_name}
+        end
+
+        def self.targets
+          ['limited edition', 'sold out limited edition', 'rare limited edition']
+        end
+      end
+    end
+  end
 
   class FieldSet < Category
     class Original < FieldSet
@@ -114,7 +132,7 @@ class Category
       end
 
       def self.targets
-        [%W[SelectMenu Numbering NumberingType]]
+        [%W[SelectField Category EditionType], %W[SelectMenu Numbering NumberingType]]
       end
     end
 
@@ -128,7 +146,7 @@ class Category
       end
 
       def self.targets
-        [%W[SelectMenu Numbering NumberingType]]
+        [%W[SelectField Category EditionType], %W[SelectMenu Numbering NumberingType]]
       end
     end
 
