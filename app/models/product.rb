@@ -39,6 +39,7 @@ class Product < ApplicationRecord
 
   def d_hsh_loop(d_key, k, f_name, f, f_grp, *tag_keys)
     tag_keys.each_with_object(f_grp) do |tag, f_grp|
+      puts "f_grp[d_key]: #{f_grp[d_key]}" if k == 'dimension'
       Item.case_merge(f_grp[d_key], f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag) #puts "selected b: #{f}, f.f_name: #{f.field_name}, f_name: #{f_name}"
     end
   end
@@ -51,34 +52,6 @@ class Product < ApplicationRecord
       d_hsh_and_row_loop(selected.g_hsh, i_hsh, f_grp) if field_set?(selected.type)
     end
   end
-
-  # def input_build(g_hsh, i_hsh, f_grp)
-  #   f_args(g_hsh).each_with_object(f_grp) do |f_hsh, f_grp|
-  #     k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
-  #     if radio_button?(t)
-  #       description_tags(:d_hsh, k, f_name, f, f_grp, 'tagline', 'body')
-  #     else
-  #       selected = i_hsh.dig(k, t_type, f_name)
-  #       f_grp[:rows].append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
-  #       tags_and_rows(k, f_name, selected, i_hsh, f_grp) if selected
-  #     end
-  #   end
-  # end
-
-  # def tags_and_rows(k, f_name, selected, i_hsh, f_grp)
-  #   if selected.is_a?(String)
-  #     Item.case_merge(f_grp[:d_hsh], selected, k, f_name)
-  #   else
-  #     description_tags(:d_hsh, k, format_fname(k, selected, f_name), selected, f_grp, 'tagline', 'body', 'material_dimension', 'mounting_dimension')
-  #     input_build(selected.g_hsh, i_hsh, f_grp) if field_set?(selected.type)
-  #   end
-  # end
-
-  # def description_tags(d_key, k, f_name, f, f_grp, *tag_keys)
-  #   tag_keys.each_with_object(f_grp) do |tag, f_grp|
-  #     Item.case_merge(f_grp[d_key], f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag) #puts "selected b: #{f}, f.f_name: #{f.field_name}, f_name: #{f_name}"
-  #   end
-  # end
 
   def assign_row(f_grp)
     kinds.each_with_object([]) do |form_row, rows|

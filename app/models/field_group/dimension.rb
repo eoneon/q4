@@ -27,7 +27,7 @@ class Dimension
         def self.name_values
           {material_dimension: 'n/a'}
         end
-        
+
         def self.targets
           build_target_group(%W[Width Height Depth], 'NumberField', 'Dimension')
         end
@@ -91,6 +91,12 @@ class Dimension
       class FlatDimension < FlatArt
         def self.targets
           build_target_group(%W[WidthHeight Diameter], 'FieldSet', 'Dimension')
+        end
+      end
+
+      class CanvasDimension < FlatArt
+        def self.targets
+          [%W[FieldSet Dimension WidthHeight]]
         end
       end
     end

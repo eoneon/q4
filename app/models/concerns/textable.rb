@@ -9,10 +9,6 @@ module Textable
       swap_str(str, swap).split(' ').map{|substr| cap_case(substr,skip,cntxt)}.join(' ')
     end
 
-    # def swap_str(str, swap_sets)
-    #   strip_space(trans_args(swap_sets).each_with_object(str) {|replace_this_with_that,str| str.sub(*replace_this_with_that)})
-    # end
-
     def swap_str(str, swap_sets)
       strip_space(trans_args(swap_sets).inject(str) {|str, replace_this_with_that| str.sub(*replace_this_with_that)})
     end

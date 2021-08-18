@@ -111,14 +111,20 @@ class Material
 
     class Canvas < FieldSet
       class StandardCanvas < Canvas
+        # def self.targets
+        #   [%W[SelectField Material StandardCanvas], %W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
+        # end
         def self.targets
-          [%W[SelectField Material StandardCanvas], %W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
+          [%W[SelectField Material StandardCanvas], %W[SelectMenu Dimension CanvasDimension], %W[SelectMenu Mounting CanvasMounting]]
         end
       end
 
       class WrappedCanvas < Canvas
+        # def self.targets
+        #   [%W[SelectField Material WrappedCanvas], %W[FieldSet Dimension WidthHeight]]
+        # end
         def self.targets
-          [%W[SelectField Material WrappedCanvas], %W[FieldSet Dimension WidthHeight]]
+          [%W[SelectField Material WrappedCanvas], %W[SelectMenu Dimension CanvasDimension]]
         end
       end
     end

@@ -8,8 +8,14 @@ module ItemProduct
     return f_grp if !product
     p_hsh_params(f_grp, product.tags.slice('product_type'))
     f_grp = product.d_hsh_and_row_params(grouped_hsh(enum: product.fieldables), input_params, f_grp)
-    d_hsh_params(f_grp)
-    attr_params(f_grp)
+    related_params(f_grp[:d_hsh], f_grp[:store], f_grp[:attrs])
+    f_grp
+    #d_hsh_params(f_grp)
+    # attr_params(f_grp)
+  end
+
+  def p_hsh_params(f_grp, product_type)
+    f_grp[:p_hsh].merge!({'product_category'=>product_category(product_type), 'product_type'=> product_type})
   end
 
   def input_params
@@ -21,14 +27,118 @@ module ItemProduct
     end
   end
 
-  def p_hsh_params(f_grp, product_type)
-    f_grp[:p_hsh].merge!({'product_category'=>product_category(product_type), 'product_type'=> product_type})
-  end
-
   def d_hsh_params(f_grp)
-    d_hsh = d_hsh_loop(f_grp[:d_hsh], f_grp[:store])
+    store = d_hsh_loop(f_grp[:d_hsh], f_grp[:store])
     #i_group[:attrs]
   end
+
+  ###############################################################
+  #material, mounting, dimension
+  ###############################################################
+
+  def related_params(d_hsh, store, attrs)
+    merge_related_params('material', 'mounting', 'material_mounting', 'body', d_hsh, store)
+    merge_related_params('mounting', 'dimension', 'mounting_dimension', 'mounting_dimension', d_hsh, store)
+    dimension_params('dimension', 'material_dimension', 'mounting_dimension', d_hsh, store, attrs)
+  end
+
+  def merge_related_params(k_key, k_key2, sub_key, end_key, d_hsh, store)
+    if k_hsh = d_hsh[k_key]
+      sub_hsh = k_hsh.transform_values!{|v_hsh| v_hsh.values[0]}.slice!(*tb_keys)
+      store[k_key] = k_hsh
+      Item.case_merge(d_hsh, sub_hsh[sub_key], k_key2, sub_key, end_key) if sub_hsh[sub_key]
+      d_hsh.delete(k_key)
+    end
+  end
+
+  def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, hsh={})
+    if k_hsh = d_hsh[k_key]
+      sub_hsh = k_hsh.slice!(sub_key)
+      dim_keys, dim_tag = k_hsh[sub_key].keys[0].underscore.split('_'), k_hsh[sub_key].values.reject{|v| v=='n/a'}[0]
+
+      material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
+      mounting_dimension_params(sub_hsh, sub_key2, attrs, hsh)
+
+      body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
+      tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
+    end
+  end
+
+  # material_dimension_params ##################################################
+  def material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
+    if vals_exist?(sub_hsh, dim_keys)
+      dim_hsh = sub_hsh.slice(*dim_keys)
+      format_material_dimensions(dim_hsh.values, dim_hsh.values[0..1], dim_keys[0], dim_tag, attrs, hsh, sub_key)
+    else
+      attrs.merge!(attrs_dimension_params([nil]))
+    end
+    dim_keys.map{|k| sub_hsh.delete(k)}
+  end
+
+  def format_material_dimensions(dims, dim_set, dim_type, dim_tag, attrs, h, sub_key)
+    attrs.merge!(attrs_dimension_params(dim_set))
+    h.merge!({sub_key=>material_dimension(dims, dim_set, dim_type, dim_tag)})
+  end
+
+  def material_dimension(dims, dim_set, dim_type, dim_tag)
+    {'measurements'=> measurements(dims), 'item_size'=> item_size(dim_set, dim_type), 'tag'=> dim_tag}
+  end
+
+  # mounting_dimension_params ##################################################
+  def mounting_dimension_params(sub_hsh, sub_key, attrs, hsh)
+    if sub_hsh.has_key?(sub_key)
+      dim_hsh = sub_hsh.slice!(sub_key) #dim_tag = sub_hsh.values[0]
+      dim_tag, framed = sub_hsh[sub_key].values[0], (sub_hsh.values[0]=='(frame)')
+      format_mounting_dimensions(dim_hsh, sub_key, dim_tag, framed, attrs, hsh)
+    else
+      attrs.merge!(attrs_dimension_params([nil], keys: %w[frame_width frame_height]))
+    end
+  end
+
+  def format_mounting_dimensions(dim_hsh, sub_key, dim_tag, framed, attrs, h)
+    if vals_exist?(dim_hsh, dim_hsh.keys) && dim_tag
+      attr_dims = framed ? dim_hsh.values[0..1] : [nil]
+      attrs.merge!(attrs_dimension_params(attr_dims, keys: %w[frame_width frame_height]))
+      h.merge!({sub_key=> mounting_dimension(dim_hsh.values, dim_hsh.values[0..1], dim_tag)})
+    end
+  end
+
+  def mounting_dimension(dims, dim_set, dim_tag)
+    {'measurements'=> measurements(dims), 'item_size'=> item_size(dim_set, 'mounting'), 'tag'=> dim_tag}
+  end
+
+  #shared methods ##############################################################
+  def measurements(d_names)
+    d_names.map{|i| i+"\""}.join(' x ')
+  end
+
+  def item_size(dims, dim_name=nil)
+    dims = dims.map(&:to_i)
+    dim_name == 'diameter' ? dims[0]**2 : dims.inject(:*)
+  end
+
+  def tagline_dimensions(hsh, k_key, sub_key, sub_key2, store)
+    key = [sub_key2, sub_key].detect{|key| hsh.has_key?(key)}
+    Item.case_merge(store, "(#{hsh.dig(key,'measurements')})", k_key, 'tagline') if hsh.dig(key, 'item_size') >= 1300
+  end
+
+  def body_dimensions(k_key, sub_key, sub_key2, hsh, store)
+    if h = hsh.dig(sub_key)
+      str = [h['measurements'], h.dig('tag')].compact.join(' ')+'.'
+      str = [hsh[sub_key2]['measurements'], hsh[sub_key2]['tag']].join(' ')+', '+str if hsh.has_key?(sub_key2)
+      Item.case_merge(store, "Measures approx. #{str}", k_key, 'body')
+    end
+  end
+
+  # attrs_dimension_params #####################################################
+  def attrs_dimension_params(dim_set, keys: ['width', 'height'])
+    [keys, [dim_set[0], dim_set[-1]]].transpose.to_h
+  end
+
+  ###############################################################
+  ###############################################################
+
+
 
   def attr_params(f_grp)
     item_attrs(f_grp)
@@ -66,26 +176,16 @@ module ItemProduct
   def description_case(k, tb_set, k_hsh, store)
     case k
       when 'numbering'; numbering_case(k, tb_set, k_hsh, store)
-      when 'dimension'; dimension_case(k_hsh, k, 'material_dimension', 'mounting_dimension', store)
-      when 'mounting'; mounting_case(k, tb_set, k_hsh, 'mounting_dimension', store)
-      when 'material'; material_case(k, tb_set, k_hsh, 'material_mounting', store)
+      #when 'dimension'; dimension_case(k_hsh, k, 'material_dimension', 'mounting_dimension', store)
+      #when 'mounting'; mounting_case(k, tb_set, k_hsh, 'mounting_dimension', store)
+      #when 'material'; material_case(k, tb_set, k_hsh, 'material_mounting', store)
       when 'dated'; dated_case(k, tb_set, k_hsh, store)
       when 'verification'; verification_case(k, tb_set, k_hsh, store)
       when 'disclaimer'; disclaimer_case(k, tb_set, k_hsh, store)
       else tb_set.map{|set| Item.case_merge(store, set[1], k, set[0])}
     end
   end
-
-  #refactor + refactor material to accomodate gallery wrapped
-  def material_case(k, tb_set, k_hsh, key, store)
-    tb_set.map{|set| Item.case_merge(store, set[1], k, set[0])}
-    Item.case_merge(store, k_hsh[key].values[0], k, key) if k_hsh[key]
-  end
-
-  def mounting_case(k, tb_set, k_hsh, key, store)
-    tb_set.map{|set| Item.case_merge(store, set[1], k, set[0])}
-    Item.case_merge(store, k_hsh[key].values[0], k, key) if k_hsh[key]
-  end
+  
   # numbering ##################################################################
   def numbering_case(k, tb_set, k_hsh, store)
     ed_val = edition_value(k_hsh)
@@ -102,37 +202,17 @@ module ItemProduct
     end
   end
 
-  # dimension ##################################################################
-  def dimension_case(k_hsh, k, key, key2, store)
-    dimension_hsh = k_hsh.slice!(key)
-    f_name, dim_tag = k_hsh[key].to_a.flatten
-    if material_hsh = valid_material_hsh?(dimension_hsh.slice!(*f_name.underscore.split('_')))
-      h = material_dimension(dim_tag, material_hsh.keys[0], material_hsh.values, key)
-      store[k] = h.merge!(mounting_dimension(dimension_hsh, key2))
-    end
+  # refactored above ###########################################################
+  def validated_slice(h, keys, test: :all?)
+    h.slice!(*keys) if valid_slice?(h, keys, test)
   end
 
-  def valid_material_hsh?(material_hsh)
-    material_hsh if material_hsh.any? && (material_hsh.keys.count >= 2) || (material_hsh.keys.count == 1 && material_hsh.keys[0] == 'diameter')
+  def valid_slice?(h, keys, check)
+    keys.public_send(check){|k| h[k].present?}
   end
 
-  def material_dimension(dim_tag, dim_type, dim_vals, key)
-    {key=> {'measurements'=> measurements(dim_vals), 'item_size'=> item_size(dim_type, dim_vals[0..1]), 'width'=> dim_vals[0..1][0], 'height'=> dim_vals[0..1][-1], 'tag'=> (dim_tag == 'n/a' ? nil : dim_tag)}}
-  end
-
-  def mounting_dimension(mounting_hsh, key2)
-    return {} unless mounting_hsh && mounting_hsh.values.count > 1
-    dim_vals = mounting_hsh.values
-    {key2=> {'measurements'=> measurements(dim_vals), 'item_size'=> item_size('mounting', dim_vals[0..1]), 'frame_width'=> dim_vals[0..1][0], 'frame_height'=> dim_vals[0..1][-1]}}
-  end
-
-  def item_size(dim_name, dims)
-    dims = dims.map(&:to_i)
-    dim_name == 'diameter' ? dims[0]**2 : dims.inject(:*)
-  end
-
-  def measurements(d_names)
-    d_names.map{|i| i+"\""}.join(' x ')
+  def vals_exist?(h, keys, check: :all?)
+    keys.public_send(check){|k| h[k].present?}
   end
 
   # dated ######################################################################
@@ -164,10 +244,7 @@ module ItemProduct
     end
   end
 
-  def oversized?(d_hsh, k='dimension', key='material_dimension', key2='mounting_dimension')
-    d_key = d_hsh.dig(k, key2, 'item_size') ? key2 : key
-    d_hsh.dig(k, d_key, 'item_size') >= 1300
-  end
+
 
   def tagline_keys
     %w[artist title mounting embellishing category edition_type medium material dimension leafing remarque numbering signature certificate disclaimer]
@@ -184,7 +261,8 @@ module ItemProduct
   end
 
   def artist_params(f_grp)
-    f_grp[:store].merge!({'artist'=> artist.artist_params['d_hsh']}) if artist
+    return unless artist
+    f_grp[:store].merge!({'artist'=> artist.artist_params['d_hsh']})
     f_grp[:attrs].merge!(artist.artist_params['attrs'])
   end
 
@@ -219,31 +297,100 @@ module ItemProduct
     end
   end
 
+  def tb_keys
+    %w[tagline body]
+  end
+
 end
 
 # THE END ######################################################################
-# def input_group(f_grp={rows:[], p_hsh:{}, d_hsh:{}, attrs:{}, store:{}})
-#   return f_grp if !product
-#   p_hsh_params(f_grp, product.tags.slice('product_type'))
-#   f_grp = product.d_hsh_and_row_params(grouped_hsh(enum: product.fieldables), input_params, f_grp)
-#   #f_grp = product.input_build(grouped_hsh(enum: product.fieldables), input_params, f_grp)
-#   #f_grp.merge!({rows: assign_row(f_grp[:rows].group_by{|h| h[:k]})})
-#   attr_params(f_grp)
-# end
-
-# def assign_row(f_grp)
-#   kinds.each_with_object([]) do |form_row, rows|
-#     row = form_row.select{|col| f_grp.has_key?(col)}
-#     rows.append(row.map!{|col| f_grp[col]}.flatten!) if row.any?
+# def mounting_dimension_tag(kind, kind2, k, k2, top_key, f_grp)
+#   if tag = f_grp.dig(top_key, kind, k, k2)
+#     Item.case_merge(f_grp, tag, top_key, kind2, k, k2)
 #   end
 # end
-################################################################################
-# DRAFT/REPLACED METHODS #######################################################
 
-# relevant lines: v_hsh.transform_values!{|v| v[0]}, h[k] = v_hsh.one? ? v_hsh.values[0] : v_hsh
-# def format_d_hsh(d_hsh)
-#   d_hsh.each_with_object({}) do |(k,v_hsh),h|
-#     v_hsh.transform_values!{|v| v[0]}
-#     h[k] = v_hsh.one? ? v_hsh.values[0] : v_hsh
+#refactor + refactor material to accomodate gallery wrapped
+# def material_case(k, tb_set, k_hsh, key, store)
+#   tb_set.map{|set| Item.case_merge(store, set[1], k, set[0])}
+#   Item.case_merge(store, k_hsh[key].values[0], 'mounting', 'body') if k_hsh[key] # 'mounting', 'body'
+# end
+#
+# def mounting_case(k, tb_set, k_hsh, key, store)
+#   tb_set.map{|set| Item.case_merge(store, set[1], k, set[0])}
+#   Item.case_merge(store, k_hsh[key].values[0], k, key) if k_hsh[key]
+# end
+
+# def oversized?(d_hsh, k='dimension', key='material_dimension', key2='mounting_dimension')
+#   d_key = d_hsh.dig(k, key2, 'item_size') ? key2 : key
+#   d_hsh.dig(k, d_key, 'item_size') >= 1300
+# end
+
+# def dimension_case(k_hsh, k, key, key2, store)
+#   hsh = k_hsh.slice!(key)
+#   puts "hsh: #{hsh}, k_hsh: #{k_hsh}"
+#   if h = material_and_mounting_dimensions(hsh, key, key2, k_hsh[key].keys[0].underscore.split('_'), k_hsh[key].values[0])
+#     store[k] = h
+#   end
+# end
+
+# def material_and_mounting_dimensions(hsh, key, key2, f_keys, dim_tag)
+#   if valid_dimensions?(hsh, f_keys)
+#     material_hsh = material_dimension(hsh, f_keys, dim_tag, key)
+#     mounting_dimension(hsh, material_hsh, key2, %w[mounting_width mounting_height])
+#   end
+# end
+#
+# def material_dimension(dimension_hsh, f_keys, dim_tag, key)
+#   dim_keys, dim_vals = f_keys.map{|f_key| [f_key, dimension_hsh[f_key]]}.transpose
+#   dim_type, dim_tag = dim_keys[0], (dim_tag == 'n/a' ? nil : dim_tag)
+#   {key=> {'measurements'=> measurements(dim_vals), 'item_size'=> item_size(dim_type, dim_vals[0..1]), 'width'=> dim_vals[0..1][0], 'height'=> dim_vals[0..1][-1], 'tag'=> dim_tag}}
+# end
+#
+# def mounting_dimension(hsh, material_hsh, key2, f_keys)
+#   return material_hsh unless valid_dimensions?(hsh, f_keys)
+#   dim_vals, dim_tag = f_keys.map{|f_key| hsh[f_key]}, (hsh[key2] == 'n/a' ? nil : hsh[key2])
+#   material_hsh.merge!({key2=> {'measurements'=> measurements(dim_vals), 'item_size'=> item_size('mounting', dim_vals[0..1]), 'frame_width'=> dim_vals[0..1][0], 'frame_height'=> dim_vals[0..1][-1], 'tag'=> dim_tag}})
+# end
+#
+# def dimension_vals(dimension_hsh, dimension_keys)
+#   dimension_keys.map{|k| dimension_keys[k]} if valid_dimensions?(dimension_hsh, dimension_keys)
+# end
+#
+# def valid_dimensions?(dimension_hsh, dimension_keys)
+#   dimension_keys.all?{|k| dimension_hsh[k].present?}
+# end
+
+# def dimension_case(k_hsh, k, key, key2, store)
+#   dimension_hsh = k_hsh.slice!(key)
+#   f_name, dim_tag = k_hsh[key].to_a.flatten
+#   material_and_mounting_dimensions(dimension_hsh, k, key, key2, f_name.underscore.split('_'), dim_tag, store)
+# end
+
+# def material_and_mounting_dimensions(dimension_hsh, k, key, key2, f_keys, dim_tag, store)
+#   if valid_dimensions?(dimension_hsh, f_keys)
+#     material_hsh = material_dimension(dimension_hsh, f_keys, dim_tag, k, key)
+#     store[k] = mounting_dimension(dimension_hsh, material_hsh, f_keys, key2)
+#   end
+# end
+
+# def mounting_dimension(dimension_hsh, material_hsh, f_keys, key2)
+#   mounting_hsh = dimension_hsh.select{|f_key| f_keys.exclude?(f_key)}
+#   return material_hsh unless mounting_hsh && mounting_hsh.values.count >= 2
+#   dim_vals = mounting_hsh.values
+#   material_hsh.merge!({key2=> {'measurements'=> measurements(dim_vals), 'item_size'=> item_size('mounting', dim_vals[0..1]), 'frame_width'=> dim_vals[0..1][0], 'frame_height'=> dim_vals[0..1][-1]}})
+# end
+
+# dimension2 #################################################################
+# mounting_dimension_tag('mounting', 'dimension', 'mounting_dimension', 'tag', d_hsh)
+# def mounting_dimension_tag(kind, kind2, k, k2, store)
+#   if tag = store.dig(kind, k, k2)
+#     Item.case_merge(store, tag, kind2, k, k2)
+#   end
+# end
+
+# def mounting_dimension_tag(kind, kind2, k, k2, top_key, f_grp)
+#   if tag = f_grp.dig(top_key, kind, k, k2)
+#     Item.case_merge(f_grp, tag, top_key, kind2, k, k2)
 #   end
 # end
