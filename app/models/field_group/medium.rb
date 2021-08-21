@@ -107,6 +107,10 @@ class Medium
     end
 
     class Serigraph < SelectField
+      def self.admin_attrs(args)
+        {medium: args[:subkind]}
+      end
+
       class StandardSerigraph < Serigraph
         def self.targets
           ['serigraph', 'original serigraph', 'silkscreen']
@@ -121,6 +125,10 @@ class Medium
     end
 
     class Giclee < SelectField
+      def self.admin_attrs(args)
+        {medium: args[:subkind]}
+      end
+
       class StandardGiclee < Giclee
         def self.targets
           ['giclee', 'textured giclee']
@@ -129,8 +137,8 @@ class Medium
     end
 
     class Lithograph < SelectField
-      def self.admin_attrs
-        {paper_only: 'paper_only'}
+      def self.admin_attrs(args)
+        {medium: args[:subkind], paper_only: 'paper_only'}
       end
 
       class StandardLithograph < Lithograph
@@ -147,8 +155,8 @@ class Medium
     end
 
     class Etching < SelectField
-      def self.admin_attrs
-        {paper_only: 'paper_only'}
+      def self.admin_attrs(args)
+        {medium: args[:subkind], paper_only: 'paper_only'}
       end
 
       class StandardEtching < Etching
@@ -171,6 +179,10 @@ class Medium
     end
 
     class MixedMedia < SelectField
+      def self.admin_attrs(args)
+        {medium: args[:subkind]}
+      end
+
       class StandardMixedMedia < MixedMedia
         def self.targets
           ['mixed media']
@@ -221,8 +233,8 @@ class Medium
     end
 
     class Photograph < SelectField
-      def self.admin_attrs
-        {paper_only: 'paper_only'}
+      def self.admin_attrs(args)
+        {medium: args[:subkind], paper_only: 'paper_only'}
       end
 
       class StandardPhotograph < Photograph

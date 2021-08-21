@@ -39,7 +39,6 @@ class Product < ApplicationRecord
 
   def d_hsh_loop(d_key, k, f_name, f, f_grp, *tag_keys)
     tag_keys.each_with_object(f_grp) do |tag, f_grp|
-      puts "f_grp[d_key]: #{f_grp[d_key]}" if k == 'dimension'
       Item.case_merge(f_grp[d_key], f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag) #puts "selected b: #{f}, f.f_name: #{f.field_name}, f_name: #{f_name}"
     end
   end

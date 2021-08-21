@@ -10,7 +10,7 @@ class Artist < ApplicationRecord
   end
 
   def tagline
-    title_tag ? "#{formal_name} #{title_tag}," : formal_name
+    title_tag ? "#{formal_name} #{title_tag}" : formal_name
   end
 
   def life_span(tag_keys=%w[yob yod])
@@ -22,7 +22,7 @@ class Artist < ApplicationRecord
   end
 
   def artist_params
-    {'d_hsh'=>{'tagline'=> tagline, 'body'=> formal_name}, 'attrs'=> {'artist'=> artist_name, 'artist_id'=> artist_id}}
+    {'d_hsh'=>{'tagline'=> "#{tagline},", 'body'=> "by #{formal_name}"}, 'attrs'=> {'artist'=> artist_name, 'artist_id'=> artist_id}}
   end
 
 end

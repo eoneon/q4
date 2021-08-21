@@ -78,8 +78,8 @@ module TypeCheck
     d_params?(h, 'tagline', 'mounting', 'Framed')
   end
 
-  def embellished?(d_hsh)
-    d_hsh['embellished']
+  def embellished?(h)
+    h['embellished']
   end
 
   def giclee?(h)
@@ -114,6 +114,10 @@ module TypeCheck
     h['edition_type']
   end
 
+  def standard_numbering?(h)
+    h['numbering'] && !from_an_edition?(h)
+  end
+
   def from_an_edition?(h)
     d_params?(h, 'tagline', 'numbering', 'from')
   end
@@ -129,6 +133,20 @@ module TypeCheck
   def danger_disclaimer(h)
     d_params?(h, 'tagline', 'disclaimer', '(Disclaimer)')
   end
+
+  ##############################################################################
+  def one_submedia?(h)
+    h['leafing'] && !h['remarque'] || !h['leafing'] && h['remarque']
+  end
+
+  def two_submedia?(h)
+    h['leafing'] && h['remarque']
+  end
+
+  def numbered_and_signed?(h)
+    standard_numbering?(h) && signed?(h)
+  end
+  ##############################################################################
 
   def d_params?(h, context, *params)
     trans_args(params).all?{|args| h.keys.include?(args[0]) && h[args[0]][context].split(' ').include?(args[1])}
