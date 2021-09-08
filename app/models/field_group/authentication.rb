@@ -42,7 +42,8 @@ class Authentication
         case
           when %w[plate authorized].any? {|i| f_name.split(' ').include?(i)}; "bearing the #{f_name} signature of the artist"
           when f_name == 'unsigned'; "This piece is unsigned."
-          else f_name;
+          when f_name.index('estate'); f_name
+          else "#{f_name} by the artist";
         end
       end
 
