@@ -2,28 +2,28 @@ require 'active_support/concern'
 
 module ItemProduct
   extend ActiveSupport::Concern
-  # i = Item.find(97)    h = i.input_group   h = Item.find(97).input_group[:store]['body']
+  # i = Item.find(97)    h = i.input_group   h = Item.find(97).input_group[:attrs]
 
   def input_group(f_grp={rows:[], context:{reorder:[], remove:[]}, d_hsh:{}, attrs:{}, store:{}})
     return f_grp if !product
     product.d_hsh_and_row_params(grouped_hsh(enum: product.fieldables), input_params, f_grp)
-
     context_and_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store], product.tags)
-
     related_params(f_grp[:d_hsh], f_grp[:store], f_grp[:attrs])
     unrelated_params(f_grp[:context], f_grp[:d_hsh], f_grp[:store])
-
-    build_tagline(f_grp[:context], f_grp[:store])
-    build_body(f_grp[:context], f_grp[:store])
-
+    f_grp[:attrs].merge!(build_description(f_grp[:context], f_grp[:store]))
     f_grp
   end
 
+  def build_description(context, store, hsh={'tagline'=>nil, 'description'=>nil})
+    return hsh unless context[:valid] #{'tagline'=>build_tagline(context, store), 'description'=>build_body(context, store)}
+    hsh['tagline'] = build_tagline(context, store)
+    hsh['description'] = build_body(context, store)
+    hsh
+  end
+
   def build_tagline(context, store)
-    if context[:valid]
-      tagline = update_tagline(context, store, valid_description_keys(store, contexts[:tagline][:keys], 'tagline'))
-      store['tagline'] = tagline_punct(context, tagline, tagline.keys)
-    end
+    tagline = update_tagline(context, store, valid_description_keys(store, contexts[:tagline][:keys], 'tagline'))
+    tagline_punct(context, tagline, tagline.keys)
   end
 
   def tagline_punct(context, tagline, keys)
@@ -34,19 +34,18 @@ module ItemProduct
   end
 
   def build_body(context, store)
-    if context[:valid]
-      keys = valid_description_keys(store, contexts[:body][:keys], 'body')
-      reorder_keys(keys: keys, k: 'numbering', ref: 'medium', i:1) if context[:proof_edition]
-      body = description_params(store, keys, 'body')
-      join_title(body, keys[keys.index('title')+1])
-      store['body'] = body_punct(context, body, body.keys.reject{|k| k = 'numbering' && !context[:proof_edition]})
-    end
+    keys = valid_description_keys(store, contexts[:body][:keys], 'body')
+    reorder_keys(keys: keys, k: 'numbering', ref: 'medium', i:1) if context[:proof_edition]
+    body = description_params(store, keys, 'body')
+    join_title(body, keys[keys.index('title')+1])
+    body_punct(context, body, body.keys)
   end
 
   def body_punct(context, body, keys)
-    k, k2 = rev_detect(contexts[:body][:media], keys), rev_detect(contexts[:body][:authentication], keys)
-    body[k2] = body[k2]+'.' if k2
-    body[k] = body[k]+(k2 ? ',' : '.')
+    k, end_key = rev_detect(contexts[:body][:media], keys), rev_detect(contexts[:body][:authentication].reject{|k| k == 'numbering' && context[:proof_edition]}, keys)
+    puts "k: #{k}, end_key: #{end_key}, keys: #{keys}"
+    body[end_key] = body[end_key]+'.' if end_key
+    body[k] = body[k]+(end_key ? ',' : '.')
     body.values.join(' ')
   end
 
@@ -111,7 +110,6 @@ module ItemProduct
       {ref: 'medium'}
     end
   end
-
 
   def flatten_context(d_hsh, key='tagline')
     d_hsh.select{|k,h| h[key]}.transform_values{|h| h[key].values[0]}
@@ -323,8 +321,7 @@ module ItemProduct
   # dated_params ###############################################################
   def dated_params(k, tb_set, k_hsh, context, store)
     return if tb_set.none? && k_hsh.none?
-    date_val = format_date(context, set[1])
-    tb_set.map{|set| Item.case_merge(store, [date_val, "(#{k_hsh.values[0]})"].join(' '), k, set[0])}
+    tb_set.map{|set| Item.case_merge(store, [set[1], format_date(context, "(#{k_hsh.values[0]})")].join(' '), k, set[0])}
   end
 
   def format_date(context, v)
@@ -436,6 +433,23 @@ end
 # def dated_params(k, tb_set, k_hsh, store)
 #   return if tb_set.none? && k_hsh.none?
 #   tb_set.map{|set| Item.case_merge(store, [set[1], "(#{k_hsh.values[0]})"].join(' '), k, set[0])}
+# end
+
+# def build_tagline(context, store)
+#   if context[:valid]
+#     tagline = update_tagline(context, store, valid_description_keys(store, contexts[:tagline][:keys], 'tagline'))
+#     store['tagline'] = tagline_punct(context, tagline, tagline.keys)
+#   end
+# end
+
+# def build_body(context, store)
+#   if context[:valid]
+#     keys = valid_description_keys(store, contexts[:body][:keys], 'body')
+#     reorder_keys(keys: keys, k: 'numbering', ref: 'medium', i:1) if context[:proof_edition]
+#     body = description_params(store, keys, 'body')
+#     join_title(body, keys[keys.index('title')+1])
+#     store['body'] = body_punct(context, body, body.keys.reject{|k| k = 'numbering' && !context[:proof_edition]})
+#   end
 # end
 
 # def validated_slice(h, keys, test: :all?)

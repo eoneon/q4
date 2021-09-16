@@ -49,7 +49,7 @@ class Authentication
 
       class StandardSignature < Signature
         def self.targets
-          ['hand signed', 'hand signed inverso', 'plate', 'authorized', 'estate signed', 'estate signed inverso', 'unsigned']
+          ['hand signed', 'hand signed inverso', 'plate signed', 'authorized', 'estate signed', 'estate signed inverso', 'unsigned']
         end
       end
 
@@ -71,7 +71,7 @@ class Authentication
 
       def self.body(f_name)
         swap_str(f_name, swap_list)
-        f_name.index('Britto Stamp') ? "This piece bears an #{f_name}." : "Includes #{f_name}."
+        f_name.index('Britto Stamp') ? "This piece bears an #{f_name}." : "#{f_name}."
       end
 
       def self.swap_list
