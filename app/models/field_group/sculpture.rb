@@ -10,7 +10,7 @@ class Sculpture
   end
 
   def self.input_group
-    [1, %w[size color sculpture_type lid]]
+    [1, %w[sculpture_type sculpture_part text_after_title]]
   end
 
   class SelectField < Sculpture
@@ -43,6 +43,10 @@ class Sculpture
     end
 
     class GartnerBlade < SelectField
+      def self.attrs
+        {kind: 3, subkind: 2, f_name: -1}
+      end
+
       class SculptureType < GartnerBlade
         def self.name_values(args)
           {medium_search: args[:f_name], product_name: str_edit(str: uncamel(args[:f_name]))}
@@ -50,7 +54,7 @@ class Sculpture
 
         class OpenBowl < SculptureType
           def self.targets
-            ['bowl', 'sphere']
+            ['bowl', 'open bowl', 'sphere']
           end
         end
 
@@ -73,21 +77,26 @@ class Sculpture
         end
       end
 
-      class Lid < GartnerBlade
-        def self.targets
-          ['marble finial lid', 'avian finial lid', 'leaf and tendril lid', 'bone and tendril lid']
+      class SculpturePart < GartnerBlade
+        # def self.attrs
+        #   {kind: 3, subkind: 2, f_name: -1}
+        # end
+        class Lid < SculpturePart
+          def self.targets
+            ['marble finial lid', 'avian finial lid', 'leaf and tendril lid', 'bone and tendril lid']
+          end
         end
-      end
 
-      class Size < GartnerBlade
-        def self.targets
-          ['large', 'medium', 'small', 'mini']
+        class Size < SculpturePart
+          def self.targets
+            ['large', 'medium', 'small', 'mini']
+          end
         end
-      end
 
-      class Color < GartnerBlade
-        def self.targets
-          ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
+        class Color < SculpturePart
+          def self.targets
+            ['allobaster', 'amethyst', 'batik series', 'black', 'black opal', 'cobalt', 'lapis', 'lime strata', 'opal', 'ruby', 'ruby strata', 'satin finish green', 'tangerine', 'tangerine strata', 'transulscent strata']
+          end
         end
       end
     end
@@ -95,6 +104,11 @@ class Sculpture
 
   class RadioButton < Sculpture
     class SculptureType < RadioButton
+      def self.name_values(args)
+        name = uncamel(args[:f_name])
+        {tagline: name}
+      end
+
       class PrimitiveBowl < SculptureType
         def self.targets
         end
@@ -187,55 +201,55 @@ class Sculpture
 
       class PrimitiveBowl < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[RadioButton SculptureType PrimitiveBowl], %W[RadioButton TextAfterTitle Primitive]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[RadioButton SculptureType PrimitiveBowl], %W[RadioButton TextAfterTitle Primitive]]
         end
       end
 
       class PrimitiveShell < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[RadioButton SculptureType PrimitiveShell], %W[RadioButton TextAfterTitle Primitive]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[RadioButton SculptureType PrimitiveShell], %W[RadioButton TextAfterTitle Primitive]]
         end
       end
 
       class IkebanaFlowerBowl < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[RadioButton SculptureType IkebanaFlowerBowl], %W[RadioButton TextAfterTitle Ikebana]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[RadioButton SculptureType IkebanaFlowerBowl], %W[RadioButton TextAfterTitle Ikebana]]
         end
       end
 
       class SaturnOilLamp < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[RadioButton SculptureType SaturnOilLamp], %W[RadioButton TextAfterTitle SaturnLamp]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[RadioButton SculptureType SaturnOilLamp], %W[RadioButton TextAfterTitle SaturnLamp]]
         end
       end
 
       class ArborSculpture < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[RadioButton SculptureType ArborSculpture], %W[RadioButton TextAfterTitle Arbor]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[RadioButton SculptureType ArborSculpture], %W[RadioButton TextAfterTitle Arbor]]
         end
       end
 
       class OpenBowl < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[SelectField SculptureType OpenBowl], %W[RadioButton TextAfterTitle OpenBowlVase]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[SelectField SculptureType OpenBowl], %W[RadioButton TextAfterTitle OpenBowlVase]]
         end
       end
 
       class OpenVase < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[SelectField SculptureType OpenVase], %W[RadioButton TextAfterTitle OpenBowlVase]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[SelectField SculptureType OpenVase], %W[RadioButton TextAfterTitle OpenBowlVase]]
         end
       end
 
       class CoveredBowl < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[SelectField SculptureType CoveredBowl], %W[SelectField SculptureType Lid], %W[RadioButton TextAfterTitle CoveredBowlVase]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[SelectField SculptureType CoveredBowl], %W[SelectField SculpturePart Lid], %W[RadioButton TextAfterTitle CoveredBowlVase]]
         end
       end
 
       class CoveredVase < SculptureType
         def self.targets
-          [%W[SelectField SculptureType Size], %W[SelectField SculptureType Color], %W[SelectField SculptureType CoveredVase], %W[SelectField SculptureType Lid], %W[RadioButton TextAfterTitle CoveredBowlVase]]
+          [%W[SelectField SculpturePart Size], %W[SelectField SculpturePart Color], %W[SelectField SculptureType CoveredVase], %W[SelectField SculpturePart Lid], %W[RadioButton TextAfterTitle CoveredBowlVase]]
         end
       end
     end

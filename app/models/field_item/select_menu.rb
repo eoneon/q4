@@ -1,6 +1,6 @@
 class SelectMenu < FieldItem
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
-
+  #validates :field_name, uniqueness: true
   # def add_and_assoc_targets(target_group)
   #   assoc_targets(add_targets(target_group))
   # end

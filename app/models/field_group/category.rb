@@ -72,6 +72,10 @@ class Category
         end
 
         class GartnerBladeGlass < HandBlownGlass
+          def self.name_values
+            {tagline: 'Hand Blown Glass Sculpture'}
+          end
+
           def self.targets
           end
         end
@@ -79,7 +83,7 @@ class Category
 
     end
   end
-  
+
   class SelectField < Category
     class Edition < SelectField
       class EditionType < Edition

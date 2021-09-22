@@ -7,6 +7,10 @@ class Detail
     {kind: 2, type: 1, f_name: -1}
   end
 
+  def self.input_group
+    [4, %w[text_before_coa]]
+  end
+
   class RadioButton < Detail
     class TextBeforeCOA < RadioButton
       class Everhart < TextBeforeCOA

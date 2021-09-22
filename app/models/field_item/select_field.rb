@@ -1,8 +1,8 @@
 class SelectField < FieldItem
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
+  #validates :field_name, uniqueness: true
 
   def add_and_assoc_targets(targets)
-    puts "targets!!!!! #{targets}"
     targets.map {|f_args| assoc_unless_included(Option.builder(*f_args))}
   end
 end
