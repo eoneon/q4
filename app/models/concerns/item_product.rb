@@ -8,12 +8,18 @@ module ItemProduct
     return f_grp if !product
     product.d_hsh_and_row_params(grouped_hsh(enum: product.fieldables), input_params, f_grp)
     related_params(f_grp[:d_hsh], f_grp[:store], f_grp[:attrs])
-    divergent_params(context, d_hsh, attrs, store, p_tags)
-    #context_and_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store], product.tags)
-    #unrelated_params(f_grp[:context], f_grp[:d_hsh], f_grp[:store])
-    #f_grp[:attrs].merge!(build_description(f_grp[:context], f_grp[:store]))
+    shared_context_and_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store], product.tags)
+    if f_grp[:context][:valid]
+      divergent_params(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store])
+    else
+      f_grp
+    end
     f_grp
   end
+
+  #context_and_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store], product.tags)
+  #unrelated_params(f_grp[:context], f_grp[:d_hsh], f_grp[:store])
+  #f_grp[:attrs].merge!(build_description(f_grp[:context], f_grp[:store]))
 
   ##############################################################################
   # related_params: material, mounting, dimension
@@ -89,7 +95,7 @@ module ItemProduct
     {'measurements'=> measurements(dims), 'item_size'=> item_size(dim_set, 'mounting'), 'tag'=> dim_tag}
   end
 
-  #shared methods ##############################################################
+  # shared methods ##############################################################
   def measurements(d_names)
     d_names.map{|i| i+"\""}.join(' x ')
   end
@@ -118,35 +124,62 @@ module ItemProduct
   end
 
   ##############################################################################
-  # divergent_params
+  # shared_context_and_attrs
   ##############################################################################
-  def divergent_params(context, d_hsh, attrs, store, p_tags)
-    shared_context(context, d_hsh, attrs, store, p_tags)
-    if context[:gartner_blade]
-      gartner_blade_params(context, d_hsh, attrs, store)
-    else context[:valid]
-      flat_params(context, d_hsh, attrs, store)
-    end
-  end
-
-  def shared_context(context, d_hsh, attrs, store, p_tags)
+  def shared_context_and_attrs(context, d_hsh, attrs, store, p_tags)
     attr_params(attrs, p_tags)
     d_hsh.keys.map{|k| context[k.to_sym] = true if contexts[:present_keys].include?(k)}
-    context[:product_type] = product_category(p_tags['product_type'].underscore.to_sym #context[:gartner_blade] = true if context[:product_type] == 'GartnerBlade' && context[:sculpture_type]
+    context[:product_type] = product_category(p_tags['product_type']).underscore.to_sym #context[:gartner_blade] = true if context[:product_type] == 'GartnerBlade' && context[:sculpture_type]
     context[:valid] = true if context[:medium] || (context[:gartner_blade] && context[:sculpture_type])
     context[:missing] = true if context[:unsigned] && !context[:disclaimer]
   end
 
+  def attr_params(attrs, p_tags)
+    Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
+    %w[sku retail qty].map{|k| attrs[k] = public_send(k)}
+  end
+
+  ##############################################################################
+  # divergent_params
+  ##############################################################################
+  def divergent_params(context, d_hsh, attrs, store)
+    if context[:gartner_blade]
+      gartner_blade_params(context, d_hsh, attrs, store)
+    else
+      flat_params(context, d_hsh, attrs, store)
+    end
+  end
+
+  # gartner_blade_params
   def gartner_blade_params(context, d_hsh, attrs, store)
+    gartner_blade_attrs(d_hsh, attrs, store, context[:unsigned])
     remove_rules(context)
-    gartner_blade_attrs(d_hsh, attrs, store)
+    unrelated_params(context, d_hsh, store)
   end
 
-  def gartner_blade_attrs(d_hsh, attrs, store)
+  def gartner_blade_attrs(d_hsh, attrs, store, unsigned)
     attrs.merge!(artist.artist_params['attrs'])
-    gartner_blade_title(d_hsh, attrs, store, gartner_blade_hsh(d_hsh))
+    gartner_blade_title(d_hsh, attrs, store, gartner_blade_hsh(d_hsh), unsigned)
   end
 
+  def gartner_blade_hsh(d_hsh)
+    %w[sculpture_type sculpture_part].each_with_object({}) do |k,h|
+      if tag_hsh = d_hsh.dig(k, 'tagline')
+        tag_hsh.count>1 ? h.merge!(tag_hsh) : h[k] = tag_hsh.values[0]
+        d_hsh.delete(k)
+      end
+    end
+  end
+
+  def gartner_blade_title(d_hsh, attrs, store, title_hsh)
+    attr_title = %w[size color sculpture_type lid].map{|k| title_hsh.dig(k)}.compact.join(' ')
+    if attr_title.present?
+      #attr_title = title_val.join(' ')
+      merge_title_params(attrs, store, "\"#{attr_title}\"", "This hand blown \"#{attr_title}\"", attr_title)
+    end
+  end
+
+  # flat_params
   def flat_params(context, d_hsh, attrs, store)
     flat_context(context, d_hsh, store)
     flat_attrs(attrs, store)
@@ -154,6 +187,7 @@ module ItemProduct
     attrs.merge!(flat_description(context, store))
   end
 
+  ## flat_context
   def flat_context(context, d_hsh, store)
     params_context(context, d_hsh, store)
     nested_params_context(context, d_hsh)
@@ -161,29 +195,7 @@ module ItemProduct
     reorder_remove(context)
   end
 
-  def flat_attrs(attrs, store)
-    artist_params(attrs, store)
-    merge_title_params(attrs, store, tagline_title, body_title, attrs_title)
-  end
-  
-  ##############################################################################
-  # context_and_attrs
-  ##############################################################################
-  # def context_and_attrs(context, d_hsh, attrs, store, p_tags)
-  #   d_hsh.keys.map{|k| context[k.to_sym] = true if contexts[:present_keys].include?(k)}
-  #   context_hsh(context, d_hsh, store, p_tags)
-  #   attrs_item_params(d_hsh, attrs, store, p_tags, context[:gartner_blade])
-  # end
-
-  ## context_hsh
-  # def context_hsh(context, d_hsh, store, p_tags)
-  #   params_context(context, d_hsh, store)
-  #   nested_params_context(context, d_hsh)
-  #   misc_context(context, p_tags)
-  #   reorder_remove(context)
-  # end
-
-  # params: related: material, mounting & dimension - unrelated: tag_vals & present_keys
+  ### params_context
   def params_context(context, d_hsh, store)
     store.each {|k,v| related_context(context,k,v['tagline'])}
     flatten_context(d_hsh).each {|k,v| unrelated_context(context,k,v, contexts[:tagline][:vals])}
@@ -200,38 +212,20 @@ module ItemProduct
   end
 
   def unrelated_context(context,k,v, tagline_vals)
-    #context[k.to_sym] = true if contexts[:present_keys].include?(k)
     if set = tagline_vals.detect{|set| v.index(set[0])}
       context[symbolize(set[-1])] = true
     end
   end
 
-  # nested: proof_edition, animator_seal & sports_seal
+  ### nested: proof_edition, animator_seal & sports_seal
   def nested_params_context(context, d_hsh)
     context[(d_hsh['numbering']['tagline'].has_key?('proof_edition') ? :proof_edition : :numbered)] = true if d_hsh['numbering']
     %w[animator_seal sports_seal].map{|k| context[k.to_sym] = true if d_hsh['seal']['body'].has_key?(k)} if d_hsh['seal']
   end
 
-  # misc: product_type, valid, missing & compound_kinds
-  # def misc_context(context, p_tags)
-  #   context[:product_type] = product_category(p_tags['product_type'])
-  #   context[:gartner_blade] = true if context[:product_type] == 'GartnerBlade' && context[:sculpture_type]
-  #   context[:valid] = true if context[:medium] || context[:gartner_blade]
-  #   context[:missing] = true if context[:unsigned] && !context[:disclaimer]
-  #   contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
-  # end
-
-  # def misc_context(context)
-  #   contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
-  # end
-
-  def compound_keys(context, keys)
-    context[keys.map(&:to_s).join('_').to_sym] = true if keys.all?{|k| context[k]}
-  end
-
-  # reorder_remove
+  ### reorder_remove
   def reorder_remove(context)
-    reorder_rules(context) unless context[:gartner_blade]
+    reorder_rules(context)
     remove_rules(context)
   end
 
@@ -261,57 +255,20 @@ module ItemProduct
     context[:remove] << 'medium' if context[:giclee] && (context[:proof_edition] || context[:numbered] && context[:embellishing] || !context[:paper])
   end
 
-  # utility
-  def flatten_context(hsh, key='tagline')
-    hsh.select{|k,h| h[key]}.transform_values{|h| h[key].values[0]}
+  ## flat_attrs
+  def flat_attrs(attrs, store)
+    artist_params(attrs, store)
+    merge_title_params(attrs, store, tagline_title, body_title, attrs_title)
   end
 
-  ## attr_params: artist, title, sku, retail, qty & :art_type, :art_category, :item_type, :item_category, :medium, :material
-  # def attrs_item_params(d_hsh, attrs, store, p_tags, gartner_blade)
-  #   artist_params(attrs, store)
-  #   Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
-  #   %w[sku retail qty].map{|k| attrs[k] = public_send(k)}
-  #   title_params(d_hsh, attrs, store, gartner_blade)
-  # end
-
-  def attr_params(attrs, p_tags)
-    Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
-    %w[sku retail qty].map{|k| attrs[k] = public_send(k)}
-  end
-
-  # artist
+  ### artist
   def artist_params(attrs, store)
     return unless artist
     store.merge!({'artist'=> artist.artist_params['d_hsh']})
     attrs.merge!(artist.artist_params['attrs'])
   end
 
-  # title
-  def title_params(d_hsh, attrs, store, gartner_blade)
-    if gartner_blade
-      gartner_blade_title(d_hsh, attrs, store, gartner_blade_hsh(d_hsh))
-    else
-      merge_title_params(attrs, store, tagline_title, body_title, attrs_title)
-    end
-  end
-
-  def gartner_blade_title(d_hsh, attrs, store, title_hsh)
-    title_val = %w[size color sculpture_type lid].map{|k| title_hsh.dig(k)}.compact
-    if title_val.any?
-      attr_title = title_val.join(' ')
-      merge_title_params(attrs, store, "\"#{attr_title}\"", "This hand blown \"#{attr_title}\"", attr_title)
-    end
-  end
-
-  def gartner_blade_hsh(d_hsh)
-    %w[sculpture_type sculpture_part].each_with_object({}) do |k,h|
-      if tag_hsh = d_hsh.dig(k, 'tagline')
-        tag_hsh.count>1 ? h.merge!(tag_hsh) : h[k] = tag_hsh.values[0]
-        d_hsh.delete(k)
-      end
-    end
-  end
-
+  ### title
   def merge_title_params(attrs, store, tagline_title, body_title, attrs_title, k='title', key='tagline', key2='body')
     store.merge!({k=> {key=> tagline_title, key2=> body_title}})
     attrs.merge!({k=> attrs_title})
@@ -329,13 +286,22 @@ module ItemProduct
     tagline_title ? tagline_title : 'Untitled'
   end
 
+  # utility
+  def compound_keys(context, keys)
+    context[keys.map(&:to_s).join('_').to_sym] = true if keys.all?{|k| context[k]}
+  end
+
+  def flatten_context(hsh, key='tagline')
+    hsh.select{|k,h| h[key]}.transform_values{|h| h[key].values[0]}
+  end
+
   ##############################################################################
   # unrelated_params
   ##############################################################################
   def unrelated_params(context, d_hsh, store)
     d_hsh.each do |k, kind_hsh|
       sub_hsh = kind_hsh.slice!(*tb_keys)
-  	flatten_params(k, kind_hsh, sub_hsh, context, store)
+  	  flatten_params(k, kind_hsh, sub_hsh, context, store)
     end
   end
 
@@ -368,7 +334,7 @@ module ItemProduct
   end
 
   def gartner_blade_text_after_title(context, v)
-    v = (context[:signed] ? "#{v}," : "#{v}."))
+    v = (context[:signed] ? "#{v}," : "#{v}.")
   end
 
   # numbering
@@ -570,6 +536,62 @@ end
 
 # THE END ######################################################################
 ##############################################################################
+##############################################################################
+# context_and_attrs
+##############################################################################
+# def context_and_attrs(context, d_hsh, attrs, store, p_tags)
+#   d_hsh.keys.map{|k| context[k.to_sym] = true if contexts[:present_keys].include?(k)}
+#   context_hsh(context, d_hsh, store, p_tags)
+#   attrs_item_params(d_hsh, attrs, store, p_tags, context[:gartner_blade])
+# end
+
+## context_hsh
+# def context_hsh(context, d_hsh, store, p_tags)
+#   params_context(context, d_hsh, store)
+#   nested_params_context(context, d_hsh)
+#   misc_context(context, p_tags)
+#   reorder_remove(context)
+# end
+
+# params: related: material, mounting & dimension - unrelated: tag_vals & present_keys
+
+
+# misc: product_type, valid, missing & compound_kinds
+# def misc_context(context, p_tags)
+#   context[:product_type] = product_category(p_tags['product_type'])
+#   context[:gartner_blade] = true if context[:product_type] == 'GartnerBlade' && context[:sculpture_type]
+#   context[:valid] = true if context[:medium] || context[:gartner_blade]
+#   context[:missing] = true if context[:unsigned] && !context[:disclaimer]
+#   contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
+# end
+
+# def misc_context(context)
+#   contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
+# end
+
+# def compound_keys(context, keys)
+#   context[keys.map(&:to_s).join('_').to_sym] = true if keys.all?{|k| context[k]}
+# end
+
+
+
+## attr_params: artist, title, sku, retail, qty & :art_type, :art_category, :item_type, :item_category, :medium, :material
+# def attrs_item_params(d_hsh, attrs, store, p_tags, gartner_blade)
+#   artist_params(attrs, store)
+#   Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
+#   %w[sku retail qty].map{|k| attrs[k] = public_send(k)}
+#   title_params(d_hsh, attrs, store, gartner_blade)
+# end
+
+# title
+# def title_params(d_hsh, attrs, store, gartner_blade)
+#   if gartner_blade
+#     gartner_blade_title(d_hsh, attrs, store, gartner_blade_hsh(d_hsh))
+#   else
+#     merge_title_params(attrs, store, tagline_title, body_title, attrs_title)
+#   end
+# end
+
 # def unrelated_params(context, d_hsh, store)
 #   d_hsh.each_with_object(store) do |(k, tb_hsh), store|
 #     k_hsh = tb_hsh.slice!(*tb_keys)
