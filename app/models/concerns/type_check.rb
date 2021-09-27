@@ -21,7 +21,7 @@ module TypeCheck
   end
 
   def default_option_kind?(k)
-    %w[sculpture_type numbering medium material signature certificate].include?(k)
+    %w[category sculpture_type numbering medium material signature certificate].include?(k)
   end
 
   # FieldItem is_a? based on :type #############################################
@@ -54,23 +54,23 @@ module TypeCheck
   end
 
   def product_category(product_type)
-    [:flat_art?, :gartner_blade?, :sculpture_art?].each do |m|
-      if p_category = public_send(m, product_type)
+    [:flat_art, :gartner_blade, :sculpture_art].each do |m|
+      if p_category = public_send(m, m, product_type)
         return p_category
       end
     end
   end
 
-  def flat_art?(product_type)
-    'FlatArt' if !gartner_blade?(product_type) && !sculpture_art?(product_type)
+  def flat_art(p_val, product_type)
+    p_val if !gartner_blade(p_val, product_type) && !sculpture_art(p_val, product_type)
   end
 
-  def gartner_blade?(product_type)
-    product_type if product_type == 'GartnerBlade'
+  def gartner_blade(p_val, product_type)
+    p_val if product_type == 'GartnerBlade'
   end
 
-  def sculpture_art?(product_type)
-    product_type if product_type == 'SculptureArt'
+  def sculpture_art(p_val, product_type)
+    p_val if product_type == 'SculptureArt'
   end
 
   # ItemProduct is_a? based on input_group[:d_hsh] #############################
@@ -154,7 +154,7 @@ module TypeCheck
 
   # check association ##########################################################
   def f_assoc(t)
-    tag_attr?(t) || option?(t) ? t : to_class(t).assoc_names[0].singularize
+    tag_attr?(t) || option?(t) || radio_button?(t) ? t : to_class(t).assoc_names[0].singularize
   end
 
   # check class ################################################################

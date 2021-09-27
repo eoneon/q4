@@ -61,7 +61,22 @@ class Category
         end
       end
 
+      class HandMadeCeramic < Sculpture
+        def self.name_values
+          name = 'Hand Made Ceramic'
+          {tagline: name, body: name.downcase}
+        end
+
+        def self.targets
+        end
+      end
+
       class HandBlownGlass < Sculpture
+        def self.name_values
+          name = 'Hand Blown Glass'
+          {tagline: name, body: name.downcase}
+        end
+
         def self.admin_attrs
           {item_type: 'Sculpture', item_category: 'Hand Blown Glass'}
         end
@@ -73,7 +88,8 @@ class Category
 
         class GartnerBladeGlass < HandBlownGlass
           def self.name_values
-            {tagline: 'Hand Blown Glass Sculpture'}
+            name = 'Hand Blown Glass Sculpture'
+            {tagline: name, body: name.downcase}
           end
 
           def self.targets

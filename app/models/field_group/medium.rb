@@ -294,57 +294,5 @@ class Medium
       end
     end
 
-    class StandardSculpture < Medium
-      class AcrylicSculpture < StandardSculpture
-        def self.targets
-          ['acrylic', 'lucite']
-        end
-      end
-
-      class GlassSculpture < StandardSculpture
-        def self.targets
-          ['glass']
-        end
-      end
-
-      class PewterSculpture < StandardSculpture
-        def self.targets
-          ['pewter', 'mixed media pewter']
-        end
-      end
-
-      class PorcelainSculpture < StandardSculpture
-        def self.targets
-          ['porcelain']
-        end
-      end
-
-      class ResinSculpture < StandardSculpture
-        def self.targets
-          ['resin', 'mixed media resin']
-        end
-      end
-
-      class MixedMediaSculpture < StandardSculpture
-        def self.targets
-          ['mixed media', 'lucite and pewter']
-        end
-      end
-    end
-
-    class HandMadeSculpture < Medium
-      class HandMadeCeramic < HandMadeSculpture
-        def self.targets
-          ['hand made ceramic']
-        end
-      end
-
-      class HandBlownGlass < HandMadeSculpture
-        def self.targets
-          ['hand blown glass']
-        end
-      end
-    end
-
   end
 end

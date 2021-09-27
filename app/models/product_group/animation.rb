@@ -13,7 +13,8 @@ class Animation
     def self.assocs
       {
         Category: [[:RadioButton, :ReproductionPrint], [:FieldSet, :LimitedEdition]],
-        Medium: [[:SelectField, :StandardSericel]]
+        Medium: [[:SelectField, :StandardSericel]],
+        Material: [[:FieldSet, :StandardSericel]]
       }
     end
 
@@ -45,6 +46,7 @@ class Animation
       {
         Category: [[:FieldSet, :LimitedEdition]],
         Medium: [[:SelectField, :StandardEtching]],
+        Material: [[:FieldSet, :StandardPaper]],
         Signature: [[:SelectField, :StandardSignature]],
         Certificate: [[:SelectField, :StandardCertificate]]
       }

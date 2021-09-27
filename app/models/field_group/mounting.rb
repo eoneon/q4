@@ -91,12 +91,6 @@ class Mounting
           build_target_group(%W[StandardFraming StandardMatting], 'FieldSet', 'Mounting')
         end
       end
-
-      class SericelMounting < FlatMounting
-        def self.targets
-          build_target_group(%W[StandardFraming StandardMatting], 'FieldSet', 'Mounting')
-        end
-      end
     end
   end
 end

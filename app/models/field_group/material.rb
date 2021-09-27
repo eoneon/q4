@@ -101,102 +101,130 @@ class Material
   end
 
   class FieldSet < Material
-    def self.admin_attrs(args)
-      {material: args[:subkind]}
+    class FlatType < FieldSet
+      def self.attrs
+        {subkind: 3}
+      end
+
+      def self.admin_attrs(args)
+        {material: args[:subkind]}
+      end
+
+      def self.name_values(args)
+        {material_search: args[:subkind], product_name: "on #{str_edit(str: uncamel(args[:f_name]), swap: ['Standard', ''])}"}
+      end
+
+      class Canvas < FlatType
+        class StandardCanvas < Canvas
+          def self.targets
+            [%W[SelectField Material StandardCanvas], %W[SelectMenu Dimension CanvasDimension], %W[SelectMenu Mounting CanvasMounting]]
+          end
+        end
+
+        class WrappedCanvas < Canvas
+          def self.targets
+            [%W[SelectField Material WrappedCanvas], %W[SelectMenu Dimension CanvasDimension]]
+          end
+        end
+      end
+
+      class Paper < FlatType
+        class StandardPaper < Paper
+          def self.targets
+            [%W[SelectField Material StandardPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
+          end
+        end
+
+        class PhotoPaper < Paper
+          def self.name_values(args)
+            {product_name: ""}
+          end
+
+          def self.targets
+            [%W[SelectField Material PhotoPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
+          end
+        end
+
+        class AnimationPaper < Paper
+          def self.name_values(args)
+            {product_name: ""}
+          end
+
+          def self.targets
+            [%W[SelectField Material AnimationPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
+          end
+        end
+      end
+
+      class Board < FlatType
+        class StandardBoard < Board
+          def self.targets
+            [%W[SelectField Material StandardBoard], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
+          end
+        end
+
+        class Wood < Board
+          def self.targets
+            [%W[SelectField Material Wood], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
+          end
+        end
+
+        class WoodBox < Board
+          def self.targets
+            [%W[SelectField Material WoodBox], %W[FieldSet Dimension WidthHeightDepth]]
+          end
+        end
+
+        class Acrylic < Board
+          def self.targets
+            [%W[SelectField Material Acrylic], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
+          end
+        end
+      end
+
+      class Metal < FlatType
+        class StandardMetal < Metal
+          def self.targets
+            [%W[SelectField Material StandardMetal], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
+          end
+        end
+
+        class MetalBox < Metal
+          def self.targets
+            [%W[SelectField Material MetalBox], %W[FieldSet Dimension WidthHeightDepth]]
+          end
+        end
+      end
+
+      class Sericel < FlatType
+        class StandardSericel < Sericel
+          def self.targets
+            [%W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
+          end
+        end
+      end
     end
 
-    def self.name_values(args)
-      {material_search: args[:subkind], product_name: "on #{str_edit(str: uncamel(args[:f_name]), swap: ['Standard', ''])}"}
+    class DepthType < FieldSet
+      class DiameterType < DepthType
+        def self.targets
+          [%W[FieldSet Dimension DiameterWeight]]
+        end
+      end
+
+      class DiameterHeightType < DepthType
+        def self.targets
+          [%W[FieldSet Dimension DiameterHeightWeight]]
+        end
+      end
+
+      class WidthHeightDepthType < DepthType
+        def self.targets
+          [%W[FieldSet Dimension WidthHeightDepthWeight]]
+        end
+      end
+
     end
-
-    class Canvas < FieldSet
-      class StandardCanvas < Canvas
-        # def self.targets
-        #   [%W[SelectField Material StandardCanvas], %W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
-        # end
-        def self.targets
-          [%W[SelectField Material StandardCanvas], %W[SelectMenu Dimension CanvasDimension], %W[SelectMenu Mounting CanvasMounting]]
-        end
-      end
-
-      class WrappedCanvas < Canvas
-        # def self.targets
-        #   [%W[SelectField Material WrappedCanvas], %W[FieldSet Dimension WidthHeight]]
-        # end
-        def self.targets
-          [%W[SelectField Material WrappedCanvas], %W[SelectMenu Dimension CanvasDimension]]
-        end
-      end
-    end
-
-    class Paper < FieldSet
-      class StandardPaper < Paper
-        def self.targets
-          [%W[SelectField Material StandardPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-        end
-      end
-
-      class PhotoPaper < Paper
-        def self.name_values(args)
-          {product_name: ""}
-        end
-
-        def self.targets
-          [%W[SelectField Material PhotoPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-        end
-      end
-
-      class AnimationPaper < Paper
-        def self.name_values(args)
-          {product_name: ""}
-        end
-
-        def self.targets
-          [%W[SelectField Material AnimationPaper], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-        end
-      end
-    end
-
-    class Board < FieldSet
-      class StandardBoard < Board
-        def self.targets
-          [%W[SelectField Material StandardBoard], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-        end
-      end
-
-      class Wood < Board
-        def self.targets
-          [%W[SelectField Material Wood], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-        end
-      end
-
-      class WoodBox < Board
-        def self.targets
-          [%W[SelectField Material WoodBox], %W[FieldSet Dimension WidthHeightDepth]]
-        end
-      end
-
-      class Acrylic < Board
-        def self.targets
-          [%W[SelectField Material Acrylic], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-        end
-      end
-    end
-
-    class Metal < FieldSet
-      class StandardMetal < Metal
-        def self.targets
-          [%W[SelectField Material StandardMetal], %W[SelectMenu Dimension FlatDimension], %W[SelectMenu Mounting StandardMounting]]
-        end
-      end
-
-      class MetalBox < Metal
-        def self.targets
-          [%W[SelectField Material MetalBox], %W[FieldSet Dimension WidthHeightDepth]]
-        end
-      end
-    end
-
   end
 
 end

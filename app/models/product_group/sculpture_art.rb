@@ -7,7 +7,6 @@ class SculptureArt
 
   def self.assocs
     {
-      SculptureType: end_keys(:SelectField, :Bowl, :Vase, :Sculpture),
       Authentication: [[:FieldSet, :StandardAuthentication]],
       Disclaimer: [[:FieldSet, :StandardDisclaimer]]
     }
@@ -16,9 +15,8 @@ class SculptureArt
   class StandardSculpture < SculptureArt
     def self.assocs
       {
-        Category: [[:RadioButton, :StandardSculpture]],
         Embellishing: [[:SelectField, :StandardEmbellishing]],
-        Medium: end_keys(:SelectField, :AcrylicSculpture, :GlassSculpture, :PewterSculpture, :PorcelainSculpture, :ResinSculpture, :MixedMediaSculpture),
+        SculptureType: end_keys(:FieldSet, :AcrylicSculpture, :GlassSculpture, :PewterSculpture, :PorcelainSculpture, :ResinSculpture, :MixedMediaSculpture)
       }
     end
 
@@ -38,13 +36,19 @@ class SculptureArt
   class HandMadeSculpture < SculptureArt
     class HandMadeCeramic < HandMadeSculpture
       def self.assocs
-        {Category: [[:RadioButton, :StandardSculpture]], Medium: [[:SelectField, :HandMadeCeramic]]}
+        {
+          Category: [[:RadioButton, :HandMadeCeramic]],
+          SculptureType: [[:FieldSet, :HandMadeCeramic]]
+        }
       end
     end
 
     class HandBlownGlass < HandMadeSculpture
       def self.assocs
-        {Category: [[:RadioButton, :StandardHandBlownGlass]], Medium: [[:SelectField, :HandBlownGlass]]}
+        {
+          Category: [[:RadioButton, :StandardHandBlownGlass]],
+          SculptureType: [[:FieldSet, :HandBlownGlass]]
+        }
       end
     end
   end
