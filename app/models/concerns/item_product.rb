@@ -3,13 +3,17 @@ require 'active_support/concern'
 module ItemProduct
   extend ActiveSupport::Concern
   # i = Item.find(97)    p = Item.find(97).product h = Item.find(97).product.fieldables   h = Item.find(97).input_group
-  # p.product_fields_loop(p.g_hsh, h, %w[tagline body material_dimension mounting_dimension material_mounting])
   def input_group(f_grp={rows:[], context:{reorder:[], remove:[]}, d_hsh:{}, attrs:{}, store:{}})
     return f_grp if !product
+    #product_and_item_attrs
     product_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], product.tags)
     item_attrs(f_grp[:context], f_grp[:attrs], f_grp[:store])
+    # product.product_item_loop
+    #product.d_hsh_and_row_params(input_params, f_grp[:rows], f_grp[:d_hsh], keys=%w[tagline body material_dimension mounting_dimension material_mounting])
+    product.product_item_loop(input_params, f_grp, keys=%w[tagline body material_dimension mounting_dimension material_mounting])
 
-    product.d_hsh_and_row_params(product.g_hsh, input_params, f_grp, keys=%w[tagline body material_dimension mounting_dimension material_mounting])
+    #f_grp[:rows] = product.assign_row(f_grp[:rows].group_by{|h| h[:k]}, form_rows(f_grp[:context], f_grp[:attrs]['medium']))
+
     related_params(f_grp[:context], f_grp[:d_hsh], f_grp[:store], f_grp[:attrs])
     shared_context_and_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store], product.tags)
     if f_grp[:context][:valid]
@@ -149,9 +153,8 @@ module ItemProduct
   # shared_context_and_attrs
   ##############################################################################
   def shared_context_and_attrs(context, d_hsh, attrs, store, p_tags)
-    #attr_params(attrs, p_tags)
     d_hsh.keys.map{|k| context[k.to_sym] = true if contexts[:present_keys].include?(k)}
-    #context[:product_type] = product_category(p_tags['product_type']) #.underscore.to_sym #context[:gartner_blade] = true if context[:product_type] == 'GartnerBlade' && context[:sculpture_type]
+    flatten_context(d_hsh).each {|k,v| unrelated_context(context,k,v, contexts[:tagline][:vals])}
     context[:valid] = true if context[:medium] || (context[:gartner_blade] && context[:sculpture_type])
     context[:missing] = true if context[:unsigned] && !context[:disclaimer]
   end
@@ -214,15 +217,21 @@ module ItemProduct
   #   Item.case_merge(store, [title, d_hsh[key][tag_key].values[0]].sub('glass', title), key, tag_key)
   # end
 
+  # def gartner_blade_related_body(d_hsh, store, title, key, tag_key='body')
+  #   v = ["This", d_hsh[key][tag_key].values[0]].join(' ')
+  #   Item.case_merge(store, v.sub('glass', title), key, tag_key)
+  # end
+
   def gartner_blade_related_body(d_hsh, store, title, key, tag_key='body')
-    v = ["This", d_hsh[key][tag_key].values[0]].join(' ')
+    category = d_hsh[key][tag_key].values[0]
+    category = category.split(' ')[0..-2].join(' ') if title.downcase.index('sculpture')
+    v = ["This", category].join(' ')
     Item.case_merge(store, v.sub('glass', title), key, tag_key)
   end
 
   def gartner_blade_description(context, store, hsh={'tagline'=>nil, 'description'=>nil})
     hsh['tagline'] = gb_tagline(context, store, valid_description_keys(store, contexts[:tagline][:keys], 'tagline'))
     hsh['description'] = gb_body(context, store, valid_description_keys(store, contexts[:body][:keys], 'body'))
-    #puts "hsh: #{hsh}"
     hsh
   end
 
@@ -233,9 +242,7 @@ module ItemProduct
 
   def gb_body(context, store, keys)
     keys = remove_keys(keys,'artist')
-    #context[:reorder] << {k:'text_after_title', ref: 'category', i: 1}
     reorder_keys(keys: keys, k:'text_after_title', ref: 'category', i: 1)
-    puts "keys: #{keys}"
     description_params(store, keys, 'body').values.join(' ')
   end
 
@@ -249,7 +256,8 @@ module ItemProduct
 
   ## flat_context
   def flat_context(context, d_hsh, store)
-    params_context(context, d_hsh, store)
+    #params_context(context, d_hsh, store)
+    store.each {|k,v| related_context(context,k,v['tagline'])}
     nested_params_context(context, d_hsh)
     contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
     reorder_remove(context)
@@ -258,7 +266,7 @@ module ItemProduct
   ### params_context
   def params_context(context, d_hsh, store)
     store.each {|k,v| related_context(context,k,v['tagline'])}
-    flatten_context(d_hsh).each {|k,v| unrelated_context(context,k,v, contexts[:tagline][:vals])}
+    #flatten_context(d_hsh).each {|k,v| unrelated_context(context,k,v, contexts[:tagline][:vals])}
   end
 
   def related_context(context,k,v)
@@ -377,7 +385,7 @@ module ItemProduct
 
   def kind_param_case(context, store, v, sub_hsh, k, tag_key)
     case k
-      when 'text_after_title'; text_after_title_params(context, store, v, k, tag_key)
+      #when 'text_after_title'; text_after_title_params(context, store, v, k, tag_key)
       when 'numbering'; numbering_params(context, store, v, sub_hsh, k, tag_key)
       when 'signature'; signature_params(context, store, v, k, tag_key)
       when 'leafing'; leafing_params(context, store, v, k, tag_key)
@@ -389,14 +397,14 @@ module ItemProduct
   end
 
   #text_after_title
-  def text_after_title_params(context, store, v, k, tag_key)
-    v = gartner_blade_text_after_title(context, v) if context[:gartner_blade]
-    Item.case_merge(store, v, k, tag_key)
-  end
-
-  def gartner_blade_text_after_title(context, v)
-    v = (context[:signed] ? "#{v}," : "#{v}.")
-  end
+  # def text_after_title_params(context, store, v, k, tag_key)
+  #   v = gartner_blade_text_after_title(context, v) if context[:gartner_blade]
+  #   Item.case_merge(store, v, k, tag_key)
+  # end
+  #
+  # def gartner_blade_text_after_title(context, v)
+  #   v = (context[:signed] ? "#{v}," : "#{v}.")
+  # end
 
   # numbering
   def numbering_params(context, store, v, sub_hsh, k, tag_key)
@@ -419,7 +427,7 @@ module ItemProduct
   end
 
   def gartner_blade_signature(v, tag_key)
-    v = (tag_key == 'tagline' ? "#{v} by GartnerBlade Glass." : v.sub('the artist', 'GartnerBlade Glass.'))
+    v = (tag_key == 'tagline' ? "#{v} by GartnerBlade Glass." : "This piece is hand signed by GartnerBlade Glass.")
   end
 
   # submedia
@@ -462,8 +470,8 @@ module ItemProduct
 
   def disclaimer(severity, damage)
     case severity
-      when 'danger'; "** Please note: #{damage}. **"
-      when 'warning'; "Please note: #{damage}."
+      when 'danger'; "** Please note: #{damage} **"
+      when 'warning'; "Please note: #{damage}"
       when 'notation'; damage
     end
   end

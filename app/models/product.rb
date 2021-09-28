@@ -19,58 +19,60 @@ class Product < ApplicationRecord
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
   # GROUPING METHODS: CRUD/VIEW ################################################
-  # def d_hsh_and_row_params(g_hsh, i_hsh, f_grp, keys)
-  #   inputs = product_fields_loop(g_hsh, f_grp[:d_hsh], keys)
-  #   item_fields_loop(inputs, i_hsh, f_grp, keys)
-  #   #d_hsh_and_row_loop(g_hsh, i_hsh, f_grp)
-  #   f_grp.merge!({rows: assign_row(f_grp[:rows].group_by{|h| h[:k]})})
-  # end
 
-  def d_hsh_and_row_params(g_hsh, i_hsh, f_grp, keys)
+  def product_item_loop(i_hsh, f_grp, keys)
     inputs = product_fields_loop(g_hsh, f_grp[:d_hsh], keys)
-    item_fields_loop(inputs, i_hsh, f_grp, keys)
-    f_grp.merge!({rows: assign_row(f_grp[:rows].group_by{|h| h[:k]})})
+    item_fields_loop(inputs, i_hsh, f_grp[:rows], f_grp[:d_hsh], keys)
+    f_grp[:rows] = assign_row(f_grp[:rows].group_by{|h| h[:k]}, form_rows(f_grp[:context], f_grp[:attrs]['medium']))
   end
 
-  def item_fields_loop(inputs, i_hsh, f_grp, keys)
-    inputs.each_with_object(f_grp) do |f_hsh, f_grp|
+  # def d_hsh_and_row_params(g_hsh, i_hsh, rows, d_hsh, keys)
+  #   inputs = product_fields_loop(g_hsh, d_hsh, keys)
+  #   item_fields_loop(inputs, i_hsh, rows, d_hsh, keys)
+  #   f_grp.merge!({rows: assign_row(rows.group_by{|h| h[:k]})})
+  # end
+
+  def item_fields_loop(inputs, i_hsh, rows, d_hsh, keys)
+    inputs.each do |f_hsh|
       k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
       selected = i_hsh.dig(k, t_type, f_name)
-      f_grp[:rows].append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
-      tags_and_rows(k, f_name, selected, i_hsh, f_grp[:d_hsh], keys) if selected
+      rows.append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
+      tags_and_rows(k, f_name, selected, i_hsh, rows, d_hsh, keys) if selected
     end
   end
 
-  # def d_hsh_and_row_loop(g_hsh, i_hsh, f_grp)
-  #   f_args(g_hsh).each_with_object(f_grp) do |f_hsh, f_grp|
+  # def item_fields_loop(inputs, i_hsh, f_grp, keys)
+  #   inputs.each_with_object(f_grp) do |f_hsh, f_grp|
   #     k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
-  #     #
-  #     if radio_button?(t)
-  #       d_hsh_loop(:d_hsh, k, f_name, f, f_grp, 'tagline', 'body')
-  #     else
-  #       selected = i_hsh.dig(k, t_type, f_name)
-  #       f_grp[:rows].append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
-  #       tags_and_rows(k, f_name, selected, i_hsh, f_grp) if selected
-  #     end
+  #     selected = i_hsh.dig(k, t_type, f_name)
+  #     f_grp[:rows].append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
+  #     tags_and_rows(k, f_name, selected, i_hsh, f_grp[:d_hsh], keys) if selected
   #   end
   # end
 
-  # def d_hsh_loop(k, f_name, f, d_hsh, tag_keys)
-  #   tag_keys.each_with_object(d_hsh) do |tag, d_hsh|
-  #     Item.case_merge(d_hsh, f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag) #puts "selected b: #{f}, f.f_name: #{f.field_name}, f_name: #{f_name}"
-  #   end
-  # end
-  def tags_and_rows(k, f_name, selected, i_hsh, d_hsh, keys)
+  def tags_and_rows(k, f_name, selected, i_hsh, rows, d_hsh, keys)
     if selected.is_a?(String)
       Item.case_merge(d_hsh, selected, k, f_name)
     else
       tags_loop(k, format_fname(k, selected, f_name), selected, d_hsh, keys)
       if field_set?(selected.type)
         inputs = product_fields_loop(selected.g_hsh, d_hsh, keys)
-        item_fields_loop(inputs, i_hsh, d_hsh, keys)
+        item_fields_loop(inputs, i_hsh, rows, d_hsh, keys)
       end
     end
   end
+
+  # def tags_and_rows(k, f_name, selected, i_hsh, d_hsh, keys)
+  #   if selected.is_a?(String)
+  #     Item.case_merge(d_hsh, selected, k, f_name)
+  #   else
+  #     tags_loop(k, format_fname(k, selected, f_name), selected, d_hsh, keys)
+  #     if field_set?(selected.type)
+  #       inputs = product_fields_loop(selected.g_hsh, d_hsh, keys)
+  #       item_fields_loop(inputs, i_hsh, d_hsh, keys)
+  #     end
+  #   end
+  # end
 
   def tags_loop(k, f_name, f, d_hsh, keys)
     keys.each_with_object(d_hsh) do |tag, d_hsh|
@@ -78,24 +80,26 @@ class Product < ApplicationRecord
     end
   end
 
+  def assign_row(form_hsh, form_rows)
+    form_rows.each_with_object([]).each do |form_row, rows|
+      row = form_row.select{|col| form_hsh.has_key?(col)}
+      rows.append(row.map!{|col| form_hsh[col]}.flatten!) if row.any?
+    end
+  end
 
-
-  # def tags_and_rows(k, f_name, selected, i_hsh, d_hsh, keys)
-  #   if selected.is_a?(String)
-  #     Item.case_merge(d_hsh, selected, k, f_name)
-  #   else
-  #     d_hsh_loop(k, format_fname(k, selected, f_name), selected, d_hsh, keys)
-  #     #d_hsh_loop(:d_hsh, k, format_fname(k, selected, f_name), selected, f_grp, ['tagline', 'body'])
-  #     d_hsh_and_row_loop(selected.g_hsh, i_hsh, d_hsh, keys) if field_set?(selected.type)
+  # def assign_row(rows, d_hsh)
+  #   kinds.each do |form_row, rows|
+  #     row = form_row.select{|col_key| d_hsh.has_key?(col_key)}
+  #     rows.append(row.map!{|col_key| d_hsh[col_key]}.flatten!) if row.any?
   #   end
   # end
 
-  def assign_row(f_grp)
-    kinds.each_with_object([]) do |form_row, rows|
-      row = form_row.select{|col| f_grp.has_key?(col)}
-      rows.append(row.map!{|col| f_grp[col]}.flatten!) if row.any?
-    end
-  end
+  # def assign_row(f_grp)
+  #   kinds.each_with_object([]) do |form_row, rows|
+  #     row = form_row.select{|col| f_grp.has_key?(col)}
+  #     rows.append(row.map!{|col| f_grp[col]}.flatten!) if row.any?
+  #   end
+  # end
 
   def format_selected(selected, attr)
     return selected if selected.nil? || selected.is_a?(String)
@@ -106,10 +110,18 @@ class Product < ApplicationRecord
     k == 'dimension' && field_set?(selected.type) ? selected.field_name : f_name
   end
 
-  def kinds
-    Medium.class_group('FieldGroup').map{|c| c.call_if(:input_group)}.compact.sort_by(&:first).map(&:last)
-  end
+  # def kinds
+  #   Medium.class_group('FieldGroup').map{|c| c.call_if(:input_group)}.compact.sort_by(&:first).map(&:last)
+  # end
 
+  def form_rows(context, medium)
+    case
+      when context[:flat_art] && medium != 'Sericel'; [%w[category numbering], %w[medium material mounting], %w[embellishing leafing remarque], %w[dated signature certificate], %w[seal verification], %w[dimension], %w[disclaimer]]
+      when context[:flat_art]; [%w[category numbering], %w[medium material embellishing], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
+      when context[:sculpture_art]; [%w[category numbering], %w[sculpture_type embellishing], %w[dated signature certificate], %w[verification], %w[dimension], %w[disclaimer]]
+      when context[:gartner_blade];  [%w[sculpture_type sculpture_part signature], %w[dimension], %w[disclaimer]]
+    end
+  end
   ##############################################################################
   ##############################################################################
 
@@ -147,6 +159,43 @@ end
 
 # THE END ######################################################################
 ################################################################################
+
+# def d_hsh_and_row_params(g_hsh, i_hsh, f_grp, keys)
+#   inputs = product_fields_loop(g_hsh, f_grp[:d_hsh], keys)
+#   item_fields_loop(inputs, i_hsh, f_grp, keys)
+#   #d_hsh_and_row_loop(g_hsh, i_hsh, f_grp)
+#   f_grp.merge!({rows: assign_row(f_grp[:rows].group_by{|h| h[:k]})})
+# end
+
+# def d_hsh_and_row_loop(g_hsh, i_hsh, f_grp)
+#   f_args(g_hsh).each_with_object(f_grp) do |f_hsh, f_grp|
+#     k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
+#     #
+#     if radio_button?(t)
+#       d_hsh_loop(:d_hsh, k, f_name, f, f_grp, 'tagline', 'body')
+#     else
+#       selected = i_hsh.dig(k, t_type, f_name)
+#       f_grp[:rows].append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
+#       tags_and_rows(k, f_name, selected, i_hsh, f_grp) if selected
+#     end
+#   end
+# end
+
+# def d_hsh_loop(k, f_name, f, d_hsh, tag_keys)
+#   tag_keys.each_with_object(d_hsh) do |tag, d_hsh|
+#     Item.case_merge(d_hsh, f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag) #puts "selected b: #{f}, f.f_name: #{f.field_name}, f_name: #{f_name}"
+#   end
+# end
+# def tags_and_rows(k, f_name, selected, i_hsh, d_hsh, keys)
+#   if selected.is_a?(String)
+#     Item.case_merge(d_hsh, selected, k, f_name)
+#   else
+#     d_hsh_loop(k, format_fname(k, selected, f_name), selected, d_hsh, keys)
+#     #d_hsh_loop(:d_hsh, k, format_fname(k, selected, f_name), selected, f_grp, ['tagline', 'body'])
+#     d_hsh_and_row_loop(selected.g_hsh, i_hsh, d_hsh, keys) if field_set?(selected.type)
+#   end
+# end
+
 # DRAFT/REPLACED METHODS #######################################################
 
 #a = lambda {puts "dog"}#{Medium.class_group('FieldGroup').map{|c| c.call_if(:input_group)}.compact.sort_by(&:first).map(&:last)}

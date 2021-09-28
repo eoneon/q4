@@ -88,6 +88,11 @@ class Sculpture
         {kind: 3, subkind: 2, f_name: -1}
       end
 
+      def self.target_tags(f_name)
+        name = str_edit(str: f_name)
+        {tagline: name, body: name}
+      end
+
       class SculptureType < GartnerBlade
         class OpenBowl < SculptureType
           def self.targets
@@ -180,7 +185,7 @@ class Sculpture
     class TextAfterTitle < RadioButton
       class Ikebana < TextAfterTitle
         def self.name_values
-          {body: "sculpture features a secured Kenzan spiked disc inside - the key to any fine Ikebana style flower arrangement"}
+          {body: "features a secured Kenzan spiked disc inside - the key to any fine Ikebana style flower arrangement."}
         end
 
         def self.targets
@@ -189,7 +194,7 @@ class Sculpture
 
       class Primitive < TextAfterTitle
         def self.name_values
-          {body: "sculpture combines sand-etched exteriors with a glossy interior"}
+          {body: "combines sand-etched exteriors with a glossy interior."}
         end
 
         def self.targets
@@ -198,7 +203,7 @@ class Sculpture
 
       class SaturnLamp < TextAfterTitle
         def self.name_values
-          {body: "features a fiberglass wick to get you started, and when lit, the lamp casts a glowing ring of firelight, evoking the rings of majestic Saturn"}
+          {body: "features a fiberglass wick to get you started, and when lit, the lamp casts a glowing ring of firelight, evoking the rings of majestic Saturn."}
         end
 
         def self.targets
@@ -207,7 +212,7 @@ class Sculpture
 
       class Arbor < TextAfterTitle
         def self.name_values
-          {body: "integrates striking colors with graceful curves"}
+          {body: "integrates striking colors with graceful curves."}
         end
 
         def self.targets
@@ -216,7 +221,7 @@ class Sculpture
 
       class OpenBowlVase < TextAfterTitle
         def self.name_values
-          {body: "combines sand-etched exteriors with an elegant lip accent"}
+          {body: "combines sand-etched exteriors with an elegant lip accent."}
         end
 
         def self.targets
@@ -225,7 +230,7 @@ class Sculpture
 
       class CoveredBowlVase < TextAfterTitle
         def self.name_values
-          {body: "sculpture combines sand-etched exteriors with an elegant"}
+          {body: "combines sand-etched exteriors with an elegant."}
         end
 
         def self.targets
