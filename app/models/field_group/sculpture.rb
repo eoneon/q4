@@ -15,7 +15,7 @@ class Sculpture
 
   class SelectField < Sculpture
     def self.target_tags(f_name)
-      name = uncamel(f_name)
+      name = str_edit(str: uncamel(f_name))
       {tagline: name, body: name.downcase}
     end
 
@@ -46,6 +46,10 @@ class Sculpture
     end
 
     class Medium < SelectField
+      def self.admin_attrs(args)
+        {item_category: str_edit(str: uncamel(args[:f_name]), swap: ['Sculpture', ''])}
+      end
+
       class AcrylicSculpture < Medium
         def self.targets
           ['acrylic', 'lucite']

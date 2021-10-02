@@ -17,9 +17,9 @@ class Medium
     {medium_search: args[:subkind], product_name: str_edit(str: uncamel(args[:f_name]), swap: ['Standard', '', 'Sculpture', '', 'Unknown', '', ' And ', ' and '], skip:['and']), origin: args[:f_name]}
   end
 
-  def self.input_group
-    [0, %w[medium embellishing leafing remarque]]
-  end
+  # def self.input_group
+  #   [0, %w[medium embellishing leafing remarque]]
+  # end
 
   class SelectField < Medium
     def self.target_tags(f_name)

@@ -32,7 +32,6 @@ module ItemProduct
   ##############################################################################
   # related_params: material, mounting, dimension
   ##############################################################################
-  # v2
   def related_params(context, d_hsh, store, attrs)
     merge_related_params('material', 'mounting', 'material_mounting', 'body', d_hsh, store)
     merge_related_params('mounting', 'dimension', 'mounting_dimension', 'mounting_dimension', d_hsh, store)
@@ -49,33 +48,54 @@ module ItemProduct
   end
 
   # def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context, hsh={})
-  #   if k_hsh = cond_slice(d_hsh, k_key) # k_hsh = {"width"=>"12", "height"=>"8"}
-  #     puts "k_hsh0: #{k_hsh}"
-  #     sub_hsh = k_hsh.slice!(sub_key) # sub_key='material_dimension' -> DON'T
-  #     puts "k_hsh1: #{k_hsh}"
-  #     puts "sub_hsh1: #{sub_hsh}"
-  #     dim_keys, dim_tag = k_hsh[sub_key].keys[0].underscore.split('_'), k_hsh[sub_key].values.reject{|v| v=='n/a'}[0]
+  #   if dimension = cond_slice(d_hsh, k_key) # k_hsh = {"width"=>"12", "height"=>"8"}
+  #     #puts "dimension: #{dimension}"
+  #     sub_hsh = dimension.slice!(sub_key) #'material_dimension'
   #
-  #     material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
-  #     mounting_dimension_params(sub_hsh, sub_key2, attrs, hsh)
+  #     #puts "dimension: #{dimension}"
+  #     dim_hsh = sub_hsh.has_key?(sub_key2) ? sub_hsh.slice!(sub_key2) : sub_hsh
+  #     # puts "dim_hsh: #{dim_hsh}"
+  #     # puts "dimension: #{dimension}"
+  #     dim_name, material_tag = dimension[sub_key].select{|k,v| v != "n/a"}.to_a[0]
   #
+  #     dim_keys = dim_name.underscore.split('_') if dim_name
+  #     material_dimension_params(dim_hsh, sub_key, dim_keys, material_tag, d_hsh, attrs, hsh)
+  #     mounting_dimension_params(dim_hsh, sub_hsh.dig(sub_key2), sub_key2, attrs, hsh)
   #     body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
   #     tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
   #   end
   # end
 
   def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context, hsh={})
-    if k_hsh = cond_slice(d_hsh, k_key) # k_hsh = {"width"=>"12", "height"=>"8"}
-      sub_hsh = k_hsh.slice!(sub_key) #'material_dimension'
-      dim_hsh = sub_hsh.has_key?(sub_key2) ? sub_hsh.slice!(sub_key2) : sub_hsh
-      dim_name, material_tag = k_hsh[sub_key].select{|k,v| v != "n/a"}.to_a[0]
-      dim_keys = dim_name.underscore.split('_')
-      material_dimension_params(dim_hsh, sub_key, dim_keys, material_tag, d_hsh, attrs, hsh)
+    dimension = cond_slice(d_hsh, k_key)
+    sub_hsh = dimension.slice!(sub_key)
+    if dim_hsh = dim_hsh(sub_hsh,sub_key2)
+      dim_name, material_tag = dimension[sub_key].to_a[0].reject{|i| i=="n/a"}
+      material_dimension_params(dim_hsh, sub_key, dim_name.underscore.split('_'), material_tag, d_hsh, attrs, hsh)
       mounting_dimension_params(dim_hsh, sub_hsh.dig(sub_key2), sub_key2, attrs, hsh)
       body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
       tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
     end
   end
+
+  def dim_hsh(sub_hsh,sub_key2)
+    h = sub_hsh.has_key?(sub_key2) ? sub_hsh.slice!(sub_key2) : sub_hsh
+    h if h.any?
+  end
+
+  # def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context, hsh={})
+  #     material_dimension_params(dim_hsh, sub_key, dim_keys, material_tag, d_hsh, attrs, hsh)
+  #     mounting_dimension_params(dim_hsh, sub_hsh.dig(sub_key2), sub_key2, attrs, hsh)
+  #     body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
+  #     tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
+  #   end
+  # end
+
+  # def dim_params(dimension,sub_key)
+  #   dim_name, material_tag = dimension[sub_key].to_a[0].reject{|i| i=="n/a"}
+  #   dim_name.underscore.split('_')
+  # end
+
   # material_dimension_params ##################################################
   # def material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
   #   weight_key = dim_keys.slice!(-1) if dim_keys.index('weight')
@@ -94,6 +114,7 @@ module ItemProduct
   # end
 
   def material_dimension_params(dim_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
+    weight_key = dim_keys.slice!(-1) if dim_keys.index('weight')
     if vals_exist?(dim_hsh, dim_keys)
       material = dim_hsh.slice(*dim_keys)
       material.keys.map{|k| dim_hsh.delete(k)}
@@ -124,16 +145,6 @@ module ItemProduct
   end
 
   # mounting_dimension_params ##################################################
-  # def mounting_dimension_params(sub_hsh, sub_key, attrs, hsh)
-  #   if sub_hsh.has_key?(sub_key)
-  #     dim_hsh = sub_hsh.slice!(sub_key) #dim_tag = sub_hsh.values[0]
-  #     dim_tag, framed = sub_hsh[sub_key].values[0], (sub_hsh.values[0]=='(frame)')
-  #     format_mounting_dimensions(dim_hsh, sub_key, dim_tag, framed, attrs, hsh)
-  #   else
-  #     attrs.merge!(attrs_dimension_params([nil], keys: %w[frame_width frame_height]))
-  #   end
-  # end
-
   def mounting_dimension_params(dim_hsh, mounting, sub_key, attrs, hsh)
     if mounting
       mounting_tag = mounting.to_a[0][-1]
@@ -189,7 +200,8 @@ module ItemProduct
   def shared_context_and_attrs(context, d_hsh, attrs, store, p_tags)
     d_hsh.keys.map{|k| context[k.to_sym] = true if contexts[:present_keys].include?(k)}
     flatten_context(d_hsh).each {|k,v| unrelated_context(context,k,v, contexts[:tagline][:vals])}
-    context[:valid] = true if context[:medium] || (context[:gartner_blade] && context[:sculpture_type])
+    #context[:valid] = true if context[:medium] || (context[:gartner_blade] && context[:sculpture_type])
+    context[:valid] = true if context[:medium] || context[:sculpture_type]
     context[:missing] = true if context[:unsigned] && !context[:disclaimer]
   end
 
@@ -283,7 +295,7 @@ module ItemProduct
 
   def related_context(store, context)
     description_params(store, %w[dimension material mounting], 'tagline').each do |k,v|
-      if k = 'dimension'
+      if k == 'dimension'
         context[k.to_sym] = true
       elsif i = ['Framed', 'Gallery Wrapped', 'Rice', 'Paper'].detect{|i| v.index(i)}
         context[symbolize(i)] = true
