@@ -1,7 +1,7 @@
 <%= form_with model: item, url: invoice_item_path(invoice, item), id: "edit-item" do |f| %>
-  <h5><span>Tagline: <%= @item.input_group[:attrs].dig('tagline') %></span></h5>
-  
-  <h5><span>Description: <%= @item.input_group[:attrs].dig('description') %></span></h5>
+  <h5><span>Tagline: <%= @input_group[:attrs].dig('tagline') %></span></h5>
+
+  <h5><span>Description: <%= @input_group[:attrs].dig('description') %></span></h5>
   <div class="form">
 
     <div class="card border border-secondary p-2 mb-2">

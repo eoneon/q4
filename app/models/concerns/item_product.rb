@@ -5,23 +5,17 @@ module ItemProduct
   # i = Item.find(97)    p = Item.find(97).product h = Item.find(97).product.fieldables   h = Item.find(97).input_group
   def input_group(f_grp={rows:[], context:{reorder:[], remove:[]}, d_hsh:{}, attrs:{}, store:{}})
     return f_grp if !product
-    #product_and_item_attrs
-    product_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], product.tags)
-    item_attrs(f_grp[:context], f_grp[:attrs], f_grp[:store])
-    # product.product_item_loop
-    #product.d_hsh_and_row_params(input_params, f_grp[:rows], f_grp[:d_hsh], keys=%w[tagline body material_dimension mounting_dimension material_mounting])
+    product_and_item_attrs(f_grp, product.tags)
     product.product_item_loop(input_params, f_grp, keys=%w[tagline body material_dimension mounting_dimension material_mounting])
-
-    #f_grp[:rows] = product.assign_row(f_grp[:rows].group_by{|h| h[:k]}, form_rows(f_grp[:context], f_grp[:attrs]['medium']))
-
     related_params(f_grp[:context], f_grp[:d_hsh], f_grp[:store], f_grp[:attrs])
     shared_context_and_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store], product.tags)
-    if f_grp[:context][:valid]
-      divergent_params(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store])
-    else
-      f_grp
-    end
+    divergent_params(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store]) if f_grp[:context][:valid]
     f_grp
+  end
+
+  def product_and_item_attrs(f_grp, p_tags)
+    product_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], product.tags)
+    item_attrs(f_grp[:context], f_grp[:attrs], f_grp[:store])
   end
 
   def product_attrs(context, d_hsh, attrs, p_tags)
@@ -54,39 +48,70 @@ module ItemProduct
     end
   end
 
+  # def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context, hsh={})
+  #   if k_hsh = cond_slice(d_hsh, k_key) # k_hsh = {"width"=>"12", "height"=>"8"}
+  #     puts "k_hsh0: #{k_hsh}"
+  #     sub_hsh = k_hsh.slice!(sub_key) # sub_key='material_dimension' -> DON'T
+  #     puts "k_hsh1: #{k_hsh}"
+  #     puts "sub_hsh1: #{sub_hsh}"
+  #     dim_keys, dim_tag = k_hsh[sub_key].keys[0].underscore.split('_'), k_hsh[sub_key].values.reject{|v| v=='n/a'}[0]
+  #
+  #     material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
+  #     mounting_dimension_params(sub_hsh, sub_key2, attrs, hsh)
+  #
+  #     body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
+  #     tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
+  #   end
+  # end
+
   def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context, hsh={})
     if k_hsh = cond_slice(d_hsh, k_key) # k_hsh = {"width"=>"12", "height"=>"8"}
-      sub_hsh = k_hsh.slice!(sub_key) # sub_key='material_dimension' -> DON'T
-      dim_keys, dim_tag = k_hsh[sub_key].keys[0].underscore.split('_'), k_hsh[sub_key].values.reject{|v| v=='n/a'}[0]
-      material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
-      mounting_dimension_params(sub_hsh, sub_key2, attrs, hsh)
+      sub_hsh = k_hsh.slice!(sub_key) #'material_dimension'
+      dim_hsh = sub_hsh.has_key?(sub_key2) ? sub_hsh.slice!(sub_key2) : sub_hsh
+      dim_name, material_tag = k_hsh[sub_key].select{|k,v| v != "n/a"}.to_a[0]
+      dim_keys = dim_name.underscore.split('_')
+      material_dimension_params(dim_hsh, sub_key, dim_keys, material_tag, d_hsh, attrs, hsh)
+      mounting_dimension_params(dim_hsh, sub_hsh.dig(sub_key2), sub_key2, attrs, hsh)
       body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
       tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
     end
   end
-
   # material_dimension_params ##################################################
-  def material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
-    weight = dim_keys.slice!(-1) if dim_keys.index('weight')
-    og_hsh = sub_hsh.slice!(*dim_keys)
-    dim_tag = format_weight_params(sub_hsh, dim_tag, weight)
+  # def material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
+  #   weight_key = dim_keys.slice!(-1) if dim_keys.index('weight')
+  #   # weight_hsh = sub_hsh.slice!(*dim_keys) if weight_key
+  #   # dim_tag = format_weight_params(weight_hsh, weight_key, dim_tag) if weight_key
+  #   if vals_exist?(sub_hsh, dim_keys)
+  #     puts "sub_hsh2: #{sub_hsh}"
+  #     dim_hsh = sub_hsh.slice(*dim_keys)
+  #     puts "dim_hsh2: #{dim_hsh}"
+  #     #sub_hsh.slice!(*dim_hsh.keys)
+  #
+  #     format_material_dimensions(dim_hsh.values, dim_hsh.values[0..1], dim_keys[0], dim_tag, attrs, hsh, sub_key)
+  #   else
+  #     attrs.merge!(attrs_dimension_params([nil]))
+  #   end
+  # end
 
-    if vals_exist?(sub_hsh, dim_keys)
-      format_material_dimensions(sub_hsh.values, sub_hsh.values[0..1], dim_keys[0], dim_tag, attrs, hsh, sub_key)
+  def material_dimension_params(dim_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
+    if vals_exist?(dim_hsh, dim_keys)
+      material = dim_hsh.slice(*dim_keys)
+      material.keys.map{|k| dim_hsh.delete(k)}
+      format_material_dimensions(material.values, material.values[0..1], dim_keys[0], dim_tag, attrs, hsh, sub_key)
     else
       attrs.merge!(attrs_dimension_params([nil]))
     end
   end
 
-  def format_weight_params(sub_hsh, dim_tag, weight)
-    weight = cond_slice(sub_hsh, weight) if weight
-    weight = weight(*weight.to_a[0]) if weight
-    [dim_tag, weight].compact.join(' ') if weight
+
+  def format_weight_params(weight_hsh, weight_key, dim_tag)
+    if weight = weight_hsh.dig(weight_key)
+      weight(weight_key, weight, dim_tag)
+    end
   end
 
-  def weight(k,v)
-    i = v.blank? ? 1 : v.to_i
-    [i, 'lb', "(#{k})"].join(' ') if i >= 10
+  def weight(weight_key, weight, dim_tag)
+    [dim_tag, weight, 'lb', "(#{weight_key})"].compact.join(' ') if weight.to_i >= 10
   end
 
   def format_material_dimensions(dims, dim_set, dim_type, dim_tag, attrs, h, sub_key)
@@ -99,11 +124,20 @@ module ItemProduct
   end
 
   # mounting_dimension_params ##################################################
-  def mounting_dimension_params(sub_hsh, sub_key, attrs, hsh)
-    if sub_hsh.has_key?(sub_key)
-      dim_hsh = sub_hsh.slice!(sub_key) #dim_tag = sub_hsh.values[0]
-      dim_tag, framed = sub_hsh[sub_key].values[0], (sub_hsh.values[0]=='(frame)')
-      format_mounting_dimensions(dim_hsh, sub_key, dim_tag, framed, attrs, hsh)
+  # def mounting_dimension_params(sub_hsh, sub_key, attrs, hsh)
+  #   if sub_hsh.has_key?(sub_key)
+  #     dim_hsh = sub_hsh.slice!(sub_key) #dim_tag = sub_hsh.values[0]
+  #     dim_tag, framed = sub_hsh[sub_key].values[0], (sub_hsh.values[0]=='(frame)')
+  #     format_mounting_dimensions(dim_hsh, sub_key, dim_tag, framed, attrs, hsh)
+  #   else
+  #     attrs.merge!(attrs_dimension_params([nil], keys: %w[frame_width frame_height]))
+  #   end
+  # end
+
+  def mounting_dimension_params(dim_hsh, mounting, sub_key, attrs, hsh)
+    if mounting
+      mounting_tag = mounting.to_a[0][-1]
+      format_mounting_dimensions(dim_hsh, sub_key, mounting_tag, (mounting_tag=='(frame)'), attrs, hsh)
     else
       attrs.merge!(attrs_dimension_params([nil], keys: %w[frame_width frame_height]))
     end
@@ -159,11 +193,6 @@ module ItemProduct
     context[:missing] = true if context[:unsigned] && !context[:disclaimer]
   end
 
-  # def attr_params(attrs, p_tags)
-  #   Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
-  #   %w[sku retail qty].map{|k| attrs[k] = public_send(k)}
-  # end
-
   ##############################################################################
   # divergent_params
   ##############################################################################
@@ -192,7 +221,7 @@ module ItemProduct
   def gartner_blade_hsh(d_hsh)
     %w[sculpture_type sculpture_part].each_with_object({}) do |k,h|
       if tag_hsh = d_hsh.dig(k, 'tagline')
-        tag_hsh.count>1 ? h.merge!(tag_hsh) : h[k] = tag_hsh.values[0]
+        k=='sculpture_type' ? h[k] = tag_hsh.values[0] : h.merge!(tag_hsh)
         d_hsh.delete(k)
       end
     end
@@ -212,15 +241,6 @@ module ItemProduct
   def gartner_blade_related_tagline(d_hsh, store, title, signed, key, tag_key='tagline')
     Item.case_merge(store, [title, d_hsh[key][tag_key].values[0]+(signed ? ',' : '.')].join(' '), key, tag_key)
   end
-
-  # def gartner_blade_related_body(d_hsh, store, title, key, tag_key='body')
-  #   Item.case_merge(store, [title, d_hsh[key][tag_key].values[0]].sub('glass', title), key, tag_key)
-  # end
-
-  # def gartner_blade_related_body(d_hsh, store, title, key, tag_key='body')
-  #   v = ["This", d_hsh[key][tag_key].values[0]].join(' ')
-  #   Item.case_merge(store, v.sub('glass', title), key, tag_key)
-  # end
 
   def gartner_blade_related_body(d_hsh, store, title, key, tag_key='body')
     category = d_hsh[key][tag_key].values[0]
@@ -249,31 +269,23 @@ module ItemProduct
   # flat_params ################################################################
   def flat_params(context, d_hsh, attrs, store)
     flat_context(context, d_hsh, store)
-    #standard_attrs(attrs, store)
     unrelated_params(context, d_hsh, store)
     attrs.merge!(flat_description(context, store))
   end
 
   ## flat_context
   def flat_context(context, d_hsh, store)
-    #params_context(context, d_hsh, store)
-    store.each {|k,v| related_context(context,k,v['tagline'])}
+    related_context(store, context)
     nested_params_context(context, d_hsh)
     contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
     reorder_remove(context)
   end
 
-  ### params_context
-  def params_context(context, d_hsh, store)
-    store.each {|k,v| related_context(context,k,v['tagline'])}
-    #flatten_context(d_hsh).each {|k,v| unrelated_context(context,k,v, contexts[:tagline][:vals])}
-  end
-
-  def related_context(context,k,v)
-    if k=='dimension'
-      context[k.to_sym] = true
-    elsif %w[material mounting].include?(k)
-      if i = ['Framed', 'Gallery Wrapped', 'Rice', 'Paper'].detect{|i| v.index(i)}
+  def related_context(store, context)
+    description_params(store, %w[dimension material mounting], 'tagline').each do |k,v|
+      if k = 'dimension'
+        context[k.to_sym] = true
+      elsif i = ['Framed', 'Gallery Wrapped', 'Rice', 'Paper'].detect{|i| v.index(i)}
         context[symbolize(i)] = true
       end
     end
@@ -322,13 +334,6 @@ module ItemProduct
     context[:remove] << 'material' if context[:paper] && [:category, :embellishing, :leafing, :remarque, :signature].any?{|k| context[k]}
     context[:remove] << 'medium' if context[:giclee] && (context[:proof_edition] || context[:numbered] && context[:embellishing] || !context[:paper])
   end
-
-  ## standard_attrs
-  # def standard_attrs(attrs, store)
-  #   %w[sku retail qty].map{|k| attrs[k] = public_send(k)}
-  #   artist_params(attrs, store)
-  #   merge_title_params(attrs, store, tagline_title, body_title, attrs_title)
-  # end
 
   ### artist
   def artist_params(attrs, store)
@@ -385,26 +390,27 @@ module ItemProduct
 
   def kind_param_case(context, store, v, sub_hsh, k, tag_key)
     case k
-      #when 'text_after_title'; text_after_title_params(context, store, v, k, tag_key)
       when 'numbering'; numbering_params(context, store, v, sub_hsh, k, tag_key)
       when 'signature'; signature_params(context, store, v, k, tag_key)
       when 'leafing'; leafing_params(context, store, v, k, tag_key)
       when 'dated'; dated_params(context, store, v, sub_hsh, k, tag_key)
+      when 'animator_seal'; animator_seal_params(context, store, v, k, tag_key)
+      when 'sports_seal'; sports_seal_params(context, store, v, k, tag_key)
       when 'verification'; verification_params(context, store, v, sub_hsh, k, tag_key)
       when 'disclaimer'; disclaimer_params(context, store, v, sub_hsh, k, tag_key)
       else Item.case_merge(store, v, k, tag_key)
     end
   end
 
-  #text_after_title
-  # def text_after_title_params(context, store, v, k, tag_key)
-  #   v = gartner_blade_text_after_title(context, v) if context[:gartner_blade]
-  #   Item.case_merge(store, v, k, tag_key)
-  # end
-  #
-  # def gartner_blade_text_after_title(context, v)
-  #   v = (context[:signed] ? "#{v}," : "#{v}.")
-  # end
+  def animator_seal_params(context, store, v, k, tag_key)
+    v = v+'.' unless context[:sports_seal]
+    Item.case_merge(store, v, k, tag_key)
+  end
+
+  def sports_seal_params(context, store, v, k, tag_key)
+    v = v.sub('This piece bears', 'and') if context[:animator_seal]
+    Item.case_merge(store, v+'.', k, tag_key)
+  end
 
   # numbering
   def numbering_params(context, store, v, sub_hsh, k, tag_key)
@@ -479,13 +485,6 @@ module ItemProduct
   ##############################################################################
   # build_description
   ##############################################################################
-  # def gb_description(context, store, hsh={'tagline'=>nil, 'description'=>nil})
-  #   #context[:remove].map {|k| remove_keys(keys,k)}
-  #   hsh['tagline'] = gb_tagline(context, store, valid_description_keys(store, contexts[:tagline][:keys], 'tagline'))
-  #   hsh['description'] = gb_body(context, store, valid_description_keys(store, contexts[:body][:keys], 'body'))
-  #   hsh
-  # end
-
   def flat_description(context, store, hsh={'tagline'=>nil, 'description'=>nil})
     hsh['tagline'] = build_tagline(context, store)
     hsh['description'] = build_body(context, store)
@@ -566,7 +565,7 @@ module ItemProduct
 
   def description_params(store, keys, tag_key)
     keys.each_with_object({}) do |k,h|
-      h[k] = store.dig(k,tag_key) if store[k].has_key?(tag_key)
+      h[k] = store.dig(k,tag_key) if store.dig(k,tag_key)
     end
   end
 
@@ -634,9 +633,6 @@ end
 #   reorder_remove(context)
 # end
 
-# params: related: material, mounting & dimension - unrelated: tag_vals & present_keys
-
-
 # misc: product_type, valid, missing & compound_kinds
 # def misc_context(context, p_tags)
 #   context[:product_type] = product_category(p_tags['product_type'])
@@ -646,79 +642,6 @@ end
 #   contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
 # end
 
-# def misc_context(context)
-#   contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
-# end
-
 # def compound_keys(context, keys)
 #   context[keys.map(&:to_s).join('_').to_sym] = true if keys.all?{|k| context[k]}
-# end
-
-
-
-## attr_params: artist, title, sku, retail, qty & :art_type, :art_category, :item_type, :item_category, :medium, :material
-# def attrs_item_params(d_hsh, attrs, store, p_tags, gartner_blade)
-#   artist_params(attrs, store)
-#   Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
-#   %w[sku retail qty].map{|k| attrs[k] = public_send(k)}
-#   title_params(d_hsh, attrs, store, gartner_blade)
-# end
-
-# title
-# def title_params(d_hsh, attrs, store, gartner_blade)
-#   if gartner_blade
-#     gartner_blade_title(d_hsh, attrs, store, gartner_blade_hsh(d_hsh))
-#   else
-#     merge_title_params(attrs, store, tagline_title, body_title, attrs_title)
-#   end
-# end
-
-# def unrelated_params(context, d_hsh, store)
-#   d_hsh.each_with_object(store) do |(k, tb_hsh), store|
-#     k_hsh = tb_hsh.slice!(*tb_keys)
-#     tb_hsh.any? ? tb_hsh.transform_values!{|v_hsh| v_hsh.values[0]}.to_a : tb_hsh
-#     kind_param_case(k, tb_hsh, k_hsh, context, store)
-#   end
-# end
-#
-# def kind_param_case(k, tb_set, k_hsh, context, store)
-#   case k
-#     when 'numbering'; numbering_params(k, tb_set, k_hsh, context, store)
-#     when 'leafing'; leafing_params(k, tb_set, context, store)
-#     when 'remarque'; remarque_params(k, tb_set, context, store)
-#     when 'dated'; dated_params(k, tb_set, k_hsh, context, store)
-#     when 'verification'; verification_params(k, tb_set, k_hsh, store)
-#     when 'disclaimer'; disclaimer_params(k, tb_set, k_hsh, store)
-#     else tb_set.map{|set| Item.case_merge(store, set[1], k, set[0])}
-#   end
-# end
-
-# def dated_params(k, tb_set, k_hsh, store)
-#   return if tb_set.none? && k_hsh.none?
-#   tb_set.map{|set| Item.case_merge(store, [set[1], "(#{k_hsh.values[0]})"].join(' '), k, set[0])}
-# end
-
-# def build_tagline(context, store)
-#   if context[:valid]
-#     tagline = update_tagline(context, store, valid_description_keys(store, contexts[:tagline][:keys], 'tagline'))
-#     store['tagline'] = tagline_punct(context, tagline, tagline.keys)
-#   end
-# end
-
-# def build_body(context, store)
-#   if context[:valid]
-#     keys = valid_description_keys(store, contexts[:body][:keys], 'body')
-#     reorder_keys(keys: keys, k: 'numbering', ref: 'medium', i:1) if context[:proof_edition]
-#     body = description_params(store, keys, 'body')
-#     join_title(body, keys[keys.index('title')+1])
-#     store['body'] = body_punct(context, body, body.keys.reject{|k| k = 'numbering' && !context[:proof_edition]})
-#   end
-# end
-
-# def validated_slice(h, keys, test: :all?)
-#   h.slice!(*keys) if valid_slice?(h, keys, test)
-# end
-#
-# def valid_slice?(h, keys, check)
-#   keys.public_send(check){|k| h[k].present?}
 # end

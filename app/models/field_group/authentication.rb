@@ -70,8 +70,8 @@ class Authentication
       end
 
       def self.body(f_name)
-        swap_str(f_name, swap_list)
-        f_name.index('Britto Stamp') ? "This piece bears an #{f_name}." : "#{f_name}."
+        f_name = swap_str(f_name, swap_list)
+        f_name.index('Britto Stamp') ? "This piece bears an #{f_name}." : "Includes #{f_name}."
       end
 
       def self.swap_list

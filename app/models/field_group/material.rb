@@ -198,6 +198,10 @@ class Material
 
       class Sericel < FlatType
         class StandardSericel < Sericel
+          def self.name_values(args)
+            {product_name: ""}
+          end
+
           def self.targets
             [%W[FieldSet Dimension WidthHeight], %W[SelectMenu Mounting CanvasMounting]]
           end

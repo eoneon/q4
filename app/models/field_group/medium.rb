@@ -269,6 +269,10 @@ class Medium
     end
 
     class Sericel < SelectField
+      def self.admin_attrs
+        {paper_only: 'paper_only'}
+      end
+
       class StandardSericel < Sericel
         def self.targets
           ['sericel', 'hand painted sericel', 'hand painted sericel on serigraph outline']
@@ -277,6 +281,10 @@ class Medium
     end
 
     class ProductionArt < SelectField
+      def self.admin_attrs
+        {paper_only: 'paper_only'}
+      end
+
       class ProductionCel < ProductionArt
         def self.targets
           ['production cel', 'production cel and matching drawing', 'production cel and two matching drawings', 'production cel and three matching drawings']
@@ -284,9 +292,9 @@ class Medium
       end
 
       class ProductionDrawing < ProductionArt
-        def self.admin_attrs
-          {paper_only: 'paper_only'}
-        end
+        # def self.admin_attrs
+        #   {paper_only: 'paper_only'}
+        # end
 
         def self.targets
           ['production drawing', 'production drawing set']

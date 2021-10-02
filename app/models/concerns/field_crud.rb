@@ -3,19 +3,23 @@ require 'active_support/concern'
 module FieldCrud
   extend ActiveSupport::Concern
 
-  def update_field(param_set)
+  def update_field(param_set, input_params)
     param_set.each do |f_hsh|
       k, t, f_name, param_val = f_hsh.values
       item_val = input_params.dig(k,t,f_name)
       context = update_case(item_val(t, item_val), param_val(t, param_val))
-      update_actions(k: k, t: t, f_name: f_name, v: item_val, v2: param_val, context: context)
+      update_actions(k: k, t: t, f_name: f_name, v: item_val, v2: param_val, context: context, input_params: input_params)
       break if update_complete?(context)
     end
   end
 
-  def update_actions(k:, t:, f_name:, v:, v2:, context:)
-    remove_field_set_fields(v.f_args(v.g_hsh)) if remove_field_set?(t, context)
+  def update_actions(k:, t:, f_name:, v:, v2:, context:, input_params:)
+    remove_field_set_fields(v.f_args(v.g_hsh), input_params) if remove_field_set?(t, context)
     update_field_case(k: k, t: t, f_name: f_name, v: v, v2: v2, context: context) unless context == :skip
+  end
+
+  def add_field_set?(t, context)
+    field_set?(t) && [:add, :replace].include?(context)
   end
 
   def remove_field_set?(t, context)
@@ -88,17 +92,24 @@ module FieldCrud
     remove_hmt(f)
   end
 
-  def remove_field_set_fields(field_args)
+  def remove_field_set_fields(field_args, input_params)
     field_args.each do |f_hsh|
       k, t, f_name, f_val = h_vals(f_hsh, :k, :t, :f_name, :f_val)
-      if old_val = input_params.dig(k,t,f_name)
+      if select_field?(t)
+        remove_field_set_fields(f_val.f_args(f_val.g_hsh), input_params)
+      elsif old_val = input_params.dig(k,t,f_name)
         remove_param(k, t, f_name, old_val)
       end
     end
   end
 
+  def remove_fieldables
+    fieldables.map{|f| remove_hmt(f)}
+    self.tags = nil
+  end
+
   # product_fields remove ######################################################
-  def remove_product_fields
+  def remove_product_fields(input_params)
     return if self.tags.nil?
     f_args(input_params).each do |f_hsh|
       remove_product_field_param(*h_vals(f_hsh, :k, :t, :f_name, :f_val))
@@ -127,7 +138,6 @@ module FieldCrud
   end
 
   # default add ################################################################
-
   def add_default_fields(field_args)
     field_args.each do |f_hsh|
       add_default(*h_vals(f_hsh, :k, :t, :f_name, :f_val))
@@ -149,11 +159,7 @@ module FieldCrud
   end
 
   def default_option(k, f_val)
-    if medium?(k)
-      detect_matching_field_names(f_val)
-    elsif default_option_kind?(k)
-      f = first_fieldable(f_val)
-    end
+    f = first_fieldable(f_val) if default_option_kind?(k)
   end
 
   def default_field_set(f_val)
@@ -166,16 +172,16 @@ module FieldCrud
   end
 
   def valid_default_field_set?(k,t)
-    dimension?(k) && select_menu?(t)
+    dimension?(k) && select_menu?(t) || numbering?(k) && select_menu?(t)
   end
 
-  def detect_matching_field_names(f_obj)
-    f_obj.fieldables.detect{|f| classify_name_match?(f.field_name, f_obj.field_name)}
-  end
+  # def detect_matching_field_names(f_obj)
+  #   f_obj.fieldables.detect{|f| classify_name_match?(f.field_name, f_obj.field_name)}
+  # end
 
-  def classify_name_match?(*names)
-    names.map{|n| compound_classify(n)}.uniq.one?
-  end
+  # def classify_name_match?(*names)
+  #   names.map{|n| compound_classify(n)}.uniq.one?
+  # end
 
   def compound_classify(name)
     name.split(' ').join('_').classify

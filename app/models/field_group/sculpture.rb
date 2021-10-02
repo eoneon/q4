@@ -151,6 +151,11 @@ class Sculpture
 
       class SculpturePart < GartnerBlade
         class Lid < SculpturePart
+          def self.target_tags(f_name)
+            name = str_edit(str: f_name, skip:['and'])
+            {tagline: "with #{name}", body: "with #{name}"}
+          end
+
           def self.targets
             ['marble finial lid', 'avian finial lid', 'leaf and tendril lid', 'bone and tendril lid']
           end

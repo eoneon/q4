@@ -1,7 +1,7 @@
 <%= form_with model: item, url: item_field_path(item), id: "edit-item-fields" do |f| %>
-  <% item.input_group[:rows].each do |row| %>
+  <% @input_group[:rows].each do |row| %>
     <div class="card border border-secondary p-2 mb-2">
-      <div class="row">
+      <div class="form-row">
         <% row.each do |f_hsh| %>
           <%= f.fields_for f_hsh[:k].to_sym do |kind_scope| %>
             <%= kind_scope.fields_for f_hsh[:t_type].to_sym do |type_scope| %>

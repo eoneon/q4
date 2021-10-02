@@ -13,19 +13,6 @@ module Fieldable
     end
   end
 
-  def product_fields_loop(g_hsh, d_hsh, keys, inputs=[])
-    Product.dig_keys_with_end_val(h: g_hsh).each_with_object(inputs) do |args, inputs|
-      k, t, t_type, f_name, f = input_vals(*args[0..-2].map!(&:underscore).append(args[-1]))
-      tags_loop(k, f_name, f, d_hsh, keys) if f.tags
-
-      if field_set?(t)
-        product_fields_loop(f.g_hsh, d_hsh, keys, inputs)
-      elsif !radio_button?(t)
-        inputs.append(input_hsh(k, t, f_name, f))
-      end
-    end
-  end
-
   def input_hsh(k, t, f_name, f_val)
     [[:k,:t,:t_type,:f_name,:f_val], [k, t, f_assoc(t), f_name, f_val]].transpose.to_h
   end

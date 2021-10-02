@@ -67,3 +67,16 @@ module Textable
 
   end
 end
+
+
+# def input_label(f_hsh)
+#   if material?(f_hsh[:k]) || medium?(f_hsh[:k])
+#     f_hsh[:k]
+#   elsif f_hsh[:f_name].index('dimension')
+#     'dimensions'
+#   elsif mounting?(f_hsh[:k]) && select_menu?(f_hsh[:t])
+#     f_hsh[:k]
+#   else
+#     swap_str(f_hsh[:f_name].split('_').join(' '), ['standard', '', 'flat', '', 'mounting', ''])
+#   end
+# end

@@ -221,28 +221,3 @@ class Item < ApplicationRecord
   end
 
 end
-
-# def grouped_form_fields
-#   form_fields.group_by{|h| h[:kind_scope]}
-# end
-#
-# def form_fields
-#   return {} unless product
-#   a = product.input_group_with_params(input_params).each_with_object([]) do |(k, field_groups), a|
-#     field_groups.each do |t, fields|
-#       fields.values.map {|f_hsh| a.append(f_hsh)}
-#     end
-#   end
-# end
-
-# def fk_id(word)
-#   [word.singularize, 'id'].join("_")
-# end
-#
-# def name_method(f)
-#   if render_types.include?(f.type.underscore)
-#     fk_id(f.kind)
-#   else
-#     delim_format(words: f.field_name, join_delim: '_', split_delims: [' ', '-'])
-#   end
-# end

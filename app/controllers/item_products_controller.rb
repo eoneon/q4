@@ -8,6 +8,7 @@ class ItemProductsController < ApplicationController
     add_product(@product)
 
     @item.save
+    @input_group = @item.input_group
 
     respond_to do |format|
       format.js
@@ -16,12 +17,14 @@ class ItemProductsController < ApplicationController
 
   def update
     @item = Item.find(params[:id])
-    @item.tags = hsh_init(@item.tags)
     @product = Product.find(params[:product_id])
     @products, @inputs = Product.search(scope: @product, hstore: 'tags')
     replace_product(@product, @item.product)
 
+
     @item.save
+    @input_group = @item.input_group
+
 
     respond_to do |format|
       format.js
@@ -43,6 +46,7 @@ class ItemProductsController < ApplicationController
     remove_product(@item.product)
 
     @item.save
+    @input_group = @item.input_group
 
     respond_to do |format|
       format.js
@@ -57,11 +61,12 @@ class ItemProductsController < ApplicationController
 
   def add_product(product)
     @item.add_obj(product)
+    @item.tags = hsh_init(@item.tags)
     @item.add_default_fields(product.f_args(product.g_hsh))
   end
 
   def remove_product(product)
-    @item.remove_product_fields
+    @item.remove_fieldables
     @item.remove_obj(product)
   end
 
@@ -71,3 +76,8 @@ class ItemProductsController < ApplicationController
   end
 
 end
+
+# def remove_product(product, input_params)
+#   @item.remove_product_fields(input_params)
+#   @item.remove_obj(product)
+# end

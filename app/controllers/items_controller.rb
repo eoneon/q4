@@ -3,12 +3,14 @@ class ItemsController < ApplicationController
   def show
     @item = Item.find(params[:id])
     @products, @inputs = Product.search(scope: @item.product, hstore: 'tags')
+    @input_group = @item.input_group #(@item.input_params)
   end
 
   def create
     @invoice = Invoice.find(params[:invoice_id])
     @item = @invoice.items.build(item_params)
     @item.save
+    @input_group = @item.input_group
 
     respond_to do |format|
       format.js
@@ -21,6 +23,7 @@ class ItemsController < ApplicationController
     @item.assign_attributes(item_params) # @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])
 
     @item.save
+    @input_group = @item.input_group #(@item.input_params)
 
     respond_to do |format|
       format.js
@@ -47,12 +50,3 @@ class ItemsController < ApplicationController
   end
 
 end
-
-# def search
-#   @item = Item.find(params[:id])
-#   @products, @inputs = Product.search(scope: @item.product, search_params: params[:items][:search], hstore: 'tags')
-#
-#   respond_to do |format|
-#     format.js
-#   end
-# end

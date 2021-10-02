@@ -4,7 +4,8 @@ class ItemFieldsController < ApplicationController
     @item = Item.find(params[:id])
     @item.tags = hsh_init(@item.tags)
     param_set = Item.build_params(params[:item].to_unsafe_h, :k, :t,:f_name,:f_val)
-    @item.update_field(param_set)
+    @item.update_field(param_set, @item.input_params)
+    @input_group = @item.input_group
 
     respond_to do |format|
       format.js
@@ -18,13 +19,3 @@ class ItemFieldsController < ApplicationController
   end
 
 end
-
-# def param_set
-#   params[:item].to_unsafe_h.each_with_object([]) do |(k, field_groups),a|
-#     field_groups.each do |t, fields|
-#       fields.each do |f_name, f_val|
-#         a.append({k: k, t: t, f_name: f_name, f_val: f_val})
-#       end
-#     end
-#   end
-# end
