@@ -25,6 +25,18 @@ module Hashable
     ref.nil? ? i : keys.index(ref)+i
   end
 
+  # ramdon hsh methods  ########################################################
+  def cond_slice(h,k)
+    if v = h.dig(k)
+      h.delete(k)
+      v
+    end
+  end
+
+  def flatten_hsh(h)
+    h.transform_values!{|v_hsh| v_hsh.values[0]}
+  end
+
   class_methods do
 
     def case_merge(h, v, *dig_keys)

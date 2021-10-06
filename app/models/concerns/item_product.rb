@@ -7,7 +7,7 @@ module ItemProduct
     return f_grp if !product
     product_and_item_attrs(f_grp, product.tags)
     product.product_item_loop(input_params, f_grp, keys=%w[tagline body material_dimension mounting_dimension material_mounting])
-    related_params(f_grp[:context], f_grp[:d_hsh], f_grp[:store], f_grp[:attrs])
+    related_params(f_grp)
     shared_context_and_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store], product.tags)
     divergent_params(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], f_grp[:store]) if f_grp[:context][:valid]
     f_grp
@@ -32,161 +32,141 @@ module ItemProduct
   ##############################################################################
   # related_params: material, mounting, dimension
   ##############################################################################
-  def related_params(context, d_hsh, store, attrs)
-    merge_related_params('material', 'mounting', 'material_mounting', 'body', d_hsh, store)
-    merge_related_params('mounting', 'dimension', 'mounting_dimension', 'mounting_dimension', d_hsh, store)
-    dimension_params('dimension', 'material_dimension', 'mounting_dimension', d_hsh, store, attrs, context)
+  def related_params(f_grp, args={k_key: 'dimension', k_key2: 'material', k_key3: 'mounting', sub_key: 'material_dimension', sub_key2: 'mounting_dimension'})
+    merge_related_params(args[:k_key2], args[:k_key3], args[:sub_key], 'body', f_grp[:d_hsh], f_grp[:store])
+    merge_related_params(args[:k_key3], args[:k_key], args[:sub_key2], args[:sub_key2], f_grp[:d_hsh], f_grp[:store])
+    dimension_params(f_grp, args)
   end
 
-  # new methods ################################################################
+  # merge_related_params #######################################################
   def merge_related_params(k_key, k_key2, sub_key, end_key, d_hsh, store)
     if k_hsh = cond_slice(d_hsh,k_key)
-      sub_hsh = k_hsh.transform_values!{|v_hsh| v_hsh.values[0]}.slice!(*tb_keys)
+      sub_hsh = flatten_hsh(k_hsh).slice!(*tb_keys)
       store[k_key] = k_hsh
-      Item.case_merge(d_hsh, sub_hsh[sub_key], k_key2, sub_key, end_key) if sub_hsh[sub_key]
+      if sub_tag = sub_hsh.dig(sub_key)
+        Item.case_merge(d_hsh, sub_tag, k_key2, sub_key, end_key)
+      end
     end
   end
 
-  # def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context, hsh={})
-  #   if dimension = cond_slice(d_hsh, k_key) # k_hsh = {"width"=>"12", "height"=>"8"}
-  #     #puts "dimension: #{dimension}"
-  #     sub_hsh = dimension.slice!(sub_key) #'material_dimension'
-  #
-  #     #puts "dimension: #{dimension}"
-  #     dim_hsh = sub_hsh.has_key?(sub_key2) ? sub_hsh.slice!(sub_key2) : sub_hsh
-  #     # puts "dim_hsh: #{dim_hsh}"
-  #     # puts "dimension: #{dimension}"
-  #     dim_name, material_tag = dimension[sub_key].select{|k,v| v != "n/a"}.to_a[0]
-  #
-  #     dim_keys = dim_name.underscore.split('_') if dim_name
-  #     material_dimension_params(dim_hsh, sub_key, dim_keys, material_tag, d_hsh, attrs, hsh)
-  #     mounting_dimension_params(dim_hsh, sub_hsh.dig(sub_key2), sub_key2, attrs, hsh)
-  #     body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
-  #     tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
-  #   end
-  # end
-
-  def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context, hsh={})
-    dimension = cond_slice(d_hsh, k_key)
-    sub_hsh = dimension.slice!(sub_key)
-    if dim_hsh = dim_hsh(sub_hsh,sub_key2)
-      dim_name, material_tag = dimension[sub_key].to_a[0].reject{|i| i=="n/a"}
-      material_dimension_params(dim_hsh, sub_key, dim_name.underscore.split('_'), material_tag, d_hsh, attrs, hsh)
-      mounting_dimension_params(dim_hsh, sub_hsh.dig(sub_key2), sub_key2, attrs, hsh)
-      body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
-      tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
-    end
-  end
-
-  def dim_hsh(sub_hsh,sub_key2)
-    h = sub_hsh.has_key?(sub_key2) ? sub_hsh.slice!(sub_key2) : sub_hsh
-    h if h.any?
-  end
-
-  # def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context, hsh={})
-  #     material_dimension_params(dim_hsh, sub_key, dim_keys, material_tag, d_hsh, attrs, hsh)
-  #     mounting_dimension_params(dim_hsh, sub_hsh.dig(sub_key2), sub_key2, attrs, hsh)
-  #     body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
-  #     tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
-  #   end
-  # end
-
-  # def dim_params(dimension,sub_key)
-  #   dim_name, material_tag = dimension[sub_key].to_a[0].reject{|i| i=="n/a"}
-  #   dim_name.underscore.split('_')
-  # end
-
-  # material_dimension_params ##################################################
-  # def material_dimension_params(sub_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
-  #   weight_key = dim_keys.slice!(-1) if dim_keys.index('weight')
-  #   # weight_hsh = sub_hsh.slice!(*dim_keys) if weight_key
-  #   # dim_tag = format_weight_params(weight_hsh, weight_key, dim_tag) if weight_key
-  #   if vals_exist?(sub_hsh, dim_keys)
-  #     puts "sub_hsh2: #{sub_hsh}"
-  #     dim_hsh = sub_hsh.slice(*dim_keys)
-  #     puts "dim_hsh2: #{dim_hsh}"
-  #     #sub_hsh.slice!(*dim_hsh.keys)
-  #
-  #     format_material_dimensions(dim_hsh.values, dim_hsh.values[0..1], dim_keys[0], dim_tag, attrs, hsh, sub_key)
-  #   else
-  #     attrs.merge!(attrs_dimension_params([nil]))
-  #   end
-  # end
-
-  def material_dimension_params(dim_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
-    weight_key = dim_keys.slice!(-1) if dim_keys.index('weight')
-    if vals_exist?(dim_hsh, dim_keys)
-      material = dim_hsh.slice(*dim_keys)
-      material.keys.map{|k| dim_hsh.delete(k)}
-      format_material_dimensions(material.values, material.values[0..1], dim_keys[0], dim_tag, attrs, hsh, sub_key)
+  # dimension_params ###########################################################
+  def dimension_params(f_grp, args)
+    if valid_dimensions?(f_grp[:d_hsh], args)
+      material_and_mounting_dimension_params(f_grp, args, args[:dimension]={})
     else
       attrs.merge!(attrs_dimension_params([nil]))
     end
   end
 
+  # def valid_dimensions?(d_hsh, args)
+  #   if args = dim_hsh?(d_hsh, args)
+  #     if args = valid_dim_hsh?(args)
+  #       args
+  #     end
+  #   end
+  # end
 
-  def format_weight_params(weight_hsh, weight_key, dim_tag)
-    if weight = weight_hsh.dig(weight_key)
-      weight(weight_key, weight, dim_tag)
+  def valid_dimensions?(d_hsh, args)
+    if dim_hsh?(d_hsh, args)
+      valid_dim_hsh?(args)
+      #   args
+      # end
+    end
+  end
+  # material_dimensions?
+  def dim_hsh?(d_hsh, args)
+    dimension = cond_slice(d_hsh, args[:k_key])
+    args[:sub_hsh] = dimension.slice!(args[:sub_key])
+    args[:dim_hsh] = args[:sub_hsh].has_key?(args[:sub_key2]) ? args[:sub_hsh].slice!(args[:sub_key2]) : args[:sub_hsh]
+    dim_keys_and_material_tag(dimension[args[:sub_key]], args)
+  end
+
+  def dim_keys_and_material_tag(material_tag_hsh, args)
+    return if args[:dim_hsh].empty?
+    dim_name, material_tag = material_tag_hsh.to_a[0].reject{|i| i=="n/a"}
+    args[:dim_keys] = dim_name.underscore.split('_')
+    args[:material_tag] = weight_params(args[:dim_keys], args[:sub_hsh], material_tag)
+    # args
+  end
+  # valid_material_dimensions?
+  def valid_dim_hsh?(args)
+    return unless vals_exist?(args[:dim_hsh], args[:dim_keys])
+    args[:material_dimension] = args[:dim_hsh].slice(*args[:dim_keys])
+    args[:material_dimension].keys.map{|k| args[:dim_hsh].delete(k)}
+    # args
+  end
+
+  def material_and_mounting_dimension_params(f_grp, args, dimension)
+    material_dimension_params(args[:material_dimension].values, args[:material_tag], args[:sub_key], args[:dim_keys][0], f_grp[:attrs], dimension)
+    mounting_dimension_params(mounting_args(args[:dim_hsh], args[:sub_hsh].dig(args[:sub_key2]), args), f_grp[:attrs], dimension)
+    body_dimensions(args[:k_key], args[:sub_key], args[:sub_key2], dimension, f_grp[:store]) if dimension.any?
+    tagline_dimensions(args[:k_key], args[:sub_key], args[:sub_key2], dimension, f_grp[:store]) if dimension.any?
+  end
+
+  def material_dimension_params(material_dimensions, material_tag, sub_key, dim_type, attrs, dimension)
+    attrs.merge!(attrs_dimension_params(material_dimensions[0..1]))
+    dimension.merge!({sub_key=>material_dimension(material_dimensions, material_dimensions[0..1], dim_type, material_tag)})
+  end
+
+  def mounting_dimension_params(args, attrs, dimension)
+    attrs.merge!(attrs_dimension_params(args[:mounting_attrs], keys: %w[frame_width frame_height]))
+    dimension.merge!({args[:sub_key2]=> mounting_dimension(args[:mounting_dimension], args[:mounting_dimension][0..1], args[:mounting_tag])}) if args[:mounting_dimension]
+  end
+
+  def mounting_args(dim_hsh, mounting, args)
+    args[:mounting_dimension] = (vals_exist?(dim_hsh, dim_hsh.keys) ? dim_hsh.values : nil)
+    args[:mounting_tag] = (mounting && args[:mounting_dimension] ? mounting.to_a[0][-1] : nil)
+    args[:mounting_attrs] = (args[:mounting_tag] == '(frame)' && args[:mounting_dimension].count >= 2 ? args[:mounting_dimension][0..1] : [nil])
+    args
+  end
+
+  def tagline_dimensions(k_key, sub_key, sub_key2, dimension, store)
+    key = [sub_key2, sub_key].detect{|key| dimension.has_key?(key)}
+    Item.case_merge(store, "(#{dimension.dig(key,'measurements')})", k_key, 'tagline') if dimension.dig(key, 'item_size').to_i >= 1300
+  end
+
+  def body_dimensions(k_key, sub_key, sub_key2, dimension, store)
+    if h = dimension.dig(sub_key)
+      str = [h['measurements'], h.dig('tag')].compact.join(' ')+'.'
+      str = [dimension[sub_key2]['measurements'], dimension[sub_key2]['tag']].join(' ')+', '+str if dimension.has_key?(sub_key2)
+      Item.case_merge(store, "Measures approx. #{str}", k_key, 'body')
     end
   end
 
-  def weight(weight_key, weight, dim_tag)
-    [dim_tag, weight, 'lb', "(#{weight_key})"].compact.join(' ') if weight.to_i >= 10
+  def weight_params(dim_keys, sub_hsh, material_tag)
+    weight_key = dim_keys.slice!(-1) if dim_keys.index('weight')
+    weight_hsh = sub_hsh.slice!(*dim_keys) if weight_key
+    weight = format_weight_params(weight_hsh, weight_key) if weight_hsh
+    weight ? weight : material_tag
+  end
+  ##############################################################################
+
+  def format_weight_params(weight_hsh, weight_key)
+    if weight = weight_hsh.dig(weight_key)
+      weight(weight_key, weight)
+    end
   end
 
-  def format_material_dimensions(dims, dim_set, dim_type, dim_tag, attrs, h, sub_key)
-    attrs.merge!(attrs_dimension_params(dim_set))
-    h.merge!({sub_key=>material_dimension(dims, dim_set, dim_type, dim_tag)})
+  def weight(weight_key, weight)
+    ["#{weight}lb", "(#{weight_key})"].compact.join(' ') if weight.to_i >= 10
   end
 
   def material_dimension(dims, dim_set, dim_type, dim_tag)
     {'measurements'=> measurements(dims), 'item_size'=> item_size(dim_set, dim_type), 'tag'=> dim_tag}
   end
 
-  # mounting_dimension_params ##################################################
-  def mounting_dimension_params(dim_hsh, mounting, sub_key, attrs, hsh)
-    if mounting
-      mounting_tag = mounting.to_a[0][-1]
-      format_mounting_dimensions(dim_hsh, sub_key, mounting_tag, (mounting_tag=='(frame)'), attrs, hsh)
-    else
-      attrs.merge!(attrs_dimension_params([nil], keys: %w[frame_width frame_height]))
-    end
-  end
-
-  def format_mounting_dimensions(dim_hsh, sub_key, dim_tag, framed, attrs, h)
-    if vals_exist?(dim_hsh, dim_hsh.keys) && dim_tag
-      attr_dims = framed ? dim_hsh.values[0..1] : [nil]
-      attrs.merge!(attrs_dimension_params(attr_dims, keys: %w[frame_width frame_height]))
-      h.merge!({sub_key=> mounting_dimension(dim_hsh.values, dim_hsh.values[0..1], dim_tag)})
-    end
-  end
-
   def mounting_dimension(dims, dim_set, dim_tag)
     {'measurements'=> measurements(dims), 'item_size'=> item_size(dim_set, 'mounting'), 'tag'=> dim_tag}
   end
 
-  # shared methods ##############################################################
-  def measurements(d_names)
-    d_names.map{|i| i+"\""}.join(' x ')
+  # shared methods #############################################################
+  def measurements(dims)
+    dims.map{|i| i+"\""}.join(' x ')
   end
 
   def item_size(dims, dim_name=nil)
     dims = dims.map(&:to_i)
     dim_name == 'diameter' ? dims[0]**2 : dims.inject(:*)
-  end
-
-  def tagline_dimensions(hsh, k_key, sub_key, sub_key2, store)
-    key = [sub_key2, sub_key].detect{|key| hsh.has_key?(key)}
-    Item.case_merge(store, "(#{hsh.dig(key,'measurements')})", k_key, 'tagline') if hsh.dig(key, 'item_size').to_i >= 1300
-  end
-
-  def body_dimensions(k_key, sub_key, sub_key2, hsh, store)
-    if h = hsh.dig(sub_key)
-      str = [h['measurements'], h.dig('tag')].compact.join(' ')+'.'
-      str = [hsh[sub_key2]['measurements'], hsh[sub_key2]['tag']].join(' ')+', '+str if hsh.has_key?(sub_key2)
-      Item.case_merge(store, "Measures approx. #{str}", k_key, 'body')
-    end
   end
 
   # attrs_dimension_params #####################################################
@@ -200,7 +180,6 @@ module ItemProduct
   def shared_context_and_attrs(context, d_hsh, attrs, store, p_tags)
     d_hsh.keys.map{|k| context[k.to_sym] = true if contexts[:present_keys].include?(k)}
     flatten_context(d_hsh).each {|k,v| unrelated_context(context,k,v, contexts[:tagline][:vals])}
-    #context[:valid] = true if context[:medium] || (context[:gartner_blade] && context[:sculpture_type])
     context[:valid] = true if context[:medium] || context[:sculpture_type]
     context[:missing] = true if context[:unsigned] && !context[:disclaimer]
   end
@@ -602,13 +581,6 @@ module ItemProduct
   end
 
   # utility methods ############################################################
-  def cond_slice(h,k)
-    if v = h.dig(k)
-      h.delete(k)
-      v
-    end
-  end
-
   def rev_detect(set, keys)
     set.reverse.detect{|k| keys.include?(k)}
   end
@@ -629,29 +601,77 @@ end
 # THE END ######################################################################
 ##############################################################################
 ##############################################################################
-# context_and_attrs
-##############################################################################
-# def context_and_attrs(context, d_hsh, attrs, store, p_tags)
-#   d_hsh.keys.map{|k| context[k.to_sym] = true if contexts[:present_keys].include?(k)}
-#   context_hsh(context, d_hsh, store, p_tags)
-#   attrs_item_params(d_hsh, attrs, store, p_tags, context[:gartner_blade])
+# def related_params(context, d_hsh, store, attrs)
+#   merge_related_params('material', 'mounting', 'material_mounting', 'body', d_hsh, store)
+#   merge_related_params('mounting', 'dimension', 'mounting_dimension', 'mounting_dimension', d_hsh, store)
+#   dimension_params('dimension', 'material_dimension', 'mounting_dimension', d_hsh, store, attrs, context)
 # end
 
-## context_hsh
-# def context_hsh(context, d_hsh, store, p_tags)
-#   params_context(context, d_hsh, store)
-#   nested_params_context(context, d_hsh)
-#   misc_context(context, p_tags)
-#   reorder_remove(context)
+# def dimension_params(k_key, sub_key, sub_key2, d_hsh, store, attrs, context)
+#   dimension = cond_slice(d_hsh, k_key)
+#   sub_hsh = dimension.slice!(sub_key)
+#   dim_hsh = sub_hsh.has_key?(sub_key2) ? sub_hsh.slice!(sub_key2) : sub_hsh
+#
+#   if dim_hsh.any?
+#     dim_name, material_tag = dimension[sub_key].to_a[0].reject{|i| i=="n/a"}
+#     dim_keys = dim_name.underscore.split('_')
+#     material_tag = weight_params(dim_keys, sub_hsh, material_tag)
+#     material_and_mounting_dimension_params(sub_hsh, dim_hsh, k_key, sub_key, sub_key2, dim_keys, material_tag, d_hsh, store, attrs)
+#   end
+# end
+#
+# def material_and_mounting_dimension_params(sub_hsh, dim_hsh, k_key, sub_key, sub_key2, dim_keys, material_tag, d_hsh, store, attrs, hsh={})
+#   material_dimension_params(dim_hsh, sub_key, dim_keys, material_tag, d_hsh, attrs, hsh)
+#   mounting_dimension_params(dim_hsh, sub_hsh.dig(sub_key2), sub_key2, attrs, hsh)
+#   body_dimensions(k_key, sub_key, sub_key2, hsh, store) if hsh.any?
+#   tagline_dimensions(hsh, k_key, sub_key, sub_key2, store) if hsh.any?
 # end
 
-# misc: product_type, valid, missing & compound_kinds
-# def misc_context(context, p_tags)
-#   context[:product_type] = product_category(p_tags['product_type'])
-#   context[:gartner_blade] = true if context[:product_type] == 'GartnerBlade' && context[:sculpture_type]
-#   context[:valid] = true if context[:medium] || context[:gartner_blade]
-#   context[:missing] = true if context[:unsigned] && !context[:disclaimer]
-#   contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
+# def material_dimension_params(dim_hsh, sub_key, dim_keys, dim_tag, d_hsh, attrs, hsh)
+#   if vals_exist?(dim_hsh, dim_keys)
+#     material = dim_hsh.slice(*dim_keys)
+#     material.keys.map{|k| dim_hsh.delete(k)}
+#     format_material_dimensions(material.values, material.values[0..1], dim_keys[0], dim_tag, attrs, hsh, sub_key)
+#   else
+#     attrs.merge!(attrs_dimension_params([nil]))
+#   end
+# end
+
+# def format_material_dimensions(dims, dim_set, dim_type, dim_tag, attrs, h, sub_key)
+#   attrs.merge!(attrs_dimension_params(dim_set))
+#   h.merge!({sub_key=>material_dimension(dims, dim_set, dim_type, dim_tag)})
+# end
+
+# see mounting_dimension_params 127 ##########################################
+# def mounting_dimension_params(dim_hsh, mounting, sub_key, attrs, hsh)
+#   if mounting
+#     mounting_tag = mounting.to_a[0][-1]
+#     format_mounting_dimensions(dim_hsh, sub_key, mounting_tag, (mounting_tag=='(frame)'), attrs, hsh)
+#   else
+#     attrs.merge!(attrs_dimension_params([nil], keys: %w[frame_width frame_height]))
+#   end
+# end
+
+# see mounting_dimension_params 127, mounting_args 137 #######################
+# def format_mounting_dimensions(dim_hsh, sub_key, dim_tag, framed, attrs, h)
+#   if vals_exist?(dim_hsh, dim_hsh.keys) && dim_tag
+#     attr_dims = framed ? dim_hsh.values[0..1] : [nil]
+#     attrs.merge!(attrs_dimension_params(attr_dims, keys: %w[frame_width frame_height]))
+#     h.merge!({sub_key=> mounting_dimension(dim_hsh.values, dim_hsh.values[0..1], dim_tag)})
+#   end
+# end
+
+# def tagline_dimensions(hsh, k_key, sub_key, sub_key2, store)
+#   key = [sub_key2, sub_key].detect{|key| hsh.has_key?(key)}
+#   Item.case_merge(store, "(#{hsh.dig(key,'measurements')})", k_key, 'tagline') if hsh.dig(key, 'item_size').to_i >= 1300
+# end
+#
+# def body_dimensions(k_key, sub_key, sub_key2, hsh, store)
+#   if h = hsh.dig(sub_key)
+#     str = [h['measurements'], h.dig('tag')].compact.join(' ')+'.'
+#     str = [hsh[sub_key2]['measurements'], hsh[sub_key2]['tag']].join(' ')+', '+str if hsh.has_key?(sub_key2)
+#     Item.case_merge(store, "Measures approx. #{str}", k_key, 'body')
+#   end
 # end
 
 # def compound_keys(context, keys)
