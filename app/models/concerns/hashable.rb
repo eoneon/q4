@@ -3,6 +3,10 @@ require 'active_support/concern'
 module Hashable
   extend ActiveSupport::Concern
 
+  def defualt_hsh(*keys)
+    keys.each_with_object({}) {|k,h| h[k]=nil}
+  end
+
   def trans_args(arg_list)
     arg_list.each_with_object({a:[],b:[]}) {|i,args| arg_list.index(i).even? ? args[:a].append(i) : args[:b].append(i)}.values.transpose
   end
@@ -25,16 +29,74 @@ module Hashable
     ref.nil? ? i : keys.index(ref)+i
   end
 
-  # ramdon hsh methods  ########################################################
-  def cond_slice(h,k)
+  def rev_detect(set, keys)
+    set.reverse.detect{|k| keys.include?(k)}
+  end
+
+  def vals_exist?(h, keys, check: :all?)
+    keys.public_send(check){|k| h[k].present?} if keys
+  end
+
+  # hsh filter methods  ########################################################
+  def filtered_hsh(h:, keys:[], dig_set:[])
+    keys.each_with_object({}) do |k,hsh|
+      if v = h.dig(*dig_set.dup.prepend(k))
+        hsh[k] = v
+      end
+    end
+  end
+
+  def extract_and_flatten(k, nested_hsh, hsh)
+    nested_hsh.count>1 ? hsh.merge!(nested_hsh) : hsh[k] = nested_hsh.values[0]
+  end
+
+  def flatten_hsh(h)
+    h.transform_values!{|v_hsh| v_hsh.values[0]}
+  end
+
+  # val_slice  ################################################################# # Hash: if v = h.dig(k); returns v and h.delete(k); else nil # Array: if a.index(k); returns i and deletes i from a; else nil
+  def slice_and_delete(enum,k)
+    if enum.is_a?(Hash)
+      hsh_slice_and_delete(enum,k)
+    else
+      arr_slice_and_delete(enum,k)
+    end
+  end
+
+  def hsh_slice_and_delete(h,k)
     if v = h.dig(k)
       h.delete(k)
       v
     end
   end
 
-  def flatten_hsh(h)
-    h.transform_values!{|v_hsh| v_hsh.values[0]}
+  def arr_slice_and_delete(a,i)
+    if idx = a.index(i)
+      a.slice!(idx)
+    end
+  end
+
+  # vals_slice  ################################################################# Hash: if v = h.dig(k); returns v and h.delete(k); else nil # Array: if a.index(k); returns i and deletes i from a; else nil
+  def slice_vals_and_delete(enum,*keys)
+    if enum.is_a?(Hash)
+      slice_hsh_vals_and_delete(enum,keys)
+    else
+      slice_arr_vals_and_delete(enum,keys)
+    end
+  end
+
+  def slice_hsh_vals_and_delete(h,*keys)
+    keys.flatten.each_with_object({}) do |k, hsh|
+      if v = hsh_slice_and_delete(h,k)
+        hsh[k]=v
+      end
+    end
+  end
+
+  def slice_arr_vals_and_delete(a,*items)
+    items.flatten.each_with_object([]) do |i, set|
+      set.append(i) if arr_slice_and_delete(a,i)
+    end
   end
 
   class_methods do

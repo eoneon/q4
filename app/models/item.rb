@@ -200,16 +200,16 @@ class Item < ApplicationRecord
 
   ##############################################################################
 
-  def tagline
-    csv_tags['tagline'] unless csv_tags.nil?
+  def tagline_title
+    "\"#{self.title}\"" unless self.title.blank?
   end
 
-  def search_tagline
-    csv_tags['search_tagline'] unless csv_tags.nil?
+  def body_title
+    tagline_title ? tagline_title : 'This'
   end
 
-  def body
-    csv_tags['body'] unless csv_tags.nil?
+  def attrs_title
+    tagline_title ? tagline_title : 'Untitled'
   end
 
   def product
@@ -221,3 +221,15 @@ class Item < ApplicationRecord
   end
 
 end
+
+# def tagline
+#   csv_tags['tagline'] unless csv_tags.nil?
+# end
+#
+# def search_tagline
+#   csv_tags['search_tagline'] unless csv_tags.nil?
+# end
+#
+# def body
+#   csv_tags['body'] unless csv_tags.nil?
+# end

@@ -20,8 +20,14 @@ class Product < ApplicationRecord
 
   # GROUPING METHODS: CRUD/VIEW ################################################
   def product_item_loop(i_hsh, f_grp, keys)
+    product_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], tags)
     product_item_fields_loop(g_hsh, i_hsh, f_grp[:rows], f_grp[:d_hsh], keys)
     f_grp[:rows] = assign_row(f_grp[:rows].group_by{|h| h[:k]}, form_rows(f_grp[:context], f_grp[:attrs]['medium']))
+  end
+
+  def product_attrs(context, d_hsh, attrs, p_tags)
+    context[product_category(p_tags['product_type'])] = true
+    Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
   end
 
   # inputs_and_selected_make_attrs_and_rows ####################################
@@ -30,14 +36,10 @@ class Product < ApplicationRecord
     item_fields_loop(inputs, i_hsh, rows, d_hsh, keys)
   end
 
-
-  ##############################################################################
-
   def product_fields_loop(g_hsh, d_hsh, keys, inputs=[])
     Product.dig_keys_with_end_val(h: g_hsh).each_with_object(inputs) do |args, inputs|
       k, t, t_type, f_name, f = input_vals(*args[0..-2].map!(&:underscore).append(args[-1]))
       tags_loop(k, f_name, f, d_hsh, keys) if f.tags
-
       if field_set?(t)
         product_fields_loop(f.g_hsh, d_hsh, keys, inputs)
       elsif !radio_button?(t)
@@ -88,7 +90,6 @@ class Product < ApplicationRecord
 
   def form_rows(context, medium)
     case
-      #when context[:flat_art] && medium != 'Sericel'; [%w[category numbering], %w[medium material mounting], %w[embellishing leafing remarque], %w[dated signature certificate], %w[seal verification], %w[dimension], %w[disclaimer]]
       when context[:flat_art] && medium != 'Sericel'; [%w[category medium embellishing leafing], %w[numbering], %w[material mounting], %w[dated signature certificate], %w[seal verification], %w[dimension], %w[disclaimer]]
       when context[:flat_art]; [%w[category medium], %w[numbering], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
       when context[:flat_art]; [%w[category numbering], %w[medium material embellishing], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
