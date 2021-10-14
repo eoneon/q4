@@ -25,7 +25,7 @@ module TypeCheck
   end
 
   def default_option_kind?(k)
-    %w[category sculpture_type numbering medium material signature certificate].include?(k)
+    %w[category sculpture_type numbering medium material mounting signature certificate].include?(k)
   end
 
   # FieldItem is_a? based on :type #############################################
@@ -81,85 +81,6 @@ module TypeCheck
     p_val if product_type == 'SculptureArt'
   end
 
-  # ItemProduct is_a? based on input_group[:d_hsh] #############################
-  # def framed?(h)
-  #   d_params?(h, 'tagline', 'mounting', 'Framed')
-  # end
-  #
-  # def embellished?(h)
-  #   h['embellished']
-  # end
-  #
-  # def giclee?(h)
-  #   d_params?(h, 'tagline', 'medium', 'Giclee')
-  # end
-  #
-  # def print?(h)
-  #   d_params?(h, 'tagline', 'medium', 'Print')
-  # end
-  #
-  # def poster?(h)
-  #   d_params?(h, 'tagline', 'medium', 'Poster')
-  # end
-  #
-  # def gallery_wrapped?(h)
-  #   d_params?(h, 'tagline', 'material', 'Gallery')
-  # end
-  #
-  # def stretched?(h)
-  #   d_params?(h, 'body', 'material', 'stretched')
-  # end
-  #
-  # def standard_paper?(h)
-  #   d_params?(h, 'tagline', 'material', 'Paper') && !rice_paper?(h)
-  # end
-  #
-  # def rice_paper?(h)
-  #   d_params?(h,'tagline', 'material', 'Rice')
-  # end
-  #
-  # def limited_edition?(h)
-  #   h['edition_type']
-  # end
-  #
-  # def standard_numbering?(h)
-  #   h['numbering'] && !from_an_edition?(h)
-  # end
-  #
-  # def from_an_edition?(h)
-  #   d_params?(h, 'tagline', 'numbering', 'from')
-  # end
-  #
-  # def unsigned?(h)
-  #   d_params?(h, 'tagline', 'signature', '(Unsigned)')
-  # end
-  #
-  # def signed?(h)
-  #   h['signature'] && !unsigned?(h)
-  # end
-  #
-  # def danger_disclaimer(h)
-  #   d_params?(h, 'tagline', 'disclaimer', '(Disclaimer)')
-  # end
-  #
-  # ##############################################################################
-  # def one_submedia?(h)
-  #   h['leafing'] && !h['remarque'] || !h['leafing'] && h['remarque']
-  # end
-  #
-  # def two_submedia?(h)
-  #   h['leafing'] && h['remarque']
-  # end
-  #
-  # def numbered_and_signed?(h)
-  #   standard_numbering?(h) && signed?(h)
-  # end
-  # ##############################################################################
-  #
-  # def d_params?(h, context, *params)
-  #   trans_args(params).all?{|args| h.keys.include?(args[0]) && h[args[0]][context].split(' ').include?(args[1])}
-  # end
-
   # check association ##########################################################
   def f_assoc(t)
     tag_attr?(t) || option?(t) || radio_button?(t) ? t : to_class(t).assoc_names[0].singularize
@@ -204,4 +125,83 @@ end
 
 # def tagline_keys
 #   {'FlatArt'=> %w[artist title mounting embellishing category edition_type medium material dimension leafing remarque numbering signature certificate disclaimer]}
+# end
+
+# ItemProduct is_a? based on input_group[:d_hsh] #############################
+# def framed?(h)
+#   d_params?(h, 'tagline', 'mounting', 'Framed')
+# end
+#
+# def embellished?(h)
+#   h['embellished']
+# end
+#
+# def giclee?(h)
+#   d_params?(h, 'tagline', 'medium', 'Giclee')
+# end
+#
+# def print?(h)
+#   d_params?(h, 'tagline', 'medium', 'Print')
+# end
+#
+# def poster?(h)
+#   d_params?(h, 'tagline', 'medium', 'Poster')
+# end
+#
+# def gallery_wrapped?(h)
+#   d_params?(h, 'tagline', 'material', 'Gallery')
+# end
+#
+# def stretched?(h)
+#   d_params?(h, 'body', 'material', 'stretched')
+# end
+#
+# def standard_paper?(h)
+#   d_params?(h, 'tagline', 'material', 'Paper') && !rice_paper?(h)
+# end
+#
+# def rice_paper?(h)
+#   d_params?(h,'tagline', 'material', 'Rice')
+# end
+#
+# def limited_edition?(h)
+#   h['edition_type']
+# end
+#
+# def standard_numbering?(h)
+#   h['numbering'] && !from_an_edition?(h)
+# end
+#
+# def from_an_edition?(h)
+#   d_params?(h, 'tagline', 'numbering', 'from')
+# end
+#
+# def unsigned?(h)
+#   d_params?(h, 'tagline', 'signature', '(Unsigned)')
+# end
+#
+# def signed?(h)
+#   h['signature'] && !unsigned?(h)
+# end
+#
+# def danger_disclaimer(h)
+#   d_params?(h, 'tagline', 'disclaimer', '(Disclaimer)')
+# end
+#
+# ##############################################################################
+# def one_submedia?(h)
+#   h['leafing'] && !h['remarque'] || !h['leafing'] && h['remarque']
+# end
+#
+# def two_submedia?(h)
+#   h['leafing'] && h['remarque']
+# end
+#
+# def numbered_and_signed?(h)
+#   standard_numbering?(h) && signed?(h)
+# end
+# ##############################################################################
+#
+# def d_params?(h, context, *params)
+#   trans_args(params).all?{|args| h.keys.include?(args[0]) && h[args[0]][context].split(' ').include?(args[1])}
 # end

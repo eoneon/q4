@@ -8,10 +8,6 @@ class LimitedEdition
     {kind: 2, type: 1, f_name: -1}
   end
 
-  def self.input_group
-    [4, %w[numbering]]
-  end
-
   class SelectField < LimitedEdition
     class Numbering < SelectField
       def self.swap_list
@@ -20,7 +16,6 @@ class LimitedEdition
 
       def self.editions(edition_type)
         set = [nil, 'AP', 'EA', 'CP', 'GP', 'PP', 'IP', 'HC', 'TC'].each_with_object([]) do |edition, set|
-          puts "edition_type: #{edition_type}"
           next if edition_type == 'Edition' && edition.nil?
           set.append(build_edition(edition, edition_type).join(' '))
         end

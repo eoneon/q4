@@ -8,7 +8,8 @@ module FieldCrud
       k, t, f_name, param_val = f_hsh.values
       item_val = input_params.dig(k,t,f_name)
       context = update_case(item_val(t, item_val), param_val(t, param_val))
-      update_actions(k: k, t: t, f_name: f_name, v: item_val, v2: param_val, context: context, input_params: input_params)
+      #update_actions(k: k, t: t, f_name: f_name, v: item_val, v2: param_val, context: context, input_params: input_params)
+      update_field_case(k: k, t: t, f_name: f_name, v: item_val, v2: param_val, context: context, input_params: input_params) unless context == :skip
       break if update_complete?(context)
     end
   end
@@ -18,19 +19,23 @@ module FieldCrud
     update_field_case(k: k, t: t, f_name: f_name, v: v, v2: v2, context: context) unless context == :skip
   end
 
-  def add_field_set?(t, context)
-    field_set?(t) && [:add, :replace].include?(context)
-  end
-
   def remove_field_set?(t, context)
     field_set?(t) && [:remove, :replace].include?(context)
   end
 
-  def update_field_case(k:, t:, f_name:, v:, v2:, context:)
+  # def update_field_case(k:, t:, f_name:, v:, v2:, context:)
+  #   case context
+  #     when :add; add_param(k, t, f_name, new_val(t, v2))
+  #     when :remove; remove_param(k, t, f_name, v)
+  #     when :replace; replace_param(k, t, f_name, new_val(t, v2), v)
+  #   end
+  # end
+
+  def update_field_case(k:, t:, f_name:, v:, v2:, context:, input_params:)
     case context
       when :add; add_param(k, t, f_name, new_val(t, v2))
-      when :remove; remove_param(k, t, f_name, v)
-      when :replace; replace_param(k, t, f_name, new_val(t, v2), v)
+      when :remove; remove_param(k, t, f_name, v, input_params)
+      when :replace; replace_param(k, t, f_name, new_val(t, v2), v, input_params)
     end
   end
 
@@ -70,6 +75,7 @@ module FieldCrud
   def add_field(k, t, f_name, f)
     assoc_unless_included(f)
     add_tag_assoc(k, t, f_name, f.id)
+    add_default_field_set_fields(f,t)
   end
 
   def add_tag_assoc(k, t, f_name, v2)
@@ -77,12 +83,32 @@ module FieldCrud
     self.save
   end
 
+  def add_default_field_set_fields(f,t)
+    if field_set?(t)
+      f.select_fields.map{|sf| add_default(sf.kind.underscore, sf.type, sf.field_name.underscore, sf)}
+    end
+  end
+
   # remove methods #############################################################
   # standard remove ############################################################
-  def remove_param(k, t, f_name, old_val)
+  # def remove_param(k, t, f_name, old_val)
+  #   if tag_attr?(t)
+  #     remove_tag_assoc(k, t, f_name, old_val)
+  #   else
+  #     remove_field(k, t, f_name, old_val)
+  #   end
+  # end
+  #
+  # def remove_field(k, t, f_name, f)
+  #   remove_tag_assoc(k, t, f_name, tag_id(f))
+  #   remove_hmt(f)
+  # end
+
+  def remove_param(k, t, f_name, old_val, input_params)
     if tag_attr?(t)
       remove_tag_assoc(k, t, f_name, old_val)
     else
+      remove_field_set_fields(old_val.f_args(old_val.g_hsh), input_params) if field_set?(t)
       remove_field(k, t, f_name, old_val)
     end
   end
@@ -98,7 +124,7 @@ module FieldCrud
       if select_field?(t)
         remove_field_set_fields(f_val.f_args(f_val.g_hsh), input_params)
       elsif old_val = input_params.dig(k,t,f_name)
-        remove_param(k, t, f_name, old_val)
+        remove_param(k, t, f_name, old_val, input_params)
       end
     end
   end
@@ -132,8 +158,8 @@ module FieldCrud
   end
 
   # replace methods ############################################################
-  def replace_param(k, t, f_name, new_val, old_val)
-    remove_param(k, t, f_name, old_val)
+  def replace_param(k, t, f_name, new_val, old_val, input_params)
+    remove_param(k, t, f_name, old_val, input_params)
     add_param(k, t, f_name, new_val)
   end
 
@@ -159,7 +185,7 @@ module FieldCrud
   end
 
   def default_option(k, f_val)
-    f = first_fieldable(f_val) if default_option_kind?(k)
+    first_fieldable(f_val) if default_option_kind?(k)
   end
 
   def default_field_set(f_val)
@@ -174,14 +200,6 @@ module FieldCrud
   def valid_default_field_set?(k,t)
     dimension?(k) && select_menu?(t) || numbering?(k) && select_menu?(t)
   end
-
-  # def detect_matching_field_names(f_obj)
-  #   f_obj.fieldables.detect{|f| classify_name_match?(f.field_name, f_obj.field_name)}
-  # end
-
-  # def classify_name_match?(*names)
-  #   names.map{|n| compound_classify(n)}.uniq.one?
-  # end
 
   def compound_classify(name)
     name.split(' ').join('_').classify
@@ -204,3 +222,15 @@ module FieldCrud
     f.id.to_s
   end
 end
+
+# def add_field_set?(t, context)
+#   field_set?(t) && [:add, :replace].include?(context)
+# end
+
+# def detect_matching_field_names(f_obj)
+#   f_obj.fieldables.detect{|f| classify_name_match?(f.field_name, f_obj.field_name)}
+# end
+
+# def classify_name_match?(*names)
+#   names.map{|n| compound_classify(n)}.uniq.one?
+# end

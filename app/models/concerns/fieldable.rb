@@ -59,22 +59,3 @@ module Fieldable
   end
 
 end
-
-##############################################################################
-# def field_args(field_groups, set=[])
-#   a = field_groups.each_with_object(set) do |(k, field_groups), a|
-#     field_groups.each do |t, fields|
-#       fields.each do |f_name, f_val|
-#         unpack_or_assign(k.underscore, t.underscore, f_name.underscore, f_val, a)
-#       end
-#     end
-#   end
-# end
-
-# def unpack_or_assign(k, t, f_name, f_val, a)
-#   if unpack?(t)
-#     field_args(f_val.g_hsh, a)
-#   else
-#     a.append({k: k, t: t, t_type: f_assoc(t), f_name: f_name, f_val: f_val})
-#   end
-# end

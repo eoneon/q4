@@ -50,10 +50,9 @@ module ItemProduct
   ##############################################################################
   def divergent_params(context, d_hsh, attrs, store)
     if context[:gartner_blade]
-      #gartner_blade_params(context, d_hsh, attrs, store)
       gartner_blade_params(contexts[:gartner_blade], context, d_hsh, attrs, store)
     else
-      flat_params(context, d_hsh, attrs, store)
+      standard_params(context, d_hsh, attrs, store)
     end
   end
 
@@ -66,22 +65,15 @@ module ItemProduct
     GartnerBlade.new.build_gartner_blade(keys, title, context, attrs, store)
   end
 
-  # def gartner_blade_params(context, d_hsh, attrs, store)
-  #   GartnerBlade.new.gartner_blade_attrs(d_hsh, attrs)
-  #   GartnerBlade.new.gartner_blade_related_category(d_hsh, store, "\"#{attrs['title']}\"", context[:signed])
-  #   unrelated_params(context, d_hsh, store)
-  #   attrs.merge!(GartnerBlade.new.gartner_blade_description(context, store))
-  # end
-
-  # flat_params ################################################################
-  def flat_params(context, d_hsh, attrs, store)
-    flat_context(context, d_hsh, store)
+  # standard_params ################################################################
+  def standard_params(context, d_hsh, attrs, store)
+    standard_context(context, d_hsh, store)
     unrelated_params(context, d_hsh, store)
     attrs.merge!(flat_description(context, store))
   end
 
-  ## flat_context
-  def flat_context(context, d_hsh, store)
+  ## standard_context
+  def standard_context(context, d_hsh, store)
     related_context(store, context)
     nested_params_context(context, d_hsh)
     contexts[:compound_kinds].map{|kinds| compound_keys(context, kinds)}
@@ -182,9 +174,6 @@ module ItemProduct
       end
     end
   end
-
-  # def param_args()
-  # end
 
   def kind_param_case(context, store, v, sub_hsh, k, tag_key)
     case k
@@ -356,11 +345,11 @@ module ItemProduct
     tag_key.split('::') if tag_key.index('::')
   end
 
-  # key-array methods ##########################################################
+  # key-array methods ########################################################## valid_description_keys: duplicate?
   def valid_description_keys(store, keys, tag_key)
     keys.select{|k| store.dig(k,tag_key).present?}
   end
-
+  # 84, 297, 304: replace with: filtered_hsh(h:, keys:[], dig_set:[])
   def description_params(store, keys, tag_key)
     keys.each_with_object({}) do |k,h|
       h[k] = store.dig(k,tag_key) if store.dig(k,tag_key)
@@ -394,7 +383,7 @@ module ItemProduct
     }
   end
 
-  # utility methods ############################################################
+  # utility methods ############################################################ #symbolize: move to textable, tb_keys: remove
   def symbolize(w)
     w.downcase.split(' ').join('_').to_sym
   end
@@ -405,44 +394,6 @@ module ItemProduct
 end
 
 # THE END ######################################################################
-##############################################################################
-##############################################################################
-# related_params: material, mounting, dimension
-##############################################################################
-#6
-# def dimension_params(dimension, f_grp, args)
-#   if material_dimensions(dimension, 'material_dimension', f_grp[:attrs], args)
-#     mounting_dimensions(dimension, 'mounting_dimension', f_grp[:attrs], args)
-#     tb_dimensions(args[:k], args[:material_dimensions], args[:mounting_dimensions], f_grp[:store])
-#   end
-# end
-
-#12
-# def material_dimensions(dimension, d_tag, attrs, args)
-#   if material_dimension = slice_and_delete(dimension, d_tag)
-#     dimension_name, material_tag = material_dimension.to_a[0].reject{|i| i=="n/a"}
-#     dimension_keys = dimension_name.underscore.split('_')
-#     weight_key = slice_and_delete(dimension_keys, 'weight')
-#     material_tag = (weight_key ? weight_params(dimension, weight_key) : material_tag)
-#     if material_dimensions = slice_dimensions(dimension, dimension_keys)
-#       args[:material_dimensions] = dimension_description_params(material_dimensions.values, (dimension_keys[0]=='diameter'), material_tag)
-#       attrs.merge!([%w[width height],material_dimensions.values[0..1]].transpose.to_h)
-#     end
-#   end
-# end
-
-#8
-# def mounting_dimensions(dimension, d_tag, attrs, args)
-#   if mounting_dimension = slice_and_delete(dimension, d_tag)
-#     #puts "mounting_dimension: #{mounting_dimension}"
-#     if mounting_dimensions = slice_dimensions(dimension, dimension.keys)
-#       #puts "mounting_dimensions: #{mounting_dimensions}"
-#       args[:mounting_dimensions] = dimension_description_params(mounting_dimensions.values, nil, mounting_dimension[d_tag])
-#       puts "mounting_dimensions_a: #{args[:mounting_dimensions]}"
-#       attrs.merge!([%w[frame_width frame_height], mounting_dimensions.values[0..1]].transpose.to_h) if mounting_dimension[d_tag]=='(frame)'
-#     end
-#   end
-# end
 
 # def compound_keys(context, keys)
 #   context[keys.map(&:to_s).join('_').to_sym] = true if keys.all?{|k| context[k]}

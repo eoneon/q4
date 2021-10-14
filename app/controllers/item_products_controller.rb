@@ -21,10 +21,8 @@ class ItemProductsController < ApplicationController
     @products, @inputs = Product.search(scope: @product, hstore: 'tags')
     replace_product(@product, @item.product)
 
-
     @item.save
     @input_group = @item.input_group
-
 
     respond_to do |format|
       format.js

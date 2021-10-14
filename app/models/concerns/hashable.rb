@@ -3,6 +3,7 @@ require 'active_support/concern'
 module Hashable
   extend ActiveSupport::Concern
 
+  # parameter methods  #########################################################
   def defualt_hsh(*keys)
     keys.each_with_object({}) {|k,h| h[k]=nil}
   end
@@ -157,7 +158,7 @@ module Hashable
       set.map{|vals| [args,vals].transpose.to_h}
     end
 
-    #hash filter methods #######################################################
+    #hash filter methods ####################################################### might want to check this one out
     def filter_hsh(h, key_set, reject_set=[])
       if h = filter_hsh_by_keys(h, key_set)
         h = filter_hsh_vals(h, reject_set)
@@ -169,7 +170,7 @@ module Hashable
       h.select{|k,v| key_set.include?(k)} if hsh_keys_exist?(h, key_set)
     end
 
-    def hsh_keys_exist?(h, key_set)
+    def hsh_keys_exist?(h, key_set) # companion vals exist?
       h && key_set.all?{|k| h.keys.include?(k)}
     end
 
@@ -177,7 +178,7 @@ module Hashable
       h.select{|k,v| invalid_vals.exclude?(v)} if h
     end
 
-    #array methods #############################################################
+    #array methods ############################################################# might want to check this one out
 
     def include_any?(arr_x, arr_y)
       arr_x.any? {|x| arr_y.include?(x)}
