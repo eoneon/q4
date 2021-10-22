@@ -8,28 +8,10 @@ module FieldCrud
       k, t, f_name, param_val = f_hsh.values
       item_val = input_params.dig(k,t,f_name)
       context = update_case(item_val(t, item_val), param_val(t, param_val))
-      #update_actions(k: k, t: t, f_name: f_name, v: item_val, v2: param_val, context: context, input_params: input_params)
       update_field_case(k: k, t: t, f_name: f_name, v: item_val, v2: param_val, context: context, input_params: input_params) unless context == :skip
       break if update_complete?(context)
     end
   end
-
-  def update_actions(k:, t:, f_name:, v:, v2:, context:, input_params:)
-    remove_field_set_fields(v.f_args(v.g_hsh), input_params) if remove_field_set?(t, context)
-    update_field_case(k: k, t: t, f_name: f_name, v: v, v2: v2, context: context) unless context == :skip
-  end
-
-  def remove_field_set?(t, context)
-    field_set?(t) && [:remove, :replace].include?(context)
-  end
-
-  # def update_field_case(k:, t:, f_name:, v:, v2:, context:)
-  #   case context
-  #     when :add; add_param(k, t, f_name, new_val(t, v2))
-  #     when :remove; remove_param(k, t, f_name, v)
-  #     when :replace; replace_param(k, t, f_name, new_val(t, v2), v)
-  #   end
-  # end
 
   def update_field_case(k:, t:, f_name:, v:, v2:, context:, input_params:)
     case context
@@ -90,20 +72,6 @@ module FieldCrud
   end
 
   # remove methods #############################################################
-  # standard remove ############################################################
-  # def remove_param(k, t, f_name, old_val)
-  #   if tag_attr?(t)
-  #     remove_tag_assoc(k, t, f_name, old_val)
-  #   else
-  #     remove_field(k, t, f_name, old_val)
-  #   end
-  # end
-  #
-  # def remove_field(k, t, f_name, f)
-  #   remove_tag_assoc(k, t, f_name, tag_id(f))
-  #   remove_hmt(f)
-  # end
-
   def remove_param(k, t, f_name, old_val, input_params)
     if tag_attr?(t)
       remove_tag_assoc(k, t, f_name, old_val)
@@ -150,7 +118,6 @@ module FieldCrud
       remove_hmt(f_val)
     end
   end
-  ##############################################################################
 
   def remove_tag_assoc(k, t, f_name, old_val)
     self.tags.reject!{|key,val| tag_key(k, t, f_name) == key && val == old_val}
@@ -222,6 +189,24 @@ module FieldCrud
     f.id.to_s
   end
 end
+
+
+# def update_actions(k:, t:, f_name:, v:, v2:, context:, input_params:)
+#   remove_field_set_fields(v.f_args(v.g_hsh), input_params) if remove_field_set?(t, context)
+#   update_field_case(k: k, t: t, f_name: f_name, v: v, v2: v2, context: context) unless context == :skip
+# end
+#
+# def remove_field_set?(t, context)
+#   field_set?(t) && [:remove, :replace].include?(context)
+# end
+
+# def update_field_case(k:, t:, f_name:, v:, v2:, context:)
+#   case context
+#     when :add; add_param(k, t, f_name, new_val(t, v2))
+#     when :remove; remove_param(k, t, f_name, v)
+#     when :replace; replace_param(k, t, f_name, new_val(t, v2), v)
+#   end
+# end
 
 # def add_field_set?(t, context)
 #   field_set?(t) && [:add, :replace].include?(context)

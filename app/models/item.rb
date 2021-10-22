@@ -6,7 +6,7 @@ class Item < ApplicationRecord
   include ItemProduct
   include Hashable
   include TypeCheck
-  #include Description
+  include Description
   include Textable
   include ExportAttrs
   include SkuRange
@@ -52,7 +52,7 @@ class Item < ApplicationRecord
     !!Float(s) rescue false
   end
 
-  # join_search (I) ##########################################################
+  # join_search (I) ############################################################
   def self.scope_group(scope, joins, input_group)
     input_group.merge!({'scope' => scope.try(:id), 'search_results' => scope_results(scope, joins)})
     scope_set(input_group)
@@ -74,7 +74,7 @@ class Item < ApplicationRecord
     {target_type: scope.class.base_class.name, target_id: scope.id}
   end
 
-  # attr_search (II) #########################################################
+  # attr_search (II) ###########################################################
   def self.attr_group(set, attrs, input_group)
     return set if attrs.empty? #|| input_group['search_results'].empty?
     attr_opts = attr_options(attrs, input_group['search_results'])
@@ -91,6 +91,7 @@ class Item < ApplicationRecord
   end
 
   # hattr_search (III) #######################################################
+
   def self.hattr_group(set, hattrs, hstore, input_group)
     return if !hstore
     hattr_query_case(set, hattrs.reject{|k,v| v.blank?}, hstore, input_group)

@@ -7,19 +7,8 @@ module HattrSearch
 
     # PART I: ##################################################################
     def search_params(scope: nil, search_params: nil, hstore:)
-      search_keys.map{|k| [k, search_value(scope, search_params, hstore, k)]}.to_h
+      search_params ? search_params : scope.public_send(hstore).select{|k,v| search_keys.include?(k)}
     end
-
-    # search_params dependencies
-    def search_value(scope, search_params, hstore, k)
-      if search_params
-        search_params[k]
-      elsif scope
-        scope.public_send(hstore)[k]
-      end
-    end
-    ############################################################################
-    ############################################################################
 
     # PART II: #################################################################
     def hattr_search(scope:, search_params:, restrict:, hstore:)
@@ -78,8 +67,20 @@ module HattrSearch
     end
 
   end
-
 end
+
+# search_params dependencies
+# def search_value(scope, search_params, hstore, k)
+#   if search_params
+#     search_params[k]
+#   elsif scope
+#     scope.public_send(hstore)[k]
+#   end
+# end
+
+# def search_params(scope: nil, search_params: nil, hstore:)
+#   search_keys.map{|k| [k, search_value(scope, search_params, hstore, k)]}.to_h
+# end
 
 ############################################################################
 # PART I, II, II: method groups from perspective of calling method, e.g., Product

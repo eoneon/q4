@@ -25,6 +25,13 @@ module Textable
       str[0] == '(' ? '('+str[1..-1].public_send(cntxt) : str.public_send(cntxt)
     end
 
+    def char_limit(str, abbrv_set, limit)
+      return str if str.length<limit || abbrv_set.empty?
+      set = abbrv_set.slice!(0)
+      str.gsub!(*set)
+      char_limit(str, abbrv_set, limit)
+    end
+
     ############################################################################
 
     def uncamel(class_word)

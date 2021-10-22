@@ -2,7 +2,8 @@ class ItemsController < ApplicationController
 
   def show
     @item = Item.find(params[:id])
-    @products, @inputs = Product.search(scope: @item.product, hstore: 'tags')
+    #@products, @inputs = Product.search(scope: @item.product, hstore: 'tags')
+    @products, @inputs = Product.search(scope: @item.product)
     @input_group = @item.input_group #(@item.input_params)
   end
 

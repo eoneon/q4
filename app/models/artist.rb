@@ -22,9 +22,29 @@ class Artist < ApplicationRecord
   end
 
   def artist_params
-    {'d_hsh'=>{'tagline'=> "#{tagline},", 'body'=> "by #{formal_name}"}, 'attrs'=> {'artist'=> artist_name, 'artist_id'=> artist_id}}
+    {'d_hsh'=>{
+      'tagline'=> "#{tagline},",
+      'body'=> "by #{formal_name}",
+      'abbrv'=> "#{abbrv_artist_name(artist_name.split(' '))},"},
+    'attrs'=> {
+      'artist'=> artist_name,
+      'artist_id'=> artist_id}
+    }
   end
 
+  def abbrv_artist_name(artist_arr)
+    if artist_arr.count == 2 && artist_arr[0].length>3
+      "#{abbrv_first(artist_arr[0])} #{artist_arr[1]}"
+    elsif artist_arr.count == 3
+      "#{abbrv_first(artist_arr[0])} #{abbrv_first(artist_arr[1])} #{artist_arr[2]}"
+    else
+      artist_arr.join(' ')
+    end
+  end
+
+  def abbrv_first(first_name)
+    "#{first_name[0]}."
+  end
 end
 
 # def title_tag

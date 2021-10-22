@@ -178,6 +178,9 @@ module Hashable
       h.select{|k,v| invalid_vals.exclude?(v)} if h
     end
 
+    # def defualt_hsh(*keys)
+    #   keys.each_with_object({}) {|k,h| h[k]=nil}
+    # end
     #array methods ############################################################# might want to check this one out
 
     def include_any?(arr_x, arr_y)

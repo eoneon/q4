@@ -5,9 +5,9 @@
     </a>
   </td>
 
-  <% table_row(item.csv_tags).each do |row| %>
+  <%# table_row(item.csv_tags).each do |row| %>
     <td>
-      <span class="fs-s"><%= row %></span>
+      <span class="fs-s"><%= item.input_group[:attrs]['abbrv'] %></span>
     </td>
-  <% end %>
+  <%# end %>
 </tr>

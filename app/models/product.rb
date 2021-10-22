@@ -4,7 +4,8 @@ class Product < ApplicationRecord
   include Crudable
   include Hashable
   include TypeCheck
-  include HattrSearch
+  #include HattrSearch
+  include Search
 
   validates :product_name, presence: true
   validates :product_name, uniqueness: true
@@ -68,7 +69,7 @@ class Product < ApplicationRecord
 
   def tags_loop(k, f_name, f, d_hsh, keys)
     keys.each_with_object(d_hsh) do |tag, d_hsh|
-      Item.case_merge(d_hsh, f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag) #puts "selected b: #{f}, f.f_name: #{f.field_name}, f_name: #{f_name}"
+      Item.case_merge(d_hsh, f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag)
     end
   end
 
@@ -94,36 +95,35 @@ class Product < ApplicationRecord
       when context[:flat_art]; [%w[category medium], %w[numbering], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
       when context[:flat_art]; [%w[category numbering], %w[medium material embellishing], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
       when context[:sculpture_art]; [%w[category numbering], %w[sculpture_type embellishing], %w[dated signature certificate], %w[verification], %w[dimension], %w[disclaimer]]
-      when context[:gartner_blade];  [%w[sculpture_type sculpture_part signature], %w[dimension], %w[disclaimer]]
-    end
-  end
-  ##############################################################################
-  ##############################################################################
-
-  # SEARCH METHODS #############################################################
-  def self.search(scope: nil, search_params: nil, restrict: nil, hstore:)
-    search_params = search_params(scope: scope, search_params: search_params, hstore: hstore)
-    results = hattr_search(scope: self, search_params: search_params, restrict: restrict, hstore: hstore)
-    a, b = results, search_inputs(search_params, results, hstore)
-  end
-
-  def self.search_keys
-    %w[category_search medium_search material_search]
-  end
-  ##############################################################################
-  ##############################################################################
-
-  # SEEDING METHODS ############################################################
-  def self.seed(store)
-    Medium.class_group('ProductGroup').each_with_object(store) do |c, store|
-      c.product_group(store)
+      when context[:gartner_blade]; [%w[sculpture_type sculpture_part signature], %w[dimension], %w[disclaimer]]
     end
   end
 
-  def self.builder(product_name, fields, tags=nil)
-    p = Product.where(product_name: product_name).first_or_create
-    p.update_tags(tags)
-    p.assoc_targets(fields)
+  class << self
+
+    # SEARCH METHODS ###########################################################
+    def search(scope:nil, hattrs:nil, hstore:'tags')
+      hattrs = hattr_params(scope, hattrs, hstore)
+      results = hattr_search(self, hattrs.reject{|k,v| v.blank?}, hstore)
+      a, b = results, search_inputs(results, hattrs, hstore)
+    end
+
+    def search_keys
+      %w[category_search medium_search material_search]
+    end
+
+    # SEEDING METHODS ##########################################################
+    def seed(store)
+      Medium.class_group('ProductGroup').each_with_object(store) do |c, store|
+        c.product_group(store)
+      end
+    end
+
+    def builder(product_name, fields, tags=nil)
+      p = Product.where(product_name: product_name).first_or_create
+      p.update_tags(tags)
+      p.assoc_targets(fields)
+    end
   end
 
   def assoc_targets(targets)
@@ -134,6 +134,27 @@ end
 
 # THE END ######################################################################
 ################################################################################
+
+# def search(scope:nil, hattrs:nil, hstore:'tags')
+#   hattrs = hattr_params(scope, hattrs, hstore)
+#   results = hstore_search(scope, hattrs, hstore)
+#   a, b = results, search_inputs(results, hattrs, hstore)
+# end
+
+# def self.search(scope: nil, search_params: nil, restrict: nil, hstore:)
+#   search_params = search_params(scope: scope, search_params: search_params, hstore: hstore)
+#   results = hattr_search(scope: self, search_params: search_params, restrict: restrict, hstore: hstore)
+#   a, b = results, search_inputs(search_params, results, hstore)
+# end
+
+# def self.hattr_params(scope,hstore)
+#   search_keys.each_with_object({}) do |k,h|
+#     if v = scope.public_send(hstore).dig(k)
+#       h[k] = v if !v.blank?
+#     end
+#   end
+# end
+
 # def product_item_loop(i_hsh, f_grp, keys)
 #   inputs = product_fields_loop(g_hsh, f_grp[:d_hsh], keys)
 #   item_fields_loop(inputs, i_hsh, f_grp[:rows], f_grp[:d_hsh], keys)
