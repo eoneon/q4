@@ -20,7 +20,7 @@ class SearchItemsController < ApplicationController
   end
 
   def search
-    @invoice = Invoice.find(params[:invoice_id]) 
+    @invoice = Invoice.find(params[:invoice_id])
     @items = Item.search(scope: scope_set[0], joins: scope_set[-1], hattrs: params[:search_items][:search].to_unsafe_h, attrs: params[:search_items][:attrs].to_unsafe_h, search_keys: Item.item_search_keys, sort_keys: Item.item_search_keys.append('size'), hstore: 'csv_tags')
     respond_to do |format|
       format.js
@@ -28,7 +28,20 @@ class SearchItemsController < ApplicationController
     end
   end
 
+  # def search
+  #   @invoice = Invoice.find(params[:invoice_id])
+  #   @items = Item.search(scope: artist_id, hattrs: params[:search_items][:search].to_unsafe_h, attrs: params[:search_items][:attrs].to_unsafe_h, search_keys: Item.item_search_keys, sort_keys: Item.item_search_keys.append('size'), hstore: 'csv_tags')
+  #   respond_to do |format|
+  #     format.js
+  #     format.html
+  #   end
+  # end
+
   private
+
+  def artist_id
+    params[:search_items][:scope].present? ? Artist.find(params[:search_items][:scope]) : nil
+  end
 
   def scope_set
     if params[:search_items][:scope].present?
@@ -39,28 +52,3 @@ class SearchItemsController < ApplicationController
   end
 
 end
-
-# def search
-#   @invoice = Invoice.find(params[:invoice_id]) #.to_unsafe_h
-#   @items = Item.search(scope: scope_set[0], joins: scope_set[-1], hattrs: search_params, attrs: extract_params(params[:search_items][:attrs]), search_keys: Item.item_search_keys, sort_keys: Item.item_search_keys.append('size'), hstore: 'csv_tags')
-#   respond_to do |format|
-#     format.js
-#     format.html
-#   end
-# end
-
-# def extract_params(param_hsh, h={})
-#   return if param_hsh.nil?
-#   param_hsh.each do |k,v|
-#     h.merge!({k=>v})
-#   end
-#   h
-# end
-
-# def search_params
-#   h={}
-#   params[:search_items][:search].each do |k,v|
-#     h.merge!({k=>v})
-#   end
-#   h
-# end

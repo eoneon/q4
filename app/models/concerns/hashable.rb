@@ -100,6 +100,12 @@ module Hashable
     end
   end
 
+  def slice_and_transfer(h:,h2:,keys:,k:nil)
+    if v = slice_vals_and_delete(h,keys)
+      h2[(k ? k : keys[0])] = v
+    end
+  end
+
   class_methods do
 
     def case_merge(h, v, *dig_keys)

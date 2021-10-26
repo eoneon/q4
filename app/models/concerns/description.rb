@@ -133,6 +133,11 @@ module Description
         set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Limited Edition', 'Ltd Ed'], ['Edition', 'Ed'], ['Numbered', 'No'], ['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]
       },
 
+      search:{
+        keys:%w[embellishing category medium sculpture_type material leafing numbering signature certificate],
+        set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Limited Edition', 'Ltd Ed'], ['Edition', 'Ed'], ['Numbered', 'No'], ['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]
+      },
+
       body:{
         keys: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
         media: %w[text_after_title category numbering medium sculpture_type material leafing remarque artist],

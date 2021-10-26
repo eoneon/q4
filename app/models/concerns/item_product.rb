@@ -5,7 +5,7 @@ module ItemProduct
   # i = Item.find(97)    p = Item.find(97).product h = Item.find(97).product.fieldables   h = Item.find(98).input_group
   def input_group(f_grp={rows:[], context:{reorder:[], remove:[]}, d_hsh:{}, attrs:{}, store:{}})
     return f_grp if !product
-    product.product_item_loop(input_params, f_grp, keys=%w[tagline body material_dimension mounting_dimension material_mounting])
+    product.product_item_loop(input_params, f_grp, keys=%w[tagline invoice_tagline tagline_search body material_dimension mounting_dimension material_mounting mounting_search])
     related_and_divergent_params(f_grp)
     f_grp
   end
@@ -290,7 +290,7 @@ module ItemProduct
   end
 
   def tb_keys
-    %w[tagline body]
+    %w[tagline invoice_tagline tagline_search body]
   end
 end
 

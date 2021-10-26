@@ -8,9 +8,13 @@ class Mounting
   end
 
   class SelectField < Mounting
+    def self.target_tags(f_name)
+      {mounting_search: f_name.split(' ').map(&:capitalize).join(' ')}
+    end
+
     class Framing < SelectField
       def self.target_tags(f_name)
-        {tagline: 'Framed', body: body(f_name), mounting_dimension: '(frame)'}
+        {tagline: 'Framed', body: body(f_name), mounting_dimension: '(frame)', mounting_search: f_name.split(' ').map(&:capitalize).join(' ')}
       end
 
       def self.body(f_name)
@@ -18,6 +22,8 @@ class Mounting
           "This piece comes floating in a #{f_name}."
         elsif f_name.split(' ').include?('box');
           "This piece comes in a #{f_name}."
+        elsif f_name.split(' ').include?('oversized');
+          "This piece has an #{f_name}."
         else
           "This piece comes #{f_name+'d'}."
         end

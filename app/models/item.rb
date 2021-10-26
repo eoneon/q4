@@ -20,6 +20,12 @@ class Item < ApplicationRecord
   belongs_to :invoice, optional: true
 
   ##############################################################################
+  def search(scope:nil, attrs:{}, hattrs:{}, input_group:{}, sort_keys:[], hstore: 'tags')
+    results_or_self = scope_group(scope, :item_products, input_group)
+    results_or_self = attr_group(results_or_self, attrs, input_group)
+    results = hstore_group(results_or_self, hattrs, hstore, input_group)
+    order_search(uniq_hattrs(results), sort_keys, hstore)
+  end
 
   def self.search(scope:nil, joins:nil, hstore:nil, search_keys:nil, sort_keys:nil, attrs:{}, hattrs:{}, input_group:{})
     set = scope_group(scope, joins, input_group)

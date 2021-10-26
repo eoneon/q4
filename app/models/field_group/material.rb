@@ -14,7 +14,7 @@ class Material
 
   class SelectField < Material
     def self.target_tags(f_name)
-      {tagline: "on #{tagline(f_name)}", body: "on #{body(f_name)}", material_mounting: ('This piece comes gallery wrapped' if f_name.index('gallery'))}
+      {tagline: "on #{tagline(f_name)}", body: "on #{body(f_name)}", invoice_tagline: "on #{str_edit(str: f_name)}", tagline_search: "on #{tagline_search(f_name)}", material_mounting: ('This piece comes gallery wrapped' if f_name.index('gallery'))}
     end
 
     def self.tagline(f_name)
@@ -25,6 +25,10 @@ class Material
       swap_str(f_name, ['gallery wrapped', ''])
     end
 
+    def self.tagline_search(f_name)
+      str_edit(str: f_name, swap: ['stretched', '', 'gallery wrapped', ''])
+    end
+
     class Canvas < SelectField
       class StandardCanvas < Canvas
         def self.targets
@@ -33,6 +37,10 @@ class Material
       end
 
       class WrappedCanvas < Canvas
+        def self.target_tags(f_name)
+          {mounting_search: (f_name.index('stretched') ? 'Stretched' : 'Gallery Wrapped')}
+        end
+
         def self.targets
           ['gallery wrapped canvas', 'stretched canvas']
         end

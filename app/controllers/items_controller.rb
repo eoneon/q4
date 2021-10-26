@@ -2,9 +2,8 @@ class ItemsController < ApplicationController
 
   def show
     @item = Item.find(params[:id])
-    #@products, @inputs = Product.search(scope: @item.product, hstore: 'tags')
     @products, @inputs = Product.search(scope: @item.product)
-    @input_group = @item.input_group #(@item.input_params)
+    @input_group = @item.input_group 
   end
 
   def create
@@ -24,7 +23,7 @@ class ItemsController < ApplicationController
     @item.assign_attributes(item_params) # @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])
 
     @item.save
-    @input_group = @item.input_group #(@item.input_params)
+    @input_group = @item.input_group
 
     respond_to do |format|
       format.js

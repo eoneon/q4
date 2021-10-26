@@ -214,7 +214,6 @@ end
 # end
 
 # DRAFT/REPLACED METHODS #######################################################
-
 #a = lambda {puts "dog"}#{Medium.class_group('FieldGroup').map{|c| c.call_if(:input_group)}.compact.sort_by(&:first).map(&:last)}
 # def my_lambda
 #   lambda {puts "dog"}
@@ -222,54 +221,12 @@ end
 # end
 
 ################################################################################
-
-# def self.search_params(scope: nil, search_params: nil, hstore:)
-#   search_keys.map{|k| [k, search_value(scope, search_params, hstore, k)]}.to_h
-# end
-
-# def self.search_value(scope, search_params, hstore, k)
-#   if search_params
-#     search_params[k]
-#   elsif scope
-#     scope.public_send(hstore)[k]
-#   end
-# end
-
-# def self.search_inputs(search_params, results, hstore)
-#   a = search_params.each_with_object([]) do |(k,v),a|
-#     a.append(search_input(k, v, results, hstore))
-#   end
-# end
-#
-# def self.search_input(k, v, results, hstore)
-#   {'input_name'=> k, 'selected'=> v, 'opts'=> results.map{|product| product.public_send(hstore)[k]}.uniq.compact}
-# end
-
-################################################################################
 # def radio_options
 #   radio_buttons.includes(:options).map(&:options)
 # end
 
-# def assign_or_merge(h, h2)
-#   h.nil? ? h2 : h.merge(h2)
-# end
-
-#  product_type product_subtype
-# def self.tag_search_field_group(search_keys:, products: product_group, h: {})
-#   search_keys.map{|search_key| h[:"#{search_key}"] = search_values(products, search_key)}
-#   h
-# end
-
-# def self.valid_search_keys(products=product_group)
-#   filter_keys.keep_if {|k| uniq_tag_keys_from_set(products).include?(k)}
-# end
-
 # def self.uniq_tag_keys_from_set(products=product_group)
 #   products.pluck(:tags).map{|tags| tags.keys}.flatten.uniq
-# end
-
-# def self.search_values(products, search_key)
-#   products.map{|product| product.tags[search_key]}.uniq.compact
 # end
 
 #all search keys-> remove?

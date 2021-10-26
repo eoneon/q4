@@ -109,14 +109,22 @@ class Dimension
 
   def material_mounting_dimension_params(k_hsh, f_grp, args)
     if args[:k]!='dimension'
+      transfer_description_vals(args[:k], flatten_hsh(k_hsh), f_grp[:attrs], f_grp[:store])
       material_mounting_params(args[:k], k_hsh, args[:related], args[:d_tag], args[:end_key], f_grp[:d_hsh], f_grp[:store])
     else
       dimension_params(k_hsh, f_grp, args)
     end
   end
 
+  def transfer_description_vals(k, hsh, attrs, store)
+    slice_and_transfer(h: hsh, h2: store, keys: %w[tagline invoice_tagline tagline_search body], k: k)
+    slice_and_transfer(h: hsh, h2: attrs, keys: ['mounting_search'])
+  end
+
   def material_mounting_params(k, k_hsh, related, d_tag, end_key, d_hsh, store)
-    store[k] = slice_vals_and_delete(flatten_hsh(k_hsh), 'tagline', 'body')
+    #store[k] = slice_vals_and_delete(flatten_hsh(k_hsh), 'tagline', 'body')
+    #slice_and_transfer(h: flatten_hsh(k_hsh), h2: store, keys: ['tagline', 'body'], k: k)
+    #slice_and_transfer(h: flatten_hsh(k_hsh), h2: attrs, keys: ['mounting_search'])
     abbr_material(k, store)
     if sub_tag = k_hsh.dig(d_tag)
       Item.case_merge(d_hsh, sub_tag, related, d_tag, end_key)
