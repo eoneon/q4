@@ -6,9 +6,8 @@ class ItemProductsController < ApplicationController
     @product = Product.find(params[:product_id])
     @products, @inputs = Product.search(scope: @product)
     add_product(@product)
-
-    @item.save
-    @input_group = @item.input_group
+    @rows, attrs = @item.input_group
+    @item.update_csv_tags(attrs)
 
     respond_to do |format|
       format.js
@@ -20,9 +19,8 @@ class ItemProductsController < ApplicationController
     @product = Product.find(params[:product_id])
     @products, @inputs = Product.search(scope: @product)
     replace_product(@product, @item.product)
-
-    @item.save
-    @input_group = @item.input_group
+    @rows, attrs = @item.input_group
+    @item.update_csv_tags(attrs)
 
     respond_to do |format|
       format.js
@@ -42,9 +40,7 @@ class ItemProductsController < ApplicationController
     @item = Item.find(params[:id])
     @products, @inputs = Product.search
     remove_product(@item.product)
-
-    @item.save
-    @input_group = @item.input_group
+    @rows, attrs = @item.input_group
 
     respond_to do |format|
       format.js
@@ -74,3 +70,7 @@ class ItemProductsController < ApplicationController
   end
 
 end
+
+# def remove_csv_tags(csv_tags)
+#   @item.contexts[:csv][:item_product].each_with_object(csv_tags){|k| csv_tags.delete(k) if csv_tags.has_key?(k)}
+# end

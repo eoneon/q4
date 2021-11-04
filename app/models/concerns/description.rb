@@ -12,7 +12,6 @@ module Description
       when 'dated'; dated_params(context, store, v, sub_hsh, k, tag_key)
       when 'animator_seal'; animator_seal_params(context, store, v, k, tag_key)
       when 'sports_seal'; sports_seal_params(context, store, v, k, tag_key)
-      #when 'certificate'; certificate_params(store, v, k, tag_key)
       when 'verification'; verification_params(context, store, v, sub_hsh, k, tag_key)
       when 'disclaimer'; disclaimer_params(context, store, v, sub_hsh, k, tag_key)
       else Item.case_merge(store, v, k, tag_key)
@@ -20,14 +19,9 @@ module Description
   end
 
   def embellishing_params(store, v, k, tag_key)
-    Item.case_merge(store, 'Embellished', k, 'abbrv') if tag_key=='tagline'
+    Item.case_merge(store, 'Embellished', k, 'invoice_tagline') if tag_key=='tagline'
     Item.case_merge(store, v, k, tag_key)
   end
-
-  # def certificate_params(store, v, k, tag_key)
-  #   Item.case_merge(store, Item.str_edit(str: v, swap: ['Letter of Authenticity', 'LOA', 'Certificate of Authenticity', 'COA'], skip:['with']), k, 'abbrv') if tag_key=='tagline'
-  #   Item.case_merge(store, v, k, tag_key)
-  # end
 
   def animator_seal_params(context, store, v, k, tag_key)
     v = v+'.' unless context[:sports_seal]
@@ -43,6 +37,7 @@ module Description
   def numbering_params(context, store, v, sub_hsh, k, tag_key)
     ed_val, conj = edition_value(sub_hsh), ('and' if context[:numbered_signed])
     Item.case_merge(store, [v, ed_val, conj].compact.join(' '), k, tag_key)
+    Item.case_merge(store, (ed_val == '1/1' ? [v, ed_val, conj] : [v, conj]).compact.join(' '), k, 'search_tagline') if tag_key == 'tagline'
   end
 
   def edition_value(sub_hsh)
@@ -128,12 +123,12 @@ module Description
         authentication: [:disclaimer, :unsigned]
       },
 
-      abbrv:{
+      invoice_tagline:{
         keys:%w[artist title embellishing category medium sculpture_type material dimension leafing numbering signature certificate],
         set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Limited Edition', 'Ltd Ed'], ['Edition', 'Ed'], ['Numbered', 'No'], ['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]
       },
 
-      search:{
+      search_tagline:{
         keys:%w[embellishing category medium sculpture_type material leafing numbering signature certificate],
         set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Limited Edition', 'Ltd Ed'], ['Edition', 'Ed'], ['Numbered', 'No'], ['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]
       },
@@ -142,6 +137,11 @@ module Description
         keys: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
         media: %w[text_after_title category numbering medium sculpture_type material leafing remarque artist],
         authentication: %w[dated numbering signature]
+      },
+
+      csv:{
+        export: %w[sku artist artist_id title retail width height frame_width frame_height tagline description qty],
+        item_product: %w[title width height frame_width frame_height tagline description tagline_search invoice_tagline mounting_search measurements item_size]
       }
     }
   end

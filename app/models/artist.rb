@@ -25,7 +25,7 @@ class Artist < ApplicationRecord
     {'d_hsh'=>{
       'tagline'=> "#{tagline},",
       'body'=> "by #{formal_name}",
-      'abbrv'=> "#{abbrv_artist_name(artist_name.split(' '))},"},
+      'invoice_tagline'=> "#{abbrv_artist_name(artist_name.split(' '))},"},
     'attrs'=> {
       'artist'=> artist_name,
       'artist_id'=> artist_id}

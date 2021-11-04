@@ -109,32 +109,22 @@ class Dimension
 
   def material_mounting_dimension_params(k_hsh, f_grp, args)
     if args[:k]!='dimension'
-      transfer_description_vals(args[:k], flatten_hsh(k_hsh), f_grp[:attrs], f_grp[:store])
-      material_mounting_params(args[:k], k_hsh, args[:related], args[:d_tag], args[:end_key], f_grp[:d_hsh], f_grp[:store])
+      material_mounting_params(args[:k], k_hsh, args[:related], args[:d_tag], args[:end_key], f_grp)
     else
       dimension_params(k_hsh, f_grp, args)
+    end
+  end
+
+  def material_mounting_params(k, k_hsh, related, d_tag, end_key, f_grp)
+    transfer_description_vals(k, flatten_hsh(k_hsh), f_grp[:attrs], f_grp[:store])
+    if sub_tag = k_hsh.dig(d_tag)
+      Item.case_merge(f_grp[:d_hsh], sub_tag, related, d_tag, end_key)
     end
   end
 
   def transfer_description_vals(k, hsh, attrs, store)
     slice_and_transfer(h: hsh, h2: store, keys: %w[tagline invoice_tagline tagline_search body], k: k)
     slice_and_transfer(h: hsh, h2: attrs, keys: ['mounting_search'])
-  end
-
-  def material_mounting_params(k, k_hsh, related, d_tag, end_key, d_hsh, store)
-    #store[k] = slice_vals_and_delete(flatten_hsh(k_hsh), 'tagline', 'body')
-    #slice_and_transfer(h: flatten_hsh(k_hsh), h2: store, keys: ['tagline', 'body'], k: k)
-    #slice_and_transfer(h: flatten_hsh(k_hsh), h2: attrs, keys: ['mounting_search'])
-    abbr_material(k, store)
-    if sub_tag = k_hsh.dig(d_tag)
-      Item.case_merge(d_hsh, sub_tag, related, d_tag, end_key)
-    end
-  end
-
-  def abbr_material(k, store)
-    if k=='material' && %w[stretched paper].detect{|str| store[k]['body'].index(str)}
-      Item.case_merge(store, Item.str_edit(str: store[k]['body'], skip: ['on']), k, 'abbrv')
-    end
   end
 
   def dimension_params(dimension, f_grp, args)
@@ -193,13 +183,13 @@ class Dimension
     mounting_keys[1..-1].map{|d_name| [mounting_keys[0], d_name].join('_')}
   end
 
-  #slice_vals_if_all
   def slice_dimensions(dimension, material_dimension_keys)
     slice_vals_and_delete(dimension, material_dimension_keys) if vals_exist?(dimension, material_dimension_keys)
   end
 
   def build_material_dimensions(material_dimension_values, attrs, args)
     args[:material_dimensions] = dimension_description_params(material_dimension_values, (args[:material_dimension_keys][0]=='diameter'), args[:material_tag])
+    attrs.merge!(args[:material_dimensions].slice('measurements', 'item_size'))
     attrs.merge!([%w[width height], args[:material_dimensions].values[0..1]].transpose.to_h)
   end
 
@@ -208,7 +198,7 @@ class Dimension
     attrs.merge!([%w[frame_width frame_height], mounting_dimensions_values[0..1]].transpose.to_h) if args[:mounting_tag]=='(frame)'
   end
 
-  # tagline, body & attributes 26 #################################################
+  # tagline, body & attributes 26 ##############################################
   def tb_dimensions(k, material_dimensions, mounting_dimensions, store)
     tagline_dimensions(k, (mounting_dimensions.present? ? mounting_dimensions : material_dimensions), store)
     body_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, store)
@@ -230,7 +220,7 @@ class Dimension
   def abbrv_dimensions(k, material_measurements, material_tag, mounting_dimensions, store)
     measurements = [material_measurements, abbrv_mounting_measurements(mounting_dimensions)].compact
     measurements = measurements.count>1 ? measurements.join(' - ') : measurements[0]
-    Item.case_merge(store, "(#{measurements})", k, 'abbrv')
+    Item.case_merge(store, "(#{measurements})", k, 'invoice_tagline')
   end
 
   def dimension_description_params(dimensions, diameter, dimension_tag)
@@ -274,3 +264,19 @@ class Dimension
     dim_name == 'diameter' ? dims[0]**2 : dims.inject(:*)
   end
 end
+
+# def material_mounting_params(k, k_hsh, related, d_tag, end_key, d_hsh, store)
+#   #store[k] = slice_vals_and_delete(flatten_hsh(k_hsh), 'tagline', 'body')
+#   #slice_and_transfer(h: flatten_hsh(k_hsh), h2: store, keys: ['tagline', 'body'], k: k)
+#   #slice_and_transfer(h: flatten_hsh(k_hsh), h2: attrs, keys: ['mounting_search'])
+#   abbr_material(k, store)
+#   if sub_tag = k_hsh.dig(d_tag)
+#     Item.case_merge(d_hsh, sub_tag, related, d_tag, end_key)
+#   end
+# end
+#
+# def abbr_material(k, store)
+#   if k=='material' && %w[stretched paper].detect{|str| store[k]['body'].index(str)}
+#     Item.case_merge(store, Item.str_edit(str: store[k]['body'], skip: ['on']), k, 'abbrv')
+#   end
+# end

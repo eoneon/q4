@@ -22,6 +22,12 @@ module Crudable
     self.save
   end
 
+  def update_csv_tags(tag_hsh)
+    return if tag_hsh.blank? || tag_hsh.stringify_keys == self.csv_tags
+    self.csv_tags = assign_or_merge(self.csv_tags, tag_hsh.stringify_keys)
+    self.save
+  end
+
   def assign_or_merge(h, h2)
     h.nil? ? h2 : h.merge(h2)
   end

@@ -31,18 +31,21 @@ module Search
     end
 
     # hattr_search (III) #######################################################
-    def hstore_group(results_or_self, hattrs, hstore, input_group)
+    def hstore_group(results_or_self, hattrs, hstore, input_group, default_set)
       input_group['hattrs'] = hattrs
-      hattr_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, nil)
+      hstore_cascade_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, default_set)
     end
 
-    def hattr_search(results_or_self, hattrs, hstore, default_set=:all)
-      results = hstore_search(results_or_self, hattrs, hstore, default_set)
-      order_search(results, search_keys, hstore)
+    def hstore_cascade_search(results_or_self, hattrs, hstore, default_set)
+      hattrs.empty? && results_or_self.class.name == "ActiveRecord::Relation" ? results_or_self : hstore_search(results_or_self, hattrs, hstore, default_set)
     end
 
-    def hstore_search(results_or_self, hattrs, hstore, default_set)
-      hstore && hattrs.any? ? hstore_query(results_or_self, hattrs, hstore) : default_results(results_or_self, default_set)
+    def hstore_search(results_or_self, hattrs, hstore, default_set=:all)
+      hattrs.any? ? hstore_query(results_or_self, hattrs, hstore) : default_results(results_or_self, default_set)
+    end
+
+    def default_results(results_or_self, default_set)
+      default_set==:all ? results_or_self.all : []
     end
 
     def default_results(results_or_self, default_set)
@@ -50,6 +53,7 @@ module Search
     end
 
     # filtering search: uniq/order ############################################# uniq_search uniq_hattr_search
+    # uniq #####################################################################
     def uniq_hattrs(results, keys, hstore, running_list=[])
       results.each_with_object([]){|i,uniq_set| assign_unique(i, keys, hstore, running_list, uniq_set)}
     end
@@ -61,8 +65,13 @@ module Search
       uniq_set << i
     end
 
+    # sort #####################################################################
     def order_search(results, sort_keys, hstore)
       results.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
+    end
+
+    def order_hstore_search(results, sort_keys, hstore)
+      results.order(order_hstore_query(sort_keys,hstore))
     end
 
     def sort_value(val)
@@ -86,10 +95,20 @@ module Search
       "#{hstore} -> \'#{k}\' = \'#{v}\'"
     end
 
+    # sort hstore ##############################################################
+    def order_hstore_query(keys,hstore)
+      keys.map{|k| order_hstore_params(k,hstore)}.join(', ')
+    end
+
+    def order_hstore_params(k,hstore)
+      "#{hstore} -> \'#{k}\'"
+    end
+
     def hattr_params(scope, hattrs, hstore)
       hattrs ? hattrs : build_hattr_params(scope, hstore)
     end
 
+    # build params from product or search_keys #################################
     def build_hattr_params(scope, hstore)
       scope ? scope_hattr_params(scope, hstore) : search_keys.each_with_object({}) {|k,h| h[k]=""}
     end
@@ -106,18 +125,26 @@ module Search
     end
 
     def search_input(k, v, results, hstore)
-      {'input_name'=> k, 'selected'=> v, 'opts'=> results.map{|obj| obj.public_send(hstore)[k]}.uniq.compact}
+      {'input_name'=> k, 'selected'=> v, 'opts'=> results.pluck(hstore).pluck(k).uniq.compact}
     end
 
-    def select_input_opts(opt_set, k, hstore)
-      opt_set.map{|i| i.public_send(hstore)[k]}.uniq.compact.prepend('-- All --')
+    def default_params(params, keys)
+      params.any? ? params : defualt_hsh(keys)
     end
 
   end
 end
 
+# def select_input_opts(opt_set, k, hstore)
+#   opt_set.map{|i| i.public_send(hstore)[k]}.uniq.compact.prepend('-- All --')
+# end
+
 # def results_or_self(results)
 #   results.blank? ? self : results
+# end
+
+# def default_hsh(keys, v="")
+#   keys.map{|k| [k, v]}.to_h
 # end
 
 # def default_search_results(set)

@@ -1,1 +1,2 @@
-$("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, input_group: @input_group %>");
+$("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
+$("#edit-item").html("<%= j render 'items/form', invoice: @item.invoice, item: @item %>");

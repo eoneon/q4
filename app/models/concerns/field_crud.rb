@@ -100,7 +100,13 @@ module FieldCrud
   def remove_fieldables
     fieldables.map{|f| remove_hmt(f)}
     self.tags = nil
+    self.csv_tags = nil
+    self.save!
   end
+
+  # def remove_csv_tags(csv_tags)
+  #   keys = csv_tags['category_search'] == 'GartnerBladeGlass' ? %w[sku] : %w[sku title]
+  # end
 
   # product_fields remove ######################################################
   def remove_product_fields(input_params)

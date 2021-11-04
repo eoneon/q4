@@ -1,16 +1,18 @@
 class SkusController < ApplicationController
   def create
     @invoice = Invoice.find(params[:invoice_id])
-    targets = item_targets
+    #targets = item_targets
 
     format_skus(params[:item][:skus]).select{|sku| uniq_sku?(sku)}.each do |sku|
-      i = Item.create(sku: sku, title: params[:item][:title], qty: 1, invoice: @invoice)
-      if targets
-        targets['set'].map{|target| i.assoc_unless_included(target)}
-        i.tags = targets['tags'] if targets['tags']
-        i.csv_tags = Export.new.export_params(i, i.product, i.artist, i.product_group['params'])
-        i.save
-      end
+      i = Item.create(sku: sku, qty: 1, invoice: @invoice)
+      i.save
+      #i = Item.create(sku: sku, title: params[:item][:title], qty: 1, invoice: @invoice)
+      # if targets
+      #   targets['set'].map{|target| i.assoc_unless_included(target)}
+      #   i.tags = targets['tags'] if targets['tags']
+      #   i.csv_tags = Export.new.export_params(i, i.product, i.artist, i.product_group['params'])
+      #   i.save
+      # end
     end
 
   end
@@ -35,24 +37,27 @@ class SkusController < ApplicationController
     sku.to_s.length <= 3 && @invoice.items.pluck(:sku).exclude?(sku) || Item.all.pluck(:sku).exclude?(sku)
   end
 
-  def format_skus(skus, set=[])
-    skus.split(',').each do |sku_block|
-      format_sku_block(sku_block, set)
-    end
-    set.flatten.uniq.sort
+  ############################################################################
+  def format_skus(skus)
+    skus.split(',').each_with_object([]) {|sku_block, skus| format_sku_block(sku_block, skus)}
   end
 
-  def format_sku_block(sku_block, set)
+  def format_sku_block(sku_block, skus)
     if sku_block.index('-')
-      format_range(sku_block.split('-'), set)
+      format_range(extract_range(sku_block), skus)
     else
-      format_sku(extract_digits(sku_block), set)
+      format_sku(extract_digits(sku_block), skus)
     end
   end
 
-  def format_range(sku_range, set)
-    sku_range = sku_range.map{|i| extract_digits(i)}.reject{|i| i.blank?}
-    set << build_range(sku_range) if valid_range?(sku_range)
+  def format_range(sku_range, skus)
+    if valid_range?(sku_range)
+      build_range(sku_range).map{|sku| skus.append(sku)}
+    end
+  end
+
+  def extract_range(sku_block)
+    sku_block.split('-').map{|sku| extract_digits(sku)}.reject{|sku| sku.blank?}
   end
 
   def build_range(sku_range)
@@ -71,9 +76,38 @@ class SkusController < ApplicationController
     sku_range[0].to_i < sku_range[1].to_i
   end
 
-  def format_sku(sku, set)
-    set << sku.to_i if sku.length <= 3 || sku.length == 6
+  def format_sku(sku, skus)
+    skus << sku.to_i if sku.length <= 3 || sku.length == 6
   end
+
+  # def build_valid_range(sku_range)
+  #   build_range(sku_range) if valid_range?(sku_range)
+  # end
+
+
+  ############################################################################
+
+  # def format_skus(skus, set=[])
+  #   skus.split(',').each do |sku_block|
+  #     format_sku_block(sku_block, set)
+  #   end
+  #   set.flatten.uniq.sort
+  # end
+  #
+  # def format_sku_block(sku_block, set)
+  #   if sku_block.index('-')
+  #     format_range(sku_block.split('-'), set)
+  #   else
+  #     format_sku(extract_digits(sku_block), set)
+  #   end
+  # end
+  #
+  # def format_range(sku_range, set)
+  #   sku_range = sku_range.map{|i| extract_digits(i)}.reject{|i| i.blank?}
+  #   set << build_range(sku_range) if valid_range?(sku_range)
+  # end
+
+  ##############################################################################
 
   ##############################################################################
 

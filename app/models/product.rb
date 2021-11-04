@@ -28,7 +28,8 @@ class Product < ApplicationRecord
 
   def product_attrs(context, d_hsh, attrs, p_tags)
     context[product_category(p_tags['product_type'])] = true
-    Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
+    #Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
+    Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
   end
 
   # inputs_and_selected_make_attrs_and_rows ####################################
@@ -101,10 +102,39 @@ class Product < ApplicationRecord
 
   class << self
 
+    def invoice_search(product:nil, artist_id:nil, hattrs:nil, hstore:'tags', inputs:{})
+      form_inputs(hattrs, product, artist_id, hstore, inputs)
+      results = search_results(product, artist_id, inputs['hattrs'].reject{|k,v| v.blank?}, hstore)
+      results = order_hstore_search(results, search_keys, hstore)
+      inputs['hattrs'] = search_inputs(results, inputs['hattrs'], hstore)
+      a, b = results, inputs
+    end
+
+    def form_inputs(hattrs, product, artist_id, hstore, inputs)
+      inputs['artist_id'] = product ? nil : artist_id
+      inputs['hattrs'] = hattr_params(product, hattrs, hstore)
+      inputs['product_id'] = !product ? nil : product.id
+    end
+
+    def search_results(product, artist_id, hattrs, hstore)
+      results_or_self = scope_search_or_self(product, artist_id)
+      hstore_search(results_or_self, hattrs, hstore)
+    end
+
+    def scope_search_or_self(product, artist_id)
+      return self unless !product && artist_id && search_by_artists(artist_id).any?
+      search_by_artists(artist_id)
+    end
+
+    def search_by_artists(artist_id)
+      where(id: ItemGroup.join_group('Item', Item.artist_items(artist_id).ids, 'Product').pluck(:target_id))
+    end
+
     # SEARCH METHODS ###########################################################
     def search(scope:nil, hattrs:nil, hstore:'tags')
       hattrs = hattr_params(scope, hattrs, hstore)
-      results = hattr_search(self, hattrs.reject{|k,v| v.blank?}, hstore)
+      results = hstore_search(self, hattrs.reject{|k,v| v.blank?}, hstore)
+      results = order_hstore_search(results, search_keys, hstore)
       a, b = results, search_inputs(results, hattrs, hstore)
     end
 
@@ -120,10 +150,11 @@ class Product < ApplicationRecord
     end
 
     def builder(product_name, fields, tags=nil)
-      p = Product.where(product_name: product_name).first_or_create
+      p = where(product_name: product_name).first_or_create
       p.update_tags(tags)
       p.assoc_targets(fields)
     end
+
   end
 
   def assoc_targets(targets)

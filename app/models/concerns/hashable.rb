@@ -101,8 +101,9 @@ module Hashable
   end
 
   def slice_and_transfer(h:,h2:,keys:,k:nil)
-    if v = slice_vals_and_delete(h,keys)
-      h2[(k ? k : keys[0])] = v
+    if hsh = slice_vals_and_delete(h,keys)
+      k ? h2[k] = hsh : h2[keys[0]] = hsh[keys[0]]
+      # h2[(k ? k : keys[0])] = hsh
     end
   end
 
@@ -184,9 +185,9 @@ module Hashable
       h.select{|k,v| invalid_vals.exclude?(v)} if h
     end
 
-    # def defualt_hsh(*keys)
-    #   keys.each_with_object({}) {|k,h| h[k]=nil}
-    # end
+    def defualt_hsh(*keys)
+      keys.flatten.each_with_object({}) {|k,h| h[k]=""}
+    end
     #array methods ############################################################# might want to check this one out
 
     def include_any?(arr_x, arr_y)

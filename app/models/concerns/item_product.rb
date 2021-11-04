@@ -2,12 +2,12 @@ require 'active_support/concern'
 
 module ItemProduct
   extend ActiveSupport::Concern
-  # i = Item.find(97)    p = Item.find(97).product h = Item.find(97).product.fieldables   h = Item.find(98).input_group
+  # i = Item.find(97)   h = Item.find(97).input_group
   def input_group(f_grp={rows:[], context:{reorder:[], remove:[]}, d_hsh:{}, attrs:{}, store:{}})
-    return f_grp if !product
+    return [f_grp[:rows], f_grp[:attrs] ]if !product
     product.product_item_loop(input_params, f_grp, keys=%w[tagline invoice_tagline tagline_search body material_dimension mounting_dimension material_mounting mounting_search])
     related_and_divergent_params(f_grp)
-    f_grp
+    a,b = f_grp[:rows], f_grp[:attrs]
   end
 
   def item_attrs(context, attrs, store)
@@ -129,7 +129,6 @@ module ItemProduct
   end
 
   def remove_rules(context)
-    #context[:remove] << 'artist' if context[:gartner_blade]
     context[:remove] << 'material' if context[:paper] && [:category, :embellishing, :leafing, :remarque, :signature].any?{|k| context[k]}
     context[:remove] << 'medium' if context[:giclee] && (context[:proof_edition] || context[:numbered] && context[:embellishing] || !context[:paper])
   end
@@ -181,7 +180,8 @@ module ItemProduct
   def flat_description(context, store, hsh={'tagline'=>nil, 'description'=>nil})
     hsh['tagline'] = build_tagline(context, store)
     hsh['description'] = build_body(context, store)
-    hsh['abbrv'] = build_abbrv(context, store)
+    hsh['invoice_tagline'] = build_invoice_tagline(context, store)
+    hsh['search_tagline'] = build_search_tagline(context, store)
     hsh
   end
 
@@ -191,12 +191,19 @@ module ItemProduct
     tagline_punct(context, tagline, tagline.keys)
   end
 
-  # abbrv
-  def build_abbrv(context, store)
-    abbrv_hsh = filtered_params(store, contexts[:abbrv][:keys], 'abbrv', 'tagline')
-    abbrv_tagline = update_abbrv(context, abbrv_hsh.keys, abbrv_hsh)
-    abbrv_tagline = tagline_punct(context, abbrv_tagline, abbrv_tagline.keys)
-    Item.char_limit(abbrv_tagline, contexts[:abbrv][:set], 140)
+  # build_invoice_tagline
+  def build_invoice_tagline(context, store)
+    invoice_hsh = filtered_params(store, contexts[:invoice_tagline][:keys], 'invoice_tagline', 'tagline')
+    invoice_tagline = update_invoice_tagline(context, invoice_hsh.keys, invoice_hsh)
+    invoice_tagline = tagline_punct(context, invoice_tagline, invoice_tagline.keys)
+    Item.char_limit(invoice_tagline, contexts[:invoice_tagline][:set], 140)
+  end
+
+  def build_search_tagline(context, store)
+    search_hsh = filtered_params(store, contexts[:search_tagline][:keys], 'tagline_search', 'tagline')
+    search_tagline = update_invoice_tagline(context, search_hsh.keys, search_hsh)
+    search_tagline = tagline_punct(context, search_tagline, search_tagline.keys)
+    Item.char_limit(search_tagline, contexts[:search_tagline][:set], 115)
   end
 
   def tagline_punct(context, tagline, keys)
@@ -212,9 +219,9 @@ module ItemProduct
     description_params(store, keys, 'tagline')
   end
 
-  def update_abbrv(context, keys, abbrv_hsh)
+  def update_invoice_tagline(context, keys, invoice_hsh)
     keys = context[:reorder].each_with_object(keys) {|h| reorder_keys(h.merge!({keys: keys}))}
-    keys.each_with_object({}){|k,h| h[k] = abbrv_hsh[k]}
+    keys.each_with_object({}){|k,h| h[k] = invoice_hsh[k]}
   end
 
   # description

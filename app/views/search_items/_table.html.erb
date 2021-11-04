@@ -1,7 +1,7 @@
 <table class="table table-sm table-striped table-hover">
   <thead>
     <tr>
-      <% Item.item_search_keys.each do |k| %>
+      <% Item.search_keys.each do |k| %>
         <th scope="<%="#{search_tags[k]['col']}"%>"><span class="fs-s"><%= search_tags[k]['label'] %></span></th>
       <% end %>
     </tr>

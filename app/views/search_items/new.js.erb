@@ -1,2 +1,2 @@
-$("#search-items").html("<%= j render 'search_items/form', invoice: @invoice, items: @items['opt_set'], hattrs: @items['hattrs'], scope: @items['scope'], attrs: @items['attrs'] %>");
-$("#search-table").html("<%= j render 'search_items/index', items: @items['search_results'] %>");
+$("#search-items").html("<%= j render 'search_items/form', invoice: @invoice, items: @items, hattrs: @input_group['hattrs'], scope: @input_group['scope'] %>");
+$("#search-table").html("<%= j render 'search_items/index', items: @items %>");

@@ -1,5 +1,5 @@
 <%= form_with model: item, url: item_field_path(item), id: "edit-item-fields" do |f| %>
-  <% @input_group[:rows].each do |row| %>
+  <% rows.each do |row| %>
     <div class="card border border-secondary p-2 mb-2">
       <div class="form-row">
         <% row.each do |f_hsh| %>

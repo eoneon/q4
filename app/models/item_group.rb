@@ -32,4 +32,8 @@ class ItemGroup < ApplicationRecord
     origin_item_groups.count
   end
 
+  def self.join_group(origin_type, origin_ids, target_type)
+    where(origin_type: origin_type, origin_id: origin_ids, target_type: target_type).distinct
+  end
+
 end

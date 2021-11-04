@@ -4,7 +4,7 @@
       <div class="row">
         <% search_cols(item.csv_tags).each do |params| %>
           <div class="<%= "#{params['col']}" %>">
-            <span class="fs-s"><%= abbrv_attr_tags(params['table-data']) %></span>
+            <span class="fs-s"><%= params['table-data'] %></span>
           </div>
         <% end %>
       </div>
