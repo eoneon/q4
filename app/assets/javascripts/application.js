@@ -110,9 +110,18 @@ $(document).ready(function(){
   $("body").on("change", "select.artist-select", function(){
     var artist = $(this).val();
     if (artist.length){
-      $('#new-skus option[value="'+artist+'"]').attr('selected', true);
+      $("#new-skus #artist_id").val(artist);
     } else {
-      $('#new-skus').find(":selected").attr('selected', false);
+      $("#new-skus #artist_id").val(false);
+    }
+  });
+
+  $("body").on("change", "select.product-select", function(){
+    var product = $(this).val();
+    if (product.length){
+      $("#new-skus #product_id").val(product);
+    } else {
+      $("#new-skus #product_id").val(false);
     }
   });
 
@@ -176,6 +185,14 @@ $(document).ready(function(){
   }
 });
 
+// $("body").on("change", "select.artist-select", function(){
+//   var artist = $(this).val();
+//   if (artist.length){
+//     $('#new-skus option[value="'+artist+'"]').attr('selected', true);
+//   } else {
+//     $('#new-skus').find(":selected").attr('selected', false);
+//   }
+// });
 
 
 // $("body").on("change", ".artist-add", function(e){

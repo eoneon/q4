@@ -20,21 +20,54 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
+  ##############################################################################
+  def batch_create_skus(invoice, product, product_args, artist, skus)
+    skus.each do |sku|
+      i = Item.create(sku: sku, qty: 1, invoice: invoice)
+      i.add_obj(artist) if artist
+      i.add_sku(product, product_args, sku) if product
+    end
+  end
+
+  def add_sku(product, product_args, sku)
+    add_obj(product)
+    self.tags = hsh_init(self.tags)
+    add_default_fields(product_args)
+    rows, attrs = input_group
+    update_csv_tags(attrs)
+  end
+
+  ##############################################################################
+  def add_product(product)
+    add_obj(product)
+    self.tags = hsh_init(self.tags)
+    add_default_fields(product.f_args(product.g_hsh))
+  end
+
+  def remove_product(product)
+    remove_fieldables
+    remove_obj(product)
+  end
+
+  def replace_product(product, item_product)
+    remove_product(item_product)
+    add_product(product)
+  end
+
   def self.artist_items(artist_id)
     joins(:artists).where(artists: {id: artist_id}).distinct
+  end
+
+  def hsh_init(tags)
+    tags ? tags : {}
   end
   ############################################################################## #results_or_self = attr_group(results_or_self, default_params(attrs, attr_search_keys), input_group)
   def self.search(scope:nil, attrs:{}, hattrs:{}, input_group:{}, hstore: 'csv_tags')
     results_or_self = scope_group(scope, :item_groups, input_group)
-    #puts "default_params: #{default_params(hattrs, search_keys)}"
     results = hstore_group(results_or_self, default_params(hattrs, search_keys), hstore, input_group, nil)
-    #results = uniq_hattrs(results, search_keys, hstore)
-    #puts "input_group: #{input_group['hattrs']}"
     args = results.any? ? [results, input_group['hattrs'], hstore] : [Product, input_group['hattrs'], 'tags']
     input_group['hattrs'] = search_inputs(*args)
-    #puts "input_group: #{input_group['hattrs']}"
     a, b = results, input_group
-    #results = order_search(uniq_hattrs(results, search_keys, hstore), search_keys, hstore)
   end
 
   def self.hattr_search_fields(results, hattrs, hstore)
@@ -46,27 +79,12 @@ class Item < ApplicationRecord
   def self.hattr_opts(results, k, hstore)
     results.map{|i| i.public_send(hstore)[k]}.uniq.compact
   end
-  #
-  # def self.attr_options(attrs, results, h={})
-  #   attrs.each do |k,v|
-  #     h.merge!({k => {'opts' => attr_opts(results, k), 'selected' =>v}})
-  #   end
-  #   h
-  # end
 
   def self.attr_search_fields(attrs, results)
     attrs.each_with_object({}) do |(k,v), attr_inputs|
       attr_inputs.merge!({k => {'opts' => results.pluck(k.to_sym).uniq, 'selected' =>v}})
     end
   end
-
-  # def self.attr_opts(results, k)
-  #   results.pluck(k.to_sym).uniq
-  # end
-
-  # def self.default_query
-  #   item_search_keys.map{|k| [k,'']}.to_h
-  # end
 
   def self.table_keys
     %w[search_tagline mounting_search measurements]
@@ -75,18 +93,6 @@ class Item < ApplicationRecord
   def self.search_keys
     %w[title category_search medium_search material_search mounting_search measurements] #item_size
   end
-
-  # def self.attr_search_keys
-  #   %w[title]
-  # end
-  #
-  # def self.index_search
-  #   sort_keys.map{|k| [k, nil]}.to_h
-  # end
-
-  # def self.default_hsh(keys, v=nil)
-  #   keys.map{|k| [k, v]}.to_h
-  # end
 
   ##############################################################################
 
@@ -103,7 +109,7 @@ class Item < ApplicationRecord
   end
 
   def product
-    products.first if products.any? #scoped_targets(scope: 'Product', join: :item_groups).first
+    products.first if products.any?
   end
 
   def artist

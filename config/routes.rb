@@ -12,6 +12,9 @@ Rails.application.routes.draw do
       member do
         post :batch_destroy
       end
+      collection do
+        get :search
+      end
     end
 
     resources :search_items, only: [:search, :index, :new] do

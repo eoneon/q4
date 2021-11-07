@@ -1,18 +1,38 @@
 <%= form_with model: Item.new, url: invoice_skus_path(invoice), id: "new-skus" do |f| %>
   <div class="form card border border-secondary p-2 mb-2">
     <div class="row">
+        <%#= f.text_field :skus, placeholder: "enter sku range", class: "form-control form-control-sm mr-sm-2" %>
 
-      <label class="col-1 col-form-label form-control-sm ml-sm-2">sku range:</label>
-      <div class="col-4">
-        <%= f.text_field :skus, placeholder: "enter sku range", class: "form-control form-control-sm mr-sm-2" %>
+      <div class="col-3">
+        <label>sku range</label>
+        <div class="input-group input-group-sm">
+          <%= f.text_field :skus, placeholder: "enter sku range", class: "form-control" %>
+        </div>
       </div>
 
-      <label class="col-1 col-form-label form-control-sm ml-sm-2">artist:</label>
       <div class="col-2">
-        <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control form-control-sm mr-sm-2" %>
+        <label>artist</label>
+        <div class="input-group input-group-sm">
+          <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control", id: "artist_id" %>
+        </div>
       </div>
 
-      <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">submit</button>
+      <div class="col-6">
+        <label>product</label>
+        <div class="input-group input-group-sm">
+          <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: "form-control", id: "product_id" %>
+          <div class="col-2">
+            <button class="btn btn-sm btn-outline-primary form-control" type="submit">submit</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="col-1">
+        <label>e</label> -->
+        <!-- <div class="input-group input-group-sm">
+          <button class="btn btn-sm btn-outline-primary form-control" type="submit">submit</button>
+        </div> -->
+      <!-- </div> -->
     </div>
   </div>
 <% end %>

@@ -1,0 +1,6 @@
+<div class="col-2">
+  <label><%= k.sub('_search','') %></label>
+  <div class="input-group input-group-sm">
+    <%= select_tag "items[#{scope}][#{k}]", options_for_select(opts, selected), {include_blank: true, class: "form-control search-select", id: k} %>
+  </div>
+</div>

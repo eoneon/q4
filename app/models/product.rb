@@ -4,7 +4,6 @@ class Product < ApplicationRecord
   include Crudable
   include Hashable
   include TypeCheck
-  #include HattrSearch
   include Search
 
   validates :product_name, presence: true
@@ -28,7 +27,6 @@ class Product < ApplicationRecord
 
   def product_attrs(context, d_hsh, attrs, p_tags)
     context[product_category(p_tags['product_type'])] = true
-    #Medium.item_tags.map(&:to_s).map{|k| attrs[k] = p_tags[k]}
     Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
   end
 
@@ -111,9 +109,9 @@ class Product < ApplicationRecord
     end
 
     def form_inputs(hattrs, product, artist_id, hstore, inputs)
-      inputs['artist_id'] = product ? nil : artist_id
+      inputs['artist'] = product ? nil : artist_id
       inputs['hattrs'] = hattr_params(product, hattrs, hstore)
-      inputs['product_id'] = !product ? nil : product.id
+      inputs['product'] = !product ? nil : product.id
     end
 
     def search_results(product, artist_id, hattrs, hstore)

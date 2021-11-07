@@ -16,10 +16,6 @@
         </div>
       </div>
 
-      <%# attrs.each do |k, opt_hsh| %>
-        <%#= render 'search_items/input_field', scope: 'attrs', k: k, opts: opt_hsh['opts'], selected: opt_hsh['selected'], col: 'col-2' %>
-      <%# end %>
-
       <% hattrs.each do |hattr_inputs| %>
         <%= render 'search_items/input_field', scope: 'hattrs', k: hattr_inputs['input_name'], opts: hattr_inputs['opts'], selected: hattr_inputs['selected'], col: 'col-2' %>
       <% end %>

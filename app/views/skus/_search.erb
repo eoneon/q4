@@ -1,0 +1,24 @@
+<%= form_with model: Item.new, url: search_invoice_skus_path(invoice), method: :get, id: "search-skus" do |f| %>
+  <div class="form card border border-secondary p-2 mb-2">
+    <div class="row">
+
+      <div class="col-2">
+        <label>artist</label>
+        <div class="input-group input-group-sm">
+          <%= f.collection_select :artist, Artist.all, :id, :artist_name, {include_blank: true, selected: inputs['artist']}, class: "form-control search-select artist-select" %>
+        </div>
+      </div>
+
+      <% inputs['hattrs'].each do |hattr_inputs| %>
+        <%= render 'skus/input_field', scope: 'hattrs', k: hattr_inputs['input_name'], opts: hattr_inputs['opts'], selected: hattr_inputs['selected'] %>
+      <% end %>
+
+      <div class="col-4">
+        <label>product</label>
+        <div class="input-group input-group-sm">
+          <%= f.collection_select :product, results, :id, :product_name, {include_blank: true, selected: inputs['product']}, class: "form-control product-select" %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
