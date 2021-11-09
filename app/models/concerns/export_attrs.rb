@@ -19,7 +19,7 @@ module ExportAttrs
     end
 
     def attr_keys
-      %w[sku artist_name artist_id title tagline property_room body width height frame_width frame_height retail qty]
+      Item.new.contexts[:csv][:export]
     end
 
   end

@@ -1,7 +1,7 @@
 <%= form_with model: item, url: invoice_item_path(invoice, item), id: "edit-item" do |f| %>
-  <h5><span>Tagline: <%= @item.hattr('csv_tags', 'tagline') %></span></h5> <%#= @input_group[:attrs].dig('tagline') %>
+  <h5><span>Tagline: <%= @item.hattr('csv_tags', 'tagline') %></span></h5>
 
-  <h5><span>Description: <%= @item.hattr('csv_tags', 'description') %></span></h5> <%#= @input_group[:attrs].dig('description') %>
+  <h5><span>Description: <%= @item.hattr('csv_tags', 'description') %></span></h5> 
   <div class="form">
 
     <div class="card border border-secondary p-2 mb-2">

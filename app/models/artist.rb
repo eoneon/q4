@@ -45,7 +45,31 @@ class Artist < ApplicationRecord
   def abbrv_first(first_name)
     "#{first_name[0]}."
   end
+
+  def sort_name
+    artist_arr = artist_name.split(' ')
+    last_name = artist_arr.unshift
+    sort_hsh={'sort_name'=> artist_arr.prepend(last_name).join(' ')}
+    #sort_hsh={'sort_name'=> artist_name.split(' ').last} #last_name
+    if self.tags.nil?
+      self.tags = sort_hsh
+    else
+      self.tags.merge!(sort_hsh)
+    end
+  end
+
 end
+
+# def sort_name(artist_arr)
+#   if artist_arr.count == 2
+#     {'first_name'=> artist_arr[0], 'last_name'=> artist_arr[1]}
+#   elsif artist_arr.count > 2
+#     last_name = artist_arr.unshift
+#     {'first_name'=> artist_arr.join(' '), 'last_name'=> last_name}
+#   elsif artist_arr.count == 1
+#     {'last_name'=> artist_arr[0]}
+#   end
+# end
 
 # def title_tag
 #   tags.try(:[], 'title_tag')
