@@ -70,8 +70,13 @@ $(document).ready(function(){
     $(this).closest(".toggle-field").toggleClass("show collapse");
   });
 
+  // $("body").on("change", ".field-param", function(){
+  //   $("#edit-item-fields").submit();
+  // });
+
   $("body").on("change", ".field-param", function(){
-    $("#edit-item-fields").submit();
+    var form = $(this).closest("form");
+    $(form).submit();
   });
 
   //CRUD ITEM-PRODUCT #update -> REFACTOR

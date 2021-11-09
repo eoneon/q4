@@ -5,6 +5,7 @@ class InvoicesController < ApplicationController
 
   def show
     @invoice = Invoice.find(params[:id])
+    @results, @inputs = Product.invoice_search
   end
 
   def new

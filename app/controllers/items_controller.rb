@@ -3,7 +3,7 @@ class ItemsController < ApplicationController
   def show
     @item = Item.find(params[:id])
     @products, @inputs = Product.search(scope: @item.product)
-    @input_group = @item.input_group 
+    @input_group = @item.input_group
   end
 
   def create
@@ -20,7 +20,8 @@ class ItemsController < ApplicationController
   def update
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
-    @item.assign_attributes(item_params) # @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])
+    @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
+    @item.assign_attributes(item_params)
 
     @item.save
     @input_group = @item.input_group
