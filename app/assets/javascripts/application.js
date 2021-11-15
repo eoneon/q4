@@ -70,8 +70,13 @@ $(document).ready(function(){
     $(this).closest(".toggle-field").toggleClass("show collapse");
   });
 
+  // $("body").on("change", ".field-param", function(){
+  //   $("#edit-item-fields").submit();
+  // });
+
   $("body").on("change", ".field-param", function(){
-    $("#edit-item-fields").submit();
+    var form = $(this).closest("form");
+    $(form).submit();
   });
 
   //CRUD ITEM-PRODUCT #update -> REFACTOR
@@ -123,6 +128,12 @@ $(document).ready(function(){
     } else {
       $("#new-skus #product_id").val(false);
     }
+  });
+
+  $("body").on("change", "select.item-product-select", function(){
+    var product_id = $(this).val();
+    $("input[name='item[product_id]']").val(product_id);
+    $("#edit-item").submit();
   });
 
   $("body").on("click", ".search-btn", function(){

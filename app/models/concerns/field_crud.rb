@@ -37,7 +37,7 @@ module FieldCrud
   end
 
   def new_val(t, v2)
-    valid_field_val?(t, v2) ? find_target(t, v2) : v2
+    valid_field_val?(t, v2) ? find_target(t, v2.to_i) : v2
   end
 
   def valid_field_val?(t, val)

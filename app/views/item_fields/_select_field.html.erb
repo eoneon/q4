@@ -1,6 +1,6 @@
 <div class="col-3">
-  <label><%= input_label(f_hsh) %></label>
   <div class="input-group input-group-sm">
-    <%= f.collection_select f_hsh[:f_name], f_hsh[:f_val].options, :id, :field_name, {include_blank: true, selected: f_hsh[:selected]}, {class: "form-control field-param fs-xs"} %>
+    <label class="fs-xs font-weight-light text-secondary pt-2 pl-1"><span class="kind-label"><%= input_label(f_hsh) %></span></label>
+    <%= f.collection_select f_hsh[:f_name], f_hsh[:f_val].options, :id, :field_name, {include_blank: true, selected: f_hsh[:selected]}, {class: "form-control border-light-gray rounded-right-border rounded-left-border field-param"} %>
   </div>
 </div>

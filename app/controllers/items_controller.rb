@@ -20,8 +20,13 @@ class ItemsController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
+    @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
+    @item.update_product_case('product', @item.product, params[:item][:product_id])
+    @products, @inputs = Product.search(scope: @item.product)
     @rows, attrs = @item.input_group
     @item.update_csv_tags(attrs)
+
+    @item.save
 
     respond_to do |format|
       format.js
@@ -48,5 +53,3 @@ class ItemsController < ApplicationController
   end
 
 end
-
-# @item.csv_tags = Export.new.export_params(@item, @product, @artist, @product_group['params'])

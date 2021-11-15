@@ -24,13 +24,17 @@
    background-color: #2A1121;
  }
 
- //form-elements
+ //form-elements  display: inline-block;
  .bg-disabled {
    background: #e9ecef !important;
  }
  //set width of bootstrap dropdown to length of longest selection
  .type-label{
-   min-width: 115px !important;
+   min-width: 10px !important;
+ }
+ .kind-label{
+   display: inline-block;
+   width: 60px //!important;
  }
  .type-dropdown {
    min-width: 125px !important;
@@ -67,7 +71,6 @@
    border-top-left-radius: 1rem !important;
    border-bottom-left-radius: 1rem !important;
  }
-
 
  //button elements
  .caret-toggle {

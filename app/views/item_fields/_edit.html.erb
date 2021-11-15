@@ -1,15 +1,17 @@
 <%= form_with model: item, url: item_field_path(item), id: "edit-item-fields" do |f| %>
-  <% rows.each do |row| %>
-    <div class="card border border-secondary p-2 mb-2">
-      <div class="form-row">
-        <% row.each do |f_hsh| %>
-          <%= f.fields_for f_hsh[:k].to_sym do |kind_scope| %>
-            <%= kind_scope.fields_for f_hsh[:t_type].to_sym do |type_scope| %>
-              <%= render "item_fields/#{f_hsh[:t]}", f: type_scope, f_hsh: f_hsh %>
+  <div class="form">
+    <% rows.each do |row| %>
+      <div class="card p-1 mb-1 border-0 bg-light">
+        <div class="form-row">
+          <% row.each do |f_hsh| %>
+            <%= f.fields_for f_hsh[:k].to_sym do |kind_scope| %>
+              <%= kind_scope.fields_for f_hsh[:t_type].to_sym do |type_scope| %>
+                <%= render "item_fields/#{f_hsh[:t]}", f: type_scope, f_hsh: f_hsh %>
+              <% end %>
             <% end %>
           <% end %>
-        <% end %>
+        </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 <% end %>

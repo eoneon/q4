@@ -1,35 +1,42 @@
 <%= form_with model: item, url: invoice_item_path(invoice, item), id: "edit-item" do |f| %>
-  <h5><span>Tagline: <%= @item.hattr('csv_tags', 'tagline') %></span></h5>
+  <div class="form-inline">
+    <%= number_field_tag "item[product_id]", @item.product.try(:id), class: "collapse" %>
 
-  <h5><span>Description: <%= @item.hattr('csv_tags', 'description') %></span></h5> 
-  <div class="form">
-
-    <div class="card border border-secondary p-2 mb-2">
-      <div class="row">
-        <div class="col-2">
-          <label>sku</label>
-          <%= f.number_field :sku, placeholder: "sku", class: "form-control form-control-sm mr-sm-2 input-field" %>
-        </div>
-
-        <div class="col-4">
-          <label>title</label>
-          <%= f.text_field :title, placeholder: "title", class: "form-control form-control-sm mr-sm-2 input-field" %>
-        </div>
-
-        <div class="col-2">
-          <label>retail</label>
-          <%= f.number_field :retail, placeholder: "retail", class: "form-control form-control-sm mr-sm-2 input-field" %>
-        </div>
-
-        <div class="col-2">
-          <label>qty</label>
-          <%= f.number_field :qty, placeholder: "qty", class: "form-control form-control-sm mr-sm-2 input-field" %>
-        </div>
+    <div class="col-2 border-light-gray p-1">
+      <div class="input-group input-group-sm">
+        <label class="fs-xs font-weight-light text-secondary"><span class="kind-label">sku:</span></label>
+        <%= f.number_field :sku, placeholder: "sku", class: "form-control border-light-gray rounded-right-border rounded-left-border field-param" %>
       </div>
     </div>
 
-    <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
-    <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+    <div class="col-3 border-light-gray p-1">
+      <div class="input-group input-group-sm">
+        <label class="fs-xs font-weight-light text-secondary pr-1">artist:</label>
+        <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true, selected: item.artist.try(:id)}, class: "form-control border-light-gray rounded-right-border rounded-left-border field-param" %>
+      </div>
+    </div>
 
+    <div class="col-4 border-light-gray p-1">
+      <div class="input-group input-group-sm">
+        <label class="fs-xs font-weight-light text-secondary pr-1">title:</label>
+        <%= f.text_field :title, placeholder: "title", class: "form-control border-light-gray rounded-right-border rounded-left-border field-param" %>
+      </div>
+    </div>
+
+    <div class="col-2 border-light-gray p-1">
+      <div class="input-group input-group-sm">
+        <label class="fs-xs font-weight-light text-secondary pr-1">$</label>
+        <%= f.number_field :retail, placeholder: "retail", class: "form-control border-light-gray rounded-right-border rounded-left-border field-param" %>
+      </div>
+    </div>
+
+    <div class="col-1 border-light-gray p-1">
+      <div class="input-group input-group-sm">
+        <label class="fs-xs font-weight-light text-secondary pr-1">qty:</label>
+        <%= f.number_field :qty, placeholder: "qty", class: "form-control border-light-gray rounded-right-border rounded-left-border field-param" %>
+      </div>
+    </div>
   </div>
+  <%#= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+
 <% end %>

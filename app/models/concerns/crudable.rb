@@ -34,7 +34,8 @@ module Crudable
   # ############################################################################
 
   def update_target_case(t, old_val, new_val)
-    case update_case(item_val(t, old_val), new_val)
+    #param_val
+    case update_case(item_val(t, old_val), param_val(t, new_val))
       when :add; add_obj(new_val(t, new_val))
       when :remove; remove_obj(old_val)
       when :replace; replace_obj(old_val, new_val(t, new_val))

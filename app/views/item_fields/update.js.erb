@@ -1,2 +1,4 @@
+document.getElementById("tagline").textContent="<%= @item.hattr('csv_tags', 'tagline') %>";
+document.getElementById("description").textContent="<%= @item.hattr('csv_tags', 'description') %>";
 $("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
 $("#edit-item").html("<%= j render 'items/form', invoice: @item.invoice, item: @item %>");
