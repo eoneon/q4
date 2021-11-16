@@ -24,6 +24,7 @@ class Product < ApplicationRecord
     product_item_fields_loop(g_hsh, i_hsh, f_grp[:rows], f_grp[:d_hsh], keys)
 
     form_hsh = f_grp[:rows].group_by{|h| h[:k]}
+    puts "build_form_rows: #{build_form_rows(form_hsh)}"
     context_for_form_rows(form_hsh, f_grp[:context])
     f_grp[:rows] = assign_row(form_hsh, form_rows(f_grp[:context], product_name.downcase.split(' ')))
     #f_grp[:rows] = assign_row(f_grp[:rows].group_by{|h| h[:k]}, form_rows(f_grp[:context], f_grp[:attrs]['medium']))
@@ -33,10 +34,6 @@ class Product < ApplicationRecord
     context[product_category(p_tags['product_type'])] = true
     set_context_key('category_search', p_tags['category_search'].underscore, context)
     set_context_key('material_search', p_tags['material_search'].underscore, context)
-    #row_context.dig('category_search', p_tags['category_search'].underscore)
-    # context[:category_search] = p_tags['category_search']
-    # context[:medium_search] = p_tags['medium_search']
-    # context[:material_search] = p_tags['material_search']
     Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
   end
 
@@ -122,6 +119,17 @@ class Product < ApplicationRecord
     end
   end
 
+  def form_groups
+    {
+      'media'=> {header: %w[category embellishing medium material], body: %w[leafing remarque]},
+      'numbering'=> {header: %w[numbering], body: %w[]},
+      'mounting'=> {header: %w[mounting], body: %w[]},
+      'authentication'=> {header: %w[seal signature certificate], body: %w[dated verification]},
+      'dimension'=> {header: %w[dimension], body: %w[]},
+      'disclaimer'=> {header: %w[disclaimer], body: %w[]}
+    }
+  end
+
   def context_for_form_rows(form_hsh, context)
     form_hsh.select{|k,v| row_context.keys.include?(k)}.each do |k, k_set|
       k_set.pluck(:f_name).each do |f_name|
@@ -145,6 +153,19 @@ class Product < ApplicationRecord
     'category_search'=> {'reproduction_print'=> :reproduction_print},
     'material_search'=> {'paper'=> :paper}
     }
+  end
+
+  def build_form_rows(form_hsh)
+    form_groups.each_with_object({}) do |(card_id,card), hsh|
+      if card[:header].any?{|k| form_hsh[k]}
+        Item.case_merge(hsh, build_row(card[:header], form_hsh), card_id, :header)
+        Item.case_merge(hsh, build_row(card[:body], form_hsh), card_id, :body)
+      end
+    end
+  end
+
+  def build_row(keys,hsh)
+    keys.select{|k| hsh.has_key?(k)}.each_with_object([]){|k,div_row| div_row << hsh[k]}.flatten
   end
 
   class << self
