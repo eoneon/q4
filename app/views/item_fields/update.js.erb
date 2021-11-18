@@ -1,5 +1,12 @@
 document.getElementById("tagline").textContent="<%= @item.hattr('csv_tags', 'tagline') %>";
 document.getElementById("description").textContent="<%= @item.hattr('csv_tags', 'description') %>";
-$("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>"); //.find(".kind-label").addClass("text-primary");
-//$("#edit-item-fields").find(".kind-label").addClass("text-primary");
+var toggle = <%= @toggle %>
+$("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
 $("#edit-item").html("<%= j render 'items/form', invoice: @item.invoice, item: @item %>");
+
+if ($(toggle).length){
+  var id = $(toggle).attr("id");
+  $("#caret-id").val(id);
+  $('#'+id).find("i").toggleClass("fa-caret-right fa-caret-down");
+  $('#'+id).closest(".card").find(".card-body.collapse").toggleClass("show collapse");
+}

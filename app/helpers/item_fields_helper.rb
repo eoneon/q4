@@ -26,4 +26,8 @@ module ItemFieldsHelper
     %w[embellishing certificate]
   end
 
+  def disable_btn(v)
+    "disabled" if v.blank?
+  end 
+
 end

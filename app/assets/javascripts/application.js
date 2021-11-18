@@ -19,9 +19,21 @@
 $(document).ready(function(){
 
   $("body").on("click", ".caret-toggle", function(){
+    var id = $(this).attr("id");
     $(this).find("i").toggleClass("fa-caret-right fa-caret-down");
-    $(this).closest(".card").siblings().find("i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
-    $(this).closest(".card").siblings().find(".card-body.show").toggleClass("show hide");
+    $(this).closest(".card").find(".card-body").toggleClass("show collapse");
+    if ($(this).find("i").hasClass("fa-caret-down")){
+      $("#caret-id").val(id);
+      $(this).closest(".card").siblings().find("i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
+      $(this).closest(".card").siblings().find(".card-body.show").toggleClass("show collapse");
+    } else{
+      $("#caret-id").val("");
+    }
+  });
+
+  $("body").on("change", ".field-param", function(){
+    var form = $(this).closest("form");
+    $(form).submit();
   });
 
   $("body").on("click", ".form-toggle", function(){
@@ -68,15 +80,6 @@ $(document).ready(function(){
 
   $("body").on("click", ".collapse-field-btn", function(){
     $(this).closest(".toggle-field").toggleClass("show collapse");
-  });
-
-  // $("body").on("change", ".field-param", function(){
-  //   $("#edit-item-fields").submit();
-  // });
-
-  $("body").on("change", ".field-param", function(){
-    var form = $(this).closest("form");
-    $(form).submit();
   });
 
   //CRUD ITEM-PRODUCT #update -> REFACTOR
@@ -195,6 +198,20 @@ $(document).ready(function(){
     return method
   }
 });
+
+
+  // $("body").on("click", ".caret-toggle", function(){
+  //   if ($(this).find("i").hasClass("fa-caret-right")){
+  //     $(this).find("i").toggleClass("fa-caret-right fa-caret-down");
+  //     $(this).closest(".card").find(".card-body").toggleClass("show collapse");
+  //
+  //     $(this).closest(".card").siblings().find("i.fa-caret-down").toggleClass("fa-caret-right");
+  //     $(this).closest(".card").siblings().find(".card-body.show").toggleClass("show collapse");
+  //   } else {
+  //     $(this).find("i").toggleClass("fa-caret-right fa-caret-down");
+  //     $(this).closest(".card").find(".card-body.show").toggleClass("show collapse");
+  //   }
+  // });
 
 // $("body").on("change", "select.artist-select", function(){
 //   var artist = $(this).val();

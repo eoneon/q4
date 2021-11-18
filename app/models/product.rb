@@ -22,12 +22,11 @@ class Product < ApplicationRecord
   def product_item_loop(i_hsh, f_grp, keys)
     product_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], tags)
     product_item_fields_loop(g_hsh, i_hsh, f_grp[:rows], f_grp[:d_hsh], keys)
-
     form_hsh = f_grp[:rows].group_by{|h| h[:k]}
-    puts "build_form_rows: #{build_form_rows(form_hsh)}"
-    context_for_form_rows(form_hsh, f_grp[:context])
-    f_grp[:rows] = assign_row(form_hsh, form_rows(f_grp[:context], product_name.downcase.split(' ')))
-    #f_grp[:rows] = assign_row(f_grp[:rows].group_by{|h| h[:k]}, form_rows(f_grp[:context], f_grp[:attrs]['medium']))
+
+    f_grp[:rows] = build_form_rows(form_hsh)
+    #context_for_form_rows(form_hsh, f_grp[:context])
+    #f_grp[:rows] = assign_row(form_hsh, form_rows(f_grp[:context], product_name.downcase.split(' ')))
   end
 
   def product_attrs(context, d_hsh, attrs, p_tags)

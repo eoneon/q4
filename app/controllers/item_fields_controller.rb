@@ -2,6 +2,8 @@ class ItemFieldsController < ApplicationController
 
   def update
     @item = Item.find(params[:id])
+    @toggle = params[:item_fields][:target_id]
+    puts "@toggle: #{@toggle}"
     @item.tags = hsh_init(@item.tags)
     param_set = Item.build_params(params[:item].to_unsafe_h, :k, :t,:f_name,:f_val)
     @item.update_field(param_set, @item.input_params)
