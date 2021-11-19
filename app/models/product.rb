@@ -22,17 +22,11 @@ class Product < ApplicationRecord
   def product_item_loop(i_hsh, f_grp, keys)
     product_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], tags)
     product_item_fields_loop(g_hsh, i_hsh, f_grp[:rows], f_grp[:d_hsh], keys)
-    form_hsh = f_grp[:rows].group_by{|h| h[:k]}
-
-    f_grp[:rows] = build_form_rows(form_hsh)
-    #context_for_form_rows(form_hsh, f_grp[:context])
-    #f_grp[:rows] = assign_row(form_hsh, form_rows(f_grp[:context], product_name.downcase.split(' ')))
+    f_grp[:rows] = build_form_rows(f_grp[:rows].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
   end
 
   def product_attrs(context, d_hsh, attrs, p_tags)
     context[product_category(p_tags['product_type'])] = true
-    set_context_key('category_search', p_tags['category_search'].underscore, context)
-    set_context_key('material_search', p_tags['material_search'].underscore, context)
     Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
   end
 
@@ -78,13 +72,6 @@ class Product < ApplicationRecord
     end
   end
 
-  def assign_row(form_hsh, form_rows)
-    form_rows.each_with_object([]).each do |form_row, rows|
-      row = form_row.select{|col| form_hsh.has_key?(col)}
-      rows.append(row.map!{|col| form_hsh[col]}.flatten!) if row.any?
-    end
-  end
-
   def format_selected(selected, attr)
     return selected if selected.nil? || selected.is_a?(String)
     selected.public_send(attr)
@@ -94,68 +81,26 @@ class Product < ApplicationRecord
     k == 'dimension' && field_set?(selected.type) ? selected.field_name : f_name
   end
 
-  def form_rows(context, p_set)
+  def media_group(context)
     case
-      when context[:sericel] && context[:limited_edition] && p_set.include?('basic'); [%w[category medium mounting], %w[numbering], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
-      when context[:sericel] && context[:limited_edition]; [%w[category medium mounting], %w[numbering], %w[signature seal certificate], %w[dimension], %w[disclaimer]]
-      when context[:sericel] && !context[:limited_edition]; [%w[medium mounting], %w[signature seal certificate], %w[dimension], %w[disclaimer]]
-
-      when context[:limited_edition]; [%w[category medium material], %w[embellishing leafing remarque], %w[mounting], %w[dated signature certificate], %w[dimension], %w[disclaimer]]
-
-      when context[:reproduction_print] && context[:paper]; [%w[medium material mounting], %w[embellishing leafing remarque], %w[dated signature certificate], %w[dimension], %w[disclaimer]]
-      when context[:reproduction_print]; [%w[medium material embellishing leafing], %w[remarque], %w[mounting], %w[dated signature certificate], %w[dimension], %w[disclaimer]]
-
-      when context[:acrylic_mixed_media] && p_set.include?('peter'); [%w[medium material mounting], %w[signature verification certificate], %w[dimension], %w[disclaimer]]
-      when context[:acrylic_mixed_media]; [%w[medium material mounting], %w[dated signature certificate], %w[dimension], %w[disclaimer]]
-
-      when context[:one_of_one] && context[:paper]; [%w[numbering medium embellishing leafing], %w[material mounting remarque], %w[dated signature certificate verification], %w[dimension], %w[disclaimer]]
-      when context[:one_of_one]; [%w[numbering medium embellishing leafing], %w[material mounting], %w[dated signature certificate verification], %w[dimension], %w[disclaimer]]
-      when context[:flat_art]; [%w[medium material mounting], %w[dated signature certificate], %w[seal verification], %w[dimension], %w[disclaimer]]
-      #when context[:flat_art]; [%w[category medium], %w[numbering], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
-      #when context[:flat_art]; [%w[category numbering], %w[medium material embellishing], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
-      when context[:sculpture_art]; [%w[category numbering], %w[sculpture_type embellishing], %w[dated signature certificate], %w[verification], %w[dimension], %w[disclaimer]]
-      when context[:gartner_blade]; [%w[sculpture_type sculpture_part signature], %w[dimension], %w[disclaimer]]
+      when context[:flat_art]; {'media'=> {header: %w[category embellishing medium], body: %w[leafing remarque]}}
+      when context[:sculpture_art]; {'media'=> {header: %w[category embellishing medium sculpture_type], body: %w[]}}
+      when context[:gartner_blade]; {'media'=> {header: %w[sculpture_type sculpture_part], body: %w[]}}
     end
   end
 
   def form_groups
     {
-      'media'=> {header: %w[category embellishing medium material], body: %w[leafing remarque]},
       'numbering'=> {header: %w[numbering], body: %w[]},
-      'mounting'=> {header: %w[mounting], body: %w[]},
+      'material_mounting'=> {header: %w[material mounting], body: %w[]},
       'authentication'=> {header: %w[seal signature certificate], body: %w[dated verification]},
       'dimension'=> {header: %w[dimension], body: %w[]},
       'disclaimer'=> {header: %w[disclaimer], body: %w[]}
     }
   end
 
-  def context_for_form_rows(form_hsh, context)
-    form_hsh.select{|k,v| row_context.keys.include?(k)}.each do |k, k_set|
-      k_set.pluck(:f_name).each do |f_name|
-        set_context_key(k,f_name,context)
-      end
-    end
-  end
-
-  def set_context_key(k, f_name, context)
-    if context_key = row_context.dig(k,f_name)
-      context[context_key] = true
-    end
-  end
-
-  def row_context
-    {
-    'numbering'=> {'numbered_one_of_one'=> :one_of_one, 'numbering_type'=> :numbered},
-    'category'=> {'edition_type'=> :limited_edition},
-    'material'=> {'wrapped_canvas'=> :wrapped_canvas},
-    'medium'=> {'standard_sericel'=> :sericel, 'production_cel'=> :production_cel, 'acrylic_mixed_media'=> :acrylic_mixed_media},
-    'category_search'=> {'reproduction_print'=> :reproduction_print},
-    'material_search'=> {'paper'=> :paper}
-    }
-  end
-
-  def build_form_rows(form_hsh)
-    form_groups.each_with_object({}) do |(card_id,card), hsh|
+  def build_form_rows(form_hsh, form_group)
+    form_group.each_with_object({}) do |(card_id,card), hsh|
       if card[:header].any?{|k| form_hsh[k]}
         Item.case_merge(hsh, build_row(card[:header], form_hsh), card_id, :header)
         Item.case_merge(hsh, build_row(card[:body], form_hsh), card_id, :body)
@@ -164,7 +109,9 @@ class Product < ApplicationRecord
   end
 
   def build_row(keys,hsh)
-    keys.select{|k| hsh.has_key?(k)}.each_with_object([]){|k,div_row| div_row << hsh[k]}.flatten
+    row = keys.select{|k| hsh.has_key?(k)}.each_with_object([]){|k,div_row| div_row << hsh[k]}.flatten
+    row = row.each_with_index {|f_hsh,i| f_hsh[:i] = i}
+    row
   end
 
   class << self
@@ -232,6 +179,61 @@ end
 
 # THE END ######################################################################
 ################################################################################
+# def assign_row(form_hsh, form_rows)
+#   form_rows.each_with_object([]).each do |form_row, rows|
+#     row = form_row.select{|col| form_hsh.has_key?(col)}
+#     rows.append(row.map!{|col| form_hsh[col]}.flatten!) if row.any?
+#   end
+# end
+
+# def context_for_form_rows(form_hsh, context)
+#   form_hsh.select{|k,v| row_context.keys.include?(k)}.each do |k, k_set|
+#     k_set.pluck(:f_name).each do |f_name|
+#       set_context_key(k,f_name,context)
+#     end
+#   end
+# end
+#
+# def set_context_key(k, f_name, context)
+#   if context_key = row_context.dig(k,f_name)
+#     context[context_key] = true
+#   end
+# end
+#
+# def row_context
+#   {
+#   'numbering'=> {'numbered_one_of_one'=> :one_of_one, 'numbering_type'=> :numbered},
+#   'category'=> {'edition_type'=> :limited_edition},
+#   'material'=> {'wrapped_canvas'=> :wrapped_canvas},
+#   'medium'=> {'standard_sericel'=> :sericel, 'production_cel'=> :production_cel, 'acrylic_mixed_media'=> :acrylic_mixed_media},
+#   'category_search'=> {'reproduction_print'=> :reproduction_print},
+#   'material_search'=> {'paper'=> :paper}
+#   }
+# end
+
+# def form_rows(context, p_set)
+#   case
+#     when context[:sericel] && context[:limited_edition] && p_set.include?('basic'); [%w[category medium mounting], %w[numbering], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
+#     when context[:sericel] && context[:limited_edition]; [%w[category medium mounting], %w[numbering], %w[signature seal certificate], %w[dimension], %w[disclaimer]]
+#     when context[:sericel] && !context[:limited_edition]; [%w[medium mounting], %w[signature seal certificate], %w[dimension], %w[disclaimer]]
+#
+#     when context[:limited_edition]; [%w[category medium material], %w[embellishing leafing remarque], %w[mounting], %w[dated signature certificate], %w[dimension], %w[disclaimer]]
+#
+#     when context[:reproduction_print] && context[:paper]; [%w[medium material mounting], %w[embellishing leafing remarque], %w[dated signature certificate], %w[dimension], %w[disclaimer]]
+#     when context[:reproduction_print]; [%w[medium material embellishing leafing], %w[remarque], %w[mounting], %w[dated signature certificate], %w[dimension], %w[disclaimer]]
+#
+#     when context[:acrylic_mixed_media] && p_set.include?('peter'); [%w[medium material mounting], %w[signature verification certificate], %w[dimension], %w[disclaimer]]
+#     when context[:acrylic_mixed_media]; [%w[medium material mounting], %w[dated signature certificate], %w[dimension], %w[disclaimer]]
+#
+#     when context[:one_of_one] && context[:paper]; [%w[numbering medium embellishing leafing], %w[material mounting remarque], %w[dated signature certificate verification], %w[dimension], %w[disclaimer]]
+#     when context[:one_of_one]; [%w[numbering medium embellishing leafing], %w[material mounting], %w[dated signature certificate verification], %w[dimension], %w[disclaimer]]
+#     when context[:flat_art]; [%w[medium material mounting], %w[dated signature certificate], %w[seal verification], %w[dimension], %w[disclaimer]]
+#     #when context[:flat_art]; [%w[category medium], %w[numbering], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
+#     #when context[:flat_art]; [%w[category numbering], %w[medium material embellishing], %w[mounting], %w[dated signature verification], %w[seal certificate], %w[dimension], %w[disclaimer]]
+#     when context[:sculpture_art]; [%w[category numbering], %w[sculpture_type embellishing], %w[dated signature certificate], %w[verification], %w[dimension], %w[disclaimer]]
+#     when context[:gartner_blade]; [%w[sculpture_type sculpture_part signature], %w[dimension], %w[disclaimer]]
+#   end
+# end
 
 # def search(scope:nil, hattrs:nil, hstore:'tags')
 #   hattrs = hattr_params(scope, hattrs, hstore)
