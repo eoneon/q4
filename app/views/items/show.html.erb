@@ -17,6 +17,17 @@
 </div>
 <hr>
 
+<h4>Product Search</h4>
+<div class="row">
+  <div class="col-12">
+    <div class="card p-1 mb-2 border-0 bg-light">
+      <%= render "item_products/forms/search", item: @item, inputs: @inputs, products: @products %>
+    </div>
+  </div>
+</div>
+
+<hr>
+
 <h4>Description</h4>
 <div class="row">
   <div class="col-12">
@@ -30,30 +41,22 @@
 </div>
 
 <hr>
-<h4>Product Search</h4>
 
 <div class="row">
-  <div class="col-12">
-    <div class="card p-1 mb-2 border-0 bg-light">
-      <%= render "item_products/forms/search", item: @item, inputs: @inputs, products: @products %>
-    </div>
+  <div class="col-1">
+    <h4>Item</h4>
+  </div>
+  <div class="col-1">
+    <%= link_to "delete", [@item.invoice, @item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
   </div>
 </div>
-
-<hr>
-<h4>Item</h4>
 
 <div class="row">
   <div class="col-12">
     <div class="card p-1 mb-2 border-0 bg-light">
       <%= render "items/form", invoice: @item.invoice, item: @item %>
     </div>
-    <%#= render "item_fields/edit", item: @item, rows: @rows %>
   </div>
 </div>
 
-<!-- <div class="row"> -->
-  <!-- <div class="col-12">  -->
-    <%= render "item_fields/edit", item: @item, rows: @rows %>
-  <!-- </div> -->
-<!-- </div> -->
+<%= render "item_fields/edit", item: @item, rows: @rows %>

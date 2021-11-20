@@ -25,6 +25,18 @@
  }
 
  //form-elements  display: inline-block;
+ .bg-gray-a {
+   background: #F2F3F4 !important;
+ }
+
+ .bg-gray-b {
+   background: #FBFCFC !important;
+ }
+
+ .bg-gray-c {
+   background: #FDFEFE !important;
+ }
+
  .bg-disabled {
    background: #e9ecef !important;
  }
@@ -39,7 +51,18 @@
  .type-dropdown {
    min-width: 125px !important;
  }
- //counter bootstrap's default rounded corners for select inputs: not in use yet since moving to dropdown
+ //counter bootstrap's default rounded corners for select inputs: not in use yet since moving to dropdown  #EBF5FB
+ .border-gray-a {
+   border-color: #EAF2F8 !important;
+ }
+
+ .border-gray-b {
+   border-color: #D4E6F1 !important;
+ }
+
+ .border-gray-c {
+   border-color: #FDFEFE !important;
+ }
 
  .border-light-gray {
    border-color: #ced4da !important;
@@ -69,6 +92,10 @@
  }
  .rounded-left-border {
    border-top-left-radius: 1rem !important;
+   border-bottom-left-radius: 1rem !important;
+ }
+ .rounded-bottom-border {
+   border-top-right-radius: 1rem !important;
    border-bottom-left-radius: 1rem !important;
  }
 

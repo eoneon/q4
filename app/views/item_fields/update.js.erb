@@ -4,7 +4,7 @@ var toggle = <%= @toggle %>
 $("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
 $("#edit-item").html("<%= j render 'items/form', invoice: @item.invoice, item: @item %>");
 
-if ($(toggle).length){
+if ($(toggle).hasClass("caret-toggle")){
   var id = $(toggle).attr("id");
   $("#caret-id").val(id);
   $('#'+id).find("i").toggleClass("fa-caret-right fa-caret-down");
