@@ -1,38 +1,33 @@
 <%= form_with model: Item.new, url: invoice_skus_path(invoice), id: "new-skus" do |f| %>
-  <div class="form card border border-secondary p-2 mb-2">
-    <div class="row">
-        <%#= f.text_field :skus, placeholder: "enter sku range", class: "form-control form-control-sm mr-sm-2" %>
+  <div class="form">
+    <div class="card bg-gray-d border-0 mb-2">
+      <div class="form-row align-items-center p-1">
 
-      <div class="col-3">
-        <label>sku range</label>
-        <div class="input-group input-group-sm">
-          <%= f.text_field :skus, placeholder: "enter sku range", class: "form-control" %>
-        </div>
-      </div>
-
-      <div class="col-2">
-        <label>artist</label>
-        <div class="input-group input-group-sm">
-          <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control", id: "artist_id" %>
-        </div>
-      </div>
-
-      <div class="col-6">
-        <label>product</label>
-        <div class="input-group input-group-sm">
-          <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: "form-control", id: "product_id" %>
-          <div class="col-2">
-            <button class="btn btn-sm btn-outline-primary form-control" type="submit">submit</button>
+        <div class="col-3 ml-0">
+          <div class="input-group input-group-sm">
+            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">skus</label>
+            <%= f.text_field :skus, placeholder: "enter sku range", class: "form-control" %>
           </div>
         </div>
-      </div>
 
-      <!-- <div class="col-1">
-        <label>e</label> -->
-        <!-- <div class="input-group input-group-sm">
+        <div class="col-2 ml-0 collapse">
+          <div class="input-group input-group-sm">
+            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">artist</label>
+            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control", id: "artist_id" %>
+          </div>
+        </div>
+
+        <div class="col-6 ml-0 collapse">
+          <div class="input-group input-group-sm">
+            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">prd</label>
+            <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: "form-control", id: "product_id" %>
+          </div>
+        </div>
+
+        <div class="col-md-1 offset-md-8">
           <button class="btn btn-sm btn-outline-primary form-control" type="submit">submit</button>
-        </div> -->
-      <!-- </div> -->
+        </div>
+      </div>
     </div>
   </div>
 <% end %>

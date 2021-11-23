@@ -7,81 +7,51 @@ class ApplicationController < ActionController::Base
     tags ? tags : {}
   end
 
+  ############################################################################
+
+  def format_skus(skus)
+    skus.split(',').each_with_object([]) {|sku_block, skus| format_sku_block(sku_block, skus)}
+  end
+
+  def format_sku_block(sku_block, skus)
+    if sku_block.index('-')
+      format_range(extract_range(sku_block), skus)
+    else
+      format_sku(extract_digits(sku_block), skus)
+    end
+  end
+
+  def format_range(sku_range, skus)
+    if valid_range?(sku_range)
+      build_range(sku_range).map{|sku| skus.append(sku)}
+    end
+  end
+
+  def extract_range(sku_block)
+    sku_block.split('-').map{|sku| extract_digits(sku)}.reject{|sku| sku.blank?}
+  end
+
+  def build_range(sku_range)
+    (sku_range[0].to_i..sku_range[1].to_i).to_a
+  end
+
+  def valid_range?(sku_range)
+     sku_range.count == 2 && valid_range_format?(sku_range) && asc_range?(sku_range)
+  end
+
+  def valid_range_format?(sku_range)
+    sku_range.all?{|i| i.length <= 3} || sku_range.all?{|i| i.length == 6}
+  end
+
+  def asc_range?(sku_range)
+    sku_range[0].to_i < sku_range[1].to_i
+  end
+
+  def format_sku(sku, skus)
+    skus << sku.to_i if sku.length <= 3 || sku.length == 6
+  end
+
+  def extract_digits(num_str)
+    num_str.gsub(/\D/, '')
+  end
 end
-
-
-#show ########################################################################
-# def search_input_group
-#   h={type: Product, inputs: search_tag_inputs, selected: selected_search_tag_inputs, item_id: @item.try(:id), product_id: @product.try(:id)}
-# end
-#
-# def products
-#   Product.tags_search(h = {tag_params: search_params, default_set: :product_group}.compact)
-# end
-#
-# #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
-# #case 2: nil
-# def search_params
-#   case
-#   when (action_name == 'show' && @product) || (action_name == 'update' && @product) || (action_name == 'search' && revert_to_product_type) then derive_search_params
-#   when (action_name == 'show' || action_name == 'update') && !@product then nil
-#   when action_name == 'search' then derive_search_tag_inputs
-#   end
-# end
-#
-# def revert_to_product_type
-#   @product && (params[:items][:search][:type] != params[:hidden][:search][:type]) && (params[:items][:search][:type] == @product.type)
-# end
-#
-# # tag_search_field_group(search_keys, @products)
-# def search_tag_inputs
-#   args={search_keys: search_keys, products: @products}.compact
-#   Product.tag_search_field_group(args).transform_values{|opts| opts.map{|opt| h={text: format_text_tag(opt), value: opt}}}
-# end
-#
-# #case 1: [["medium_category", "standard_print"], ["medium", "basic_print"], ["material", "metal"]]
-# #case 2: [["medium_category", "all"], ["medium", "all"], ["material", "all"]]
-# def selected_search_tag_inputs
-#   case
-#   when (@product && (action_name == 'show' || action_name == 'update')) || (action_name == 'search' && revert_to_product_type) then search_params.to_h
-#   when (!@product && (action_name == 'show' || action_name == 'update')) then derive_search_tag_inputs.to_h
-#   when action_name == 'search' then derive_search_tag_inputs.to_h
-#   end
-# end
-#
-# # case 1: ["medium_category", "medium", "material"]
-# def search_keys
-#   case
-#   when @product && (action_name == 'show' || action_name == 'update') then Product.valid_search_keys([@product])
-#   when !@product && (action_name == 'show' || action_name == 'update') then derive_search_keys
-#   when action_name == 'search' then derive_search_keys
-#   end
-# end
-#
-# def derive_search_params
-#   Product.tag_search_field_group(search_keys: search_keys, products: [@product]).each {|k,v| v.prepend(k.to_s)}.values
-# end
-#
-# def derive_search_keys
-#   Product.filter_keys
-# end
-#
-# def derive_search_tag_inputs
-#   Product.filter_keys.map{|k| [k, build_tag_value(k)]}
-# end
-#
-# def build_tag_value(k)
-#   if params[:items] && params[:items][:search].keys.include?(k)
-#     params[:items][:search][k]
-#   else
-#     'all'
-#   end
-# end
-#
-# def format_text_tag(tag_value)
-#   tag_value.underscore.split('_').join(' ').sub('one of a kind', 'One-of-a-Kind').split(' ').map{|w| w.capitalize}.join(' ')
-# end
-#
-# def filter_keys
-#   %w[medium_category medium material]
-# end

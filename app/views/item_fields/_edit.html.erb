@@ -3,7 +3,7 @@
     <%= text_field_tag "card_id", nil, class: "collapse", id: 'caret-id' %>
 
     <% rows.each do |card_id, card| %>
-      <div class="card p-1 mb-1 bg-gray-a border-0">
+      <div class="card p-1 mb-1 bg-gray-d border-0">
         <div class="card-header border-0 bg-transparent pt-1 pb-1 pl-0 pr-0">
           <div class="form-row">
             <% card[:header].each do |f_hsh| %>
@@ -12,7 +12,7 @@
           </div>
         </div>
 
-        <div class="card-body pt-1 pb-1 pl-0 bg-light border border-white border-top-0 rounded-bottom collapse">
+        <div class="card-body pt-1 pb-1 pl-0 bg-gray-c border border-white border-top-0 rounded-bottom collapse">
           <div class="form-row pl-1 ml-0">
             <% card[:body].each do |f_hsh| %>
               <%= render "item_fields/form_row", f: f, f_hsh: f_hsh, card_id: card_id, card: card, i: nil %>
