@@ -1,6 +1,10 @@
-<div class="form-inline" id="edit-supplier">
-  <%= form_with model: supplier do |f| %>
-    <%= f.text_field :supplier_name, placeholder: "supplier's name", class: "form-control form-control-sm mr-sm-2" %>
-    <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">submit</button>
-  <% end %>
-</div>
+<%= form_with model: supplier, id: "edit-supplier" do |f| %>
+  <div class="form">
+    <div class="input-group input-group-sm">
+      <%= f.text_field :supplier_name, placeholder: "supplier's name", class: "form-control form-control-sm" %>
+      <div class="input-group-append">
+        <button class="btn btn-sm btn-outline-primary form-control-sm" type="submit">edit</button>
+      </div>
+    </div>
+  </div>
+<% end %>

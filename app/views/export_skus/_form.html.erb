@@ -1,4 +1,4 @@
-<%= form_tag(invoice_export_skus_path(@invoice, format: "csv"), method: "post", id: "export-skus") do |f| %>
+<%= form_tag(invoice_export_skus_path(@invoice, format: "csv"), method: "post", id: "export-skus", class: "collapse", data: {parent: "#invoice"}) do |f| %>
   <div class="form">
     <div class="card bg-gray-d border-0 mb-2">
       <div class="form-row align-items-center p-1">

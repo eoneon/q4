@@ -1,24 +1,26 @@
 <%= form_with model: invoice, url: supplier_invoice_path(invoice.supplier, invoice), id: "edit-invoice" do |f| %>
-<div class="form">
-  <div class="card bg-gray-d border-0 mb-2">
-    <div class="form-row align-items-center p-1">
+  <div class="form">
+    <div class="card bg-gray-d border-0 mb-2">
+      <div class="form-row align-items-center p-1">
 
-      <div class="col-3 ml-0">
-        <div class="input-group input-group-sm">
-          <label class="fs-xs font-weight-light text-secondary pt-2 px-1">inv#</label>
-          <%= f.number_field :invoice_number, placeholder: "invoice #", maxlength: 6, class: "form-control" %>
+        <div class="col-3 ml-0">
+          <div class="input-group input-group-sm">
+            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">inv#</label>
+            <%= f.number_field :invoice_number, placeholder: "invoice #", maxlength: 6, class: "form-control" %>
+          </div>
         </div>
-      </div>
 
-      <div class="col-3 ml-0">
-        <div class="input-group input-group-sm">
-          <label class="fs-xs font-weight-light text-secondary pt-2 px-1">name</label>
-          <%= f.text_field :invoice_name, placeholder: "invoice name", class: "form-control" %>
+        <div class="col-3 ml-0">
+          <div class="input-group input-group-sm">
+            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">name</label>
+            <%= f.text_field :invoice_name, placeholder: "invoice name", class: "form-control" %>
+          </div>
         </div>
-      </div>
 
-      <div class="col-md-1 offset-md-5">
-        <button class="btn btn-sm btn-outline-primary form-control" type="submit">submit</button>
+        <div class="col-md-1 offset-md-5">
+          <button class="btn btn-sm btn-outline-primary form-control" type="submit">submit</button>
+        </div>
+        
       </div>
     </div>
   </div>

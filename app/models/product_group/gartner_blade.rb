@@ -23,6 +23,7 @@ class GartnerBlade
     attrs.merge!({'title'=> title})
     category(store, 'category', "\"#{title}\"", (context[:signed] ? ',' : '.'), title.downcase.index('sculpture'))
     attr_description(keys, store, attrs)
+    attrs['invoice_tagline'] = [attrs['tagline'], store.dig('dimension', 'invoice_tagline')].compact.join(' ')
   end
 
   def category(store, key, title, punct, sculp)
@@ -32,7 +33,7 @@ class GartnerBlade
 
   def format_category(k, v, title, punct, sculp)
     if k=='tagline'
-      [title, v+punct].join(' ')
+      punct=='.' ? "#{title} #{v} by GartnerBlade Glass." : [title, v+punct].join(' ')
     else
       v = v.split(' ')[0..-2].join(' ') if sculp
       v = ["This", v].join(' ')

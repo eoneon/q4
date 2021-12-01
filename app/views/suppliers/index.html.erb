@@ -3,12 +3,17 @@
 </div>
 <hr>
 
-<div class="row">
+<div class="row justify-content-center">
   <div class="col-4">
-    <div class="">
-      <%= render 'suppliers/form', supplier: Supplier.new %>
+    <div class="card">
+      <div class="card-header p-1">
+        <%= render 'suppliers/form', supplier: Supplier.new %>
+      </div>
+      
+      <div class="card-body p-1">
+      <%= render "suppliers/tab_index", suppliers: @suppliers %>
+      </div>
     </div>
-    <%= render "suppliers/tab_index", suppliers: @suppliers %>
   </div>
 
   <div class="col-8">

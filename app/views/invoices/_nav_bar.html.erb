@@ -1,5 +1,5 @@
-<nav class="navbar navbar-expand-sm navbar-light bg-light" id="invoice-show">
-  <a class="navbar-brand"><%#= invoice.invoice_number %></a>
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+  <a class="navbar-brand"><%= invoice.invoice_number %></a>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
     <span class="navbar-toggler-icon"></span>
@@ -7,37 +7,43 @@
 
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
-      <li class="nav-item active">
-        <a class="nav-link" data-toggle="collapse" href="#<%= dom_tag(invoice, :edit) %>"><span class="text-secondary">edit invoice</span><span class="sr-only">(current)</span></a>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#edit-invoice-toggle">Edit Invoice Info</a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" data-toggle="collapse" href="#<%= dom_tag(invoice, :new_sku) %>"><span class="text-secondary">add sku</span><span class="sr-only">(current)</span></a>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#new-skus-toggle">Add Sku Range</a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" data-toggle="collapse" href="#<%= dom_tag(invoice, :new_skus) %>"><span class="text-secondary">add skus</span><span class="sr-only">(current)</span></a>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#destroy-skus">Delete Sku Range</a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" data-toggle="collapse" href="#<%= dom_tag(invoice, :destroy_skus) %>"><span class="text-secondary">destroy skus</span><span class="sr-only">(current)</span></a>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#export-skus">Export Sku Range</a>
       </li>
-      <!-- <li class="nav-item active">
-        <a class="nav-link" href="<%#= supplier_invoice_path(invoice) %>" data-method="delete" data-remote="true" data-confirm="Are you sure?"><span class="text-secondary">delete</span><span class="sr-only">(current)</span></a>
-      </li> -->
+      <li class="nav-item">
+        <a class="nav-link" href="<%= supplier_invoice_path(invoice) %>" data-method="delete" data-remote="true" data-confirm="Are you sure?">Delete Invoice</a>
+      </li>
     </ul>
   </div>
 
-  <div class="collapse" id="<%= dom_tag(invoice, :edit) %>" data-parent="#invoice-show">
-    <%#= render 'invoices/edit', invoice: invoice %>
-  </div>
-
-  <div class="collapse" id="<%= dom_tag(invoice, :new_sku) %>" data-parent="#invoice-show">
-    <%#= render 'items/new', invoice: invoice %>
-  </div>
-
-  <div class="collapse" id="<%= dom_tag(invoice, :new_skus) %>" data-parent="#invoice-show">
-    <%#= render 'skus/new_skus', invoice: invoice %>
-  </div>
-  <div class="collapse" id="<%= dom_tag(invoice, :destroy_skus) %>" data-parent="#invoice-show">
-    <%#= render 'skus/destroy_skus', invoice: invoice %>
-  </div>
-
 </nav>
+
+<div class="pos-f-t">
+  <div class="collapse" id="edit-invoice-toggle" data-parent="#invoice">
+    <%= render 'invoices/edit', invoice: @invoice %>
+  </div>
+</div>
+
+<div class="pos-f-t">
+  <div class="collapse" id="new-skus-toggle" data-parent="#invoice">
+    <%= render 'skus/search', invoice: @invoice, results: @results, inputs: @inputs %>
+    <%= render 'skus/form', invoice: @invoice %>
+  </div>
+</div>
+
+<div class="pos-f-t">
+  <%= render 'skus/destroy', invoice: @invoice %>
+</div>
+
+<div class="pos-f-t">
+  <%= render 'export_skus/form', invoice: @invoice %>
+</div>

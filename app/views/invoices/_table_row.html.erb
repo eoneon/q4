@@ -1,11 +1,10 @@
-<tr>
-  <th>
-    <div class="media">
-      <div class="media-body">
-        <a href="<%= supplier_invoice_path(invoice.supplier, invoice) %>" class="btn btn-link" type="button">
-          <%= invoice.invoice_number %>
-        </a>
-      </div>
-    </div>
-  </th>
+<tr class="row border justify-content-between mx-1 mb-1">
+  <td class="p-0">
+    <a href="<%= supplier_invoice_path(invoice.supplier, invoice) %>" class="btn btn-link" type="button">
+      <span class="fs-s"><%= invoice.invoice_number %></span>
+    </a>
+  </td>
+  <td class="p-1">
+    <a href="<%= supplier_path(invoice.supplier) %>" data-method="delete" data-remote="true" data-confirm="Are you sure?" class="btn btn-sm btn-outline-danger"><span class="fs-s">delete</span></a>
+  </td>
 </tr>

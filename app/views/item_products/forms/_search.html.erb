@@ -1,9 +1,9 @@
 <%= form_with model: item, url: search_item_products_path, method: :get, id: 'search-item-product' do |f| %>
   <div class="form-inline">
     <%= number_field_tag :id, item.id, class: "collapse" %>
-  
+
     <% inputs.each do |input| %>
-      <div class="col-2 border-light-gray p-1">
+      <div class="col-3 border-light-gray p-1">
         <div class="input-group input-group-sm">
           <label class="fs-s font-weight-light text-secondary pr-1"> <%= search_label(input['input_name']) %></label>
           <%= select_tag "items[search][#{input['input_name']}]", options_for_select(search_input_options(input['input_name'], input['opts']), input['selected']), {class: "form-control border-light-gray rounded-right-border rounded-left-border search-select"} %>

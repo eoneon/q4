@@ -1,10 +1,6 @@
 class Artist < ApplicationRecord
   has_many :item_groups, as: :origin
 
-  def self.tag_field_sets
-    [%w[first_name last_name], %w[title_tag], %w[yob yod]]
-  end
-
   def formal_name
     [artist_name, life_span].compact.join(' ')
   end
@@ -17,7 +13,7 @@ class Artist < ApplicationRecord
     "(#{tag_keys.map{|k| tags[k]}.join('-')})" if tags &&  tag_keys.all?{|k| !tags.dig(k).blank?}
   end
 
-  def title_tag(tag_key='title_tag')
+  def title_tag(tag_key='title')
     "(#{tags[tag_key]})" if tags && !tags[tag_key].blank?
   end
 
@@ -48,9 +44,8 @@ class Artist < ApplicationRecord
 
   def sort_name
     artist_arr = artist_name.split(' ')
-    last_name = artist_arr.unshift
+    last_name = artist_arr.pop
     sort_hsh={'sort_name'=> artist_arr.prepend(last_name).join(' ')}
-    #sort_hsh={'sort_name'=> artist_name.split(' ').last} #last_name
     if self.tags.nil?
       self.tags = sort_hsh
     else
@@ -60,15 +55,13 @@ class Artist < ApplicationRecord
 
 end
 
-# def sort_name(artist_arr)
-#   if artist_arr.count == 2
-#     {'first_name'=> artist_arr[0], 'last_name'=> artist_arr[1]}
-#   elsif artist_arr.count > 2
-#     last_name = artist_arr.unshift
-#     {'first_name'=> artist_arr.join(' '), 'last_name'=> last_name}
-#   elsif artist_arr.count == 1
-#     {'last_name'=> artist_arr[0]}
-#   end
+
+# def self.tag_fields
+#   [%w[title body], %w[yob yod]]
+# end
+
+# def self.fields
+#   {years: %w[title body], tag: %w[title body]}
 # end
 
 # def title_tag

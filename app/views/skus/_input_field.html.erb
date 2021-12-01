@@ -1,6 +1,6 @@
 <div class="col-2 ml-0">
   <div class="input-group input-group-sm">
     <label class="fs-xs font-weight-light text-secondary pt-2 px-1"><%= k[0..2] %></label>
-    <%= select_tag "items[#{scope}][#{k}]", options_for_select(opts, selected), {include_blank: true, class: "form-control search-select", id: k} %>
+    <%= select_tag "items[#{scope}][#{k}]", options_for_select(opts, selected), {include_blank: true, class: "form-control rounded-right-border rounded-left-border search-select", id: k} %>
   </div>
 </div>

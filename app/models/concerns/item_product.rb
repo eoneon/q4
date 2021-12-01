@@ -168,7 +168,7 @@ module ItemProduct
   def flatten_params(k, tb_hsh, sub_hsh, context, store)
     tb_hsh.each do |tag_key, tag_hsh|
       tag_hsh.each do |f_name, f_val|
-        key = (tag_hsh.count>1 ? f_name : k)
+        key = (tag_hsh.count>1 || k == 'seal'? f_name : k)
         kind_param_case(context, store, f_val, sub_hsh, key, tag_key)
       end
     end

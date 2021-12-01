@@ -24,6 +24,7 @@ module Description
   end
 
   def animator_seal_params(context, store, v, k, tag_key)
+    puts "animator_seal_params: #{v}"
     v = v+'.' unless context[:sports_seal]
     Item.case_merge(store, v, k, tag_key)
   end
