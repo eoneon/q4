@@ -53,6 +53,17 @@ class Artist < ApplicationRecord
     end
   end
 
+  def items
+    Item.joins(:artists).where(artists: {id: id})
+  end
+
+  def product_items(product)
+    items.where(id: product.items.ids)
+  end
+
+  def titles(product)
+    (product ? product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
+  end
 end
 
 

@@ -5,7 +5,7 @@ module ArtistsHelper
   end
 
   def col_size(f_name)
-    %w[title body].include?(f_name) ? 'col-12' : 'col-2'
+    %w[title body].include?(f_name) ? 'col-6' : 'col-2'
   end
 end
 

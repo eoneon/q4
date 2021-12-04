@@ -133,6 +133,15 @@ $(document).ready(function(){
     }
   });
 
+  $("body").on("change", "select.title-select", function(){
+    var product = $(this).val();
+    if (product.length){
+      $("#new-skus #title_id").val(product);
+    } else {
+      $("#new-skus #title_id").val(false);
+    }
+  });
+
   $("body").on("change", "select.item-product-select", function(){
     var product_id = $(this).val();
     $("input[name='item[product_id]']").val(product_id);

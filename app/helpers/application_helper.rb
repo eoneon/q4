@@ -1,4 +1,5 @@
 module ApplicationHelper
+
   def dom_ref(*tags, lev: :type)
     tags.map{|tag| format_ref(tag, lev)}.join("-")
   end
@@ -36,5 +37,9 @@ module ApplicationHelper
   end
 
   ##############################################################################
+
+  def css_opt(k, f_name, css_name)
+    "#{css_name}" if k==f_name
+  end
 
 end

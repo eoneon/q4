@@ -10,22 +10,36 @@
           </div>
         </div>
 
-        <div class="col-2 ml-0 collapse">
+        <div class="col-3 ml-0">
           <div class="input-group input-group-sm">
             <label class="fs-xs font-weight-light text-secondary pt-2 px-1">artist</label>
             <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control", id: "artist_id" %>
           </div>
         </div>
 
-        <div class="col-6 ml-0 collapse">
+        <div class="col-3 ml-0">
           <div class="input-group input-group-sm">
             <label class="fs-xs font-weight-light text-secondary pt-2 px-1">prd</label>
             <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: "form-control", id: "product_id" %>
           </div>
         </div>
 
+        <div class="col-3 ml-0">
+          <div class="input-group input-group-sm">
+            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">title</label>
+            <%= f.text_field :title, class: "form-control" %>
+          </div>
+        </div>
+
+        <div class="col-3 ml-0">
+          <div class="input-group input-group-sm">
+            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">title</label>
+            <%= f.select(:title, [], {include_blank: true}, class: "form-control", id: 'title-select') %>
+          </div>
+        </div>
+
         <div class="col-md-1 offset-md-8">
-          <button class="btn btn-sm btn-outline-primary form-control" type="submit">submit</button>
+          <button class="btn btn-sm btn-outline-primary form-control" type="submit">save</button>
         </div>
       </div>
     </div>

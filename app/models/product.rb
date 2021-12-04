@@ -18,6 +18,14 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
+  def items
+    Item.joins(:products).where(products: {id: id})
+  end
+
+  # def titles
+  #   items.pluck(:title).uniq.reject{|i| i.blank?}
+  # end
+
   # GROUPING METHODS: CRUD/VIEW ################################################
   def product_item_loop(i_hsh, f_grp, keys)
     product_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], tags)
@@ -155,7 +163,6 @@ class Product < ApplicationRecord
     def search_keys
       %w[category_search medium_search]
     end
-
     # SEEDING METHODS ##########################################################
     def seed(store)
       Medium.class_group('ProductGroup').each_with_object(store) do |c, store|

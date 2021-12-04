@@ -7,6 +7,9 @@ class ApplicationController < ActionController::Base
     tags ? tags : {}
   end
 
+  def cond_val(val, default=nil)
+    val ? val : default
+  end
   ############################################################################
 
   def format_skus(skus)

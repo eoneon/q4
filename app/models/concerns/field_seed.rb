@@ -4,7 +4,7 @@ module FieldSeed
   extend ActiveSupport::Concern
 
   class_methods do
-    
+
     # BUILD METHODS ############################################################
     ############################################################################
     def build_and_store(m, store)

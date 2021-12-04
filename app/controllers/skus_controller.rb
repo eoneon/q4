@@ -39,6 +39,14 @@ class SkusController < ApplicationController
     params.require(:item).permit!
   end
 
+  def item_params
+    {title: cond_val(params[:item][:title]), retail: cond_val(params[:item][:retail]), qty: cond_val(params[:item][:qty]), invoice: @invoice}.reject{|k,v| v.blank?}
+  end
+
+  def titles(artist, product)
+    artist ? artist.titles(product) : []
+  end
+
   def cond_find(klass, param_val)
     klass.find(param_val) unless param_val.blank?
   end

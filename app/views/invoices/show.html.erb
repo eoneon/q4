@@ -3,7 +3,7 @@
 </div>
 <hr>
 
-<div id="invoice">
+<div id="invoice-navbar-forms">
   <%= render 'invoices/nav_bar', invoice: @invoice %>
 </div>
 
@@ -12,16 +12,3 @@
 <div id="items-table">
   <%= render 'items/table', invoice: @invoice %>
 </div>
-
-
-<%#= render 'skus/search', invoice: @invoice, results: @results, inputs: @inputs %>
-<%#= render 'skus/form', invoice: @invoice %>
-
-<%#= render 'skus/destroy', invoice: @invoice %>
-<%#= render 'export_skus/form', invoice: @invoice %>
-<%#= render 'invoices/edit', invoice: @invoice %>
-<%#= render 'invoices/nav_bar', invoice: @invoice %>
-
-<!-- <a href="<%#= new_invoice_search_item_path(@invoice) %>" class="btn btn-link" type="button">
-  search
-</a> -->
