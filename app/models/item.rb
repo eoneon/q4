@@ -20,14 +20,22 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
-  ##############################################################################
-  def batch_create_skus(invoice, product, product_args, artist, skus)
+  def batch_create_skus(skus, sku_params, artist, product, product_args)
     skus.each do |sku|
-      i = Item.create(sku: sku, qty: 1, invoice: invoice)
+      sku_params[:sku] = sku
+      i = Item.create(sku_params)
       i.add_obj(artist) if artist
       i.add_sku(product, product_args, sku) if product
     end
   end
+  ##############################################################################
+  # def batch_create_skus(invoice, product, product_args, artist, skus)
+  #   skus.each do |sku|
+  #     i = Item.create(sku: sku, qty: 1, invoice: invoice)
+  #     i.add_obj(artist) if artist
+  #     i.add_sku(product, product_args, sku) if product
+  #   end
+  # end
 
   def add_sku(product, product_args, sku)
     add_obj(product)

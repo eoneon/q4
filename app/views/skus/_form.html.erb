@@ -13,28 +13,24 @@
         <div class="col-3 ml-0">
           <div class="input-group input-group-sm">
             <label class="fs-xs font-weight-light text-secondary pt-2 px-1">artist</label>
-            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control", id: "artist_id" %>
+            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control artist_id", id: "artist_id" %>
           </div>
         </div>
 
         <div class="col-3 ml-0">
           <div class="input-group input-group-sm">
             <label class="fs-xs font-weight-light text-secondary pt-2 px-1">prd</label>
-            <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: "form-control", id: "product_id" %>
+            <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: "form-control product_id", id: "product_id" %>
           </div>
         </div>
 
         <div class="col-3 ml-0">
           <div class="input-group input-group-sm">
-            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">title</label>
-            <%= f.text_field :title, class: "form-control" %>
-          </div>
-        </div>
-
-        <div class="col-3 ml-0">
-          <div class="input-group input-group-sm">
-            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">title</label>
-            <%= f.select(:title, [], {include_blank: true}, class: "form-control", id: 'title-select') %>
+            <div class="input-group-prepend">
+              <button class="btn btn-outline-secondary toggle-view" type="button" id="title-toggle"><span class="fs-xs font-weight-light text-secondary pt-2 px-0">title</span></button>
+            </div>
+            <%= render 'items/title', titles: titles %>
+            <%= f.text_field :title, class: "form-control title-toggle default-show show", id: 'title-text' %>
           </div>
         </div>
 

@@ -1,9 +1,17 @@
 class SkusController < ApplicationController
 
+  def new
+    @titles = titles(cond_find(Artist, params[:item][:artist_id]), cond_find(Product, params[:item][:product_id]))
+
+    respond_to do |format|
+      format.js
+    end
+  end
+
   def search
     @invoice = Invoice.find(params[:invoice_id])
-    product = cond_find(Product, params[:item][:product])
-    artist_id = cond_id(params[:item][:artist])
+    product = cond_find(Product, params[:item][:product_id])
+    artist_id = cond_id(params[:item][:artist_id])
     @results, @inputs = Product.invoice_search(product: product, artist_id: artist_id, hattrs: params[:items][:hattrs].to_unsafe_h)
 
     respond_to do |format|
@@ -15,7 +23,8 @@ class SkusController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     artist = cond_find(Artist, params[:item][:artist_id])
     product = cond_find(Product, params[:item][:product_id])
-    Item.new.batch_create_skus(@invoice, product, product_args(product), artist, skus) if skus
+    Item.new.batch_create_skus(skus, item_params, artist, product, product_args(product)) if skus
+    #Item.new.batch_create_skus(@invoice, product, product_args(product), artist, skus)  if skus
     @results, @inputs = Product.invoice_search
 
     respond_to do |format|
@@ -39,11 +48,15 @@ class SkusController < ApplicationController
     params.require(:item).permit!
   end
 
+  # def item_params
+  #   {title: cond_val(params[:item][:title]), retail: cond_val(params[:item][:retail]), qty: cond_val(params[:item][:qty]), invoice: @invoice}.reject{|k,v| v.blank?}
+  # end
+
   def item_params
-    {title: cond_val(params[:item][:title]), retail: cond_val(params[:item][:retail]), qty: cond_val(params[:item][:qty]), invoice: @invoice}.reject{|k,v| v.blank?}
+    {title: cond_val(params[:item][:title]), invoice: @invoice}.reject{|k,v| v.blank?}
   end
 
-  def titles(artist, product)
+  def titles(artist=nil, product=nil)
     artist ? artist.titles(product) : []
   end
 

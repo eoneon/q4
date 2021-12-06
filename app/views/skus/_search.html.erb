@@ -6,7 +6,7 @@
         <div class="col-3 ml-0">
           <div class="input-group input-group-sm">
             <label class="fs-xs font-weight-light text-secondary pt-2 px-1">artist</label>
-            <%= f.collection_select :artist, Artist.all, :id, :artist_name, {include_blank: true, selected: inputs['artist']}, class: "form-control rounded-right-border rounded-left-border search-select artist-select" %>
+            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true, selected: inputs['artist']}, id: "artist-search", class: "form-control rounded-right-border rounded-left-border search-select artist-select" %>
           </div>
         </div>
 
@@ -17,7 +17,7 @@
         <div class="col-5 ml-0">
           <div class="input-group input-group-sm">
             <label class="fs-xs font-weight-light text-secondary pt-2 px-1">prd</label>
-            <%= f.collection_select :product, results, :id, :product_name, {include_blank: true, selected: inputs['product']}, class: "form-control rounded-right-border rounded-left-border product-select" %>
+            <%= f.collection_select :product_id, results, :id, :product_name, {include_blank: true, selected: inputs['product']}, id: "product-search", class: "form-control rounded-right-border rounded-left-border product-select" %>
           </div>
         </div>
       </div>

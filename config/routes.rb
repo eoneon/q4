@@ -8,7 +8,7 @@ Rails.application.routes.draw do
   resources :invoices do
     resources :items, except: [:index]
     resources :export_skus, only: [:create]
-    resources :skus, only: [:create] do
+    resources :skus, only: [:new,:create] do
       member do
         post :batch_destroy
       end

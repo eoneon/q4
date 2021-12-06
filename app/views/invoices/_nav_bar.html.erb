@@ -11,7 +11,7 @@
         <a class="nav-link" data-toggle="collapse" href="#edit-invoice-toggle">Edit Invoice</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="collapse" href="#new-skus-toggle">Add Skus</a>
+        <a class="nav-link new-skus" data-toggle="collapse" href="#new-skus-toggle">Add Skus</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#destroy-skus-toggle">Delete Skus</a>
@@ -39,7 +39,7 @@
   <div class="collapse" id="new-skus-toggle" data-parent="#invoice-navbar-forms">
     <hr>
     <%= render 'skus/search', invoice: @invoice, results: @results, inputs: @inputs %>
-    <%= render 'skus/form', invoice: @invoice %>
+    <%= render 'skus/form', invoice: @invoice, titles: [] %>
   </div>
 </div>
 
