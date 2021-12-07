@@ -36,6 +36,7 @@ $(document).ready(function(){
     $(form).submit();
   });
 
+  //not sure if in use
   $("body").on("click", ".form-toggle", function(){
     var target = $(this).attr("data-target");
     if (!$(target).hasClass("show")){
@@ -45,7 +46,7 @@ $(document).ready(function(){
     }
   });
 
-  //CRUD SHOW
+  //CRUD SHOW: not sure if using
   $("body").on("click", "#tab-index a.list-group-item", function(e){
     var item_id = '#'+$(this).attr("id");
     var item_card_id = item_id.replace("tab-item", "show");
@@ -58,7 +59,7 @@ $(document).ready(function(){
     }
   });
 
-  //CRUD SHOW SEARCH
+  //CRUD SHOW SEARCH: not sure if using
   $("body").on("change", ".artist-search", function(){
     var v = $(this).val();
     if (v.length) {
@@ -82,7 +83,7 @@ $(document).ready(function(){
     $(this).closest(".toggle-field").toggleClass("show collapse");
   });
 
-  //CRUD ITEM-PRODUCT #update -> REFACTOR
+  //CRUD ITEM-PRODUCT #update -> REFACTOR: not sure if using
   $("body").on("click", "#item-products-index button.list-group-item", function(e){
     var new_id = $(this).attr("id");
     var old_id = $(this).attr("data-selected");
@@ -109,6 +110,7 @@ $(document).ready(function(){
     $(form).submit();
   });
 
+  //: not sure if using
   $("body").on("change", ":radio.search-select", function(){
     var form = $(this).closest("form");
     $(form).find(":selected").attr('selected', false);
@@ -129,12 +131,7 @@ $(document).ready(function(){
   $("body").on("change", "#artist-search, #product-search", function(){
     var id = $(this).val();
     var input = "."+$(this).attr("id").split("-")[0]+"_id"
-
-    if (id.length){
-      $("#new-skus, #new-title").find(input).val(id);
-    } else {
-      $("#new-skus, #new-title").find(input).val(false);
-    }
+    toggleInputVal($("#new-skus, #new-title").find(input), id);
     $("#new-title").submit();
   });
 
@@ -156,15 +153,6 @@ $(document).ready(function(){
     $(toggle_targets).toggleClass("show collapse");
   });
 
-  $("body").on("change", "select.title-select", function(){
-    var product = $(this).val();
-    if (product.length){
-      $("#new-skus #title_id").val(product);
-    } else {
-      $("#new-skus #title_id").val(false);
-    }
-  });
-
   $("body").on("change", "select.item-product-select", function(){
     var product_id = $(this).val();
     $("input[name='item[product_id]']").val(product_id);
@@ -176,10 +164,10 @@ $(document).ready(function(){
     $('#new-skus').find(":input").val("");
   });
 
-  $("body").on("change", "#title", function(){
-    var title = $(this).val();
-    $("input[name='item[title]']").val(title)
-  });
+  // $("body").on("change", "#title", function(){
+  //   var title = $(this).val();
+  //   $("input[name='item[title]']").val(title)
+  // });
 
   $("body").on("focusout", ".input-field", function(){
     $(this).closest("form").submit();
@@ -260,32 +248,6 @@ $(document).ready(function(){
 //   }
 // });
 
-
-// $("body").on("change", ".artist-add", function(e){
-//   var id = $(this).val();
-//   var artist_id = $('#hidden_artist_id').val();
-//   //toggleTab(id, e);
-//   $('#hidden_artist_id').val(toggleAttr(artist_id, id));
-//   $("#edit-item").submit();
-// });
-
-  //CRUD ITEM-PRODUCT #update - OLDER VER
-  // $("body").on("click", "#product-index button.list-group-item", function(e){
-  //   var product_id = $('#hidden_product_id').val();
-  //   var type = $('#hidden_search_type').val();
-  //   var id = $(this).attr("id");
-  //   //toggleTab(id, e);
-  //   $('#hidden_product_id').val(toggleAttr(product_id, id));
-  //   $('#hidden_type').val(type);
-  //   $("#edit-item").submit();
-  // });
-
-//This worked but switched to dedicated controller#action
-// $("body").on("click", ".reset-select", function(){
-//   var form = $(this).closest("form");
-//   $(form).find("#hidden_index").val("All");
-// });
-
 //#SEARCH: handler for submitting search form: on dropdown selection
 // $("body").on("click", ".reset-select", function(){
 //   var input_name = $(this).attr("data-target");
@@ -343,12 +305,6 @@ $(document).ready(function(){
 //   console.log(input)
 // });
 
-//#SEARCH: handler for submitting search form: on dropdown selection
-// $("body").on("change", ".product-select", function(){
-//   var form = $(this).closest("form");
-//   $(form).submit();
-// });
-
 // function afterSearch(target, tags) {
 //   var card_obj = objRef(target, tags);
 //   var search_ids = $("#search-form").find('select option').eq(idx).val();
@@ -359,3 +315,13 @@ $(document).ready(function(){
 //     card_obj['tab-item'].filter("a").addClass("active");
 //   }
 // }
+
+// $("body").on("change", "select.title-select", function(){
+//   var product = $(this).val();
+//   toggleInputVal($("#new-skus #title_id"), product);
+//   // if (product.length){
+//   //   $("#new-skus #title_id").val(product);
+//   // } else {
+//   //   $("#new-skus #title_id").val(false);
+//   // }
+// });
