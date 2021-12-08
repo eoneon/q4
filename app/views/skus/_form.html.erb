@@ -8,19 +8,19 @@
 
           <div class="col-4 ml-0">
             <div class="input-group input-group-sm">
-              <button id="caret-toggle" class="caret-toggle btn btn-sm bg-transparent ml-0 my-1 pl-1 py-0 pr-2" type="button"><%= (fa_icon "caret-right") %></button>
+              <button id="caret-toggle" class="caret-toggle default-caret-right btn btn-sm bg-transparent ml-0 my-1 pl-1 py-0 pr-2" type="button"><%= (fa_icon "caret-right") %></button>
               <label class="fs-xs font-weight-light text-secondary pt-2 pl-1 pr-1">skus</label>
               <%= f.text_field :skus, placeholder: "enter sku range", class: "form-control bg-gray-d" %>
             </div>
           </div>
 
           <div class="col-md-1 offset-md-7">
-            <button class="btn btn-sm btn-outline-primary form-control" type="submit">save</button>
+            <button class="btn btn-sm btn-outline-info form-control" type="submit">save</button>
           </div>
         </div>
       </div>
 
-      <div class="card-body pt-2 pb-1 pl-0 bg-gray-d border border-white border-top-0 rounded-bottom collapse">
+      <div class="card-body pt-2 pb-1 pl-0 bg-gray-d border border-white border-top-0 rounded-bottom default-collapse collapse">
 
         <div class="form-row pl-1 ml-0 mb-2">
           <div class="col-4 ml-0">
@@ -49,17 +49,17 @@
             </div>
           </div>
 
-          <div class="col-2">
+          <div class="col-2 ml-0">
             <div class="input-group input-group-sm">
-              <label class="fs-xs font-weight-light text-secondary pt-2 px-1">$</label>
-              <%= f.number_field :retail, class: "form-control bg-gray-c field-param" %>
+              <label class="fs-xs font-weight-light text-secondary pt-2 pl-3 pr-2">$</label>
+              <%= f.number_field :retail, class: "form-control bg-gray-c" %>
             </div>
           </div>
 
-          <div class="col-1">
+          <div class="col-2">
             <div class="input-group input-group-sm">
-              <label class="fs-xs font-weight-light text-secondary pt-2 px-1">qty:</label>
-              <%= f.number_field :qty, class: "form-control bg-gray-c field-param" %>
+              <label class="fs-xs font-weight-light text-secondary pt-2 pl-1 pr-2">qty:</label>
+              <%= f.number_field :qty, class: "form-control bg-gray-c" %>
             </div>
           </div>
         </div>

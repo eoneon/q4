@@ -31,78 +31,10 @@ $(document).ready(function(){
     }
   });
 
+  //edit-form submission: UPDATE select field and submit form
   $("body").on("change", ".field-param", function(){
     var form = $(this).closest("form");
     $(form).submit();
-  });
-
-  //not sure if in use
-  $("body").on("click", ".form-toggle", function(){
-    var target = $(this).attr("data-target");
-    if (!$(target).hasClass("show")){
-      $(this).addClass("active").siblings().removeClass("active");
-      $(target).siblings().removeClass("show");
-      $(target).addClass("show");
-    }
-  });
-
-  //CRUD SHOW: not sure if using
-  $("body").on("click", "#tab-index a.list-group-item", function(e){
-    var item_id = '#'+$(this).attr("id");
-    var item_card_id = item_id.replace("tab-item", "show");
-    var show_card = $('#show-card > .card');
-    if ($(show_card).length && '#'+$(show_card).attr('id') == item_card_id){
-      e.stopPropagation();
-      e.preventDefault();
-      $(item_card_id).remove();
-      $(item_id).removeClass("active");
-    }
-  });
-
-  //CRUD SHOW SEARCH: not sure if using
-  $("body").on("change", ".artist-search", function(){
-    var v = $(this).val();
-    if (v.length) {
-      $(this).closest("form").submit();
-    } else {
-      $('#show-card > .card').remove();
-    }
-  });
-
-  $("body").on("click", ".dropdown a.field-toggle", function(){
-    var target = $(this).attr("href");
-    if ($(target).hasClass("show")){
-      $(target).toggleClass("show collapse");
-    } else {
-      $(target).closest(".toggle-field-group").find(".toggle-field.show").toggleClass("show collapse");
-      $(target).toggleClass("show collapse");
-    }
-  });
-
-  $("body").on("click", ".collapse-field-btn", function(){
-    $(this).closest(".toggle-field").toggleClass("show collapse");
-  });
-
-  //CRUD ITEM-PRODUCT #update -> REFACTOR: not sure if using
-  $("body").on("click", "#item-products-index button.list-group-item", function(e){
-    var new_id = $(this).attr("id");
-    var old_id = $(this).attr("data-selected");
-    var method = toggleHttp(new_id, old_id);
-    $("input[name='product_id']").val(toggleAttr(new_id, old_id));
-    $('#'+method+'-item-product').submit();
-  });
-
-  //CRUD ITEM-SEARCH INDEX #update
-  $("body").on("click", "#item-index button.list-group-item", function(e){
-    var item_id = $('#hidden_item_id').val();
-    var id = $(this).attr("id");
-    toggleTab(id, e);
-    $('#hidden_item_id').val(toggleAttr(item_id, id));
-  });
-
-  //CRUD ITEM-ARTIST #update
-  $("body").on("change", ".artist-update", function(e){
-    $("#patch-item-artist").submit();
   });
 
   $("body").on("change", "select.search-select", function(){
@@ -110,21 +42,18 @@ $(document).ready(function(){
     $(form).submit();
   });
 
-  //: not sure if using
-  $("body").on("change", ":radio.search-select", function(){
-    var form = $(this).closest("form");
-    $(form).find(":selected").attr('selected', false);
-    $(form).submit();
+  $("body").on("focusout", ".input-field", function(){
+    $(this).closest("form").submit();
   });
 
-  //new stuff #new-skus
-  $("body").on("click", ".nav-link.new-skus", function(){
+  // invoice#show.html #new-skus: collapse.show - caret-right/caret-down - clear fields
+  $("body").on("click", "#invoice-nav .nav-link", function(){
     if ($("#new-skus-toggle").hasClass("show")){
       $("#new-skus-toggle .form :input").val("");
       $("#title-select").find("option:first").siblings().remove();
-      if ($("#title-select").hasClass("show")){
-        $(".title-toggle").toggleClass("show collapse");
-      }
+      $("#new-skus .default-caret-right i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
+      $("#new-skus .default-collapse.show").toggleClass("show collapse");
+      $("#new-skus .default-show.collapse").toggleClass("show collapse");
     }
   });
 
@@ -153,34 +82,46 @@ $(document).ready(function(){
     $(toggle_targets).toggleClass("show collapse");
   });
 
-  $("body").on("change", "select.item-product-select", function(){
-    var product_id = $(this).val();
-    $("input[name='item[product_id]']").val(product_id);
-    $("#edit-item").submit();
-  });
-
+  //what is this?
   $("body").on("click", ".search-btn", function(){
     $('#new-skus').find(":selected").attr('selected', false);
     $('#new-skus').find(":input").val("");
   });
 
-  // $("body").on("change", "#title", function(){
-  //   var title = $(this).val();
-  //   $("input[name='item[title]']").val(title)
-  // });
-
-  $("body").on("focusout", ".input-field", function(){
-    $(this).closest("form").submit();
+  //item-field
+  $("body").on("change", ".item-product-select", function(){
+    setInput($(this).attr("data-target"), $(this).val());
+    $("#edit-item").submit();
   });
 
-  $("body").on("keyup", ".required-field", function(){
-    var val = $(this).val();
-    var submit = $(this).closest("form").find(".disabled-btn");
-    if (val.length){
-      $(submit).removeAttr('disabled');
+  //items#search
+  $("body").on("click", ".refresh", function(){
+    setInput($(this).attr("data-target"), false);
+    submitFormByContext($(this).closest("form").attr("id"));
+  });
+
+  //CRUD SHOW SEARCH: not sure if using these 3
+  $("body").on("change", ".artist-search", function(){
+    var v = $(this).val();
+    if (v.length) {
+      $(this).closest("form").submit();
     } else {
-      $(submit).attr('disabled', 'disabled')
+      $('#show-card > .card').remove();
     }
+  });
+
+  $("body").on("click", ".dropdown a.field-toggle", function(){
+    var target = $(this).attr("href");
+    if ($(target).hasClass("show")){
+      $(target).toggleClass("show collapse");
+    } else {
+      $(target).closest(".toggle-field-group").find(".toggle-field.show").toggleClass("show collapse");
+      $(target).toggleClass("show collapse");
+    }
+  });
+
+  $("body").on("click", ".collapse-field-btn", function(){
+    $(this).closest(".toggle-field").toggleClass("show collapse");
   });
 
   $(function(e) {
@@ -194,6 +135,16 @@ $(document).ready(function(){
   function toggleInputVal(inputs, value) {
     var val = value.length ? value : ""
     $(inputs).val(value);
+  }
+
+  function setInput(input_name, value) {
+    $('input[name="'+input_name+'"]').val(value);
+  }
+
+  function submitFormByContext(context) {
+    if (context == "search-item-product"){
+      $("#edit-item").submit();
+    }
   }
 
   function toggleTab(id, e) {
@@ -213,18 +164,84 @@ $(document).ready(function(){
     return id
   }
 
-  function toggleHttp(new_id, old_id) {
-    if (old_id.length == 0) {
-      var method = "post"; //id = new_id
-    } else if (new_id != old_id) {
-      var method = "patch"; //id = new_id
-    } else if (new_id == old_id){
-      var method = "delete"; //id = ""
-    }
-    return method
-  }
 });
 
+// not using:
+
+// function toggleHttp(new_id, old_id) {
+//   if (old_id.length == 0) {
+//     var method = "post"; //id = new_id
+//   } else if (new_id != old_id) {
+//     var method = "patch"; //id = new_id
+//   } else if (new_id == old_id){
+//     var method = "delete"; //id = ""
+//   }
+//   return method
+// }
+
+// $("body").on("keyup", ".required-field", function(){
+//   var val = $(this).val();
+//   var submit = $(this).closest("form").find(".disabled-btn");
+//   if (val.length){
+//     $(submit).removeAttr('disabled');
+//   } else {
+//     $(submit).attr('disabled', 'disabled')
+//   }
+// });
+
+//CRUD ITEM-ARTIST #update
+// $("body").on("change", ".artist-update", function(e){
+//   $("#patch-item-artist").submit();
+// });
+
+//CRUD ITEM-PRODUCT #update -> REFACTOR: not sure if using
+// $("body").on("click", "#item-products-index button.list-group-item", function(e){
+//   var new_id = $(this).attr("id");
+//   var old_id = $(this).attr("data-selected");
+//   var method = toggleHttp(new_id, old_id);
+//   $("input[name='product_id']").val(toggleAttr(new_id, old_id));
+//   $('#'+method+'-item-product').submit();
+// });
+//
+// //CRUD ITEM-SEARCH INDEX #update
+// $("body").on("click", "#item-index button.list-group-item", function(e){
+//   var item_id = $('#hidden_item_id').val();
+//   var id = $(this).attr("id");
+//   toggleTab(id, e);
+//   $('#hidden_item_id').val(toggleAttr(item_id, id));
+// });
+
+//CRUD SHOW: used with aside
+// $("body").on("click", "#tab-index a.list-group-item", function(e){
+//   var item_id = '#'+$(this).attr("id");
+//   var item_card_id = item_id.replace("tab-item", "show");
+//   var show_card = $('#show-card > .card');
+//   if ($(show_card).length && '#'+$(show_card).attr('id') == item_card_id){
+//     e.stopPropagation();
+//     e.preventDefault();
+//     $(item_card_id).remove();
+//     $(item_id).removeClass("active");
+//   }
+// });
+
+// RADIO BUTTON fn
+// $("body").on("change", ":radio.search-select", function(){
+//   var form = $(this).closest("form");
+//   $(form).find(":selected").attr('selected', false);
+//   $(form).submit();
+// });
+
+// COLLAPSE/SHOW TOGGLE fn
+// $("body").on("click", ".form-toggle", function(){
+//   var target = $(this).attr("data-target");
+//   if (!$(target).hasClass("show")){
+//     $(this).addClass("active").siblings().removeClass("active");
+//     $(target).siblings().removeClass("show");
+//     $(target).addClass("show");
+//   }
+// });
+
+// old methods for reference
 
 // $("body").on("click", ".caret-toggle", function(){
 //   if ($(this).find("i").hasClass("fa-caret-right")){

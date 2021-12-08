@@ -13,8 +13,11 @@
 
     <div class="col-6 border-light-gray p-1">
       <div class="input-group input-group-sm">
-        <label class="fs-s font-weight-light text-secondary pr-1"> prd:</label>
-        <%= f.collection_select :product, products, :id, :product_name, {include_blank: true, selected: item.product.try(:id)}, class: "form-control border-light-gray rounded-right-border rounded-left-border item-product-select" %>
+        <label class="fs-s font-weight-light text-secondary pr-1">prd:</label>
+        <div class="input-group-prepend">
+          <button class="btn btn-sm btn-outline-secondary text-sm font-weight-light border-light-gray rounded-left-border border-right-0 refresh" data-target="item[product_id]" type="button"><%= (fa_icon "repeat") %></button>
+        </div>
+        <%= f.collection_select :product, products, :id, :product_name, {include_blank: true, selected: item.product.try(:id)}, id: "product-select", class: "form-control border-light-gray rounded-right-border border-left-0 item-product-select", data:{target: "item[product_id]"} %>
       </div>
     </div>
 
