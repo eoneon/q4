@@ -50,7 +50,7 @@
  }
  .kind-label{
    display: inline-block;
-   width: 35px //!important;
+   width: 38px //!important;
  }
  .type-dropdown {
    min-width: 125px !important;
@@ -105,6 +105,9 @@
 
  //button elements
  .caret-toggle {
+   width: 12px;
+ }
+ .caret-slug {
    width: 12px;
  }
  //remove blue active outline

@@ -1,8 +1,8 @@
-<div class="row justify-content-center">
-  <h1 id="sku">
-    Sku: <span id="sku-header"><%= @item.sku %></span><span id="item-product"></span>
+<!-- <div class="row justify-content-center">
+  <h1>
+    Sku: <span id="sku-header"><%#= @item.sku %></span><span id="item-product"></span>
   </h1>
-</div>
+</div> -->
 
 <div class="row justify-content-center">
   <h4>
@@ -15,17 +15,6 @@
   </h4>
 
 </div>
-<hr>
-
-<h4>Product Search</h4>
-<div class="row">
-  <div class="col-12">
-    <div class="card p-1 mb-2 border-0 bg-light">
-      <%= render "item_products/forms/search", item: @item, inputs: @inputs, products: @products %>
-    </div>
-  </div>
-</div>
-
 <hr>
 
 <h4>Description</h4>
@@ -42,6 +31,17 @@
 
 <hr>
 
+<h4>Product Search</h4>
+<div class="row">
+  <div class="col-12">
+    <div class="card p-1 mb-2 border-0 bg-light">
+      <%= render "item_products/forms/search", item: @item, inputs: @inputs, products: @products %>
+    </div>
+  </div>
+</div>
+
+<hr>
+
 <div class="row">
   <div class="col-1">
     <h4>Item</h4>
@@ -50,13 +50,8 @@
     <%= link_to "delete", [@item.invoice, @item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
   </div>
 </div>
-
-<div class="row">
-  <div class="col-12">
-    <div class="card p-1 mb-2 border-0 bg-light">
-      <%= render "items/form", invoice: @item.invoice, item: @item %>
-    </div>
-  </div>
+<div id="item-navbar-forms">
+  <%= render "items/nav_bar", invoice: @item.invoice, item: @item, inputs: @inputs, rows: @rows, products: @products, titles: @titles %>
 </div>
-
-<%= render "item_fields/edit", item: @item, rows: @rows %>
+<%#= render "items/form", invoice: @item.invoice, item: @item, titles: @titles %>
+<%#= render "item_fields/edit", item: @item, rows: @rows %>

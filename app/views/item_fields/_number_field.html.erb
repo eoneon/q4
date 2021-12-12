@@ -1,6 +1,7 @@
 <div class="col-2">
   <div class="input-group input-group-sm">
-    <label class="fs-xs font-weight-light text-secondary pt-2 pl-1"><span class="kind-label"><%= input_label(f_hsh) %></span></label>
+    <%= render "item_fields/caret", card_id: card_id, body: card[:body], i: i, context: context %>
+    <%= render "item_fields/label", f_hsh: f_hsh %>
     <%= f.number_field f_hsh[:f_name], value: f_hsh[:selected], step: 0.5, class: "form-control border-gray-b field-param" %>
   </div>
 </div>

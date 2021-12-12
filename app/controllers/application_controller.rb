@@ -7,8 +7,20 @@ class ApplicationController < ActionController::Base
     tags ? tags : {}
   end
 
+  def cond_find(klass, param_val)
+    klass.find(param_val) unless param_val.blank?
+  end
+
+  def cond_id(fk_id)
+    fk_id ? fk_id : nil
+  end
+  
   def cond_val(val, default=nil)
     val ? val : default
+  end
+
+  def titles(artist=nil, product=nil)
+    artist ? artist.titles(product) : []
   end
   ############################################################################
 

@@ -1,7 +1,6 @@
 class ItemFieldsController < ApplicationController
 
   def update
-
     @item = Item.find(params[:id])
     @toggle = params[:card_id]
     @item.tags = hsh_init(@item.tags)
@@ -9,7 +8,7 @@ class ItemFieldsController < ApplicationController
     @item.update_field(param_set, @item.input_params)
     @rows, attrs = @item.input_group
     @item.update_csv_tags(attrs)
-
+    @titles = titles(@item.artist)
     respond_to do |format|
       format.js
     end

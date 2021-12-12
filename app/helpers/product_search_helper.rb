@@ -1,7 +1,7 @@
 module ProductSearchHelper
 
   def search_input_options(name, opts)
-    opts.map{|opt| [opt, opt]}.prepend(["-- #{name.sub('_search','')} --", ""])
+    opts.map{|opt| [opt, opt]} #.prepend(["-- #{name.sub('_search','')} --", ""])
   end
 
   def edit_name(name)

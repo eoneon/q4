@@ -1,0 +1,46 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+  <a class="navbar-brand" id="sku"><%= item.sku %></a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#item-nav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="invoice-nav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#edit-item-toggle">Edit Item</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#edit-sku-toggle">Edit Sku</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#artist-toggle">Add Artist</a>
+      </li>
+    </ul>
+
+  </div>
+  <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+</nav>
+
+<div class="pos-f-t">
+  <div class="collapse" id="edit-item-toggle" data-parent="#item-navbar-forms">
+    <hr>
+    <%= render "item_products/forms/search", item: item, inputs: inputs, products: products %>
+    <%= render "items/form", invoice: invoice, item: item, titles: titles %>
+    <%= render "item_fields/edit", item: item, rows: rows %>
+  </div>
+</div>
+
+<div class="pos-f-t">
+  <div class="collapse" id="edit-sku-toggle" data-parent="#item-navbar-forms">
+    <hr>
+    <%= render 'skus/edit', invoice: invoice, item: item %>
+  </div>
+</div>
+
+<div class="pos-f-t">
+  <div class="collapse" id="artist-toggle" data-parent="#item-navbar-forms">
+    <hr>
+    <%= render 'artists/form' %>
+  </div>
+</div>

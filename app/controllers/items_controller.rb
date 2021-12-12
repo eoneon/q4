@@ -3,6 +3,7 @@ class ItemsController < ApplicationController
   def show
     @item = Item.find(params[:id])
     @products, @inputs = Product.search(scope: @item.product)
+    @titles = titles(@item.artist)
     @rows, attrs = @item.input_group
   end
 
@@ -20,6 +21,8 @@ class ItemsController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
+    @titles = titles(cond_find(Artist, params[:item][:artist_id]))
+
     @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
     @item.update_product_case('product', @item.product, params[:item][:product_id])
     @products, @inputs = Product.search(scope: @item.product)

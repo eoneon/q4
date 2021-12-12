@@ -1,9 +1,7 @@
 <div class="col-3">
   <div class="input-group input-group-sm">
-    <% if i == 0 %>
-      <button id="<%= card_id %>" class="caret-toggle btn btn-sm bg-transparent ml-0 my-1 pl-0 py-0" type="button" <%= disable_btn(card[:body]) %>><%= (fa_icon "caret-right") %></button>
-    <% end %>
-    <label class="fs-xs font-weight-light text-secondary pt-2 pl-1"><span class="kind-label"><%= input_label(f_hsh) %></span></label>
+    <%= render "item_fields/caret", card_id: card_id, body: card[:body], i: i, context: context %>
+    <%= render "item_fields/label", f_hsh: f_hsh %>
     <%= f.collection_select f_hsh[:f_name], f_hsh[:f_val].options, :id, :field_name, {include_blank: true, selected: f_hsh[:selected]}, {class: "form-control border-gray-b field-param"} %>
   </div>
 </div>

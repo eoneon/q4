@@ -46,7 +46,7 @@ $(document).ready(function(){
     $(this).closest("form").submit();
   });
 
-  // invoice#show.html #new-skus: collapse.show - caret-right/caret-down - clear fields
+  //invoice#show.html #new-skus: collapse.show - caret-right/caret-down - clear fields
   $("body").on("click", "#invoice-nav .nav-link", function(){
     if ($("#new-skus-toggle").hasClass("show")){
       $("#new-skus-toggle .form :input").val("");
@@ -89,15 +89,34 @@ $(document).ready(function(){
   });
 
   //item-field
-  $("body").on("change", ".item-product-select", function(){
-    setInput($(this).attr("data-target"), $(this).val());
-    $("#edit-item").submit();
+  $("body").on("change", ".update-search", function(){
+    setInputVal(inputGroupData($(this), "data-input"), $(this).val());
+    $(inputGroupData($(this), "data-form")).submit();
   });
 
   //items#search
-  $("body").on("click", ".refresh", function(){
-    setInput($(this).attr("data-target"), false);
-    submitFormByContext($(this).closest("form").attr("id"));
+  $("body").on("click", ".deselect", function(){
+    setInputVal(inputGroupData($(this), "data-input"), "");
+    $(inputGroupData($(this), "data-form")).submit();
+  });
+
+  //items#search
+  $("body").on("click", ".unselect", function(){
+    $(this).closest(".input-group").find(":selected").attr('selected', false);
+    $(inputGroupData($(this), "data-form")).submit();
+  });
+
+  //CRUD SHOW: used with aside tabs, see: suppliers/index
+  $("body").on("click", "#tab-index a.list-group-item", function(e){
+    var item_id = '#'+$(this).attr("id");
+    var item_card_id = item_id.replace("tab-item", "show");
+    var show_card = $('#show-card > .card');
+    if ($(show_card).length && '#'+$(show_card).attr('id') == item_card_id){
+      e.stopPropagation();
+      e.preventDefault();
+      $(item_card_id).remove();
+      $(item_id).removeClass("active");
+    }
   });
 
   //CRUD SHOW SEARCH: not sure if using these 3
@@ -124,27 +143,18 @@ $(document).ready(function(){
     $(this).closest(".toggle-field").toggleClass("show collapse");
   });
 
-  $(function(e) {
-    var artist_id = $('#hidden_artist_id').val();
-    if (artist_id != undefined && artist_id.length){
-      $('.artist-add option[value="'+artist_id+'"]').attr('selected', true);
-    }
-  });
-
-  //new
+  // click/change -> set target field
   function toggleInputVal(inputs, value) {
     var val = value.length ? value : ""
     $(inputs).val(value);
   }
 
-  function setInput(input_name, value) {
+  function setInputVal(input_name, value) {
     $('input[name="'+input_name+'"]').val(value);
   }
 
-  function submitFormByContext(context) {
-    if (context == "search-item-product"){
-      $("#edit-item").submit();
-    }
+  function inputGroupData(ref, data) {
+    return $(ref).closest(".input-group").attr(data);
   }
 
   function toggleTab(id, e) {
@@ -163,6 +173,13 @@ $(document).ready(function(){
     }
     return id
   }
+
+  $(function(e) {
+    var artist_id = $('#hidden_artist_id').val();
+    if (artist_id != undefined && artist_id.length){
+      $('.artist-add option[value="'+artist_id+'"]').attr('selected', true);
+    }
+  });
 
 });
 
@@ -211,19 +228,6 @@ $(document).ready(function(){
 //   $('#hidden_item_id').val(toggleAttr(item_id, id));
 // });
 
-//CRUD SHOW: used with aside
-// $("body").on("click", "#tab-index a.list-group-item", function(e){
-//   var item_id = '#'+$(this).attr("id");
-//   var item_card_id = item_id.replace("tab-item", "show");
-//   var show_card = $('#show-card > .card');
-//   if ($(show_card).length && '#'+$(show_card).attr('id') == item_card_id){
-//     e.stopPropagation();
-//     e.preventDefault();
-//     $(item_card_id).remove();
-//     $(item_id).removeClass("active");
-//   }
-// });
-
 // RADIO BUTTON fn
 // $("body").on("change", ":radio.search-select", function(){
 //   var form = $(this).closest("form");
@@ -240,6 +244,13 @@ $(document).ready(function(){
 //     $(target).addClass("show");
 //   }
 // });
+
+// route form submission: obsolete because: inputGroupData
+// function submitFormByContext(context) {
+//   if (context == "search-item-product"){
+//     $("#edit-item").submit();
+//   }
+// }
 
 // old methods for reference
 
