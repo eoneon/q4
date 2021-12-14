@@ -1,7 +1,6 @@
 <%= form_with model: item, url: item_field_path(item), id: "edit-item-fields" do |f| %>
   <div class="form">
     <%= text_field_tag "card_id", nil, class: "collapse", id: 'caret-id' %>
-
     <% rows.each do |card_id, card| %>
       <div class="card bg-gray-d p-1 mb-1">
         <div class="card-header border-0 bg-transparent pt-1 pb-1 pl-0 pr-0">
@@ -11,7 +10,6 @@
             <% end %>
           </div>
         </div>
-
         <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-gray-d border border-white border-top-0 rounded-bottom collapse">
           <div class="form-row">
             <% card[:body].each do |f_hsh| %>
@@ -21,6 +19,5 @@
         </div>
       </div>
     <% end %>
-
   </div>
 <% end %>

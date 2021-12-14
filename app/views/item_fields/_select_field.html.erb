@@ -1,7 +1,7 @@
 <div class="col-3">
   <div class="input-group input-group-sm">
     <%= render "item_fields/caret", card_id: card_id, body: card[:body], i: i, context: context %>
-    <%= render "item_fields/label", f_hsh: f_hsh %>
+    <%= render "item_fields/label", label: f_hsh %>
     <%= f.collection_select f_hsh[:f_name], f_hsh[:f_val].options, :id, :field_name, {include_blank: true, selected: f_hsh[:selected]}, {class: "form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0 field-param"} %>
   </div>
 </div>

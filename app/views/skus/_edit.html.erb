@@ -1,20 +1,18 @@
 <%= form_with model: item, url: invoice_sku_path(invoice, item), id: "edit-sku" do |f| %>
   <div class="form">
-    <div class="card p-1 mb-1 bg-disabled border-0">
-      <div class="form-row">
+    <div class="card bg-gray-d p-0 mb-1">
+      <div class="form-row pl-1 ml-0 mb-2">
 
-        <div class="col-2">
+        <div class="col-2 pt-2">
           <div class="input-group input-group-sm">
             <div class="input-group-prepend">
               <button id="" class="caret-toggle btn btn-sm bg-transparent mx-1 my-1 pl-1 py-0" type="button" <%= disable_btn(nil) %>></button>
             </div>
-            <div class="input-group-prepend">
-              <span class="fs-xs font-weight-light text-secondary kind-label pt-2 pr-1">sku</span>
-            </div>
-            <%= f.number_field :sku, placeholder: "sku", class: "form-control bg-gray-b field-param" %>
+            <%= render "item_fields/label", label: 'sku' %>
+            <%= f.number_field :sku, class: "form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0" %>
           </div>
         </div>
-        <div class="col-md-1 offset-md-9">
+        <div class="col-md-1 offset-md-9 pt-2 pr-3">
           <button class="btn btn-sm btn-outline-info form-control" type="submit">save</button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 module ItemFieldsHelper
 
   def input_label(f_hsh)
-    label_case(Item.swap_str(f_hsh[:f_name].split('_').join(' '), ['standard', '', 'flat', '', ' one of one', '', ' seal', '']), f_hsh[:k], f_hsh[:t])
+    f_hsh.is_a?(String) ? f_hsh : label_case(Item.swap_str(f_hsh[:f_name].split('_').join(' '), ['standard', '', 'flat', '', ' one of one', '', ' seal', '']), f_hsh[:k], f_hsh[:t])
   end
 
   def label_case(f_name, k, t)

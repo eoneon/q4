@@ -1,31 +1,25 @@
 <%= form_with model: Artist.new, id: "artist-new" do |f| %>
   <div class="form">
-    <div class="card bg-gray-d border-0 mb-2">
-
-      <div class="form-row align-items-center p-1">
-
-        <div class="col-4 ml-0">
+    <div class="card bg-gray-d p-0 mb-1">
+      <div class="form-row pl-1 ml-0 mb-1">
+        <div class="col-4 pt-2">
           <div class="input-group input-group-sm">
-            <label class="fs-xs font-weight-light text-secondary pt-2 px-1 kind-label">artist</label>
-            <%= f.text_field :artist_name, class: "form-control form-control-sm"%>
+            <%= render "item_fields/label", label: 'artist' %>
+            <%= f.text_field :artist_name, class: "form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0"%>
           </div>
         </div>
-
         <%= render 'artists/tags', f: f, fields: %w[yob yod], artist: Artist.new %>
-
-        <div class="col-2 ml-0">
+        <div class="col-2 pt-2">
           <div class="input-group input-group-sm">
-            <label class="fs-xs font-weight-light text-secondary pt-2 px-1 kind-label">id</label>
-            <%= f.number_field :artist_id, class: "form-control form-control-sm" %>
+            <%= render "item_fields/label", label: 'id' %>
+            <%= f.number_field :artist_id, class: "form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0" %>
           </div>
         </div>
-
-        <div class="col-md-1 offset-md-1">
+        <div class="col-md-1 offset-md-1 pt-2 pr-3">
           <%= submit_tag "save", class: "btn btn-sm btn-outline-primary form-control" %>
         </div>
       </div>
-
-      <div class="form-row align-items-center p-1">
+      <div class="form-row pl-1 pr-2 ml-0 mb-2">
         <%= render 'artists/tags', f: f, fields: %w[title body], artist: Artist.new %>
       </div>
     </div>
