@@ -50,7 +50,11 @@
  }
  .kind-label{
    display: inline-block;
-   width: 38px //!important;
+   width: 40px //!important;
+ }
+ .search-label{
+   display: inline-block;
+   width: 48px //!important;
  }
  .type-dropdown {
    min-width: 125px !important;
@@ -101,6 +105,14 @@
  .rounded-bottom-border {
    border-top-right-radius: 1rem !important;
    border-bottom-left-radius: 1rem !important;
+ }
+ .rounded-right-border-md {
+   border-top-right-radius: .25rem !important;
+   border-bottom-right-radius: .25rem !important;
+ }
+ .rounded-left-border-md {
+   border-top-left-radius: .25rem !important;
+   border-bottom-left-radius: .25rem !important;
  }
 
  //button elements

@@ -1,7 +1,7 @@
 module SearchItemsHelper
 
   def search_label(input_name)
-    input_name[0..2]+':'
+    input_name.sub('_search','')
   end
 
   def attr_tags

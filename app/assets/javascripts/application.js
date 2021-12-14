@@ -31,6 +31,20 @@ $(document).ready(function(){
     }
   });
 
+  // COLLAPSE/SHOW TOGGLE fn
+  $("body").on("click", ".form-toggle a", function(){
+    if ($(this).hasClass("active")){
+      $(this).removeClass("active");
+    } else {
+      $(this).closest(".form-toggle").find("a").removeClass("active");
+      $(this).addClass("active");
+    }
+  });
+
+  // $("#edit-item-toggle").on("hide.bs.collapse", function(){
+  //   $("a[href='#edit-item-toggle']").removeClass("active");
+  // });
+
   //edit-form submission: UPDATE select field and submit form
   $("body").on("change", ".field-param", function(){
     var form = $(this).closest("form");

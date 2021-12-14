@@ -2,6 +2,6 @@
   <div class="input-group input-group-sm">
     <%= render "item_fields/caret", card_id: card_id, body: card[:body], i: i, context: context %>
     <%= render "item_fields/label", f_hsh: f_hsh %>
-    <%= f.number_field f_hsh[:f_name], value: f_hsh[:selected], step: 0.5, class: "form-control border-gray-b field-param" %>
+    <%= f.number_field f_hsh[:f_name], value: f_hsh[:selected], step: 0.5, class: "form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0 field-param" %>
   </div>
 </div>

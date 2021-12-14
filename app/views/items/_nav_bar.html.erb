@@ -1,14 +1,17 @@
-<nav class="navbar navbar-expand-sm navbar-light bg-light">
+<nav class="navbar navbar-expand-sm navbar-light bg-disabled">
   <a class="navbar-brand" id="sku"><%= item.sku %></a>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#item-nav">
     <span class="navbar-toggler-icon"></span>
   </button>
 
-  <div class="collapse navbar-collapse" id="invoice-nav">
+  <div class="collapse navbar-collapse form-toggle" id="item-nav">
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" data-toggle="collapse" href="#edit-item-toggle">Edit Item</a>
+        <a class="nav-link" data-toggle="collapse" href="#description-toggle">Description</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="collapse" href="#edit-item-toggle">Edit Item</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#edit-sku-toggle">Edit Sku</a>
@@ -17,15 +20,25 @@
         <a class="nav-link" data-toggle="collapse" href="#artist-toggle">Add Artist</a>
       </li>
     </ul>
-
   </div>
-  <%= link_to "delete", [invoice, item], method: :delete, class: 'btn btn-sm btn-outline-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+
+  <%= link_to item.invoice.invoice_number, invoice, class: 'badge badge-primary mr-2' %>
+  <%= link_to item.invoice.supplier.supplier_name, suppliers_path, class: 'badge badge-primary mr-2' %>
+  <%= link_to "delete", [invoice, item], method: :delete, class: 'badge badge-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+
 </nav>
 
 <div class="pos-f-t">
-  <div class="collapse" id="edit-item-toggle" data-parent="#item-navbar-forms">
+  <div class="collapse" id="description-toggle" data-parent="#item-navbar-forms">
+    <%= render 'items/description', item: item %>
+  </div>
+</div>
+
+<div class="pos-f-t">
+  <div class="show collapse" id="edit-item-toggle" data-parent="#item-navbar-forms">
     <hr>
     <%= render "item_products/forms/search", item: item, inputs: inputs, products: products %>
+    <hr>
     <%= render "items/form", invoice: invoice, item: item, titles: titles %>
     <%= render "item_fields/edit", item: item, rows: rows %>
   </div>

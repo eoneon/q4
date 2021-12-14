@@ -1,5 +1,7 @@
-document.getElementById("tagline").textContent="<%= raw @item.hattr('csv_tags', 'tagline') %>";
-document.getElementById("description").textContent="<%= raw @item.hattr('csv_tags', 'description') %>";
 $("#search-item-product").html("<%= j render 'item_products/forms/search', item: @item, inputs: @inputs, products: @products %>");
 $("#edit-item").html("<%= j render 'items/form', invoice: @invoice, item: @item, titles: @titles, rows: @rows %>");
 $("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
+$("#description-toggle").html("<%= j render 'items/description', item: @item %>");
+
+//document.getElementById("tagline").textContent="<%= raw @item.hattr('csv_tags', 'tagline') %>";
+//document.getElementById("description").textContent="<%= raw @item.hattr('csv_tags', 'description') %>";
