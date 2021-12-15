@@ -1,5 +1,24 @@
 module ApplicationHelper
 
+  def boot_classes(element, *html_classes)
+    boot_elements[element].concat(html_classes).join(' ')
+  end
+
+  def boot_elements
+    {
+      submit: %w[btn btn-sm badge form-control submit-btn],
+      caret: %w[caret-toggle btn btn-sm bg-transparent mx-1 my-1 pl-2 py-0],
+      title_toggle: %w[btn btn-sm kind-label bg-gray-c border border-gray-b rounded-left-border-md border-right-0 text-info font-weight-light ml-0 px-0 toggle-view],
+      label: %w[kind-label bg-gray-c border border-gray-b rounded-left-border-md border-right-0 text-info fs-xs font-weight-light pt-2 pl-1 pr-0],
+      input: %w[form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0],
+      search_label: %w[fs-xs font-weight-light text-secondary pt-2 pr-1 search-label],
+      reset_btn: %w[btn btn-sm btn-outline-secondary border-light-gray rounded-left-border border-right-0 text-sm font-weight-light],
+      search_input: %w[form-control bg-gray-d border-light-gray rounded-right-border border-left-0]
+    }
+  end
+
+  ##############################################################################
+
   def dom_ref(*tags, lev: :type)
     tags.map{|tag| format_ref(tag, lev)}.join("-")
   end

@@ -127,7 +127,7 @@ class Product < ApplicationRecord
     def invoice_search(product:nil, artist_id:nil, hattrs:nil, hstore:'tags', inputs:{})
       form_inputs(hattrs, product, artist_id, hstore, inputs)
       results = search_results(product, artist_id, inputs['hattrs'].reject{|k,v| v.blank?}, hstore)
-      results = order_hstore_search(results, search_keys, hstore)
+      results = order_hstore_search(results, %w[category_search medium_search material_search], hstore)
       inputs['hattrs'] = search_inputs(results, inputs['hattrs'], hstore)
       a, b = results, inputs
     end
@@ -161,7 +161,7 @@ class Product < ApplicationRecord
     end
 
     def search_keys
-      %w[category_search medium_search]
+      %w[category_search medium_search material_search]
     end
     # SEEDING METHODS ##########################################################
     def seed(store)

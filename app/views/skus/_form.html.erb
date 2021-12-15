@@ -1,66 +1,63 @@
 <%= form_with model: Item.new, url: invoice_skus_path(invoice), id: "new-skus" do |f| %>
   <div class="form">
-    <div class="card bg-disabled mb-2">
+    <div class="card bg-gray-d p-0 mb-1">
+      <div class="card-header bg-transparent pt-0 pb-1 pl-0 pr-0">
+        <div class="form-row mb-1">
 
-      <div class="card-header bg-transparent pt-1 pb-1 pl-0 pr-0">
-
-        <div class="form-row p-1">
-
-          <div class="col-4 ml-0">
+          <div class="col-4 pt-2">
             <div class="input-group input-group-sm">
-              <button id="caret-toggle" class="caret-toggle default-caret-right btn btn-sm bg-transparent ml-0 my-1 pl-1 py-0 pr-2" type="button"><%= (fa_icon "caret-right") %></button>
-              <label class="fs-xs font-weight-light text-secondary pt-2 pl-1 pr-1">skus</label>
-              <%= f.text_field :skus, placeholder: "enter sku range", class: "form-control bg-gray-d" %>
+              <%= render "item_fields/caret", card_id: 'skus', body: true, i: 0, context: 'header' %>
+              <%= render "item_fields/label", label: 'skus' %>
+              <%= f.text_field :skus, placeholder: "enter sku range", class: boot_classes(:input) %>
             </div>
           </div>
 
-          <div class="col-md-1 offset-md-7">
-            <button class="btn btn-sm btn-outline-info form-control" type="submit">save</button>
+          <div class="col-md-1 offset-md-7 pt-2">
+            <button class="<%= boot_classes(:submit, 'badge-primary') %>" type="submit">create</button>
           </div>
         </div>
       </div>
 
-      <div class="card-body pt-2 pb-1 pl-0 bg-gray-d border border-white border-top-0 rounded-bottom default-collapse collapse">
+      <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-gray-d border border-white border-top-0 rounded-bottom default-collapse collapse">
 
-        <div class="form-row pl-1 ml-0 mb-2">
+        <div class="form-row pt-2 pb-2">
           <div class="col-4 ml-0">
             <div class="input-group input-group-sm">
-              <label class="fs-xs font-weight-light text-secondary pt-2 pl-1 pr-2">artist</label>
-              <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: "form-control bg-gray-c artist_id", id: "artist_id" %>
+              <%= render "item_fields/caret", card_id: 'artist', body: true, i: 0, context: 'body' %>
+              <%= render "item_fields/label", label: 'artist' %>
+              <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'artist_id'), id: "artist_id" %>
             </div>
           </div>
 
           <div class="col-6 ml-0">
             <div class="input-group input-group-sm">
-              <label class="fs-xs font-weight-light text-secondary pt-2 pl-1 pr-2">prd</label>
-              <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: "form-control bg-gray-c product_id", id: "product_id" %>
+              <%= render "item_fields/label", label: 'product' %>
+              <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: boot_classes(:input, 'product_id'), id: "product_id" %>
             </div>
           </div>
         </div>
 
-        <div class="form-row pl-1 ml-0">
+        <div class="form-row">
           <div class="col-4 ml-0">
             <div class="input-group input-group-sm">
-
-              <div class="input-group-prepend">
-                <button class="btn btn-outline-light pl-1 pr-2 toggle-view" type="button" id="title-toggle"><span class="fs-xs font-weight-light text-secondary pt-2 px-1">title</span></button>
-              </div>
+              <%= render "item_fields/caret", card_id: 'title', body: true, i: 0, context: 'body' %>
+              <%= render 'items/title_toggle' %>
               <%= render 'items/title', titles: titles %>
-              <%= f.text_field :title, class: "form-control bg-gray-c title-toggle default-show show", id: 'title-text' %>
+              <%= f.text_field :title, class: boot_classes(:input, 'default-show', 'show', 'title-toggle', 'field-param'), id: 'title-text' %>
             </div>
           </div>
 
           <div class="col-2 ml-0">
             <div class="input-group input-group-sm">
-              <label class="fs-xs font-weight-light text-secondary pt-2 pl-3 pr-2">$</label>
-              <%= f.number_field :retail, class: "form-control bg-gray-c" %>
+              <%= render "item_fields/label", label: 'retail' %>
+              <%= f.number_field :retail, class: boot_classes(:input) %>
             </div>
           </div>
 
           <div class="col-2">
             <div class="input-group input-group-sm">
-              <label class="fs-xs font-weight-light text-secondary pt-2 pl-1 pr-2">qty:</label>
-              <%= f.number_field :qty, class: "form-control bg-gray-c" %>
+              <%= render "item_fields/label", label: 'qty' %>
+              <%= f.number_field :qty, class: boot_classes(:input) %>
             </div>
           </div>
         </div>

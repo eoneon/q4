@@ -1,11 +1,11 @@
-<nav class="navbar navbar-expand-sm navbar-light bg-light">
-  <a class="navbar-brand"><%= invoice.invoice_number %></a>
+<nav class="navbar navbar-expand-sm navbar-light bg-disabled">
+  <a class="navbar-brand" id="invoice">Invoice: <%= invoice.invoice_number %></a>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#invoice-nav">
     <span class="navbar-toggler-icon"></span>
   </button>
 
-  <div class="collapse navbar-collapse" id="invoice-nav">
+  <div class="collapse navbar-collapse form-toggle" id="invoice-nav">
     <ul class="navbar-nav">
       <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#edit-invoice-toggle">Edit Invoice</a>
@@ -25,7 +25,8 @@
     </ul>
 
   </div>
-  <a class="btn btn-sm btn-outline-danger" href="<%= supplier_invoice_path(invoice) %>" data-method="delete" data-remote="true" data-confirm="Are you sure?">Delete Invoice</a>
+  <!-- <a class="badge badge-danger form-control-sm" href="<%#= supplier_invoice_path(invoice) %>" data-method="delete" data-remote="true" data-confirm="Are you sure?">Delete</a> -->
+  <%= link_to "delete", [invoice.supplier, invoice], method: :delete, class: 'badge badge-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
 </nav>
 
 <div class="pos-f-t">

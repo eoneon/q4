@@ -1,26 +1,35 @@
 <%= form_with model: Item.new, url: search_invoice_skus_path(invoice), method: :get, id: "search-skus" do |f| %>
   <div class="form">
-    <div class="card bg-gray-d border-0 mb-2">
-      <div class="form-row align-items-center p-1">
+    <div class="card bg-gray-d p-1 mb-1">
 
+      <div class="form-row mb-2">
+        <% inputs['hattrs'].each do |input| %>
+          <div class="col-3 ml-0">
+            <div class="input-group input-group-sm">
+              <%= render 'item_products/forms/search_group', scope: 'hattrs', input_name: input['input_name'], opts: input['opts'], selected: input['selected'] %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="form-row">
         <div class="col-3 ml-0">
           <div class="input-group input-group-sm">
-            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">artist</label>
-            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true, selected: inputs['artist']}, id: "artist-search", class: "form-control rounded-right-border rounded-left-border search-select artist-select" %>
+            <%= render 'item_products/forms/search_label', input_name: 'artist' %>
+            <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
+            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true, selected: inputs['artist']}, id: "artist-search", class: boot_classes(:search_input, 'search-select', 'artist-select') %>
           </div>
         </div>
 
-        <% inputs['hattrs'].each do |hattr_inputs| %>
-          <%= render 'skus/input_field', scope: 'hattrs', k: hattr_inputs['input_name'], opts: hattr_inputs['opts'], selected: hattr_inputs['selected'] %>
-        <% end %>
-
-        <div class="col-5 ml-0">
+        <div class="col-6 ml-0">
           <div class="input-group input-group-sm">
-            <label class="fs-xs font-weight-light text-secondary pt-2 px-1">prd</label>
-            <%= f.collection_select :product_id, results, :id, :product_name, {include_blank: true, selected: inputs['product']}, id: "product-search", class: "form-control rounded-right-border rounded-left-border product-select" %>
+            <%= render 'item_products/forms/search_label', input_name: 'product' %>
+            <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
+            <%= f.collection_select :product_id, results, :id, :product_name, {include_blank: true, selected: inputs['product']}, id: "product-search", class: boot_classes(:search_input, 'product-select') %>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 <% end %>

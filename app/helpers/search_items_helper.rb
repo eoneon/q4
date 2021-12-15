@@ -1,9 +1,5 @@
 module SearchItemsHelper
 
-  def search_label(input_name)
-    input_name.sub('_search','')
-  end
-
   def attr_tags
     {'search_tagline'=>{'label'=>'tagline', 'col'=>'col-2'}, 'mounting_search'=>{'label'=>'mounting', 'col'=>'col-2'}, 'measurements'=>{'label'=>'dimensions', 'col'=>'col-2'}}
   end

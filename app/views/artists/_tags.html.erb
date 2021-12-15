@@ -3,7 +3,7 @@
     <div class="<%= "#{field['col']} pt-2" %>">
       <div class="input-group input-group-sm">
         <%= render "item_fields/label", label: field['label'] %>
-        <%= ff.text_field field['name'], class: "form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0", id: field['name'] %>
+        <%= ff.text_field field['name'], class: "#{boot_classes(:input)}", id: field['name'] %>
       </div>
     </div>
   <% end %>

@@ -1,1 +1,1 @@
-<%= select(:item, :title, titles, {include_blank: true}, class: "form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0 pr-2 default-collapse collapse title-toggle", id: 'title-select') %>
+<%= select(:item, :title, titles, {include_blank: true}, class: "#{boot_classes(:input, 'default-collapse', 'collapse', 'title-toggle', 'field-param')}", id: 'title-select') %>

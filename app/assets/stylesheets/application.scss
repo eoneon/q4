@@ -50,7 +50,7 @@
  }
  .kind-label{
    display: inline-block;
-   width: 40px //!important;
+   width: 44px //!important;
  }
  .search-label{
    display: inline-block;
@@ -122,7 +122,10 @@
  .caret-slug {
    width: 12px;
  }
- //remove blue active outline
+ .submit-btn {
+   width: 50px;
+ }
+ //remove blue active outline , button:focus
  input:focus, select:focus, textarea:focus, button:focus {
    outline: none !important;
    box-shadow: none !important;
