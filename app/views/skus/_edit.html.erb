@@ -9,11 +9,8 @@
               <button id="" class="caret-toggle btn btn-sm bg-transparent mx-1 my-1 pl-1 py-0" type="button" <%= disable_btn(nil) %>></button>
             </div>
             <%= render "item_fields/label", label: 'sku' %>
-            <%= f.number_field :sku, class: "form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0" %>
+            <%= f.number_field :sku, class: boot_classes(:input, 'field-param') %>
           </div>
-        </div>
-        <div class="col-md-1 offset-md-9 pt-2 pr-3">
-          <button class="btn btn-sm btn-outline-info form-control" type="submit">save</button>
         </div>
       </div>
     </div>

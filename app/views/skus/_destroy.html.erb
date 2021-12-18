@@ -1,4 +1,4 @@
-<%= form_with model: Item.new, url: batch_destroy_invoice_sku_path(invoice), id: "destroy-skus" do |f| %>
+<%= form_with model: Item.new, url: batch_destroy_invoice_skus_path(invoice), id: "destroy-skus" do |f| %>
   <div class="form">
     <div class="card bg-gray-d p-1 mb-2">
       <div class="form-row p-1">
@@ -6,12 +6,12 @@
         <div class="col-4 ml-0">
           <div class="input-group input-group-sm">
             <%= render "item_fields/label", label: 'skus' %>
-            <%= f.text_field :skus, placeholder: "enter sku range", class: boot_classes(:input) %>
+            <%= f.text_field :skus, placeholder: "enter sku range", class: boot_classes(:input, 'required-field') %>
           </div>
         </div>
 
         <div class="col-md-1 offset-md-7">
-          <button class="<%= boot_classes(:submit, 'badge-danger') %>" type="submit">delete</button>
+          <button class="<%= boot_classes(:submit, 'badge-danger') %>" type="submit" disabled>delete</button>
         </div>
       </div>
     </div>

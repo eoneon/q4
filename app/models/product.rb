@@ -22,10 +22,6 @@ class Product < ApplicationRecord
     Item.joins(:products).where(products: {id: id})
   end
 
-  # def titles
-  #   items.pluck(:title).uniq.reject{|i| i.blank?}
-  # end
-
   # GROUPING METHODS: CRUD/VIEW ################################################
   def product_item_loop(i_hsh, f_grp, keys)
     product_attrs(f_grp[:context], f_grp[:d_hsh], f_grp[:attrs], tags)
@@ -186,27 +182,11 @@ end
 
 # THE END ######################################################################
 ################################################################################
-# def assign_row(form_hsh, form_rows)
-#   form_rows.each_with_object([]).each do |form_row, rows|
-#     row = form_row.select{|col| form_hsh.has_key?(col)}
-#     rows.append(row.map!{|col| form_hsh[col]}.flatten!) if row.any?
-#   end
+
+# def titles
+#   items.pluck(:title).uniq.reject{|i| i.blank?}
 # end
 
-# def context_for_form_rows(form_hsh, context)
-#   form_hsh.select{|k,v| row_context.keys.include?(k)}.each do |k, k_set|
-#     k_set.pluck(:f_name).each do |f_name|
-#       set_context_key(k,f_name,context)
-#     end
-#   end
-# end
-#
-# def set_context_key(k, f_name, context)
-#   if context_key = row_context.dig(k,f_name)
-#     context[context_key] = true
-#   end
-# end
-#
 # def row_context
 #   {
 #   'numbering'=> {'numbered_one_of_one'=> :one_of_one, 'numbering_type'=> :numbered},
@@ -282,27 +262,6 @@ end
 
 # def kinds
 #   Medium.class_group('FieldGroup').map{|c| c.call_if(:input_group)}.compact.sort_by(&:first).map(&:last)
-# end
-
-# def d_hsh_and_row_params(g_hsh, i_hsh, f_grp, keys)
-#   inputs = product_fields_loop(g_hsh, f_grp[:d_hsh], keys)
-#   item_fields_loop(inputs, i_hsh, f_grp, keys)
-#   #d_hsh_and_row_loop(g_hsh, i_hsh, f_grp)
-#   f_grp.merge!({rows: assign_row(f_grp[:rows].group_by{|h| h[:k]})})
-# end
-
-# def d_hsh_and_row_loop(g_hsh, i_hsh, f_grp)
-#   f_args(g_hsh).each_with_object(f_grp) do |f_hsh, f_grp|
-#     k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
-#     #
-#     if radio_button?(t)
-#       d_hsh_loop(:d_hsh, k, f_name, f, f_grp, 'tagline', 'body')
-#     else
-#       selected = i_hsh.dig(k, t_type, f_name)
-#       f_grp[:rows].append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
-#       tags_and_rows(k, f_name, selected, i_hsh, f_grp) if selected
-#     end
-#   end
 # end
 
 # def d_hsh_loop(k, f_name, f, d_hsh, tag_keys)

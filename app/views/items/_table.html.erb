@@ -3,6 +3,9 @@
   </thead>
 
   <tbody>
-    <%= render 'items/table_body', invoice: invoice %>
+    <%#= render 'items/table_body', invoice: invoice %>
+    <% invoice.items.order(:sku).each do |item| %>
+      <%= render 'items/invoice_card', item: item %>
+    <% end %>
   </tbody>
 </table>

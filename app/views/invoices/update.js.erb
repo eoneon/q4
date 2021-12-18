@@ -1,1 +1,5 @@
+document.getElementById("invoice-name").textContent="<%= raw @invoice.invoice_name %>";
+document.getElementById("invoice-number").textContent="<%= raw @invoice.invoice_number %>";
 $("#edit-invoice").replaceWith("<%= j render 'invoices/edit', invoice: @invoice %>");
+//$("#edit-invoice-toggle").removeClass("show");
+//$("#invoice-nav").find("a").removeClass("active");

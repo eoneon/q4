@@ -5,7 +5,7 @@
         <div class="col-4 pt-2">
           <div class="input-group input-group-sm">
             <%= render "item_fields/label", label: 'artist' %>
-            <%= f.text_field :artist_name, class: boot_classes(:input) %>
+            <%= f.text_field :artist_name, class: boot_classes(:input, 'required-field') %>
           </div>
         </div>
 
@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="col-md-1 offset-md-1 pt-2">
-          <button class="form-control btn btn-sm badge badge-primary submit-btn" type="submit">create</button>
+          <button class="<%= boot_classes(:submit, 'badge-primary') %>" type="submit" disabled>create</button>
         </div>
       </div>
       <div class="form-row pl-1 pr-2 ml-0 mb-2">

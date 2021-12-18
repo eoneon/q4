@@ -1,4 +1,3 @@
 <% invoice.items.order(:sku).each do |item| %>
-  <%#= render 'items/table_row', item: item %>
   <%= render 'items/invoice_card', item: item %>
 <% end %>

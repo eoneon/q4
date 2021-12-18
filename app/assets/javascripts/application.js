@@ -45,6 +45,16 @@ $(document).ready(function(){
   //   $("a[href='#edit-item-toggle']").removeClass("active");
   // });
 
+  $("body").on("keyup", ".required-field", function(){
+    var val = $(this).val();
+    var submit = $(this).closest("form").find(".submit-btn");
+    if (val.length){
+      $(submit).removeAttr('disabled');
+    } else {
+      $(submit).attr('disabled', 'disabled');
+    }
+  });
+
   //edit-form submission: UPDATE select field and submit form
   $("body").on("change", ".field-param", function(){
     var form = $(this).closest("form");

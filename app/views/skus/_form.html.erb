@@ -8,12 +8,12 @@
             <div class="input-group input-group-sm">
               <%= render "item_fields/caret", card_id: 'skus', body: true, i: 0, context: 'header' %>
               <%= render "item_fields/label", label: 'skus' %>
-              <%= f.text_field :skus, placeholder: "enter sku range", class: boot_classes(:input) %>
+              <%= f.text_field :skus, placeholder: "enter sku range", class: boot_classes(:input, 'required-field') %>
             </div>
           </div>
 
           <div class="col-md-1 offset-md-7 pt-2">
-            <button class="<%= boot_classes(:submit, 'badge-primary') %>" type="submit">create</button>
+            <button class="<%= boot_classes(:submit, 'badge-primary') %>" type="submit" disabled>create</button>
           </div>
         </div>
       </div>
@@ -43,7 +43,7 @@
               <%= render "item_fields/caret", card_id: 'title', body: true, i: 0, context: 'body' %>
               <%= render 'items/title_toggle' %>
               <%= render 'items/title', titles: titles %>
-              <%= f.text_field :title, class: boot_classes(:input, 'default-show', 'show', 'title-toggle', 'field-param'), id: 'title-text' %>
+              <%= f.text_field :title, class: boot_classes(:input, 'default-show', 'show', 'title-toggle'), id: 'title-text' %>
             </div>
           </div>
 

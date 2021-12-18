@@ -5,14 +5,14 @@
 
       <div class="form-row pl-1 ml-0 mb-2">
 
-        <div class="col-3 pl-4 pt-2">
+        <div class="col-3 pl-4 pr-2 pt-2">
           <div class="input-group input-group-sm">
             <%= render "item_fields/label", label: 'artist' %>
-            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true, selected: item.artist.try(:id)}, class: "#{boot_classes(:input, 'field-param')}" %>
+            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true, selected: item.artist.try(:id)}, class: boot_classes(:input, 'field-param') %>
           </div>
         </div>
 
-        <div class="col-4 pt-2">
+        <div class="col-4 pt-2 pl-0">
           <div class="input-group input-group-sm">
             <%= render 'items/title_toggle' %>
             <%= render 'items/title', titles: titles %>

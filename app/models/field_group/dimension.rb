@@ -188,9 +188,9 @@ class Dimension
   end
 
   def build_material_dimensions(material_dimension_values, attrs, args)
+    attrs.merge!([%w[width height], material_dimension_values[0..1]].transpose.to_h)
     args[:material_dimensions] = dimension_description_params(material_dimension_values, (args[:material_dimension_keys][0]=='diameter'), args[:material_tag])
     attrs.merge!(args[:material_dimensions].slice('measurements', 'item_size'))
-    attrs.merge!([%w[width height], args[:material_dimensions].values[0..1]].transpose.to_h)
   end
 
   def build_mounting_dimensions(dimension, mounting_dimensions_values, attrs, args)

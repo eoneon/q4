@@ -1,3 +1,5 @@
 $("#search-skus").html("<%= j render 'skus/search', invoice: @invoice, results: @results, inputs: @inputs %>");
 $("#new-skus").html("<%= j render 'skus/form', invoice: @invoice, titles: [] %>");
+//$("#new-skus-toggle").removeClass("show");
+//$("#invoice-nav").find("a").removeClass("active");
 $("#items-table").replaceWith("<%= j render 'items/table', invoice: @invoice %>");

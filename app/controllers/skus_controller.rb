@@ -36,7 +36,7 @@ class SkusController < ApplicationController
     @item = Item.find(params[:id])
     @item.assign_attributes(sku_params)
     @item.save
-    
+
     respond_to do |format|
       format.js
     end
@@ -44,8 +44,8 @@ class SkusController < ApplicationController
 
   def batch_destroy
     @invoice = Invoice.find(params[:invoice_id])
-    skus = format_skus(params[:item][:skus])
-    @invoice.items.where(sku: skus, invoice: @invoice).destroy_all
+    @skus = format_skus(params[:item][:skus])
+    @invoice.items.where(sku: @skus, invoice: @invoice).destroy_all
 
     respond_to do |format|
       format.js
@@ -58,25 +58,9 @@ class SkusController < ApplicationController
     params.require(:item).permit!
   end
 
-  # def item_params
-  #   {title: cond_val(params[:item][:title]), retail: cond_val(params[:item][:retail]), qty: cond_val(params[:item][:qty]), invoice: @invoice}.reject{|k,v| v.blank?}
-  # end
-
   def item_params
     {title: cond_val(params[:item][:title]), invoice: @invoice}.reject{|k,v| v.blank?}
   end
-
-  # def titles(artist=nil, product=nil)
-  #   artist ? artist.titles(product) : []
-  # end
-
-  # def cond_find(klass, param_val)
-  #   klass.find(param_val) unless param_val.blank?
-  # end
-  #
-  # def cond_id(fk_id)
-  #   fk_id ? fk_id : nil
-  # end
 
   def product_args(product)
     product.f_args(product.g_hsh) if product
@@ -91,3 +75,7 @@ class SkusController < ApplicationController
   end
 
 end
+
+# def item_params
+#   {title: cond_val(params[:item][:title]), retail: cond_val(params[:item][:retail]), qty: cond_val(params[:item][:qty]), invoice: @invoice}.reject{|k,v| v.blank?}
+# end

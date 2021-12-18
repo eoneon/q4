@@ -6,12 +6,12 @@
         <div class="col-4 ml-0">
           <div class="input-group input-group-sm">
             <%= render "item_fields/label", label: 'skus' %>
-            <%= text_field_tag :skus, nil, placeholder: "enter sku range", class: boot_classes(:input) %>
+            <%= text_field_tag :skus, nil, placeholder: "enter sku range", class: boot_classes(:input, 'required-field') %>
           </div>
         </div>
 
         <div class="col-md-1 offset-md-7">
-          <button class="<%= boot_classes(:submit, 'badge-primary') %>" type="submit">export</button>
+          <button class="<%= boot_classes(:submit, 'badge-primary') %>" type="submit" disabled>export</button>
         </div>
       </div>
     </div>

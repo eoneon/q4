@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-sm navbar-light bg-disabled">
-  <a class="navbar-brand" id="sku">Sku: <%= item.sku %></a>
+  <a class="navbar-brand">Sku: <span id="sku"><%= item.sku %></span></a>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#item-nav">
     <span class="navbar-toggler-icon"></span>
@@ -39,7 +39,7 @@
     <hr>
     <%= render "item_products/forms/search", item: item, inputs: inputs, products: products %>
     <hr>
-    <%= render "items/form", invoice: invoice, item: item, titles: titles %>
+    <%= render "items/edit", invoice: invoice, item: item, titles: titles %>
     <%= render "item_fields/edit", item: item, rows: rows %>
   </div>
 </div>
