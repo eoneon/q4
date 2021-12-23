@@ -1,0 +1,34 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-disabled">
+  <a class="navbar-brand">Supplier: <span id="supplier-name"><%= supplier.supplier_name %></span></a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#supplier-nav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse form-toggle" id="supplier-nav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#edit-supplier-toggle">Edit Supplier</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#new-invoice-toggle">Add Invoice</a>
+      </li>
+    </ul>
+
+  </div>
+  <%= link_to "delete", supplier, method: :delete, class: 'badge badge-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
+</nav>
+
+<div class="pos-f-t">
+  <div class="collapse" id="edit-supplier-toggle" data-parent="#supplier-navbar-forms">
+    <hr>
+    <%= render 'suppliers/edit', supplier: @supplier %>
+  </div>
+</div>
+
+<div class="pos-f-t">
+  <div class="collapse" id="new-invoice-toggle" data-parent="#supplier-navbar-forms">
+    <hr>
+    <%= render 'invoices/new', supplier: @supplier %>
+  </div>
+</div>

@@ -1,10 +1,10 @@
 <h1><%= @invoice.supplier.supplier_name %>: <%= link_to  @invoice.invoice_number, url_for(:back) %></h1>
 
 <div id="search-form">
-  <%= render 'search_items/form', invoice: @invoice, hattrs: @input_group['hattrs'], scope: @input_group['scope'], attrs: @input_group['attrs'] %>
+  <%= render 'search_items/form', invoice: @invoice, inputs: @inputs %>
 </div>
 
-<%= render 'search_items/sku_form', invoice: @invoice %>
+<%#= render 'search_items/sku_form', invoice: @invoice %>
 
 <div id="search-table">
   <%= render 'search_items/index', items: @items %>

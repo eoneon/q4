@@ -45,7 +45,7 @@ module Description
     if sub_hsh.keys.count == 2
       sub_hsh.values.join('/')
     elsif sub_hsh.keys.include?('edition_size')
-      "out of #{k_hsh['edition_size']}"
+      "out of #{sub_hsh['edition_size']}"
     end
   end
 

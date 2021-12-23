@@ -17,6 +17,18 @@ module ApplicationHelper
     }
   end
 
+  # def hattr_inputs(inputs, set, cond=:exclude?)
+  #   inputs.select{|input| set.public_send(cond).(input['input_name'])}
+  # end
+
+  def included_inputs(inputs, *set)
+    inputs.select{|input| set.include?(input['input_name'])}
+  end
+
+  def rejected_inputs(inputs, *set)
+    inputs.select{|input| set.exclude?(input['input_name'])}
+  end
+
   ##############################################################################
 
   def dom_ref(*tags, lev: :type)

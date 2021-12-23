@@ -200,7 +200,7 @@ module ItemProduct
   end
 
   def build_search_tagline(context, store)
-    search_hsh = filtered_params(store, contexts[:search_tagline][:keys], 'tagline_search', 'tagline')
+    search_hsh = filtered_params(store, contexts[:search_tagline][:keys], 'search_tagline', 'tagline')
     search_tagline = update_invoice_tagline(context, search_hsh.keys, search_hsh)
     search_tagline = tagline_punct(context, search_tagline, search_tagline.keys)
     Item.char_limit(search_tagline, contexts[:search_tagline][:set], 115)

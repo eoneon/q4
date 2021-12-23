@@ -32,6 +32,12 @@ class ItemGroup < ApplicationRecord
     origin_item_groups.count
   end
 
+  def self.origins_targets(origins, origin_name, target_name)
+    return origins if origins.none?
+    ids = join_group(origin_name, origins.ids, target_name).pluck(:target_id).uniq
+    ids.any? ? target_name.to_s.classify.constantize.where(id: ids) : []
+  end
+
   def self.join_group(origin_type, origin_ids, target_type)
     where(origin_type: origin_type, origin_id: origin_ids, target_type: target_type).distinct
   end

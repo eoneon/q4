@@ -1,4 +1,7 @@
-$("#new-invoice").replaceWith("<%= j render 'invoices/form', supplier: @supplier %>");
-$("tbody").html("<%= j render 'suppliers/table_body', invoices: @supplier.invoices %>");
-var tab = $("<%= j render 'suppliers/tab', supplier: @supplier %>").addClass("active");
-$("#<%= dom_tag(@supplier, 'tab-item') %>").replaceWith(tab);
+$("#new-invoice").html("<%= j render 'invoices/new', supplier: @supplier %>");
+$("#invoices-table").replaceWith("<%= j render 'invoices/table', supplier: @supplier %>");
+
+// $("#new-invoice").replaceWith("<%= j render 'invoices/form', supplier: @supplier %>");
+// $("tbody").html("<%= j render 'suppliers/table_body', invoices: @supplier.invoices %>");
+// var tab = $("<%= j render 'suppliers/tab', supplier: @supplier %>").addClass("active");
+// $("#<%= dom_tag(@supplier, 'tab-item') %>").replaceWith(tab);

@@ -26,6 +26,8 @@
 
   </div>
   <!-- <a class="badge badge-danger form-control-sm" href="<%#= supplier_invoice_path(invoice) %>" data-method="delete" data-remote="true" data-confirm="Are you sure?">Delete</a> -->
+  <%= link_to invoice.supplier.supplier_name, invoice.supplier, class: 'badge badge-primary mr-2' %>
+  <%= link_to 'item-search', new_invoice_search_item_path(invoice), class: 'badge badge-primary mr-2' %>
   <%= link_to "delete", [invoice.supplier, invoice], method: :delete, class: 'badge badge-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
 </nav>
 

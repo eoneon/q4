@@ -3,15 +3,45 @@
 </div>
 <hr>
 
-<div class="row justify-content-center">
+<nav class="navbar navbar-expand-sm navbar-light bg-disabled">
+  <a class="navbar-brand">Suppliers</a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#supplier-nav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse form-toggle" id="supplier-nav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="collapse" href="#new-supplier-toggle">Add Supplier</a>
+      </li>
+    </ul>
+
+  </div>
+</nav>
+
+<div class="pos-f-t">
+  <div class="collapse" id="new-supplier-toggle" data-parent="#supplier-navbar-forms">
+    <hr>
+    <%= render 'suppliers/new' %>
+  </div>
+</div>
+
+<hr>
+
+<div id="suppliers-table">
+  <%= render 'suppliers/table', suppliers: @suppliers %>
+</div>
+
+<!-- <div class="row justify-content-center">
   <div class="col-4">
     <div class="card">
       <div class="card-header p-1">
-        <%= render 'suppliers/form', supplier: Supplier.new %>
+        <%#= render 'suppliers/form', supplier: Supplier.new %>
       </div>
-      
+
       <div class="card-body p-1">
-      <%= render "suppliers/tab_index", suppliers: @suppliers %>
+      <%#= render "suppliers/tab_index", suppliers: @suppliers %>
       </div>
     </div>
   </div>
@@ -20,4 +50,4 @@
     <div id="show-card">
     </div>
   </div>
-</div>
+</div> -->

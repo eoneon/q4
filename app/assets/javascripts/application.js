@@ -301,7 +301,7 @@ $(document).ready(function(){
 // });
 
 //#SEARCH: handler for submitting search form: on dropdown selection
-// $("body").on("click", ".reset-select", function(){
+// $("body").on("click", ".unselect-select", function(){
 //   var input_name = $(this).attr("data-target");
 //   var form = $(this).closest("form");
 //   $("#items_search_"+input_name+"").val("all");

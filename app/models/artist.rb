@@ -1,5 +1,6 @@
 class Artist < ApplicationRecord
   has_many :item_groups, as: :origin
+  #belongs_to :item, optional: true #, through: :item_groups, source: :target, source_type: "Item"
 
   def formal_name
     [artist_name, life_span].compact.join(' ')
@@ -66,28 +67,6 @@ class Artist < ApplicationRecord
   end
 end
 
-
-# def self.tag_fields
-#   [%w[title body], %w[yob yod]]
-# end
-
-# def self.fields
-#   {years: %w[title body], tag: %w[title body]}
-# end
-
 # def title_tag
 #   tags.try(:[], 'title_tag')
-# end
-
-# def yod
-#   v = tags.try(:[], 'yod')
-#   "(d.#{v})" if v.present?
-# end
-
-# def search_line
-#   [tags.try(:[], 'last_name'), yod].compact.join(' ')
-# end
-
-# def artist_params
-#   {'tagline'=> tagline, 'search_line'=> search_line, 'body'=> formal_name, 'export_tag'=> artist_name}
 # end

@@ -9,9 +9,6 @@ Rails.application.routes.draw do
     resources :items, except: [:index]
     resources :export_skus, only: [:create]
     resources :skus, only: [:new,:create, :update] do
-      # member do
-      #   post :batch_destroy
-      # end
       collection do
         post :batch_destroy
       end

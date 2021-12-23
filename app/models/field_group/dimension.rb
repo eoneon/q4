@@ -123,7 +123,7 @@ class Dimension
   end
 
   def transfer_description_vals(k, hsh, attrs, store)
-    slice_and_transfer(h: hsh, h2: store, keys: %w[tagline invoice_tagline tagline_search body], k: k)
+    slice_and_transfer(h: hsh, h2: store, keys: %w[tagline invoice_tagline search_tagline body], k: k)
     slice_and_transfer(h: hsh, h2: attrs, keys: ['mounting_search'])
   end
 

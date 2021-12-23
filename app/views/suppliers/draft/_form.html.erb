@@ -1,0 +1,17 @@
+<%= form_with model: Supplier.new, id: "new-supplier" do |f| %>
+<div class="form">
+  <div class="card bg-gray-d p-0 mb-1">
+    <div class="form-row pl-1 ml-0 mb-2">
+      <div class="col-3 pt-2">
+        <div class="input-group input-group-sm">
+          <%= render "item_fields/label", label: 'name' %>
+          <%= f.text_field :supplier_name, class: boot_classes(:input) %>
+        </div>
+      </div>
+
+      <div class="col-md-1 offset-md-8 pt-2 pr-3">
+        <button class="<%= boot_classes(:submit, 'badge-primary') %>" type="submit">edit</button>
+      </div>
+    </div>
+  </div>
+<% end %>

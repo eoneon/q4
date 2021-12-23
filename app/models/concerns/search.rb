@@ -48,10 +48,6 @@ module Search
       default_set==:all ? results_or_self.all : []
     end
 
-    def default_results(results_or_self, default_set)
-      default_set==:all ? results_or_self.all : []
-    end
-
     # filtering search: uniq/order ############################################# uniq_search uniq_hattr_search
     # uniq #####################################################################
     def uniq_hattrs(results, keys, hstore, running_list=[])
@@ -59,19 +55,27 @@ module Search
     end
 
     def assign_unique(i, keys, hstore, running_list, uniq_set)
-      comparison_hsh = filtered_hsh(h: i.public_send(hstore), keys: keys)
+      comparison_hsh = hstore_tags(i, hstore, keys)
       return if running_list.include?(comparison_hsh)
       running_list << comparison_hsh
       uniq_set << i
     end
+    #new test methods ####################################################################
+    def hstore_tags(obj, hstore, keys)
+      keys.each_with_object({}) {|k,h| h[k] = obj.public_send(hstore).dig(k)}
+    end
 
+    def uniq_results(results, hstore, keys)
+      results.delete{|i| i.id != id && hstore_tags(i, hstore, keys).all?{|k,v| public_send(hstore).dig(k) == v}}
+    end
+    #####################################################################
     # sort #####################################################################
     def order_search(results, sort_keys, hstore)
       results.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
     end
 
     def order_hstore_search(results, sort_keys, hstore)
-      results.order(order_hstore_query(sort_keys,hstore))
+      results.any? ? results.order(order_hstore_query(sort_keys,hstore)) : results
     end
 
     def sort_value(val)
@@ -126,6 +130,14 @@ module Search
 
     def search_input(k, v, results, hstore)
       {'input_name'=> k, 'selected'=> v, 'opts'=> results.pluck(hstore).pluck(k).uniq.compact}
+    end
+
+    def origins_targets_inputs(target, origin_name, target_name, results, inputs)
+      inputs[target_name.underscore] = {'selected'=> target.try(:id), 'opts'=> origins_targets_opts(results, origin_name, target_name)}
+    end
+
+    def origins_targets_opts(results, origin_name, target_name)
+      results.any? ? ItemGroup.origins_targets(results, origin_name, target_name) : target_name.to_s.classify.constantize.all
     end
 
     def default_params(params, keys)

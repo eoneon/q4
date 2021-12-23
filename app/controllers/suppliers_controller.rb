@@ -5,10 +5,6 @@ class SuppliersController < ApplicationController
 
   def show
     @supplier = Supplier.find(params[:id])
-    respond_to do |format|
-      format.js
-      format.html
-    end
   end
 
   def create

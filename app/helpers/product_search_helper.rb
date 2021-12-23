@@ -13,9 +13,10 @@ module ProductSearchHelper
   end
 
   def search_label(input_name)
-    input_name.sub('_search','')
+    label = input_name.sub('_search','')
+    label.sub('measurements','measures')
   end
-  
+
   def edit_name(name)
     name = [['Standard',''], ['On ', 'on '], ['One Of A Kind', 'One-of-a-Kind'], ['Of One', ' 1/1']].each_with_object(name) do |word_set|
       name.sub!(word_set[0], word_set[1])

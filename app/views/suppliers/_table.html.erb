@@ -3,8 +3,8 @@
   </thead>
 
   <tbody>
-    <% invoice.items.order(:sku).each do |item| %>
-      <%= render 'items/invoice_card', item: item %>
+    <% suppliers.order(:supplier_name).each do |supplier| %>
+      <%= render 'suppliers/supplier', supplier: supplier %>
     <% end %>
   </tbody>
 </table>

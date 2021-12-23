@@ -20,6 +20,39 @@ class Item < ApplicationRecord
   has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
+  ##############################################################################
+  def self.item_search(product:nil, artist:nil, title: nil, hattrs:nil, hstore:'csv_tags', inputs:{})
+    hattrs = hattr_params(product, hattrs, hstore)
+    results_or_self = search_case(artist, product)
+    results_or_self = title_search(results_or_self, title)
+    results = hstore_cascade_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, [])
+    results = order_hstore_search(results, %w[search_tagline item_size], hstore)
+    a, b = uniq_hattrs(results, search_keys, hstore), form_inputs(product, artist, title, hattrs, results, hstore, inputs)
+  end
+
+  def self.form_inputs(product, artist, title, hattrs, results, hstore, inputs)
+    origins_targets_inputs(product, 'Item', 'Product', results, inputs)
+    origins_targets_inputs(artist, 'Item', 'Artist', results, inputs)
+    inputs['title'] = {'selected' => title, 'opts'=> (results.any? ? results.pluck(:title).uniq : results)}
+    results, hstore = results.any? ? [results, hstore] : [Product, 'tags']
+    inputs['hattrs'] = search_inputs(results, hattrs, hstore)
+    inputs
+  end
+
+  def self.search_case(artist, product)
+    case
+      when artist && product; artist.product_items(product)
+      when artist; artist.items
+      when product; product.items
+      when !artist && !product; self
+    end
+  end
+
+  def self.title_search(results_or_self, title)
+    title.blank? ? results_or_self : results_or_self.where(title: title)
+  end
+  ##############################################################################
+
   def batch_create_skus(skus, sku_params, artist, product, product_args)
     skus.each do |sku|
       sku_params[:sku] = sku
@@ -28,14 +61,6 @@ class Item < ApplicationRecord
       i.add_sku(product, product_args, sku) if product
     end
   end
-  ##############################################################################
-  # def batch_create_skus(invoice, product, product_args, artist, skus)
-  #   skus.each do |sku|
-  #     i = Item.create(sku: sku, qty: 1, invoice: invoice)
-  #     i.add_obj(artist) if artist
-  #     i.add_sku(product, product_args, sku) if product
-  #   end
-  # end
 
   def add_sku(product, product_args, sku)
     add_obj(product)
@@ -102,11 +127,11 @@ class Item < ApplicationRecord
   end
 
   def self.table_keys
-    %w[search_tagline mounting_search measurements]
+    %w[tagline_search mounting_search measurements]
   end
 
   def self.search_keys
-    %w[title category_search medium_search material_search mounting_search measurements] #item_size
+    %w[category_search medium_search material_search mounting_search measurements] #measurements item_size
   end
 
   def self.artist_items(artist_id)
