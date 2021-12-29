@@ -1,2 +1,4 @@
-$("#search-items").html("<%= j render 'search_items/form', invoice: @invoice, items: @items, hattrs: @input_group['hattrs'], scope: @input_group['scope'] %>");
-$("#search-table").html("<%= j render 'search_items/index', items: @items %>");
+// $("#search-items").html("<%= j render 'search_items/form', invoice: @invoice, items: @items, hattrs: @input_group['hattrs'], scope: @input_group['scope'] %>");
+// $("#search-table").html("<%= j render 'search_items/index', items: @items %>");
+$("#search-items").html("<%= j render 'search_items/search', invoice: @invoice, inputs: @inputs %>");
+$("#search-table").replaceWith("<%= j render 'search_items/table', items: @items %>");

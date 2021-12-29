@@ -22,7 +22,7 @@
     </ul>
   </div>
 
-  <%= link_to item.invoice.invoice_number, invoice, class: 'badge badge-primary mr-2' %>
+  <%= link_to item.invoice.invoice_number, [invoice.supplier, invoice], class: 'badge badge-primary mr-2' %>
   <%= link_to item.invoice.supplier.supplier_name, invoice.supplier, class: 'badge badge-primary mr-2' %>
   <%= link_to "delete", [invoice, item], method: :delete, class: 'badge badge-danger form-control-sm', data: { confirm: 'Are you sure?' } %>
 

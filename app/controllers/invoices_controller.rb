@@ -40,13 +40,10 @@ class InvoicesController < ApplicationController
 
   def destroy
     @invoice = Invoice.find(params[:id])
+    @supplier = @invoice.supplier
 
     if @invoice.destroy
-      flash[:notice] = "\"#{@invoice.name}\" was deleted successfully."
-      redirect_to @invoice.supplier
-    else
-      flash.now[:alert] = "There was an error deleting the invoice."
-      render :show
+      redirect_to @supplier
     end
   end
 

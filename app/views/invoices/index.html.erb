@@ -3,13 +3,6 @@
 </div>
 <hr>
 
-<table class="table table-striped table-hover">
-  <thead>
-    <th>Invoices Name</th>
-  </thead>
-  <tbody>
-    <% @invoices.each do |invoice| %>
-      <%= render 'invoices/table_row', invoice: invoice %>
-    <% end %>
-  </tbody>
-</table>
+<div id="invoices-table">
+  <%= render 'invoices/table', invoices: @invoices %>
+</div>

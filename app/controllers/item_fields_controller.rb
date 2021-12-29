@@ -9,6 +9,7 @@ class ItemFieldsController < ApplicationController
     @rows, attrs = @item.input_group
     @item.update_csv_tags(attrs)
     @titles = titles(@item.artist)
+    
     respond_to do |format|
       format.js
     end

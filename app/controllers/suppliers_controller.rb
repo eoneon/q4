@@ -10,6 +10,7 @@ class SuppliersController < ApplicationController
   def create
     @supplier = Supplier.new(supplier_params)
     @supplier.save
+    @suppliers = Supplier.all.order(supplier_name: 'asc')
 
     respond_to do |format|
       format.js

@@ -1,2 +1,2 @@
-$("#new-supplier").replaceWith("<%= j render 'suppliers/form' %>");
-$("#tab-index").prepend("<%= j render 'suppliers/tab', supplier: @supplier %>");
+$("#new-supplier").html("<%= j render 'suppliers/new' %>");
+$("#suppliers-table").replaceWith("<%= j render 'suppliers/table', suppliers: @suppliers %>");

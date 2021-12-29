@@ -95,4 +95,8 @@ module Crudable
     to_class(target_type).find(target_id)
   end
 
+  def hsh_init(tags)
+    tags ? tags : {}
+  end
+
 end

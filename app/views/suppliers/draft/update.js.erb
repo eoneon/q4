@@ -1,0 +1,2 @@
+$("#show-card").html("<%= j render 'suppliers/show', supplier: @supplier %>");
+$("#<%= dom_tag(@supplier, 'tab-item') %>").find(".item-name").text("<%= @supplier.supplier_name %>");

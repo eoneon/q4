@@ -1,0 +1,15 @@
+<div class="row justify-content-center">
+  <h1><%= @invoice.supplier.supplier_name %>: <%= link_to  @invoice.invoice_number, url_for(:back) %></h1>
+</div>
+
+<div id="search-form">
+  <%= render 'search_items/search', invoice: @invoice, inputs: @inputs %>
+</div>
+<hr>
+
+<%= render 'search_items/form', invoice: @invoice %>
+<%= render 'skus/new', invoice: @invoice %>
+
+<div id="search-table">
+  <%= render 'search_items/table', items: @items %>
+</div>

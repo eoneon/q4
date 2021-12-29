@@ -1,0 +1,13 @@
+<table class="table table-sm table-striped table-hover">
+  <thead>
+    <tr>
+      <% Item.search_keys.each do |k| %>
+        <th scope="<%="#{search_tags[k]['col']}"%>"><span class="fs-s"><%= search_tags[k]['label'] %></span></th>
+      <% end %>
+    </tr>
+  </thead>
+
+  <tbody id="search-table">
+    <%= render 'search_items/table_body', items: items %>
+  </tbody>
+</table>

@@ -3,7 +3,7 @@
   </thead>
 
   <tbody>
-    <% supplier.invoices.order(:invoice_number).each do |invoice| %>
+    <% invoices.order(:invoice_number).each do |invoice| %>
       <%= render 'invoices/invoice', invoice: invoice %>
     <% end %>
   </tbody>

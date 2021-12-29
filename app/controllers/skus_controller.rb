@@ -59,7 +59,7 @@ class SkusController < ApplicationController
   end
 
   def item_params
-    {title: cond_val(params[:item][:title]), invoice: @invoice}.reject{|k,v| v.blank?}
+    {title: cond_val(params[:item][:title]), retail: cond_val(params[:item][:retail]), qty: cond_val(params[:item][:qty]), invoice: @invoice}.reject{|k,v| v.blank?}
   end
 
   def product_args(product)
@@ -75,7 +75,3 @@ class SkusController < ApplicationController
   end
 
 end
-
-# def item_params
-#   {title: cond_val(params[:item][:title]), retail: cond_val(params[:item][:retail]), qty: cond_val(params[:item][:qty]), invoice: @invoice}.reject{|k,v| v.blank?}
-# end

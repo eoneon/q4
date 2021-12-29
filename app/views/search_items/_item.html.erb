@@ -1,0 +1,9 @@
+<button type="button" class="list-group-item list-group-item-action py-1" id="<%= item.id %>" data-toggle="list" data-form="#new-skus" data-field="#item_id" role="tab">
+  <div class="row">
+    <% search_cols(item.csv_tags).each do |params| %>
+      <div class="<%= "#{params['col']}" %>">
+        <span class="fs-s"><%= params['table-data'] %></span>
+      </div>
+    <% end %>
+  </div>
+</button>

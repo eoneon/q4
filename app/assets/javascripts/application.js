@@ -130,42 +130,49 @@ $(document).ready(function(){
     $(inputGroupData($(this), "data-form")).submit();
   });
 
-  //CRUD SHOW: used with aside tabs, see: suppliers/index
-  $("body").on("click", "#tab-index a.list-group-item", function(e){
-    var item_id = '#'+$(this).attr("id");
-    var item_card_id = item_id.replace("tab-item", "show");
-    var show_card = $('#show-card > .card');
-    if ($(show_card).length && '#'+$(show_card).attr('id') == item_card_id){
-      e.stopPropagation();
-      e.preventDefault();
-      $(item_card_id).remove();
-      $(item_id).removeClass("active");
-    }
+  $("body").on("click", ".list-group-item", function(e){
+    var new_id = $(this).attr("id");
+    var input = $($(this).attr("data-form")).find($($(this).attr("data-field")));
+    toggleSet(input, new_id, $(input).val());
+    toggleTab(new_id, e);
   });
+
+  //CRUD SHOW: used with aside tabs, see: suppliers/index
+  // $("body").on("click", "#tab-index a.list-group-item", function(e){
+  //   var item_id = '#'+$(this).attr("id");
+  //   var item_card_id = item_id.replace("tab-item", "show");
+  //   var show_card = $('#show-card > .card');
+  //   if ($(show_card).length && '#'+$(show_card).attr('id') == item_card_id){
+  //     e.stopPropagation();
+  //     e.preventDefault();
+  //     $(item_card_id).remove();
+  //     $(item_id).removeClass("active");
+  //   }
+  // });
 
   //CRUD SHOW SEARCH: not sure if using these 3
-  $("body").on("change", ".artist-search", function(){
-    var v = $(this).val();
-    if (v.length) {
-      $(this).closest("form").submit();
-    } else {
-      $('#show-card > .card').remove();
-    }
-  });
+  // $("body").on("change", ".artist-search", function(){
+  //   var v = $(this).val();
+  //   if (v.length) {
+  //     $(this).closest("form").submit();
+  //   } else {
+  //     $('#show-card > .card').remove();
+  //   }
+  // });
 
-  $("body").on("click", ".dropdown a.field-toggle", function(){
-    var target = $(this).attr("href");
-    if ($(target).hasClass("show")){
-      $(target).toggleClass("show collapse");
-    } else {
-      $(target).closest(".toggle-field-group").find(".toggle-field.show").toggleClass("show collapse");
-      $(target).toggleClass("show collapse");
-    }
-  });
-
-  $("body").on("click", ".collapse-field-btn", function(){
-    $(this).closest(".toggle-field").toggleClass("show collapse");
-  });
+  // $("body").on("click", ".dropdown a.field-toggle", function(){
+  //   var target = $(this).attr("href");
+  //   if ($(target).hasClass("show")){
+  //     $(target).toggleClass("show collapse");
+  //   } else {
+  //     $(target).closest(".toggle-field-group").find(".toggle-field.show").toggleClass("show collapse");
+  //     $(target).toggleClass("show collapse");
+  //   }
+  // });
+  //
+  // $("body").on("click", ".collapse-field-btn", function(){
+  //   $(this).closest(".toggle-field").toggleClass("show collapse");
+  // });
 
   // click/change -> set target field
   function toggleInputVal(inputs, value) {
@@ -189,14 +196,22 @@ $(document).ready(function(){
     }
   }
 
-  function toggleAttr(new_id, old_id) {
-    if (new_id == old_id){
-      var id = "";
-    } else {
-      var id = new_id;
-    }
-    return id
+  function toggleSet(input, new_id, old_id) {
+    $(input).val(toggleVal(new_id, old_id));
   }
+
+  function toggleVal(new_id, old_id) {
+    return new_id == old_id ? "" : new_id
+  }
+
+  // function toggleAttr(new_id, old_id) {
+  //   if (new_id == old_id){
+  //     var id = "";
+  //   } else {
+  //     var id = new_id;
+  //   }
+  //   return id
+  // }
 
   $(function(e) {
     var artist_id = $('#hidden_artist_id').val();
