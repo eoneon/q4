@@ -45,6 +45,10 @@
    background: #e9ecef !important;
  }
  //set width of bootstrap dropdown to length of longest selection
+ .sku-span{
+   display: inline-block;
+   width: 30px //!important;
+ }
  .type-label{
    min-width: 10px !important;
  }

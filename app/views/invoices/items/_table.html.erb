@@ -1,0 +1,10 @@
+<table class="table table-sm table-striped table-hover">
+  <thead>
+  </thead>
+
+  <tbody>
+    <% invoice.items.order(:sku).each do |item| %>
+      <%= render 'invoices/items/item', item: item %>
+    <% end %>
+  </tbody>
+</table>
