@@ -34,6 +34,30 @@ class Item < ApplicationRecord
     public_send(hstore).dig(k) unless !public_send(hstore)
   end
 
+  ##############################################################################
+
+  def sku_pos
+    invoice.skus.index(self)
+  end
+
+  def first_sku
+    invoice.first_sku
+  end
+
+  def last_sku
+    invoice.last_sku
+  end
+
+  def next_sku
+    invoice.skus[sku_pos+1]
+  end
+
+  def prev_sku
+    invoice.skus[sku_pos-1]
+  end
+
+  ##############################################################################
+
   def tagline_title
     "\"#{self.title}\"" unless self.title.blank?
   end
@@ -45,6 +69,8 @@ class Item < ApplicationRecord
   def attrs_title
     tagline_title ? tagline_title : 'Untitled'
   end
+  
+  ##############################################################################
 
   class << self
 

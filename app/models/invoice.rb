@@ -7,6 +7,24 @@ class Invoice < ApplicationRecord
   end
 
   def display
-    "#{invoice_name}: #{invoice_number}" #if invoice.present?
+    "#{invoice_name}: #{invoice_number}" 
+  end
+
+  ##############################################################################
+
+  def skus
+    items.order(:sku)
+  end
+
+  def first_sku
+    skus.first
+  end
+
+  def last_sku
+    skus.last
+  end
+
+  def sku_count
+    skus.count
   end
 end

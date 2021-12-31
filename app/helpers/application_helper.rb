@@ -17,10 +17,6 @@ module ApplicationHelper
     }
   end
 
-  # def hattr_inputs(inputs, set, cond=:exclude?)
-  #   inputs.select{|input| set.public_send(cond).(input['input_name'])}
-  # end
-
   def included_inputs(inputs, *set)
     inputs.select{|input| set.include?(input['input_name'])}
   end
@@ -74,3 +70,7 @@ module ApplicationHelper
   end
 
 end
+
+# def hattr_inputs(inputs, set, cond=:exclude?)
+#   inputs.select{|input| set.public_send(cond).(input['input_name'])}
+# end
