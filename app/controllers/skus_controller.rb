@@ -8,6 +8,17 @@ class SkusController < ApplicationController
     end
   end
 
+  def show
+    @item = Item.find(params[:id])
+    @products, @inputs = Product.search(scope: @item.product)
+    @titles = titles(@item.artist)
+    @rows, attrs = @item.input_group
+    
+    respond_to do |format|
+      format.js
+    end
+  end
+
   def search
     @invoice = Invoice.find(params[:invoice_id])
     product = cond_find(Product, params[:item][:product_id])

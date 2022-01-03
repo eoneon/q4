@@ -6,14 +6,14 @@
         <div class="card-header border-0 bg-transparent pt-1 pb-1 pl-0 pr-0">
           <div class="form-row">
             <% card[:header].each do |f_hsh| %>
-              <%= render "item_fields/form_row", f: f, f_hsh: f_hsh, card_id: card_id, card: card, i: f_hsh[:i], context: 'header' %>
+              <%= render "item_fields/form_row", f: f, f_hsh: f_hsh, card_id: dom_ref(:show, card_id), card: card, i: f_hsh[:i], context: 'header' %>
             <% end %>
           </div>
         </div>
         <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-gray-d border border-white border-top-0 rounded-bottom collapse">
           <div class="form-row">
             <% card[:body].each do |f_hsh| %>
-              <%= render "item_fields/form_row", f: f, f_hsh: f_hsh, card_id: card_id, card: card, i: f_hsh[:i], context: 'body' %>
+              <%= render "item_fields/form_row", f: f, f_hsh: f_hsh, card_id: dom_ref(:show, card_id), card: card, i: f_hsh[:i], context: 'body' %>
             <% end %>
           </div>
         </div>

@@ -18,17 +18,13 @@
 
 $(document).ready(function(){
 
-  $("body").on("click", ".caret-toggle", function(){
-    var id = $(this).attr("id");
-    $(this).find("i").toggleClass("fa-caret-right fa-caret-down");
-    $(this).closest(".card").find(".card-body").toggleClass("show collapse");
-    if ($(this).find("i").hasClass("fa-caret-down")){
-      $("#caret-id").val(id);
-      $(this).closest(".card").siblings().find("i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
-      $(this).closest(".card").siblings().find(".card-body.show").toggleClass("show collapse");
-    } else{
-      $("#caret-id").val("");
-    }
+  $("body").on("click", ".caret-toggle", function(e){
+    var card = $(this).closest(".card");
+    var action = $(this).find("i").hasClass("fa-caret-down") ? 'collapse' : 'show'
+    var context = sliceTag($(this).attr("id"), 0);
+    if (context=='index') {showActionToggle(action, card);};
+    if (context=='show') {toggleVal(sliceTag($(this).attr("id"), -1), $("#caret-id").val());};
+    caretToggle($(this).find("i"), card, $(card).find(".card-body"), action);
   });
 
   // COLLAPSE/SHOW TOGGLE fn
@@ -40,10 +36,6 @@ $(document).ready(function(){
       $(this).addClass("active");
     }
   });
-
-  // $("#edit-item-toggle").on("hide.bs.collapse", function(){
-  //   $("a[href='#edit-item-toggle']").removeClass("active");
-  // });
 
   $("body").on("keyup", ".required-field", function(){
     var val = $(this).val();
@@ -137,43 +129,6 @@ $(document).ready(function(){
     toggleTab(new_id, e);
   });
 
-  //CRUD SHOW: used with aside tabs, see: suppliers/index
-  // $("body").on("click", "#tab-index a.list-group-item", function(e){
-  //   var item_id = '#'+$(this).attr("id");
-  //   var item_card_id = item_id.replace("tab-item", "show");
-  //   var show_card = $('#show-card > .card');
-  //   if ($(show_card).length && '#'+$(show_card).attr('id') == item_card_id){
-  //     e.stopPropagation();
-  //     e.preventDefault();
-  //     $(item_card_id).remove();
-  //     $(item_id).removeClass("active");
-  //   }
-  // });
-
-  //CRUD SHOW SEARCH: not sure if using these 3
-  // $("body").on("change", ".artist-search", function(){
-  //   var v = $(this).val();
-  //   if (v.length) {
-  //     $(this).closest("form").submit();
-  //   } else {
-  //     $('#show-card > .card').remove();
-  //   }
-  // });
-
-  // $("body").on("click", ".dropdown a.field-toggle", function(){
-  //   var target = $(this).attr("href");
-  //   if ($(target).hasClass("show")){
-  //     $(target).toggleClass("show collapse");
-  //   } else {
-  //     $(target).closest(".toggle-field-group").find(".toggle-field.show").toggleClass("show collapse");
-  //     $(target).toggleClass("show collapse");
-  //   }
-  // });
-  //
-  // $("body").on("click", ".collapse-field-btn", function(){
-  //   $(this).closest(".toggle-field").toggleClass("show collapse");
-  // });
-
   // click/change -> set target field
   function toggleInputVal(inputs, value) {
     var val = value.length ? value : ""
@@ -204,15 +159,55 @@ $(document).ready(function(){
     return new_id == old_id ? "" : new_id
   }
 
-  // function toggleAttr(new_id, old_id) {
-  //   if (new_id == old_id){
-  //     var id = "";
-  //   } else {
-  //     var id = new_id;
-  //   }
-  //   return id
-  // }
+  //toggle current caret-icon & card-body ######################################
+  function caretToggle(caret_icon, card, card_body, action) {
+    toggleCard(caret_icon, card, card_body);
+    toggleCardSiblings(card, action);
+  }
+  function toggleCard(caret, card, card_body) {
+    toggleCaret(caret);
+    toggleCardBody(card_body);
+  }
+  function toggleCaret(caret) {
+    $(caret).toggleClass("fa-caret-right fa-caret-down");
+  }
+  function toggleCardBody(card_body) {
+    $(card_body).toggleClass("show collapse");
+  }
 
+  //toggle sibling caret-icons down & collapse their card-bodies ###############
+  function toggleCardSiblings(card, action) {
+    if (action=='show') closeHideCardSiblings(card);
+  }
+  function closeHideCardSiblings(card) {
+    closeCaretSiblings(card);
+    hideCardSiblings(card);
+  }
+  function closeCaretSiblings(card) {
+    $(card).siblings().find("i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
+  }
+  function hideCardSiblings(card) {
+    $(card).siblings().find(".card-body.show").toggleClass("show collapse");
+  }
+
+  //toggle#show HTTP get item & remove sibling items ###########################
+  function showActionToggle(action, card) {
+    if (action=='show'){
+      $(card).find("a.show-body").click();
+      removeCardSiblings(card);
+    } else {
+      $(card).find(".card-body > div").empty();
+    }
+  }
+  function removeCardSiblings(card) {
+    $(card).siblings().find(".card-body > div").empty();
+  }
+  //utilities ##################################################################
+  function sliceTag(attr, i) {
+    return attr.split('-')[i]
+  }
+
+  //end ########################################################################
   $(function(e) {
     var artist_id = $('#hidden_artist_id').val();
     if (artist_id != undefined && artist_id.length){
@@ -223,6 +218,47 @@ $(document).ready(function(){
 });
 
 // not using:
+
+// $("#edit-item-toggle").on("hide.bs.collapse", function(){
+//   $("a[href='#edit-item-toggle']").removeClass("active");
+// });
+
+// CRUD SHOW: used with aside tabs, see: suppliers/index
+// $("body").on("click", "#tab-index a.list-group-item", function(e){
+//   var item_id = '#'+$(this).attr("id");
+//   var item_card_id = item_id.replace("tab-item", "show");
+//   var show_card = $('#show-card > .card');
+//   if ($(show_card).length && '#'+$(show_card).attr('id') == item_card_id){
+//     e.stopPropagation();
+//     e.preventDefault();
+//     $(item_card_id).remove();
+//     $(item_id).removeClass("active");
+//   }
+// });
+//
+// CRUD SHOW SEARCH: not sure if using these 3
+// $("body").on("change", ".artist-search", function(){
+//   var v = $(this).val();
+//   if (v.length) {
+//     $(this).closest("form").submit();
+//   } else {
+//     $('#show-card > .card').remove();
+//   }
+// });
+
+// $("body").on("click", ".dropdown a.field-toggle", function(){
+//   var target = $(this).attr("href");
+//   if ($(target).hasClass("show")){
+//     $(target).toggleClass("show collapse");
+//   } else {
+//     $(target).closest(".toggle-field-group").find(".toggle-field.show").toggleClass("show collapse");
+//     $(target).toggleClass("show collapse");
+//   }
+// });
+//
+// $("body").on("click", ".collapse-field-btn", function(){
+//   $(this).closest(".toggle-field").toggleClass("show collapse");
+// });
 
 // function toggleHttp(new_id, old_id) {
 //   if (old_id.length == 0) {

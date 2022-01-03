@@ -1,10 +1,10 @@
-<div class="card p-1 mb-1 bg-light border-0" id="<%= dom_ref(item, :card) %>">
-
+<div class="card p-1 mb-1 bg-light border-0" id="<%= dom_ref(:card, item) %>">
+  <a href="<%= invoice_sku_path(item.invoice, item) %>" data-remote="true" class="show-body collapse" type="button"></a>
   <div class="card-header bg-transparent border-0 pt-0 pb-0 pr-0 mr-0">
     <div class="row align-items-center">
 
       <div class="col-auto border-0 ml-0 px-0 mr-1">
-        <%= render "invoices/items/caret", card_id: dom_ref(item, :caret), body: true, i: 0, context: 'header' %>
+        <%= render "invoices/items/caret", card_id: dom_ref(:index, item), body: true, i: 0, context: 'header' %>
         <a href="<%= invoice_item_path(item.invoice, item) %>" class="btn btn-sm btn-link border-0 pl-0 ml-1" type="button">
           <span class="fs-s sku-span"><%= item.sku %></span>
         </a>
@@ -16,7 +16,7 @@
   </div>
 
   <div class="card-body pt-2 pb-1 pl-0 bg-light rounded border border-light-gray border-right-0 border-left-0 border-bottom-0 collapse">
-    <div class="row">
+    <div class="row" id="<%= dom_ref(:body, item) %>">
     </div>
   </div>
 
