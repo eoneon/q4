@@ -1,11 +1,11 @@
 <%= form_with model: item, url: search_item_products_path, method: :get, id: 'search-item-product' do |f| %>
   <div class="form">
-    <div class="card bg-gray-d p-1 mb-1">
+    <div class="card bg-light-blue p-1 mb-1">
       <%= number_field_tag :id, item.id, class: "collapse" %>
-
+  
       <div class="form-row px-2">
         <% inputs.each do |input| %>
-          <div class="col-4 border-light-gray p-1">
+          <div class="col-3 border-light-gray p-1">
             <div class="input-group input-group-sm" data-form="#search-item-product">
               <%= render 'item_products/forms/search_group', scope: 'search', input_name: input['input_name'], opts: input['opts'], selected: input['selected'] %>
             </div>

@@ -20,13 +20,6 @@ class SearchItemsController < ApplicationController
     artist = cond_find(Artist, params[:item][:artist_id])
     item.batch_dup_skus(skus, item_params, artist) if skus
     @results, @inputs = Product.invoice_search
-
-    #redirect_to "/supplier/#{@invoice.supplier.id}/invoices/#{@invoice.id}"
-    #back #[@invoice.supplier, @invoice]
-
-    # respond_to do |format|
-    #   format.html {render "/supplier/#{@invoice.supplier.id}/invoices/#{@invoice.id}"}
-    # end
   end
 
   private
@@ -56,6 +49,13 @@ end
 # respond_to do |format|
 #   #format.html {render file: "/invoices/search.html.erb"}
 #   format.html {render file: "/search_items/show.html.erb"}
+# end
+
+#redirect_to "/supplier/#{@invoice.supplier.id}/invoices/#{@invoice.id}"
+#back #[@invoice.supplier, @invoice]
+
+# respond_to do |format|
+#   format.html {render "/supplier/#{@invoice.supplier.id}/invoices/#{@invoice.id}"}
 # end
 
 # def index

@@ -29,12 +29,7 @@ $(document).ready(function(){
 
   // COLLAPSE/SHOW TOGGLE fn
   $("body").on("click", ".form-toggle a", function(){
-    if ($(this).hasClass("active")){
-      $(this).removeClass("active");
-    } else {
-      $(this).closest(".form-toggle").find("a").removeClass("active");
-      $(this).addClass("active");
-    }
+    toggleActive($(this), ".form-toggle");
   });
 
   $("body").on("keyup", ".required-field", function(){
@@ -74,12 +69,11 @@ $(document).ready(function(){
   });
 
   $("body").on("change", "#artist-search, #product-search", function(){
-    var id = $(this).val();
-    var input = "."+$(this).attr("id").split("-")[0]+"_id"
-    toggleInputVal($("#new-skus, #new-title").find(input), id);
+    var input = "."+sliceTag($(this).attr("id"), 0)+"_id"
+    toggleInputVal($(this).closest("form").parent().find(input), $(this).val());
     $("#new-title").submit();
   });
-
+  
   $("body").on("change", "#title-select", function(){
     var title = $(this).val();
     $("#title-text").val(title);
@@ -196,17 +190,25 @@ $(document).ready(function(){
       $(card).find("a.show-body").click();
       removeCardSiblings(card);
     } else {
-      $(card).find(".card-body > div").empty();
+      $(card).find(".card-body").empty();
     }
   }
   function removeCardSiblings(card) {
-    $(card).siblings().find(".card-body > div").empty();
+    $(card).siblings().find(".card-body").empty();
   }
   //utilities ##################################################################
   function sliceTag(attr, i) {
     return attr.split('-')[i]
   }
 
+  function toggleActive(a, parent) {
+    if (a.hasClass("active")){
+      $(a).removeClass("active");
+    } else {
+      $(a).closest(parent).find("a.active").removeClass("active");
+      $(a).addClass("active");
+    }
+  }
   //end ########################################################################
   $(function(e) {
     var artist_id = $('#hidden_artist_id').val();

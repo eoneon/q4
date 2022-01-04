@@ -5,10 +5,13 @@
 <div id="search-form">
   <%= render 'search_items/search', invoice: @invoice, inputs: @inputs %>
 </div>
+
 <hr>
 
-<%= render 'search_items/form', invoice: @invoice %>
-<%= render 'skus/new', invoice: @invoice %>
+<div>
+  <%= render 'search_items/form', invoice: @invoice %>
+  <%= render 'skus/new', invoice: @invoice %>
+</div>
 
 <div id="search-table">
   <%= render 'search_items/table', items: @items %>

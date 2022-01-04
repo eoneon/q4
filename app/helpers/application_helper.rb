@@ -20,7 +20,7 @@ module ApplicationHelper
       label: %w[kind-label bg-gray-c border border-gray-b rounded-left-border-md border-right-0 text-info fs-xs font-weight-light pt-2 pl-1 pr-0],
       input: %w[form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0],
       search_label: %w[fs-xs font-weight-light text-secondary pt-2 pr-1 search-label],
-      reset_btn: %w[btn btn-sm btn-outline-secondary border-light-gray rounded-left-border border-right-0 text-sm font-weight-light],
+      reset_btn: %w[btn btn-sm bg-gray-d border-light-gray rounded-left-border border-right-0 text-sm font-weight-light],
       search_input: %w[form-control bg-gray-d border-light-gray rounded-right-border border-left-0]
     }
   end

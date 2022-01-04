@@ -157,7 +157,7 @@ class Product < ApplicationRecord
     end
 
     def search_keys
-      %w[category_search medium_search material_search]
+      %w[category_search medium_search] #material_search
     end
     # SEEDING METHODS ##########################################################
     def seed(store)
