@@ -1,4 +1,3 @@
-//$("#item-products-index").replaceWith("<%= j render 'item_products/index', item: @item, products: @products %>");
-$("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
-$("#edit-item").html("<%= j render 'items/edit', invoice: @item.invoice, item: @item %>");
-$("#search-item-product").html("<%= j render 'item_products/forms/search', item: @item, inputs: @inputs %>");
+$("#<%= dom_ref('edit-item-fields', @item) %>").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
+$("#<%= dom_ref('edit-item', @item) %>").html("<%= j render 'items/edit', invoice: @item.invoice, item: @item %>");
+$("#<%= dom_ref('search-item-product', @item) %>").html("<%= j render 'item_products/forms/search', item: @item, inputs: @inputs %>");

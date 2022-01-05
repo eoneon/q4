@@ -1,0 +1,2 @@
+module SkuProductsHelper
+end

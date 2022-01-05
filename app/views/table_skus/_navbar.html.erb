@@ -1,0 +1,23 @@
+<nav class="navbar navbar-expand-sm navbar-dark bg-purple p-0 mb-2">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#item-nav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse form-toggle" id="item-nav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link fs-s" data-toggle="collapse" href="#description-toggle">Description</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fs-s active" data-toggle="collapse" href="#edit-item-toggle">Edit Item</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fs-s" data-toggle="collapse" href="#edit-sku-toggle">Edit Sku</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div id="<%= dom_ref('nav-targets', item) %>">
+  <%= render 'table_skus/nav_targets', invoice: @item.invoice, item: @item, products: @products, inputs: @inputs, rows: @rows, titles: @titles %>
+</div>

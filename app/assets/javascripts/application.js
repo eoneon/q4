@@ -22,8 +22,8 @@ $(document).ready(function(){
     var card = $(this).closest(".card");
     var action = $(this).find("i").hasClass("fa-caret-down") ? 'collapse' : 'show'
     var context = sliceTag($(this).attr("id"), 0);
+    if (context=='show') {toggleSet($("#caret-id"), $(this).attr("id"), $("#caret-id").val());};
     if (context=='index') {showActionToggle(action, card);};
-    if (context=='show') {toggleVal(sliceTag($(this).attr("id"), -1), $("#caret-id").val());};
     caretToggle($(this).find("i"), card, $(card).find(".card-body"), action);
   });
 
@@ -73,7 +73,7 @@ $(document).ready(function(){
     toggleInputVal($(this).closest("form").parent().find(input), $(this).val());
     $("#new-title").submit();
   });
-  
+
   $("body").on("change", "#title-select", function(){
     var title = $(this).val();
     $("#title-text").val(title);

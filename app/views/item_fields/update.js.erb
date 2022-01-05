@@ -1,6 +1,6 @@
-var toggle = <%= @toggle %>
-$("#edit-item-fields").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
-$("#edit-item").html("<%= j render 'items/edit', invoice: @item.invoice, item: @item, titles: @titles %>");
+var toggle = "#<%= @toggle %>"
+$("#<%= dom_ref('edit-item-fields', @item) %>").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
+$("#<%= dom_ref('edit-item', @item) %>").html("<%= j render 'items/edit', invoice: @item.invoice, item: @item, titles: @titles %>");
 $("#description-toggle").html("<%= j render 'items/description', item: @item %>");
 
 if ($(toggle).hasClass("caret-toggle")){

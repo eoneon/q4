@@ -1,0 +1,2 @@
+module TableSkusHelper
+end
