@@ -20,16 +20,28 @@ $(document).ready(function(){
 
   $("body").on("click", ".caret-toggle", function(e){
     var card = $(this).closest(".card");
-    var action = $(this).find("i").hasClass("fa-caret-down") ? 'collapse' : 'show'
+    var action = iconToggleAction($(this).find("i"), "fa-caret-down");
     var context = sliceTag($(this).attr("id"), 0);
     if (context=='show') {toggleSet($("#caret-id"), $(this).attr("id"), $("#caret-id").val());};
     if (context=='index') {showActionToggle(action, card);};
+    // var test = $(".card-body.item-content > row").html();
+    // console.log(test)
     caretToggle($(this).find("i"), card, $(card).find(".card-body"), action);
   });
 
   // COLLAPSE/SHOW TOGGLE fn
-  $("body").on("click", ".form-toggle a", function(){
+  $("body").on("click", ".form-toggle a, .toggle-target button", function(){
     toggleActive($(this), ".form-toggle");
+  });
+
+  $("body").on("click", ".slide-toggle", function(){
+    var card = $(this).closest(".card");
+    var action = iconToggleAction($(this).find("i"), "fa-toggle-on");
+    if (action=='show') $(".slide-toggle").find("i.fa-toggle-on").click();
+    
+    if (action=='show') showAction(action, $(this).attr("data-parent"), card);
+    iconToggle($(this).find("i"), "fa-toggle-on fa-toggle-off");
+    toggleVisable($(card).find(".toggle-target"));
   });
 
   $("body").on("keyup", ".required-field", function(){
@@ -158,21 +170,30 @@ $(document).ready(function(){
     toggleCard(caret_icon, card, card_body);
     toggleCardSiblings(card, action);
   }
-  function toggleCard(caret, card, card_body) {
-    toggleCaret(caret);
-    toggleCardBody(card_body);
+  function toggleCard(caret_icon, card, card_body) {
+    iconToggle(caret_icon,"fa-caret-right fa-caret-down")
+    toggleVisable(card_body);
   }
-  function toggleCaret(caret) {
-    $(caret).toggleClass("fa-caret-right fa-caret-down");
+  function iconToggleAction(icon, klass) {
+    return $(icon).hasClass(klass) ? 'collapse' : 'show'
   }
-  function toggleCardBody(card_body) {
-    $(card_body).toggleClass("show collapse");
+
+  function iconToggle(btn, classes) {
+    $(btn).toggleClass(classes);
+  }
+
+  function toggleVisable(target) {
+    $(target).toggleClass("show collapse");
   }
 
   //toggle sibling caret-icons down & collapse their card-bodies ###############
   function toggleCardSiblings(card, action) {
     if (action=='show') closeHideCardSiblings(card);
   }
+  //new: experiment
+  // function toggleSiblingIcon(action, sibling, toggleKlass) {
+  //   if (action=='show') $(sibling).toggleClass(toggleKlass)
+  // }
   function closeHideCardSiblings(card) {
     closeCaretSiblings(card);
     hideCardSiblings(card);
@@ -193,12 +214,16 @@ $(document).ready(function(){
       $(card).find(".card-body").empty();
     }
   }
+  function showAction(action, parent, card) {
+    if (action=='show'){
+      $(card).find("a.show-body").click();
+      //removeCardSiblings(card);
+    } else {
+      $(parent).find(".card-body").empty();
+    }
+  }
   function removeCardSiblings(card) {
     $(card).siblings().find(".card-body").empty();
-  }
-  //utilities ##################################################################
-  function sliceTag(attr, i) {
-    return attr.split('-')[i]
   }
 
   function toggleActive(a, parent) {
@@ -209,15 +234,38 @@ $(document).ready(function(){
       $(a).addClass("active");
     }
   }
-  //end ########################################################################
-  $(function(e) {
-    var artist_id = $('#hidden_artist_id').val();
-    if (artist_id != undefined && artist_id.length){
-      $('.artist-add option[value="'+artist_id+'"]').attr('selected', true);
-    }
-  });
-
+  //utilities ##################################################################
+  function sliceTag(attr, i) {
+    return attr.split('-')[i]
+  }
 });
+  // function contentLoaded(content) {
+  //   $(content).ready(function() {
+  //     if (!undefined) {
+  //       console.log('test');
+  //     };
+  //   });
+  // }
+  //end ########################################################################
+  // $(".card-body.item-content > row").ready(function() {
+  //   console.log("test");
+  // });
+
+  // $(function(e) {
+  //   var content = $(".card-body.item-content > row").html();
+  //   if (content != undefined && content.length){
+  //     console.log("test");
+  //   }
+  // });
+  //
+  // $(function(e) {
+  //   var artist_id = $('#hidden_artist_id').val();
+  //   if (artist_id != undefined && artist_id.length){
+  //     $('.artist-add option[value="'+artist_id+'"]').attr('selected', true);
+  //   }
+  // });
+
+
 
 // not using:
 
@@ -322,13 +370,6 @@ $(document).ready(function(){
 //   }
 // });
 
-// route form submission: obsolete because: inputGroupData
-// function submitFormByContext(context) {
-//   if (context == "search-item-product"){
-//     $("#edit-item").submit();
-//   }
-// }
-
 // old methods for reference
 
 // $("body").on("click", ".caret-toggle", function(){
@@ -420,13 +461,3 @@ $(document).ready(function(){
 //     card_obj['tab-item'].filter("a").addClass("active");
 //   }
 // }
-
-// $("body").on("change", "select.title-select", function(){
-//   var product = $(this).val();
-//   toggleInputVal($("#new-skus #title_id"), product);
-//   // if (product.length){
-//   //   $("#new-skus #title_id").val(product);
-//   // } else {
-//   //   $("#new-skus #title_id").val(false);
-//   // }
-// });

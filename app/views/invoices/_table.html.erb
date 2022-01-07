@@ -2,7 +2,7 @@
   <thead>
   </thead>
 
-  <tbody>
+  <tbody id="invoice-index">
     <% invoices.order(:invoice_number).each do |invoice| %>
       <%= render 'invoices/invoice', invoice: invoice %>
     <% end %>

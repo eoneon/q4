@@ -1,0 +1,16 @@
+<div class="card px-1 py-0 bg-light border border-gray-b" id="">
+  <a href="<%= invoice_table_sku_path(invoice, invoice.items.first) %>" data-remote="true" class="show-body collapse" type="button"></a>
+  <div class="row align-items-center">
+    <button id="<%= invoice.id %>" class="<%= boot_classes(:btn_nav, 'px-3', 'py-0') %>" type="button" data-parent="#<%= invoice.invoice_number %>">
+      <%= (fa_icon "toggle-off") %>
+    </button>
+
+    <div class="toggle-target collapse">
+      <div class="btn-group ml-0 mr-3" role="group">
+        <button type="button" class="btn btn-sm btn-light py-0 'ml-0' my-0" disabled>Left</button>
+        <button type="button" class="btn btn-sm btn-light py-0 my-0" disabled>Middle</button>
+        <button type="button" class="btn btn-sm btn-light py-0 my-0" disabled>Right</button>
+      </div>
+    </div>
+  </div>
+</div>
