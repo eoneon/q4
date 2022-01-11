@@ -14,7 +14,7 @@ module ItemFieldsHelper
   end
 
   def swap_name
-    ['edition type', 'ltd ed', 'numbering type', 'edtn', 'numbered', 'nmbrd', 'edition size', 'size', 'edition', 'nmbr', 'dated', 'dating', 'animator', 'anima', 'sports', 'sport', 'mounting width', 'mnt-w', 'mounting height', 'mnt-h', 'width', 'w', 'height', 'h', 'depth', 'd', 'sculpture', 'sculp', 'verification number', 'reg #', 'verification type', 'reg', 'severity', 'discl', 'damage', 'damg', 'border', 'brdr', 'matting', 'mtt', 'framing', 'frm']
+    ['edition type', 'ltd ed', 'numbering type', 'edtn', 'numbered', 'nmbrd', 'edition size', 'size', 'edition', 'nmbr', 'dated', 'dating', 'animator', 'anima', 'sports', 'sport', 'mounting width', 'mnt-width', 'mounting height', 'mnt-height', 'diameter', 'diam', 'sculpture', 'sculp', 'verification number', 'reg #', 'verification type', 'reg', 'severity', 'discl', 'damage', 'damg', 'border', 'brdr', 'matting', 'mtt', 'framing', 'frm']
   end
 
   def swap_kind

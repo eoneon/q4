@@ -1,5 +1,5 @@
 <div class="card p-1 mb-1 bg-light border-0" id="<%= dom_ref(:card, item) %>">
-  <a href="<%= invoice_sku_path(item.invoice, item) %>" data-remote="true" class="show-body collapse" type="button"></a>
+  <a href="<%= invoice_table_sku_path(item.invoice, item) %>" data-remote="true" class="show-body collapse" type="button"></a>
   <div class="card-header bg-transparent border-0 pt-0 pb-0 pr-0 mr-0">
     <div class="row align-items-center">
 
@@ -15,6 +15,7 @@
     </div>
   </div>
 
-  <div class="card-body pt-2 pb-1 px-1 bg-light rounded collapse" id="<%= dom_ref(item, 'navbar-forms') %>">
+  <div class="card-body item-content pt-2 pb-1 px-1 bg-light rounded collapse" id="<%= dom_ref('navbar-forms', item) %>">
   </div>
+
 </div>

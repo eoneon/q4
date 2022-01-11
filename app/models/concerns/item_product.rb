@@ -69,6 +69,7 @@ module ItemProduct
   def standard_params(context, d_hsh, attrs, store)
     standard_context(context, d_hsh, store)
     unrelated_params(context, d_hsh, store)
+    search_edition(d_hsh, attrs)
     attrs.merge!(flat_description(context, store))
   end
 
@@ -100,6 +101,12 @@ module ItemProduct
   def nested_params_context(context, d_hsh)
     context[(d_hsh['numbering']['tagline'].has_key?('proof_edition') ? :proof_edition : :numbered)] = true if d_hsh['numbering']
     %w[animator_seal sports_seal].map{|k| context[k.to_sym] = true if d_hsh['seal']['body'].has_key?(k)} if d_hsh['seal']
+  end
+
+  def search_edition(d_hsh, attrs)
+    if ed_val = d_hsh.dig("numbering", "tagline")
+      attrs.merge!({'edition'=>ed_val.values[0].split(' ')[0].sub('Numbered', 'No')})
+    end
   end
 
   ### reorder_remove

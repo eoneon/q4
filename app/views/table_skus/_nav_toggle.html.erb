@@ -1,0 +1,15 @@
+<div class="card px-1 py-0 bg-disabled border border-secondary" id="">
+  <div class="row align-items-center">
+    <button id="<%= item.id %>" class="<%= boot_classes(:btn_nav, 'px-3', 'py-0') %>" type="button" data-parent="#<%= dom_ref(:card, item) %>" data-target=".toggle-nav" data-show-target="a.show-body">
+      <%= (fa_icon "toggle-off") %>
+    </button>
+
+    <div class="toggle-nav collapse">
+      <div class="btn-group ml-0 mr-3" data-parent="#<%= dom_ref('navbar-forms', item) %>" role="group">
+        <button type="button" class="btn btn-sm btn-outline-secondary border-0 py-0 'ml-0' my-0" data-toggle="collapse" data-target="#description-toggle" disabled>Dscrp</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary border-0 py-0 my-0" data-toggle="collapse" data-target="#edit-item-toggle" disabled>Item</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary border-0 py-0 my-0" data-toggle="collapse" data-target="#edit-sku-toggle" disabled>Sku</button>
+      </div>
+    </div>
+  </div>
+</div>

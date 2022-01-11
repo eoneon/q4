@@ -3,8 +3,8 @@
   </thead>
 
   <tbody>
-    <% suppliers.order(:supplier_name).each do |supplier| %>
-      <%= render 'suppliers/supplier', supplier: supplier %>
+    <% suppliers.order(:supplier_name).each_with_index do |supplier, i| %>
+      <%= render 'suppliers/supplier', supplier: supplier, i: i %>
     <% end %>
   </tbody>
 </table>

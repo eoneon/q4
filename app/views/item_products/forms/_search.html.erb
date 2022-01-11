@@ -1,9 +1,9 @@
 <%= form_with model: item, url: search_item_products_path, method: :get, id: dom_ref('search-item-product', item) do |f| %>
   <div class="form">
-    <div class="card bg-light-blue p-1 mb-1">
+    <div class="card bg-gray-d p-0 mb-1 border-0">
       <%= number_field_tag :id, item.id, class: "collapse" %>
 
-      <div class="form-row px-2">
+      <div class="form-row px-1">
         <% inputs.each do |input| %>
           <div class="col-3 border-light-gray p-1">
             <div class="input-group input-group-sm" data-form="#<%= dom_ref('search-item-product', item) %>">

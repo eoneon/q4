@@ -3,7 +3,7 @@
     <div class="card bg-gray-d p-1 mb-1">
 
       <div class="form-row mt-1">
-        <% rejected_inputs(inputs['hattrs'], 'measurements').each do |input| %>
+        <% rejected_inputs(inputs['hattrs'], 'measurements', 'edition').each do |input| %>
           <div class="col-3 ml-0">
             <div class="input-group input-group-sm" data-form="#search-items">
               <%= render 'item_products/forms/search_group', scope: 'hattrs', input_name: input['input_name'], opts: input['opts'], selected: input['selected'] %>
@@ -41,7 +41,7 @@
           </div>
         </div>
 
-        <% included_inputs(inputs['hattrs'], 'measurements').each do |input| %>
+        <% included_inputs(inputs['hattrs'], 'measurements', 'edition').each do |input| %>
           <div class="col-3 ml-0">
             <div class="input-group input-group-sm" data-form="#search-items">
               <%= render 'item_products/forms/search_group', scope: 'hattrs', input_name: input['input_name'], opts: input['opts'], selected: input['selected'] %>

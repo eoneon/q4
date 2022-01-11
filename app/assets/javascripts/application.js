@@ -18,32 +18,30 @@
 
 $(document).ready(function(){
 
-  $("body").on("click", ".caret-toggle", function(e){
-    var card = $(this).closest(".card");
-    var action = iconToggleAction($(this).find("i"), "fa-caret-down");
-    var context = sliceTag($(this).attr("id"), 0);
-    if (context=='show') {toggleSet($("#caret-id"), $(this).attr("id"), $("#caret-id").val());};
-    if (context=='index') {showActionToggle(action, card);};
-    // var test = $(".card-body.item-content > row").html();
-    // console.log(test)
-    caretToggle($(this).find("i"), card, $(card).find(".card-body"), action);
-  });
-
-  // COLLAPSE/SHOW TOGGLE fn
-  $("body").on("click", ".form-toggle a, .toggle-target button", function(){
-    toggleActive($(this), ".form-toggle");
+  $("body").on("click", ".caret-toggle", function(){
+    var [action, parent, input] = [iconToggleAction($(this), "fa-caret-down"), $(this).closest(".card"), $(this).attr("data-input")];
+    toggleSet($("#caret-id"), $(this).attr("id"), $("#caret-id").val()); //toggleSet($(input), $(this).attr("id"), $(input).val());
+    caretToggle($(this), parent, $(parent).attr("data-target"), action, ".caret-toggle");
   });
 
   $("body").on("click", ".slide-toggle", function(){
-    var card = $(this).closest(".card");
-    var action = iconToggleAction($(this).find("i"), "fa-toggle-on");
-    if (action=='show') $(".slide-toggle").find("i.fa-toggle-on").click();
-    
-    if (action=='show') showAction(action, $(this).attr("data-parent"), card);
-    iconToggle($(this).find("i"), "fa-toggle-on fa-toggle-off");
-    toggleVisable($(card).find(".toggle-target"));
+    var [action, parent, nav_target] = [iconToggleAction($(this), "fa-toggle-on"), $(this).attr("data-parent"), $(this).attr("data-target")];
+    showAction(action, parent, $(parent).attr("data-target"), nav_target, $(this).attr("data-show-target"), ".slide-toggle");
+    iconToggle($(this), "fa-toggle-on fa-toggle-off");
+    toggleVisability($(parent).find(nav_target));
   });
 
+  $("body").on("click", ".toggle-nav button", function(){
+    var parent_target = $(this).parent().attr("data-parent");
+    if ($(parent_target).is(":visible") == $($(this).attr("data-target")).is(":visible")) toggleVisability(parent_target);
+    toggleActive($(this), $(this).siblings().filter(".active"));
+  });
+
+  $("body").on("click", "#invoice-nav .nav-link", function(){
+    toggleActive($(this), $(this).closest(".navbar-nav").find("a.active"));
+  });
+
+  //fields
   $("body").on("keyup", ".required-field", function(){
     var val = $(this).val();
     var submit = $(this).closest("form").find(".submit-btn");
@@ -52,6 +50,11 @@ $(document).ready(function(){
     } else {
       $(submit).attr('disabled', 'disabled');
     }
+  });
+
+  // COLLAPSE/SHOW TOGGLE fn: FIX SINCE WE REFACTORED METHOD
+  $("body").on("click", ".form-toggle a, .toggle-target button", function(){
+    toggleActive($(this), ".form-toggle");
   });
 
   //edit-form submission: UPDATE select field and submit form
@@ -140,22 +143,13 @@ $(document).ready(function(){
     var val = value.length ? value : ""
     $(inputs).val(value);
   }
-
   function setInputVal(input_name, value) {
     $('input[name="'+input_name+'"]').val(value);
   }
-
   function inputGroupData(ref, data) {
     return $(ref).closest(".input-group").attr(data);
   }
 
-  function toggleTab(id, e) {
-    if ($('#'+id).hasClass("active")) {
-      e.stopPropagation();
-      e.preventDefault();
-      $('#'+id).removeClass("active");
-    }
-  }
 
   function toggleSet(input, new_id, old_id) {
     $(input).val(toggleVal(new_id, old_id));
@@ -165,91 +159,66 @@ $(document).ready(function(){
     return new_id == old_id ? "" : new_id
   }
 
+  // aside/tabs
+  function toggleTab(id, e) {
+    if ($('#'+id).hasClass("active")) {
+      e.stopPropagation();
+      e.preventDefault();
+      $('#'+id).removeClass("active");
+    }
+  }
+
   //toggle current caret-icon & card-body ######################################
-  function caretToggle(caret_icon, card, card_body, action) {
-    toggleCard(caret_icon, card, card_body);
-    toggleCardSiblings(card, action);
+  function caretToggle(caret_btn, parent, target, action, kill_btn) {
+    toggleCard(caret_btn, $(parent).find(target));
+    var active_sibling = $(parent).siblings().has(target+":visible");
+    if (action=='show' && active_sibling.length) {
+      toggleCard($(active_sibling).find(kill_btn), $(active_sibling).find(target));
+    }
   }
-  function toggleCard(caret_icon, card, card_body) {
-    iconToggle(caret_icon,"fa-caret-right fa-caret-down")
-    toggleVisable(card_body);
+  function toggleCard(caret_btn, target) {
+    iconToggle(caret_btn,"fa-caret-right fa-caret-down")
+    toggleVisability(target);
   }
-  function iconToggleAction(icon, klass) {
-    return $(icon).hasClass(klass) ? 'collapse' : 'show'
+  function killSibling(parent, target, kill_btn) {
+    var active_sibling = $(parent).siblings().has(target);
+    if (active_sibling.length) $(active_sibling).find(kill_btn).click();
   }
-
-  function iconToggle(btn, classes) {
-    $(btn).toggleClass(classes);
+  function iconToggleAction(icon_btn, klass) {
+    return $(icon_btn).find("i").hasClass(klass) ? 'collapse' : 'show'
   }
-
-  function toggleVisable(target) {
+  function iconToggle(icon_btn, classes) {
+    $(icon_btn).find("i").toggleClass(classes);
+  }
+  function toggleVisability(target) {
     $(target).toggleClass("show collapse");
   }
-
-  //toggle sibling caret-icons down & collapse their card-bodies ###############
-  function toggleCardSiblings(card, action) {
-    if (action=='show') closeHideCardSiblings(card);
-  }
-  //new: experiment
-  // function toggleSiblingIcon(action, sibling, toggleKlass) {
-  //   if (action=='show') $(sibling).toggleClass(toggleKlass)
-  // }
-  function closeHideCardSiblings(card) {
-    closeCaretSiblings(card);
-    hideCardSiblings(card);
-  }
-  function closeCaretSiblings(card) {
-    $(card).siblings().find("i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
-  }
-  function hideCardSiblings(card) {
-    $(card).siblings().find(".card-body.show").toggleClass("show collapse");
-  }
-
-  //toggle#show HTTP get item & remove sibling items ###########################
-  function showActionToggle(action, card) {
+  function showAction(action, parent, parent_target, nav_target, btn_target, kill_btn) {
     if (action=='show'){
-      $(card).find("a.show-body").click();
-      removeCardSiblings(card);
+      $(parent).find(btn_target).click();
+      killSibling(parent, nav_target+":visible", kill_btn)
     } else {
-      $(card).find(".card-body").empty();
+      $(nav_target).find("button").attr('disabled', true);
+      $(parent_target).empty();
+      if ($(parent_target).is(":visible")) toggleVisability(parent_target);
     }
   }
-  function showAction(action, parent, card) {
-    if (action=='show'){
-      $(card).find("a.show-body").click();
-      //removeCardSiblings(card);
-    } else {
-      $(parent).find(".card-body").empty();
-    }
-  }
-  function removeCardSiblings(card) {
-    $(card).siblings().find(".card-body").empty();
-  }
 
-  function toggleActive(a, parent) {
+  function toggleActive(a, active_sibling) {
     if (a.hasClass("active")){
       $(a).removeClass("active");
     } else {
-      $(a).closest(parent).find("a.active").removeClass("active");
       $(a).addClass("active");
+      if (active_sibling.length) $(active_sibling).removeClass("active");
     }
   }
+
   //utilities ##################################################################
   function sliceTag(attr, i) {
     return attr.split('-')[i]
   }
 });
-  // function contentLoaded(content) {
-  //   $(content).ready(function() {
-  //     if (!undefined) {
-  //       console.log('test');
-  //     };
-  //   });
-  // }
-  //end ########################################################################
-  // $(".card-body.item-content > row").ready(function() {
-  //   console.log("test");
-  // });
+//end ########################################################################
 
   // $(function(e) {
   //   var content = $(".card-body.item-content > row").html();
@@ -265,7 +234,9 @@ $(document).ready(function(){
   //   }
   // });
 
-
+  // function removeCardSiblings(card) {
+  //   $(card).siblings().find(".card-body").empty();
+  // }
 
 // not using:
 

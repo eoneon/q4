@@ -69,7 +69,7 @@ class Item < ApplicationRecord
   def attrs_title
     tagline_title ? tagline_title : 'Untitled'
   end
-  
+
   ##############################################################################
 
   class << self
@@ -106,7 +106,7 @@ class Item < ApplicationRecord
     end
 
     def search_keys
-      %w[category_search medium_search material_search mounting_search measurements] #measurements item_size
+      %w[category_search medium_search material_search mounting_search measurements edition] #measurements item_size
     end
 
     def artist_items(artist_id)

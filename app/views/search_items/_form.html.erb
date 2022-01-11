@@ -1,7 +1,7 @@
 <%= form_with model: Item.new, url: invoice_search_items_path(invoice), id: "new-skus" do |f| %>
   <div class="form">
 
-    <div class="card bg-gray-d p-0 mb-1">
+    <div class="card bg-gray-d p-0 mb-1" data-target=".card-body">
       <%= number_field_tag "item_id", nil, class: "collapse", id: "item_id" %>
 
       <div class="card-header bg-transparent pt-0 pb-1 pl-0 pr-0">

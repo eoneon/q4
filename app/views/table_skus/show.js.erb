@@ -1,1 +1,4 @@
-$("#<%= dom_ref('navbar-forms', @item) %>").html("<%= j render 'table_skus/navbar', invoice: @item.invoice, item: @item, products: @products, inputs: @inputs, rows: @rows, titles: @titles %>");
+$("#<%= dom_ref('navbar-forms', @item) %>").html("<%= j render 'table_skus/nav_targets', invoice: @item.invoice, item: @item, products: @products, inputs: @inputs, rows: @rows, titles: @titles %>");
+$(function(){
+  $(".toggle-nav").find("button").removeAttr('disabled');
+});

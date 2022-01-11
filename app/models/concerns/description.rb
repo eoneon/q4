@@ -131,7 +131,7 @@ module Description
 
       search_tagline:{
         keys:%w[embellishing category medium sculpture_type material leafing numbering signature certificate],
-        set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Limited Edition', 'Ltd Ed'], ['Edition', 'Ed'], ['Numbered', 'No'], ['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]
+        set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Limited Edition', 'Ltd Ed'], ['Edition', 'Ed'], ['Numbered', 'No'], ['Mixed Media', 'MM'], ['Hand Pulled', 'HP'], [' and ', ' & ']]
       },
 
       body:{
@@ -148,7 +148,3 @@ module Description
   end
 
 end
-
-# def untitled?(h)
-#   h.dig('title', 'tagline').blank?
-# end

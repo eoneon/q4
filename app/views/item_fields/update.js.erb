@@ -1,10 +1,10 @@
-var toggle = "#<%= @toggle %>"
+var toggle = "<%= raw @toggle %>"
 $("#<%= dom_ref('edit-item-fields', @item) %>").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
 $("#<%= dom_ref('edit-item', @item) %>").html("<%= j render 'items/edit', invoice: @item.invoice, item: @item, titles: @titles %>");
 $("#description-toggle").html("<%= j render 'items/description', item: @item %>");
 
-if ($(toggle).hasClass("caret-toggle")){
-  var id = $(toggle).attr("id");
+if (toggle.length && $('#'+toggle).hasClass("caret-toggle")){
+  var id = $('#'+toggle).attr("id");
   $("#caret-id").val(id);
   $('#'+id).find("i").toggleClass("fa-caret-right fa-caret-down");
   $('#'+id).closest(".card").find(".card-body.collapse").toggleClass("show collapse");
