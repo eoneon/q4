@@ -243,15 +243,7 @@ $(document).ready(function(){
   //   }
   // });
 
-  // function removeCardSiblings(card) {
-  //   $(card).siblings().find(".card-body").empty();
-  // }
-
 // not using:
-
-// $("#edit-item-toggle").on("hide.bs.collapse", function(){
-//   $("a[href='#edit-item-toggle']").removeClass("active");
-// });
 
 // CRUD SHOW: used with aside tabs, see: suppliers/index
 // $("body").on("click", "#tab-index a.list-group-item", function(e){
