@@ -26,7 +26,7 @@ module Textable
     end
 
     def char_limit(str, abbrv_set, limit)
-      return str if str.length<limit || abbrv_set.empty?
+      return str if str.nil? || str.length<limit || abbrv_set.empty?
       set = abbrv_set.slice!(0)
       str.gsub!(*set)
       char_limit(str, abbrv_set, limit)

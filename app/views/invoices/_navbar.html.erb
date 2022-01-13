@@ -11,7 +11,7 @@
         <a class="nav-link" data-toggle="collapse" href="#edit-invoice-toggle">Edit Invoice</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link new-skus" data-toggle="collapse" href="#new-skus-toggle">Add Skus</a>
+        <a class="nav-link new-skus" data-toggle="collapse" data-search="#search-skus" data-form="#new-skus" href="#new-skus-toggle">Add Skus</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" data-toggle="collapse" href="#destroy-skus-toggle">Delete Skus</a>
@@ -34,30 +34,30 @@
 <div class="pos-f-t">
   <div class="collapse" id="edit-invoice-toggle" data-parent="#invoice-navbar-forms">
     <hr>
-    <%= render 'invoices/edit', invoice: @invoice %>
+    <%= render 'invoices/edit', invoice: invoice %>
   </div>
 </div>
 
 <div class="pos-f-t">
   <div class="collapse" id="new-skus-toggle" data-parent="#invoice-navbar-forms">
     <hr>
-    <%= render 'skus/search', invoice: @invoice, results: @results, inputs: @inputs %>
-    <%= render 'skus/form', invoice: @invoice, titles: [] %>
-    <%= render 'titles/new', invoice: @invoice %>
+    <%= render 'skus/search', invoice: invoice, results: results, inputs: inputs %>
+    <%= render 'skus/form', invoice: invoice, titles: [] %>
+    <%= render 'titles/new', invoice: invoice %>
   </div>
 </div>
 
 <div class="pos-f-t">
   <div class="collapse" id="destroy-skus-toggle" data-parent="#invoice-navbar-forms">
     <hr>
-    <%= render 'skus/destroy', invoice: @invoice %>
+    <%= render 'skus/destroy', invoice: invoice %>
   </div>
 </div>
 
 <div class="pos-f-t">
   <div class="collapse" id="export-skus-toggle" data-parent="#invoice-navbar-forms">
     <hr>
-    <%= render 'export_skus/form', invoice: @invoice %>
+    <%= render 'export_skus/form', invoice: invoice %>
   </div>
 </div>
 

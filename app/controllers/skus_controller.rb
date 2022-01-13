@@ -15,11 +15,14 @@ class SkusController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     product = cond_find(Product, params[:item][:product_id])
     artist_id = cond_id(params[:item][:artist_id])
-    @results, @inputs = Product.invoice_search(product: product, artist_id: artist_id, hattrs: params[:items][:hattrs].to_unsafe_h)
-
-    respond_to do |format|
-      format.js
-    end
+    #@results, @inputs = Product.invoice_search(product: product, artist_id: artist_id, hattrs: params[:items][:hattrs].to_unsafe_h)
+    @nav_products, @nav_search_inputs = Product.invoice_search(product: product, artist_id: artist_id, hattrs: params[:items][:hattrs].to_unsafe_h)
+    # puts "@nav_products: #{@nav_products}"
+    # puts "@nav_search_inputs: #{@nav_search_inputs}"
+    #
+    # respond_to do |format|
+    #   format.js
+    # end
   end
 
   def create
@@ -27,7 +30,8 @@ class SkusController < ApplicationController
     artist = cond_find(Artist, params[:item][:artist_id])
     product = cond_find(Product, params[:item][:product_id])
     Item.new.batch_create_skus(skus, item_params, artist, product, product_args(product)) if skus
-    @results, @inputs = Product.invoice_search
+    #@results, @inputs = Product.invoice_search
+    @nav_products, @nav_search_inputs = Product.invoice_search
 
     respond_to do |format|
       format.js

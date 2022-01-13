@@ -1,5 +1,6 @@
-$("#search-skus").html("<%= j render 'skus/search', invoice: @invoice, results: @results, inputs: @inputs %>");
+//$("#search-skus").html("<%= j render 'skus/search', invoice: @invoice, results: @results, inputs: @inputs %>");
+$("#search-skus").html("<%= j render 'skus/search', invoice: @invoice, results: @nav_products, inputs: @nav_search_inputs %>");
 $("#new-skus").html("<%= j render 'skus/form', invoice: @invoice, titles: [] %>");
+$("#items-table").replaceWith("<%= j render 'items/table', invoice: @invoice %>");
 //$("#new-skus-toggle").removeClass("show");
 //$("#invoice-nav").find("a").removeClass("active");
-$("#items-table").replaceWith("<%= j render 'items/table', invoice: @invoice %>");

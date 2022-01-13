@@ -72,17 +72,6 @@ $(document).ready(function(){
     $(this).closest("form").submit();
   });
 
-  //invoice#show.html #new-skus: collapse.show - caret-right/caret-down - clear fields
-  $("body").on("click", "#invoice-nav .nav-link", function(){
-    if ($("#new-skus-toggle").hasClass("show")){
-      $("#new-skus-toggle .form :input").val("");
-      $("#title-select").find("option:first").siblings().remove();
-      $("#new-skus .default-caret-right i.fa-caret-down").toggleClass("fa-caret-right fa-caret-down");
-      $("#new-skus .default-collapse.show").toggleClass("show collapse");
-      $("#new-skus .default-show.collapse").toggleClass("show collapse");
-    }
-  });
-
   $("body").on("change", "#artist-search, #product-search", function(){
     var input = "."+sliceTag($(this).attr("id"), 0)+"_id"
     toggleInputVal($(this).closest("form").parent().find(input), $(this).val());
@@ -136,6 +125,13 @@ $(document).ready(function(){
     var input = $($(this).attr("data-form")).find($($(this).attr("data-field")));
     toggleSet(input, new_id, $(input).val());
     toggleTab(new_id, e);
+  });
+
+  $("#new-skus-toggle").on("hide.bs.collapse", function(){
+    var a = $("[href='#"+$(this).attr("id")+"']");
+    refreshCaretForm($(a).attr("data-form"), $($(a).attr("data-form")).find(".card"));
+    clearInputsOpts("#title-select");
+    refreshSearchForm($(a).attr("data-search"));
   });
 
   // click/change -> set target field
@@ -212,7 +208,20 @@ $(document).ready(function(){
       if (active_sibling.length) $(active_sibling).removeClass("active");
     }
   }
-
+  function refreshCaretForm(form, card) {
+    clearInputs(form);
+    if ($($(card).attr("data-target")).is(":visible")) toggleCard($(card).find(".caret-toggle"), $(card).find($(card).attr("data-target")));
+  }
+  function refreshSearchForm(target) {
+    clearInputs(target);
+    $(target).submit();
+  }
+  function clearInputs(target) {
+    $(target + " :input").val("");
+  }
+  function clearInputsOpts(target) {
+    $(target + " option:first").siblings().remove();
+  }
   //utilities ##################################################################
   function sliceTag(attr, i) {
     return attr.split('-')[i]
