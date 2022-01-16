@@ -1,6 +1,9 @@
-<%= form_with model: Item.new, url: invoice_skus_path(invoice), id: "new-skus" do |f| %>
+<%= form_with model: Item.new, url: invoice_batch_items_path(invoice), id: "new-item-skus" do |f| %>
   <div class="form">
+
     <div class="card bg-gray-d p-0 mb-1" data-target=".card-body">
+      <%= number_field_tag "item_id", nil, class: "collapse required", id: "item_id" %>
+
       <div class="card-header bg-transparent pt-0 pb-1 pl-0 pr-0">
         <div class="form-row mb-1">
 
@@ -20,7 +23,7 @@
 
       <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-gray-d border border-white border-top-0 rounded-bottom default-collapse collapse">
 
-        <div class="form-row pt-2 pb-2">
+        <div class="form-row pt-2 pb-2 pr-2">
           <div class="col-4 ml-0">
             <div class="input-group input-group-sm">
               <%= render "item_fields/caret", card_id: 'artist', body: true, i: 0, context: 'body' %>
@@ -29,20 +32,10 @@
             </div>
           </div>
 
-          <div class="col-6 ml-0">
-            <div class="input-group input-group-sm">
-              <%= render "item_fields/label", label: 'product' %>
-              <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: boot_classes(:input, 'product_id'), id: "product_id" %>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row">
           <div class="col-4 ml-0">
             <div class="input-group input-group-sm">
-              <%= render "item_fields/caret", card_id: 'title', body: true, i: 0, context: 'body' %>
               <%= render 'items/title_toggle' %>
-              <%= render 'items/title', titles: titles %>
+              <%= render 'items/title', titles: [] %>
               <%= f.text_field :title, class: boot_classes(:input, 'default-show', 'show', 'title-toggle'), id: 'title-text' %>
             </div>
           </div>
@@ -61,7 +54,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>

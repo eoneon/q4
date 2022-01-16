@@ -27,6 +27,12 @@ Rails.application.routes.draw do
     member do
       get :search
     end
+
+    resources :batch_items, only: [:search, :index, :create] do
+      collection do
+        get :search
+      end
+    end
   end
 
   resources :item_products do

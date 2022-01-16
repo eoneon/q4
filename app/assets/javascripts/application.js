@@ -41,35 +41,18 @@ $(document).ready(function(){
     toggleActive($(this), $(this).closest(".navbar-nav").find("a.active"));
   });
 
-  //fields
-  $("body").on("keyup", ".required-field", function(){
-    var val = $(this).val();
-    var submit = $(this).closest("form").find(".submit-btn");
-    if (val.length){
-      $(submit).removeAttr('disabled');
-    } else {
-      $(submit).attr('disabled', 'disabled');
-    }
-  });
-
-  // COLLAPSE/SHOW TOGGLE fn: FIX SINCE WE REFACTORED METHOD
-  $("body").on("click", ".form-toggle a, .toggle-target button", function(){
-    toggleActive($(this), ".form-toggle");
+  //forms
+  $("body").on("keyup, focusin, focusout", ".required", function(){
+    requiredFields($(this));
   });
 
   //edit-form submission: UPDATE select field and submit form
-  $("body").on("change", ".field-param", function(){
-    var form = $(this).closest("form");
-    $(form).submit();
-  });
-
-  $("body").on("change", "select.search-select", function(){
-    var form = $(this).closest("form");
-    $(form).submit();
+  $("body").on("change", "select.search-select, .field-param", function(){
+    thisForm($(this)).submit();
   });
 
   $("body").on("focusout", ".input-field", function(){
-    $(this).closest("form").submit();
+    thisForm($(this)).submit();
   });
 
   $("body").on("change", "#artist-search, #product-search", function(){
@@ -97,10 +80,10 @@ $(document).ready(function(){
   });
 
   //what is this?
-  $("body").on("click", ".search-btn", function(){
-    $('#new-skus').find(":selected").attr('selected', false);
-    $('#new-skus').find(":input").val("");
-  });
+  // $("body").on("click", ".search-btn", function(){
+  //   $('#new-skus').find(":selected").attr('selected', false);
+  //   $('#new-skus').find(":input").val("");
+  // });
 
   //item-field
   $("body").on("change", ".update-search", function(){
@@ -121,19 +104,29 @@ $(document).ready(function(){
   });
 
   $("body").on("click", ".list-group-item", function(e){
-    var new_id = $(this).attr("id");
-    var input = $($(this).attr("data-form")).find($($(this).attr("data-field")));
+    var [new_id, form] = [$(this).attr("id"), $(this).attr("data-form")];
+    var input = $(form).find($($(this).attr("data-field")));
     toggleSet(input, new_id, $(input).val());
+    requiredFields(input);
     toggleTab(new_id, e);
   });
 
-  $("#new-skus-toggle").on("hide.bs.collapse", function(){
+  $("#new-skus-toggle, #new-item-skus-toggle").on("hide.bs.collapse", function(){
     var a = $("[href='#"+$(this).attr("id")+"']");
     refreshCaretForm($(a).attr("data-form"), $($(a).attr("data-form")).find(".card"));
     clearInputsOpts("#title-select");
     refreshSearchForm($(a).attr("data-search"));
   });
 
+  function requiredFields(input) {
+    var emptyFields = $(thisFormItem($(input), ".required")).filter(function() {return $(this).val() == "";});
+    var submit = thisFormItem($(input), ".submit-btn");
+    if (emptyFields.length==0){
+      $(submit).removeAttr('disabled');
+    } else {
+      $(submit).attr('disabled', 'disabled');
+    }
+  }
   // click/change -> set target field
   function toggleInputVal(inputs, value) {
     var val = value.length ? value : ""
@@ -145,16 +138,12 @@ $(document).ready(function(){
   function inputGroupData(ref, data) {
     return $(ref).closest(".input-group").attr(data);
   }
-
-
   function toggleSet(input, new_id, old_id) {
     $(input).val(toggleVal(new_id, old_id));
   }
-
   function toggleVal(new_id, old_id) {
     return new_id == old_id ? "" : new_id
   }
-
   // aside/tabs
   function toggleTab(id, e) {
     if ($('#'+id).hasClass("active")) {
@@ -199,7 +188,6 @@ $(document).ready(function(){
       if ($(parent_target).is(":visible")) toggleVisability(parent_target);
     }
   }
-
   function toggleActive(a, active_sibling) {
     if (a.hasClass("active")){
       $(a).removeClass("active");
@@ -208,6 +196,16 @@ $(document).ready(function(){
       if (active_sibling.length) $(active_sibling).removeClass("active");
     }
   }
+
+
+  function clearInputs(target) {
+    $(target + " :input").val("");
+  }
+  function clearInputsOpts(target) {
+    $(target + " option:first").siblings().remove();
+  }
+
+  //form #######################################################################
   function refreshCaretForm(form, card) {
     clearInputs(form);
     if ($($(card).attr("data-target")).is(":visible")) toggleCard($(card).find(".caret-toggle"), $(card).find($(card).attr("data-target")));
@@ -216,12 +214,13 @@ $(document).ready(function(){
     clearInputs(target);
     $(target).submit();
   }
-  function clearInputs(target) {
-    $(target + " :input").val("");
+  function thisFormItem(ref, target) {
+    return $(thisForm(ref)).find(target);
   }
-  function clearInputsOpts(target) {
-    $(target + " option:first").siblings().remove();
+  function thisForm(ref) {
+    return $(ref).closest("form");
   }
+
   //utilities ##################################################################
   function sliceTag(attr, i) {
     return attr.split('-')[i]
@@ -244,6 +243,11 @@ $(document).ready(function(){
   // });
 
 // not using:
+
+// COLLAPSE/SHOW TOGGLE fn: FIX SINCE WE REFACTORED METHOD
+// $("body").on("click", ".form-toggle a, .toggle-target button", function(){
+//   toggleActive($(this), ".form-toggle");
+// });
 
 // CRUD SHOW: used with aside tabs, see: suppliers/index
 // $("body").on("click", "#tab-index a.list-group-item", function(e){

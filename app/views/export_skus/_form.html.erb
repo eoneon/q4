@@ -1,4 +1,4 @@
-<%= form_tag(invoice_export_skus_path(@invoice, format: "csv"), method: "post", id: "export-skus") do |f| %>
+<%= form_tag(invoice_export_skus_path(invoice, format: "csv"), method: "post", id: "export-skus") do |f| %>
   <div class="form">
     <div class="card bg-gray-d p-1 mb-2">
       <div class="form-row p-1">
@@ -6,7 +6,7 @@
         <div class="col-4 ml-0">
           <div class="input-group input-group-sm">
             <%= render "item_fields/label", label: 'skus' %>
-            <%= text_field_tag :skus, nil, placeholder: "enter sku range", class: boot_classes(:input, 'required-field') %>
+            <%= text_field_tag :skus, nil, placeholder: "enter sku range", class: boot_classes(:input, 'required') %>
           </div>
         </div>
 

@@ -2,16 +2,16 @@
   <div class="form">
 
     <div class="card bg-gray-d p-0 mb-1" data-target=".card-body">
-      <%= number_field_tag "item_id", nil, class: "collapse", id: "item_id" %>
+      <%= number_field_tag "item_id", nil, class: "collapse required", id: "item_id" %>
 
       <div class="card-header bg-transparent pt-0 pb-1 pl-0 pr-0">
         <div class="form-row mb-1">
 
           <div class="col-4 pt-2">
-            <div class="input-group input-group-sm">
+            <div class="input-group input-group-sm" data-required="#item_id">
               <%= render "item_fields/caret", card_id: 'skus', body: true, i: 0, context: 'header' %>
               <%= render "item_fields/label", label: 'skus' %>
-              <%= f.text_field :skus, placeholder: "enter sku range", class: boot_classes(:input, 'required-field') %>
+              <%= f.text_field :skus, placeholder: "enter sku range", class: boot_classes(:input, 'required') %>
             </div>
           </div>
 

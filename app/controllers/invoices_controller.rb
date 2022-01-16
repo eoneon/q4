@@ -5,8 +5,8 @@ class InvoicesController < ApplicationController
 
   def show
     @invoice = Invoice.find(params[:id])
-    #@results, @inputs = Product.invoice_search
     @nav_products, @nav_search_inputs = Product.invoice_search
+    @items, @item_inputs = Item.item_search
   end
 
   def new
