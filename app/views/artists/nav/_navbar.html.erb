@@ -1,0 +1,12 @@
+<nav class="navbar navbar-expand-sm navbar-dark bg-purple">
+  <a class="navbar-brand text-white"><span id="artist-name">Artist</span></a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#artist-nav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="artist-nav">
+    <%= render 'artists/nav/nav_links' %>
+  </div>
+  <%= render 'artists/nav/search', artist: artist %>
+</nav>

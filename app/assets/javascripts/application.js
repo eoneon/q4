@@ -51,6 +51,22 @@ $(document).ready(function(){
     thisForm($(this)).submit();
   });
 
+  $("body").on("change", "select.artist-search", function(){
+    var [selected, anchors, disabled] = [$(this).find(":selected").text(), $("#artist-nav").find(".nav-link"), $("#artist-nav").find(".nav-link").filter(".toggle-disable")];
+    //var disabled = $(anchors).filter(".toggle-disable");
+    $(anchors).removeClass("active");
+    clearToggleContent($(anchors).attr("href"));
+    //$($(anchors).attr("href")).empty();
+    if (selected.length){
+      $(disabled).removeClass("disabled");
+      $("#artist-name").text(selected);
+      thisForm($(this)).submit();
+    } else {
+      $(disabled).addClass("disabled");
+      $("#artist-name").text("Artist");
+    }
+  });
+
   $("body").on("focusout", ".input-field", function(){
     thisForm($(this)).submit();
   });
@@ -118,6 +134,11 @@ $(document).ready(function(){
     refreshSearchForm($(a).attr("data-search"));
   });
 
+  $("a.nav-link.disabled").on("click", function(e){
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
   function requiredFields(input) {
     var emptyFields = $(thisFormItem($(input), ".required")).filter(function() {return $(this).val() == "";});
     var submit = thisFormItem($(input), ".submit-btn");
@@ -151,6 +172,10 @@ $(document).ready(function(){
       e.preventDefault();
       $('#'+id).removeClass("active");
     }
+  }
+  function clearToggleContent(targets) {
+    $(targets).empty();
+    if ($(targets).filter(":visible")) toggleVisability(targets);
   }
 
   //toggle current caret-icon & card-body ######################################
@@ -196,7 +221,6 @@ $(document).ready(function(){
       if (active_sibling.length) $(active_sibling).removeClass("active");
     }
   }
-
 
   function clearInputs(target) {
     $(target + " :input").val("");

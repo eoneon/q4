@@ -1,0 +1,8 @@
+<%= form_with url: search_artists_url, method: :get, id: "artist-search" do |f| %>
+  <div class="form">
+    <div class="input-group input-group-sm">
+      <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
+      <%= f.collection_select :id, Artist.all, :id, :artist_name, {include_blank: true, selected: artist.try(:id)}, class: boot_classes(:search_input, 'artist-search') %>
+    </div>
+  </div>
+<% end %>

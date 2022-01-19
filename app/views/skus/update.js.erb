@@ -1,2 +1,1 @@
-//document.getElementById("sku").textContent="<%= raw @item.sku %>";
-$("#<%=dom_ref(@item, 'edit-sku') %>").html("<%= j render 'skus/edit', invoice: @invoice, item: @item %>");
+$("#<%= dom_ref(@item, 'edit-sku') %>").html("<%= j render 'skus/edit', invoice: @invoice, item: @item %>");
