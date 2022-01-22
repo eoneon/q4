@@ -1,11 +1,5 @@
-<ul class="navbar-nav">
-  <li class="nav-item">
-    <a class="nav-link" data-toggle="collapse" href="#add-artist-toggle">Add Artist</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link toggle-disable disabled" data-toggle="collapse" href="#edit-artist-toggle">Edit Artist</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link toggle-disable disabled" data-toggle="collapse" href="#search-artist-items-toggle">Search Artist Items</a>
-  </li>
-</ul>
+<div class="btn-group nav-toggle">
+  <button type="button" class="btn btn-outline-light bg-transparent border-0 nav-btn static" data-toggle="collapse" data-target="#add-artist-toggle">Add Artist</button>
+  <button type="button" class="btn btn-outline-light bg-transparent border-0 nav-btn disable dynamic" data-toggle="collapse" data-target="#edit-artist-toggle" disabled>Edit Artist</button>
+  <button type="button" class="btn btn-outline-light bg-transparent border-0 nav-btn disable dynamic" data-toggle="collapse" data-target="#search-artist-items-toggle" disabled>Search Artist Items</button>
+</div>

@@ -55,6 +55,10 @@
    background: #e9ecef !important;
  }
  //set width of bootstrap dropdown to length of longest selection
+ .artist-brand{
+   display: inline-block;
+   width: 200px //!important;
+ }
  .sku-span{
    display: inline-block;
    width: 30px //!important;

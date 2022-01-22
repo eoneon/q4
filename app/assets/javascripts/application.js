@@ -28,17 +28,41 @@ $(document).ready(function(){
     var [action, parent, nav_target] = [iconToggleAction($(this), "fa-toggle-on"), $(this).attr("data-parent"), $(this).attr("data-target")];
     showAction(action, parent, $(parent).attr("data-target"), nav_target, $(this).attr("data-show-target"), ".slide-toggle");
     iconToggle($(this), "fa-toggle-on fa-toggle-off");
-    toggleVisability($(parent).find(nav_target));
+    toggleVisibility($(parent).find(nav_target));
   });
 
   $("body").on("click", ".toggle-nav button", function(){
     var parent_target = $(this).parent().attr("data-parent");
-    if ($(parent_target).is(":visible") == $($(this).attr("data-target")).is(":visible")) toggleVisability(parent_target);
-    toggleActive($(this), $(this).siblings().filter(".active"));
+    if ($(parent_target).is(":visible") == $($(this).attr("data-target")).is(":visible")) toggleVisibility(parent_target);
+    //toggleActive($(this), $(this).siblings().filter(".active"));
+    //toggleActive($(this), navToggleSiblings($(this).filter(".active"));
+    toggleActive($(this), navToggleSiblings($(this)));
   });
 
   $("body").on("click", "#invoice-nav .nav-link", function(){
     toggleActive($(this), $(this).closest(".navbar-nav").find("a.active"));
+  });
+
+  $("body").on("click", "#artist-nav .nav-btn", function(){
+    var h = navbarData($(this).closest(".navbar"));
+    toggleActive($(this), navToggleSiblings($(this)));
+    if (showingStaticTarget($(this))){
+      $(h.span).text(h.spanVal);
+      deselectOpt($(h.input));
+      setAttrAccess(h.nav_btns, true);
+      emptyNavTargets(h.nav_btns, '.dynamic');
+    }
+  });
+
+  $("body").on("change", "select.artist-search", function(){
+    var [h, selected] = [navbarData($(this).closest(".navbar")), $(this).find(":selected").text()];
+    var [span_val, disable] = selected.length ? [selected, false] : [h.spanVal, true]
+    hideNavTargets(h.nav_btns,'.nav-btn');
+    emptyNavTargets(h.nav_btns, '.dynamic');
+    $(h.nav_btns).removeClass("active");
+    $(h.span).text(span_val);
+    setAttrAccess(h.nav_btns, disable);
+    if (disable==false) thisForm($(this)).submit();
   });
 
   //forms
@@ -49,22 +73,6 @@ $(document).ready(function(){
   //edit-form submission: UPDATE select field and submit form
   $("body").on("change", "select.search-select, .field-param", function(){
     thisForm($(this)).submit();
-  });
-
-  $("body").on("change", "select.artist-search", function(){
-    var [selected, anchors, disabled] = [$(this).find(":selected").text(), $("#artist-nav").find(".nav-link"), $("#artist-nav").find(".nav-link").filter(".toggle-disable")];
-    //var disabled = $(anchors).filter(".toggle-disable");
-    $(anchors).removeClass("active");
-    clearToggleContent($(anchors).attr("href"));
-    //$($(anchors).attr("href")).empty();
-    if (selected.length){
-      $(disabled).removeClass("disabled");
-      $("#artist-name").text(selected);
-      thisForm($(this)).submit();
-    } else {
-      $(disabled).addClass("disabled");
-      $("#artist-name").text("Artist");
-    }
   });
 
   $("body").on("focusout", ".input-field", function(){
@@ -103,13 +111,13 @@ $(document).ready(function(){
 
   //item-field
   $("body").on("change", ".update-search", function(){
-    setInputVal(inputGroupData($(this), "data-input"), $(this).val());
+    setValByInputName(inputGroupData($(this), "data-input"), $(this).val());
     $(inputGroupData($(this), "data-form")).submit();
   });
 
   //items#search
   $("body").on("click", ".deselect", function(){
-    setInputVal(inputGroupData($(this), "data-input"), "");
+    setValByInputName(inputGroupData($(this), "data-input"), "");
     $(inputGroupData($(this), "data-form")).submit();
   });
 
@@ -139,33 +147,51 @@ $(document).ready(function(){
     e.preventDefault();
   });
 
-  function requiredFields(input) {
-    var emptyFields = $(thisFormItem($(input), ".required")).filter(function() {return $(this).val() == "";});
-    var submit = thisFormItem($(input), ".submit-btn");
-    if (emptyFields.length==0){
-      $(submit).removeAttr('disabled');
-    } else {
-      $(submit).attr('disabled', 'disabled');
-    }
+  //navbar
+  function navToggleBtns(a) {
+    return $(a).closest(".nav-toggle").find(".nav-btn");
   }
-  // click/change -> set target field
-  function toggleInputVal(inputs, value) {
-    var val = value.length ? value : ""
-    $(inputs).val(value);
+  function navToggleSiblings(a) {
+    return $(navToggleBtns(a)).not(a);
   }
-  function setInputVal(input_name, value) {
-    $('input[name="'+input_name+'"]').val(value);
+
+  function navbarData(navbar) {
+    var data = $(navbar).data();
+    data.nav_btns = $(navbar).find(".nav-btn");
+    return data;
   }
-  function inputGroupData(ref, data) {
-    return $(ref).closest(".input-group").attr(data);
+
+  function emptyNavTargets(ref, scope){
+    Array.from($(ref).filter(scope)).forEach(function (nav_btn) {
+      $($(nav_btn).attr("data-target")).empty();
+    });
   }
-  function toggleSet(input, new_id, old_id) {
-    $(input).val(toggleVal(new_id, old_id));
+  function hideNavTargets(ref, scope){
+    Array.from($(ref).filter(scope)).forEach(function (nav_btn) {
+      hideTarget($($(nav_btn).attr("data-target")));
+    });
   }
-  function toggleVal(new_id, old_id) {
-    return new_id == old_id ? "" : new_id
+  // function dataTarget(ref, scope) {
+  //   return $(ref).filter(scope).attr("data-target");
+  // }
+  function dataParentTargets(parent) {
+    return $(parent).find("[data-parent='"+parent+"']");
   }
-  // aside/tabs
+
+  function showingStaticTarget(btn) {
+    return $(btn).hasClass("static") && !isVisible($(btn).attr("data-target"))
+  }
+  function toggleActive(a, sibling) {
+    var state = toggleIntraClass(a, "active");
+    if (state==true)  $(sibling).removeClass("active");
+  }
+
+  function toggleIntraClass(target, klass) {
+    $(target).hasClass(klass) ? $(target).removeClass(klass) : $(target).addClass(klass)
+    return $(target).hasClass(klass) ? true : false
+  }
+
+  //aside/tabs
   function toggleTab(id, e) {
     if ($('#'+id).hasClass("active")) {
       e.stopPropagation();
@@ -173,9 +199,17 @@ $(document).ready(function(){
       $('#'+id).removeClass("active");
     }
   }
-  function clearToggleContent(targets) {
-    $(targets).empty();
-    if ($(targets).filter(":visible")) toggleVisability(targets);
+  //end navbar
+
+  //show/collapse
+  function hideTarget(target) {
+    if (isVisible($(target))) $(target).removeClass("show");
+  }
+  function toggleVisibility(target) {
+    $(target).toggleClass("show collapse");
+  }
+  function isVisible(target) {
+    return $(target).is(":visible");
   }
 
   //toggle current caret-icon & card-body ######################################
@@ -188,7 +222,7 @@ $(document).ready(function(){
   }
   function toggleCard(caret_btn, target) {
     iconToggle(caret_btn,"fa-caret-right fa-caret-down")
-    toggleVisability(target);
+    toggleVisibility(target);
   }
   function killSibling(parent, target, kill_btn) {
     var active_sibling = $(parent).siblings().has(target);
@@ -200,9 +234,7 @@ $(document).ready(function(){
   function iconToggle(icon_btn, classes) {
     $(icon_btn).find("i").toggleClass(classes);
   }
-  function toggleVisability(target) {
-    $(target).toggleClass("show collapse");
-  }
+
   function showAction(action, parent, parent_target, nav_target, btn_target, kill_btn) {
     if (action=='show'){
       $(parent).find(btn_target).click();
@@ -210,30 +242,11 @@ $(document).ready(function(){
     } else {
       $(nav_target).find("button").attr('disabled', true);
       $(parent_target).empty();
-      if ($(parent_target).is(":visible")) toggleVisability(parent_target);
-    }
-  }
-  function toggleActive(a, active_sibling) {
-    if (a.hasClass("active")){
-      $(a).removeClass("active");
-    } else {
-      $(a).addClass("active");
-      if (active_sibling.length) $(active_sibling).removeClass("active");
+      if ($(parent_target).is(":visible")) toggleVisibility(parent_target);
     }
   }
 
-  function clearInputs(target) {
-    $(target + " :input").val("");
-  }
-  function clearInputsOpts(target) {
-    $(target + " option:first").siblings().remove();
-  }
-
-  //form #######################################################################
-  function refreshCaretForm(form, card) {
-    clearInputs(form);
-    if ($($(card).attr("data-target")).is(":visible")) toggleCard($(card).find(".caret-toggle"), $(card).find($(card).attr("data-target")));
-  }
+  //forms
   function refreshSearchForm(target) {
     clearInputs(target);
     $(target).submit();
@@ -243,6 +256,51 @@ $(document).ready(function(){
   }
   function thisForm(ref) {
     return $(ref).closest("form");
+  }
+
+  //form inputs
+  function setValByInputName(input_name, value) {
+    $('input[name="'+input_name+'"]').val(value);
+  }
+  function clearInputs(target) {
+    $(target + " :input").val("");
+  }
+  function clearInputsOpts(target) {
+    $(target + " option:first").siblings().remove();
+  }
+  function requiredFields(input) {
+    var emptyFields = $(thisFormItem($(input), ".required")).filter(function() {return $(this).val() == "";});
+    var submit = thisFormItem($(input), ".submit-btn");
+    if (emptyFields.length==0){
+      $(submit).removeAttr('disabled');
+    } else {
+      $(submit).attr('disabled', 'disabled');
+    }
+  }
+  function toggleInputVal(inputs, value) {
+    var val = value.length ? value : ""
+    $(inputs).val(value);
+  }
+  function toggleSet(input, new_id, old_id) {
+    $(input).val(toggleVal(new_id, old_id));
+  }
+  function toggleVal(new_id, old_id) {
+    return new_id == old_id ? "" : new_id
+  }
+  function setAttrAccess(elements, access) {
+    $(elements).filter(".disable").attr("disabled", access);
+  }
+  function deselectOpt(select){
+    $(select).attr('selected', false);
+    $(select).val("");
+  }
+  function inputGroupData(ref, data) {
+    return $(ref).closest(".input-group").attr(data);
+  }
+  //form #######################################################################
+  function refreshCaretForm(form, card) {
+    clearInputs(form);
+    if ($($(card).attr("data-target")).is(":visible")) toggleCard($(card).find(".caret-toggle"), $(card).find($(card).attr("data-target")));
   }
 
   //utilities ##################################################################
@@ -267,11 +325,6 @@ $(document).ready(function(){
   // });
 
 // not using:
-
-// COLLAPSE/SHOW TOGGLE fn: FIX SINCE WE REFACTORED METHOD
-// $("body").on("click", ".form-toggle a, .toggle-target button", function(){
-//   toggleActive($(this), ".form-toggle");
-// });
 
 // CRUD SHOW: used with aside tabs, see: suppliers/index
 // $("body").on("click", "#tab-index a.list-group-item", function(e){
@@ -305,10 +358,6 @@ $(document).ready(function(){
 //     $(target).toggleClass("show collapse");
 //   }
 // });
-//
-// $("body").on("click", ".collapse-field-btn", function(){
-//   $(this).closest(".toggle-field").toggleClass("show collapse");
-// });
 
 // function toggleHttp(new_id, old_id) {
 //   if (old_id.length == 0) {
@@ -320,16 +369,6 @@ $(document).ready(function(){
 //   }
 //   return method
 // }
-
-// $("body").on("keyup", ".required-field", function(){
-//   var val = $(this).val();
-//   var submit = $(this).closest("form").find(".disabled-btn");
-//   if (val.length){
-//     $(submit).removeAttr('disabled');
-//   } else {
-//     $(submit).attr('disabled', 'disabled')
-//   }
-// });
 
 //CRUD ITEM-ARTIST #update
 // $("body").on("change", ".artist-update", function(e){
@@ -360,30 +399,7 @@ $(document).ready(function(){
 //   $(form).submit();
 // });
 
-// COLLAPSE/SHOW TOGGLE fn
-// $("body").on("click", ".form-toggle", function(){
-//   var target = $(this).attr("data-target");
-//   if (!$(target).hasClass("show")){
-//     $(this).addClass("active").siblings().removeClass("active");
-//     $(target).siblings().removeClass("show");
-//     $(target).addClass("show");
-//   }
-// });
-
 // old methods for reference
-
-// $("body").on("click", ".caret-toggle", function(){
-//   if ($(this).find("i").hasClass("fa-caret-right")){
-//     $(this).find("i").toggleClass("fa-caret-right fa-caret-down");
-//     $(this).closest(".card").find(".card-body").toggleClass("show collapse");
-//
-//     $(this).closest(".card").siblings().find("i.fa-caret-down").toggleClass("fa-caret-right");
-//     $(this).closest(".card").siblings().find(".card-body.show").toggleClass("show collapse");
-//   } else {
-//     $(this).find("i").toggleClass("fa-caret-right fa-caret-down");
-//     $(this).closest(".card").find(".card-body.show").toggleClass("show collapse");
-//   }
-// });
 
 // $("body").on("change", "select.artist-select", function(){
 //   var artist = $(this).val();
