@@ -1,4 +1,4 @@
-class ItemArtistsController < ApplicationController
+class ArtistItemsController < ApplicationController
   def search
     @items, @item_inputs = Item.item_search(search_params)
 
@@ -6,15 +6,6 @@ class ItemArtistsController < ApplicationController
       format.js
     end
   end
-  # def update
-  #   @item = Item.find(params[:id])
-  #   @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
-  #   @item.save
-  #
-  #   respond_to do |format|
-  #     format.js
-  #   end
-  # end
 
   private
 
@@ -24,5 +15,4 @@ class ItemArtistsController < ApplicationController
     title: cond_val(params[:items][:title]),
     hattrs: params[:items][:hattrs].to_unsafe_h}
   end
-
 end
