@@ -1,0 +1,12 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-disabled border-0 p-0 m-0" data-parent="#<%= dom_ref('navbar-forms', item) %>" data-card="#<%= dom_ref(:card, item) %>">
+  <div class="btn-group btn-group-sm p-0 m-0" role="group">
+    <button id="<%= item.id %>" class="<%= boot_classes(:btn_nav, 'btn-outline-secondary', 'py-0', 'px-1', 'm-1') %>" type="button" data-target=".nav-toggle">
+      <span class=""><%= (fa_icon "toggle-off") %></span>
+    </button>
+    <div class="item-nav nav-toggle m-0 mr-1 collapse">
+      <button type="button" class="btn btn-sm btn-outline-secondary squared-right-border squared-left-border py-0 px-1 mx-0 my-1 nav-btn disable dynamic" data-toggle="collapse" data-target="#description-toggle" disabled><span class="fs-s">Dscrp</span></button>
+      <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 mx-0 my-1 squared-right-border squared-left-border nav-btn disable dynamic" data-toggle="collapse" data-target="#edit-item-toggle" disabled><span class="fs-s">Item</span></button>
+      <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1 mx-0 my-1 squared-left-border nav-btn disable dynamic" data-toggle="collapse" data-target="#edit-sku-toggle" disabled><span class="fs-s">Sku</span></button>
+    </div>
+  </div>
+</nav>

@@ -16,7 +16,7 @@ module ApplicationHelper
     {
       submit: %w[btn btn-sm badge form-control submit-btn],
       caret: %w[caret-toggle btn btn-sm bg-transparent border-0],
-      btn_nav: %w[slide-toggle btn btn-sm bg-transparent border-0],
+      btn_nav: %w[slide-toggle btn btn-sm bg-transparent, btn-secondary],
       title_toggle: %w[btn btn-sm kind-label bg-gray-c border border-gray-b rounded-left-border-md border-right-0 text-info font-weight-light ml-0 px-0 toggle-view],
       label: %w[kind-label bg-gray-c border border-gray-b rounded-left-border-md border-right-0 text-info fs-xs font-weight-light pt-2 pl-1 pr-0],
       input: %w[form-control bg-gray-c border-gray-b rounded-right-border-md border-left-0 pl-0],

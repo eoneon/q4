@@ -24,18 +24,36 @@ $(document).ready(function(){
     caretToggle($(this), parent, $(parent).attr("data-target"), action, ".caret-toggle");
   });
 
+  // $("body").on("click", ".slide-toggle", function(){
+  //   var [action, parent, nav_target] = [iconToggleAction($(this), "fa-toggle-on"), $(this).attr("data-parent"), $(this).attr("data-target")];
+  //   showAction(action, parent, $(parent).attr("data-target"), nav_target, $(this).attr("data-show-target"), ".slide-toggle");
+  //   iconToggle($(this), "fa-toggle-on fa-toggle-off");
+  //   toggleVisibility($(parent).find(nav_target));
+  // });
   $("body").on("click", ".slide-toggle", function(){
-    var [action, parent, nav_target] = [iconToggleAction($(this), "fa-toggle-on"), $(this).attr("data-parent"), $(this).attr("data-target")];
-    showAction(action, parent, $(parent).attr("data-target"), nav_target, $(this).attr("data-show-target"), ".slide-toggle");
-    iconToggle($(this), "fa-toggle-on fa-toggle-off");
-    toggleVisibility($(parent).find(nav_target));
+    //var data = navbarDataTest($(this).closest(".navbar"), $(this));
+    var data2 = navbarDataTestTwo($(this).closest(".navbar"), $(this), {})
+    console.log(data2)
+    slideToggle(data2, $(this), ".slide-toggle");
+    //toggleSlide($(this), data2.btn.target);
   });
 
-  $("body").on("click", ".toggle-nav button", function(){
-    var parent_target = $(this).parent().attr("data-parent");
-    if ($(parent_target).is(":visible") == $($(this).attr("data-target")).is(":visible")) toggleVisibility(parent_target);
-    //toggleActive($(this), $(this).siblings().filter(".active"));
-    //toggleActive($(this), navToggleSiblings($(this).filter(".active"));
+
+  // $("body").on("click", ".slide-toggle", function(){
+  //   var [action, parent, nav_target] = [iconToggleAction($(this), "fa-toggle-on"), $(this).attr("data-parent"), $(this).attr("data-target")];
+  //   var test = navbarDataTest($(this).closest(".navbar"), $(this));
+  //   console.log(test);
+  //   showAction(action, parent, $(parent).attr("data-target"), nav_target, $(this).attr("data-show-target"), ".slide-toggle");
+  //   iconToggle($(this), "fa-toggle-on fa-toggle-off");
+  //   toggleVisibility($(parent).find(nav_target));
+  // });
+
+  $("body").on("click", ".item-nav .nav-btn", function(){
+    //var h = navbarData($(this).closest(".navbar"));
+    var data = navbarDataTestTwo($(this).closest(".navbar"), $(this), {});
+    console.log(data);
+    //if (isVisible(h.parent) == isVisible($(this).attr("data-target"))) toggleVisibility(h.parent);
+    if (isVisible(data.nav_toggle.parent) == isVisible(data.btn.target)) toggleVisibility(data.nav_toggle.parent);
     toggleActive($(this), navToggleSiblings($(this)));
   });
 
@@ -103,11 +121,6 @@ $(document).ready(function(){
     $(toggle_targets).toggleClass("show collapse");
   });
 
-  //what is this?
-  // $("body").on("click", ".search-btn", function(){
-  //   $('#new-skus').find(":selected").attr('selected', false);
-  //   $('#new-skus').find(":input").val("");
-  // });
 
   //item-field
   $("body").on("change", ".update-search", function(){
@@ -171,9 +184,10 @@ $(document).ready(function(){
       hideTarget($($(nav_btn).attr("data-target")));
     });
   }
-  // function dataTarget(ref, scope) {
-  //   return $(ref).filter(scope).attr("data-target");
-  // }
+
+  function navTargetDataParentTag(nav_btns){
+    return $($(nav_btns).attr("data-target")).attr("data-parent");
+  }
   function dataParentTargets(parent) {
     return $(parent).find("[data-parent='"+parent+"']");
   }
@@ -199,17 +213,126 @@ $(document).ready(function(){
       $('#'+id).removeClass("active");
     }
   }
+
+  //navbar => new
+  function slideToggle(h, btn, btn_tag) {
+    toggleSlide(btn, h.btn.toggle_target);
+    if (h.btn.vis_target==false){
+      toggleOnSlide(h.card.id, h.card.submit, h.btn.active_sibling, h.btn.target, btn_tag);
+    } else {
+      //toggleOffSlide($(h.card.id).find(h.card.target), h.nav_toggle.btns);
+      toggleOffSlide($(h.card.id).find(h.card.target), h.card.vis_target, h.nav_toggle.btns);
+    }
+  }
+
+  // function slideToggle(data, btn, btn_tag) {
+  //   toggleSlide(btn, data.toggle_target);
+  //   if (data.vis_target==false){
+  //     //console.log(data.active_card)
+  //     toggleOnSlide(data.card, data.submit, data.active_card, data.target_tag, btn_tag);
+  //   } else {
+  //     toggleOffSlide(data.card_target, data.nav_btns);
+  //   }
+  // }
+
+  function toggleSlide(btn, target) {
+    iconToggle(btn, "fa-toggle-on fa-toggle-off");
+    toggleVisibility($(target));
+  }
+  function toggleOnSlide(card, submit, active_card, target, btn) {
+    $(card).find(submit).click();
+    toggleOffSlideSibling(active_card, btn);
+  }
+  // function toggleOffSlideSibling(card, target, btn) {
+  //   var active_card = $(card).siblings().has(target);
+  //   if (active_card.length) $(active_card).find(btn).click();
+  // }
+
+  function toggleOffSlideSibling(active_card, btn) {
+    if (active_card.length) $(active_card).find(btn).click();
+  }
+  function toggleOffSlide(card_target, vis_target, nav_btns) {
+    $(nav_btns).attr('disabled', true);
+    $(card_target).empty();
+    if (vis_target==true) toggleVisibility($(card_target));
+    //hideTarget($(card_target));
+  }
+
+  function navbarDataTest(navbar, this_element) {
+    var data = $(navbar).data();
+    data.nav_btns = $(navbar).find(".nav-btn");
+    return navbarDataOpts(navbar, data, this_element);
+  }
+
+  function navbarDataOpts(navbar, data, this_element){
+    if ($(this_element).has(".btn")){
+      data.target_tag = $(this_element).attr("data-target");
+      data.toggle_target = $(navbar).find(data.target_tag);
+      data.vis_target = isVisible(data.toggle_target);
+      //data.slide_target = $(data.card)find(data.target);
+      if (data.vis_target==false) {
+        data.active_card = siblingWithVisibleTarget(data.card, data.target_tag);
+        //console.log(data.target_tag)
+      } else {
+        data.card_target = $(data.card).attr("data-target");
+      }
+    }
+    return data;
+  }
+
+  function navbarDataTestTwo(navbar, this_element, data) {
+    navCardData($(navbar).data(), data, {});
+    //data.nav_btns = $(navbar).find(".nav-btn");
+    navToggleData(navbar, data, {});
+    return navTargetData(navbar, this_element, data, {});
+  }
+
+  function navCardData(navbar_data, data, card){
+    if ('card' in navbar_data) {
+      card = $(navbar_data.card).data();
+      card.id = navbar_data.card;
+      if ('target' in card) card.vis_target = isVisible($(card.id).find(card.target));
+      data.card = card
+    }
+    return data;
+  }
+
+  function navToggleData(navbar, data, nav_toggle){
+    nav_toggle.btns = $(navbar).find(".nav-btn");
+    // console.log(navTargetDataParentTag(nav_toggle.btns));
+    nav_toggle.parent = navTargetDataParentTag(nav_toggle.btns);
+    data.nav_toggle = nav_toggle;
+    return data;
+  }
+
+  function navTargetData(navbar, this_element, data, btn){
+    if ($(this_element).data("target") && $(this_element).has(".btn")) {
+      btn.target = $(this_element).attr("data-target");
+      btn.toggle_target = $(navbar).find(btn.target);
+      btn.vis_target = isVisible(btn.toggle_target);
+      //btn.vis_target = isVisible($(navbar).find(btn.target));
+      if (btn.vis_target==false) btn.active_sibling = siblingWithVisibleTarget(data.card.id, btn.target);
+      data.btn = btn
+    }
+    return data;
+  }
   //end navbar
 
   //show/collapse
+  function siblingWithVisibleTarget(parent, target) {
+    var active_sibling = $(parent).siblings().has(target+":visible");
+    return active_sibling.length ? active_sibling : false;
+  }
   function hideTarget(target) {
     if (isVisible($(target))) $(target).removeClass("show");
+    //if (isVisible($(target))) $(target).toggleClass("show collapse");
   }
   function toggleVisibility(target) {
     $(target).toggleClass("show collapse");
   }
   function isVisible(target) {
     return $(target).is(":visible");
+    //return $(target).is(":visible") ? target : false;
   }
 
   //toggle current caret-icon & card-body ######################################
@@ -310,6 +433,11 @@ $(document).ready(function(){
 });
 //end ########################################################################
 
+  //what is this?
+  // $("body").on("click", ".search-btn", function(){
+  //   $('#new-skus').find(":selected").attr('selected', false);
+  //   $('#new-skus').find(":input").val("");
+  // });
   // $(function(e) {
   //   var content = $(".card-body.item-content > row").html();
   //   if (content != undefined && content.length){
