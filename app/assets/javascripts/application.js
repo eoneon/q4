@@ -24,37 +24,14 @@ $(document).ready(function(){
     caretToggle($(this), parent, $(parent).attr("data-target"), action, ".caret-toggle");
   });
 
-  // $("body").on("click", ".slide-toggle", function(){
-  //   var [action, parent, nav_target] = [iconToggleAction($(this), "fa-toggle-on"), $(this).attr("data-parent"), $(this).attr("data-target")];
-  //   showAction(action, parent, $(parent).attr("data-target"), nav_target, $(this).attr("data-show-target"), ".slide-toggle");
-  //   iconToggle($(this), "fa-toggle-on fa-toggle-off");
-  //   toggleVisibility($(parent).find(nav_target));
-  // });
   $("body").on("click", ".slide-toggle", function(){
-    //var data = navbarDataTest($(this).closest(".navbar"), $(this));
-    var data2 = navbarDataTestTwo($(this).closest(".navbar"), $(this), {})
-    console.log(data2)
-    slideToggle(data2, $(this), ".slide-toggle");
-    //toggleSlide($(this), data2.btn.target);
+    var data = navbarDataTestThree($(this).closest(".navbar"), $(this), {});
+    slideToggle(data, $(this), ".slide-toggle");
   });
 
-
-  // $("body").on("click", ".slide-toggle", function(){
-  //   var [action, parent, nav_target] = [iconToggleAction($(this), "fa-toggle-on"), $(this).attr("data-parent"), $(this).attr("data-target")];
-  //   var test = navbarDataTest($(this).closest(".navbar"), $(this));
-  //   console.log(test);
-  //   showAction(action, parent, $(parent).attr("data-target"), nav_target, $(this).attr("data-show-target"), ".slide-toggle");
-  //   iconToggle($(this), "fa-toggle-on fa-toggle-off");
-  //   toggleVisibility($(parent).find(nav_target));
-  // });
-
   $("body").on("click", ".item-nav .nav-btn", function(){
-    //var h = navbarData($(this).closest(".navbar"));
-    var data = navbarDataTestTwo($(this).closest(".navbar"), $(this), {});
-    console.log(data);
-    //if (isVisible(h.parent) == isVisible($(this).attr("data-target"))) toggleVisibility(h.parent);
-    if (isVisible(data.nav_toggle.parent) == isVisible(data.btn.target)) toggleVisibility(data.nav_toggle.parent);
-    toggleActive($(this), navToggleSiblings($(this)));
+    var data = navbarDataTestThree($(this).closest(".navbar"), $(this), {});
+    itemNavbarToggle(data, $(this));
   });
 
   $("body").on("click", "#invoice-nav .nav-link", function(){
@@ -62,26 +39,38 @@ $(document).ready(function(){
   });
 
   $("body").on("click", "#artist-nav .nav-btn", function(){
-    var h = navbarData($(this).closest(".navbar"));
+    var d = navbarDataTestThree($(this).closest(".navbar"), $(this), {});
+    console.log(d)
     toggleActive($(this), navToggleSiblings($(this)));
-    if (showingStaticTarget($(this))){
-      $(h.span).text(h.spanVal);
-      deselectOpt($(h.input));
-      setAttrAccess(h.nav_btns, true);
-      emptyNavTargets(h.nav_btns, '.dynamic');
-    }
+    if (d.btn.context=='show') artistNavbarToggle($(this).closest(".navbar"), d);
   });
 
+  // $("body").on("click", "#artist-nav .nav-btn", function(){
+  //   var h = navbarData($(this).closest(".navbar"));
+  //   toggleActive($(this), navToggleSiblings($(this)));
+  //   if (showingStaticTarget($(this))){
+  //     $(h.span).text(h.spanVal);
+  //     deselectOpt($(h.input));
+  //     setAttrAccess(h.nav_btns, true);
+  //     emptyNavTargets(h.nav_btns, '.dynamic');
+  //   }
+  // });
   $("body").on("change", "select.artist-search", function(){
-    var [h, selected] = [navbarData($(this).closest(".navbar")), $(this).find(":selected").text()];
-    var [span_val, disable] = selected.length ? [selected, false] : [h.spanVal, true]
-    hideNavTargets(h.nav_btns,'.nav-btn');
-    emptyNavTargets(h.nav_btns, '.dynamic');
-    $(h.nav_btns).removeClass("active");
-    $(h.span).text(span_val);
-    setAttrAccess(h.nav_btns, disable);
-    if (disable==false) thisForm($(this)).submit();
+    var d = navbarDataTestThree($(this).closest(".navbar"), $(this), {});
+
+    searchArtistNavbarToggle($(this).closest(".navbar"), d, $(this));
   });
+
+  // $("body").on("change", "select.artist-search", function(){
+  //   var [h, selected] = [navbarData($(this).closest(".navbar")), $(this).find(":selected").text()];
+  //   var [span_val, disable] = selected.length ? [selected, false] : [h.spanVal, true]
+  //   hideNavTargets(h.nav_btns,'.nav-btn');
+  //   emptyNavTargets(h.nav_btns, '.dynamic');
+  //   $(h.nav_btns).removeClass("active");
+  //   $(h.span).text(span_val);
+  //   setAttrAccess(h.nav_btns, disable);
+  //   if (disable==false) thisForm($(this)).submit();
+  // });
 
   //forms
   $("body").on("keyup, focusin, focusout", ".required", function(){
@@ -174,17 +163,27 @@ $(document).ready(function(){
     return data;
   }
 
-  function emptyNavTargets(ref, scope){
-    Array.from($(ref).filter(scope)).forEach(function (nav_btn) {
+  // function emptyNavTargets(ref, scope){
+  //   Array.from($(ref).filter(scope)).forEach(function (nav_btn) {
+  //     $($(nav_btn).attr("data-target")).empty();
+  //   });
+  // }
+  function emptyNavTargets(nav_btns){
+    Array.from($(nav_btns)).forEach(function (nav_btn) {
       $($(nav_btn).attr("data-target")).empty();
     });
   }
-  function hideNavTargets(ref, scope){
-    Array.from($(ref).filter(scope)).forEach(function (nav_btn) {
+  // function hideNavTargets(ref, scope){
+  //   Array.from($(ref).filter(scope)).forEach(function (nav_btn) {
+  //     hideTarget($($(nav_btn).attr("data-target")));
+  //   });
+  // }
+  function hideNavTargets(nav_btns){
+    Array.from($(nav_btns)).forEach(function (nav_btn) {
+      $(nav_btn).removeClass("active");
       hideTarget($($(nav_btn).attr("data-target")));
     });
   }
-
   function navTargetDataParentTag(nav_btns){
     return $($(nav_btns).attr("data-target")).attr("data-parent");
   }
@@ -192,12 +191,12 @@ $(document).ready(function(){
     return $(parent).find("[data-parent='"+parent+"']");
   }
 
-  function showingStaticTarget(btn) {
-    return $(btn).hasClass("static") && !isVisible($(btn).attr("data-target"))
-  }
+  // function showingStaticTarget(btn) {
+  //   return $(btn).hasClass("static") && !isVisible($(btn).attr("data-target"));
+  // }
   function toggleActive(a, sibling) {
     var state = toggleIntraClass(a, "active");
-    if (state==true)  $(sibling).removeClass("active");
+    if (state==true) $(sibling).removeClass("active");
   }
 
   function toggleIntraClass(target, klass) {
@@ -215,25 +214,41 @@ $(document).ready(function(){
   }
 
   //navbar => new
-  function slideToggle(h, btn, btn_tag) {
-    toggleSlide(btn, h.btn.toggle_target);
-    if (h.btn.vis_target==false){
-      toggleOnSlide(h.card.id, h.card.submit, h.btn.active_sibling, h.btn.target, btn_tag);
-    } else {
-      //toggleOffSlide($(h.card.id).find(h.card.target), h.nav_toggle.btns);
-      toggleOffSlide($(h.card.id).find(h.card.target), h.card.vis_target, h.nav_toggle.btns);
-    }
+  function artistNavbarToggle(navbar, d) {
+    setNavBrand(navbar, d.brand.span);
+    deselectOpt($(d.forms.input));
+    setAttrAccess(d.btn_grp.btns, true);
+    emptyNavTargets(d.btn_grp.dyno_btns);
+    //emptyNavTargets(d.btn_grp.dyno_btns, '.dynamic');
   }
 
-  // function slideToggle(data, btn, btn_tag) {
-  //   toggleSlide(btn, data.toggle_target);
-  //   if (data.vis_target==false){
-  //     //console.log(data.active_card)
-  //     toggleOnSlide(data.card, data.submit, data.active_card, data.target_tag, btn_tag);
-  //   } else {
-  //     toggleOffSlide(data.card_target, data.nav_btns);
-  //   }
-  // }
+  function searchArtistNavbarToggle(navbar, d, this_element) {
+    var [brand, disable, form_ref] = searchArtistNavbarData(d, this_element);
+    hideNavTargets(d.btn_grp.btns);
+    emptyNavTargets(d.btn_grp.dyno_btns);
+    setNavBrand(navbar, brand);
+    setAttrAccess(d.btn_grp.btns, disable);
+    if (disable==false) thisForm($(form_ref)).submit();
+  }
+
+  function searchArtistNavbarData(d, this_element) {
+    var selected = $(this_element).find(":selected").text()
+    return selected.length ? [selected, false, this_element] : [d.brand, true, false];
+  }
+
+  function itemNavbarToggle(data, btn) {
+    if (data.card.vis_target == data.btn.vis_target) toggleVisibility(data.btn_grp.parent);
+    toggleActive(btn, navToggleSiblings(btn));
+  }
+
+  function slideToggle(d, btn, btn_tag) {
+    toggleSlide(btn, d.btn.toggle_target);
+    if (d.btn.vis_target==false){
+      toggleOnSlide(d.card.id, d.card.submit, d.btn.active_sibling, d.btn.target, btn_tag);
+    } else {
+      toggleOffSlide($(d.card.id).find(d.card.target), d.card.vis_target, d.btn_grp.btns);
+    }
+  }
 
   function toggleSlide(btn, target) {
     iconToggle(btn, "fa-toggle-on fa-toggle-off");
@@ -243,79 +258,123 @@ $(document).ready(function(){
     $(card).find(submit).click();
     toggleOffSlideSibling(active_card, btn);
   }
-  // function toggleOffSlideSibling(card, target, btn) {
-  //   var active_card = $(card).siblings().has(target);
-  //   if (active_card.length) $(active_card).find(btn).click();
-  // }
 
   function toggleOffSlideSibling(active_card, btn) {
     if (active_card.length) $(active_card).find(btn).click();
   }
   function toggleOffSlide(card_target, vis_target, nav_btns) {
     $(nav_btns).attr('disabled', true);
+    $(nav_btns).removeClass("active");
     $(card_target).empty();
     if (vis_target==true) toggleVisibility($(card_target));
-    //hideTarget($(card_target));
   }
 
-  function navbarDataTest(navbar, this_element) {
-    var data = $(navbar).data();
-    data.nav_btns = $(navbar).find(".nav-btn");
-    return navbarDataOpts(navbar, data, this_element);
+  // function navbarDataTestTwo(navbar, this_element, data) {
+  //   navCardData($(navbar).data(), data, {});
+  //   navToggleData(navbar, data, {});
+  //   return navTargetData(navbar, this_element, data, {});
+  // }
+
+  ///new
+  function navbarDataTestThree(navbar, this_element, data){
+    var nav_data = navbar.data();
+    formData(navbar, nav_data, data,{});
+    navBrandData(navbar, nav_data, data,{});
+    navBtnData(navbar, this_element, data, {});
+    navCardData(nav_data, data, {});
+    return navBtnGrpData(navbar, data, {});
   }
 
-  function navbarDataOpts(navbar, data, this_element){
-    if ($(this_element).has(".btn")){
-      data.target_tag = $(this_element).attr("data-target");
-      data.toggle_target = $(navbar).find(data.target_tag);
-      data.vis_target = isVisible(data.toggle_target);
-      //data.slide_target = $(data.card)find(data.target);
-      if (data.vis_target==false) {
-        data.active_card = siblingWithVisibleTarget(data.card, data.target_tag);
-        //console.log(data.target_tag)
-      } else {
-        data.card_target = $(data.card).attr("data-target");
-      }
+  //a
+  function formData(navbar, nav_data, data, forms){
+    if ('form' in nav_data) {
+      forms.form = nav_data.form;
+      forms.input = nav_data.input;
+      data.forms = forms;
     }
     return data;
   }
 
-  function navbarDataTestTwo(navbar, this_element, data) {
-    navCardData($(navbar).data(), data, {});
-    //data.nav_btns = $(navbar).find(".nav-btn");
-    navToggleData(navbar, data, {});
-    return navTargetData(navbar, this_element, data, {});
+  //b
+  function navBrandData(navbar, nav_data, data, brand){
+    if ('brand' in nav_data) {
+      brand.span = nav_data.brand;
+      data.brand = brand
+    }
+    return data;
   }
 
-  function navCardData(navbar_data, data, card){
-    if ('card' in navbar_data) {
-      card = $(navbar_data.card).data();
-      card.id = navbar_data.card;
+  //c
+  function navBtnData(navbar, this_element, data, btn) {
+    if ($(this_element).data("target") && $(this_element).has(".btn")) {
+      btn.target = $(this_element).attr("data-target");
+      btn.toggle_target = $(navbar).find(btn.target);
+      btn.vis_target = isVisible($(navbar).find(btn.target));
+      btn.context = $(this_element).hasClass("static") && !btn.vis_target ? 'show' : false;
+      data.btn = btn
+    }
+    return data;
+  }
+
+  //d
+  function navBtnGrpData(navbar, data, btn_grp){
+    btn_grp.btns = $(navbar).find(".nav-btn");
+    btn_grp.parent = navTargetDataParentTag(btn_grp.btns);
+    btn_grp.dyno_btns = $(btn_grp.btns).filter(".dynamic");
+    data.btn_grp = btn_grp;
+    return data;
+  }
+
+  //e
+  function navCardData(nav_data, data, card){
+    if ('card' in nav_data) {
+      card = $(nav_data.card).data();
+      card.id = nav_data.card;
       if ('target' in card) card.vis_target = isVisible($(card.id).find(card.target));
+      if (data.btn.vis_target==false) data.btn.active_sibling = siblingWithVisibleTarget(card.id, data.btn.target);
       data.card = card
     }
     return data;
   }
 
-  function navToggleData(navbar, data, nav_toggle){
-    nav_toggle.btns = $(navbar).find(".nav-btn");
-    // console.log(navTargetDataParentTag(nav_toggle.btns));
-    nav_toggle.parent = navTargetDataParentTag(nav_toggle.btns);
-    data.nav_toggle = nav_toggle;
-    return data;
+  function setNavBrand(navbar, brand){
+    //$(navbar + ".nav-brand").find("span.first").text(brandVal);
+    $(navbar).find("span").text(brand);
+  }
+  ///new-end
+
+  // function navCardData(navbar_data, data, card){
+  //   if ('card' in navbar_data) {
+  //     card = $(navbar_data.card).data();
+  //     card.id = navbar_data.card;
+  //     if ('target' in card) card.vis_target = isVisible($(card.id).find(card.target));
+  //     data.card = card
+  //   }
+  //   return data;
+  // }
+
+  // function navToggleData(navbar, data, nav_toggle){
+  //   nav_toggle.btns = $(navbar).find(".nav-btn");
+  //   nav_toggle.parent = navTargetDataParentTag(nav_toggle.btns);
+  //   data.nav_toggle = nav_toggle;
+  //   return data;
+  // }
+  //
+  // function navTargetData(navbar, this_element, data, btn){
+  //   if ($(this_element).data("target") && $(this_element).has(".btn")) {
+  //     btn.target = $(this_element).attr("data-target");
+  //     btn.toggle_target = formatToggleTarget(btn.target, navbar);
+  //     btn.vis_target = isVisible(btn.toggle_target);
+  //     if (btn.vis_target==false) btn.active_sibling = siblingWithVisibleTarget(data.card.id, btn.target);
+  //     data.btn = btn
+  //   }
+  //   return data;
+  // }
+
+  function formatToggleTarget(target, ref){
+    return target[0]=='#' ? $(target) : $(ref).find(target);
   }
 
-  function navTargetData(navbar, this_element, data, btn){
-    if ($(this_element).data("target") && $(this_element).has(".btn")) {
-      btn.target = $(this_element).attr("data-target");
-      btn.toggle_target = $(navbar).find(btn.target);
-      btn.vis_target = isVisible(btn.toggle_target);
-      //btn.vis_target = isVisible($(navbar).find(btn.target));
-      if (btn.vis_target==false) btn.active_sibling = siblingWithVisibleTarget(data.card.id, btn.target);
-      data.btn = btn
-    }
-    return data;
-  }
   //end navbar
 
   //show/collapse
@@ -332,7 +391,6 @@ $(document).ready(function(){
   }
   function isVisible(target) {
     return $(target).is(":visible");
-    //return $(target).is(":visible") ? target : false;
   }
 
   //toggle current caret-icon & card-body ######################################
@@ -347,26 +405,11 @@ $(document).ready(function(){
     iconToggle(caret_btn,"fa-caret-right fa-caret-down")
     toggleVisibility(target);
   }
-  function killSibling(parent, target, kill_btn) {
-    var active_sibling = $(parent).siblings().has(target);
-    if (active_sibling.length) $(active_sibling).find(kill_btn).click();
-  }
   function iconToggleAction(icon_btn, klass) {
     return $(icon_btn).find("i").hasClass(klass) ? 'collapse' : 'show'
   }
   function iconToggle(icon_btn, classes) {
     $(icon_btn).find("i").toggleClass(classes);
-  }
-
-  function showAction(action, parent, parent_target, nav_target, btn_target, kill_btn) {
-    if (action=='show'){
-      $(parent).find(btn_target).click();
-      killSibling(parent, nav_target+":visible", kill_btn)
-    } else {
-      $(nav_target).find("button").attr('disabled', true);
-      $(parent_target).empty();
-      if ($(parent_target).is(":visible")) toggleVisibility(parent_target);
-    }
   }
 
   //forms
