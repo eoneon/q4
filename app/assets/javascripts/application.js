@@ -24,60 +24,44 @@ $(document).ready(function(){
     caretToggle($(this), parent, $(parent).attr("data-target"), action, ".caret-toggle");
   });
 
-  $("body").on("click", ".slide-toggle", function(){
-    var data = navbarDataTestThree($(this).closest(".navbar"), $(this), {});
-    slideToggle(data, $(this), ".slide-toggle");
-  });
-
-  $("body").on("click", ".item-nav .nav-btn", function(){
-    var data = navbarDataTestThree($(this).closest(".navbar"), $(this), {});
-    itemNavbarToggle(data, $(this));
-  });
-
+  //NAVBAR
   $("body").on("click", "#invoice-nav .nav-link", function(){
     toggleActive($(this), $(this).closest(".navbar-nav").find("a.active"));
   });
 
+  $("body").on("click", ".slide-toggle", function(){
+    var data = navbarData($(this).closest(".navbar"), $(this), {});
+    slideToggle(data, $(this), ".slide-toggle");
+  });
+
+  $("body").on("click", ".item-nav .nav-btn", function(){
+    var data = navbarData($(this).closest(".navbar"), $(this), {});
+    itemNavbarToggle(data, $(this));
+  });
+
   $("body").on("click", "#artist-nav .nav-btn", function(){
-    var d = navbarDataTestThree($(this).closest(".navbar"), $(this), {});
-    console.log(d)
+    var d = navbarData($(this).closest(".navbar"), $(this), {});
     toggleActive($(this), navToggleSiblings($(this)));
     if (d.btn.context=='show') artistNavbarToggle($(this).closest(".navbar"), d);
   });
 
-  // $("body").on("click", "#artist-nav .nav-btn", function(){
-  //   var h = navbarData($(this).closest(".navbar"));
-  //   toggleActive($(this), navToggleSiblings($(this)));
-  //   if (showingStaticTarget($(this))){
-  //     $(h.span).text(h.spanVal);
-  //     deselectOpt($(h.input));
-  //     setAttrAccess(h.nav_btns, true);
-  //     emptyNavTargets(h.nav_btns, '.dynamic');
-  //   }
-  // });
   $("body").on("change", "select.artist-search", function(){
-    var d = navbarDataTestThree($(this).closest(".navbar"), $(this), {});
-
+    var d = navbarData($(this).closest(".navbar"), $(this), {});
     searchArtistNavbarToggle($(this).closest(".navbar"), d, $(this));
   });
 
-  // $("body").on("change", "select.artist-search", function(){
-  //   var [h, selected] = [navbarData($(this).closest(".navbar")), $(this).find(":selected").text()];
-  //   var [span_val, disable] = selected.length ? [selected, false] : [h.spanVal, true]
-  //   hideNavTargets(h.nav_btns,'.nav-btn');
-  //   emptyNavTargets(h.nav_btns, '.dynamic');
-  //   $(h.nav_btns).removeClass("active");
-  //   $(h.span).text(span_val);
-  //   setAttrAccess(h.nav_btns, disable);
-  //   if (disable==false) thisForm($(this)).submit();
-  // });
-
-  //forms
+  //FORMS-FIELDS
   $("body").on("keyup, focusin, focusout", ".required", function(){
     requiredFields($(this));
   });
 
-  //edit-form submission: UPDATE select field and submit form
+  $("body").on("change", "#title-select", function(){
+    var title = $(this).val();
+    $("#title-text").val(title);
+    $(".title-toggle").toggleClass("show collapse");
+  });
+
+  //FORMS-EVENT TRIGGERING SUBMIT
   $("body").on("change", "select.search-select, .field-param", function(){
     thisForm($(this)).submit();
   });
@@ -92,12 +76,6 @@ $(document).ready(function(){
     $("#new-title").submit();
   });
 
-  $("body").on("change", "#title-select", function(){
-    var title = $(this).val();
-    $("#title-text").val(title);
-    $(".title-toggle").toggleClass("show collapse");
-  });
-
   $("body").on("change", "#artist_id, #product_id", function(){
     var id = $(this).val();
     var input = "."+$(this).attr("id");
@@ -105,13 +83,7 @@ $(document).ready(function(){
     $("#new-title").submit();
   });
 
-  $("body").on("click", ".toggle-view", function(){
-    var toggle_targets = "."+$(this).attr("id");
-    $(toggle_targets).toggleClass("show collapse");
-  });
-
-
-  //item-field
+  //FORMS-UPDATE-SEARCH item-field
   $("body").on("change", ".update-search", function(){
     setValByInputName(inputGroupData($(this), "data-input"), $(this).val());
     $(inputGroupData($(this), "data-form")).submit();
@@ -129,6 +101,14 @@ $(document).ready(function(){
     $(inputGroupData($(this), "data-form")).submit();
   });
 
+  $("#new-skus-toggle, #new-item-skus-toggle").on("hide.bs.collapse", function(){
+    var a = $("[href='#"+$(this).attr("id")+"']");
+    refreshCaretForm($(a).attr("data-form"), $($(a).attr("data-form")).find(".card"));
+    clearInputsOpts("#title-select");
+    refreshForm($(a).attr("data-search"));
+  });
+
+  //TARGET-TOGGLE
   $("body").on("click", ".list-group-item", function(e){
     var [new_id, form] = [$(this).attr("id"), $(this).attr("data-form")];
     var input = $(form).find($($(this).attr("data-field")));
@@ -137,11 +117,9 @@ $(document).ready(function(){
     toggleTab(new_id, e);
   });
 
-  $("#new-skus-toggle, #new-item-skus-toggle").on("hide.bs.collapse", function(){
-    var a = $("[href='#"+$(this).attr("id")+"']");
-    refreshCaretForm($(a).attr("data-form"), $($(a).attr("data-form")).find(".card"));
-    clearInputsOpts("#title-select");
-    refreshSearchForm($(a).attr("data-search"));
+  $("body").on("click", ".toggle-view", function(){
+    var toggle_targets = "."+$(this).attr("id");
+    $(toggle_targets).toggleClass("show collapse");
   });
 
   $("a.nav-link.disabled").on("click", function(e){
@@ -149,79 +127,16 @@ $(document).ready(function(){
     e.preventDefault();
   });
 
-  //navbar
-  function navToggleBtns(a) {
-    return $(a).closest(".nav-toggle").find(".nav-btn");
-  }
-  function navToggleSiblings(a) {
-    return $(navToggleBtns(a)).not(a);
-  }
+  //NAVBAR
 
-  function navbarData(navbar) {
-    var data = $(navbar).data();
-    data.nav_btns = $(navbar).find(".nav-btn");
-    return data;
-  }
-
-  // function emptyNavTargets(ref, scope){
-  //   Array.from($(ref).filter(scope)).forEach(function (nav_btn) {
-  //     $($(nav_btn).attr("data-target")).empty();
-  //   });
-  // }
-  function emptyNavTargets(nav_btns){
-    Array.from($(nav_btns)).forEach(function (nav_btn) {
-      $($(nav_btn).attr("data-target")).empty();
-    });
-  }
-  // function hideNavTargets(ref, scope){
-  //   Array.from($(ref).filter(scope)).forEach(function (nav_btn) {
-  //     hideTarget($($(nav_btn).attr("data-target")));
-  //   });
-  // }
-  function hideNavTargets(nav_btns){
-    Array.from($(nav_btns)).forEach(function (nav_btn) {
-      $(nav_btn).removeClass("active");
-      hideTarget($($(nav_btn).attr("data-target")));
-    });
-  }
-  function navTargetDataParentTag(nav_btns){
-    return $($(nav_btns).attr("data-target")).attr("data-parent");
-  }
-  function dataParentTargets(parent) {
-    return $(parent).find("[data-parent='"+parent+"']");
-  }
-
-  // function showingStaticTarget(btn) {
-  //   return $(btn).hasClass("static") && !isVisible($(btn).attr("data-target"));
-  // }
-  function toggleActive(a, sibling) {
-    var state = toggleIntraClass(a, "active");
-    if (state==true) $(sibling).removeClass("active");
-  }
-
-  function toggleIntraClass(target, klass) {
-    $(target).hasClass(klass) ? $(target).removeClass(klass) : $(target).addClass(klass)
-    return $(target).hasClass(klass) ? true : false
-  }
-
-  //aside/tabs
-  function toggleTab(id, e) {
-    if ($('#'+id).hasClass("active")) {
-      e.stopPropagation();
-      e.preventDefault();
-      $('#'+id).removeClass("active");
-    }
-  }
-
-  //navbar => new
+  //ARTIST-NAVBAR: ADD, EDIT & SEARCH
   function artistNavbarToggle(navbar, d) {
     setNavBrand(navbar, d.brand.span);
     deselectOpt($(d.forms.input));
     setAttrAccess(d.btn_grp.btns, true);
     emptyNavTargets(d.btn_grp.dyno_btns);
-    //emptyNavTargets(d.btn_grp.dyno_btns, '.dynamic');
   }
-
+  //ARTIST-NAVBAR: UPDATE NAVBAR FROM SEARCH FORM
   function searchArtistNavbarToggle(navbar, d, this_element) {
     var [brand, disable, form_ref] = searchArtistNavbarData(d, this_element);
     hideNavTargets(d.btn_grp.btns);
@@ -230,26 +145,27 @@ $(document).ready(function(){
     setAttrAccess(d.btn_grp.btns, disable);
     if (disable==false) thisForm($(form_ref)).submit();
   }
-
   function searchArtistNavbarData(d, this_element) {
-    var selected = $(this_element).find(":selected").text()
-    return selected.length ? [selected, false, this_element] : [d.brand, true, false];
+    var selected = $(this_element).find(":selected").text();
+    return selected.length ? [selected, false, this_element] : [d.brand.span, true, false];
   }
 
+  //ITEM-NAVBAR: TABLE-SKUS
   function itemNavbarToggle(data, btn) {
     if (data.card.vis_target == data.btn.vis_target) toggleVisibility(data.btn_grp.parent);
     toggleActive(btn, navToggleSiblings(btn));
   }
-
+  //ITEM-NAVBAR: SLIDE-TOGGLE BTN - TABLE-SKUS
   function slideToggle(d, btn, btn_tag) {
+    console.log(d)
     toggleSlide(btn, d.btn.toggle_target);
     if (d.btn.vis_target==false){
-      toggleOnSlide(d.card.id, d.card.submit, d.btn.active_sibling, d.btn.target, btn_tag);
+      toggleOnSlide(d.card.id, d.card.submit, d.btn.sibling_btn, d.btn.target, btn_tag);
+      //toggleOnSlide(d.card.id, d.card.submit, d.btn.target, btn_tag);
     } else {
       toggleOffSlide($(d.card.id).find(d.card.target), d.card.vis_target, d.btn_grp.btns);
     }
   }
-
   function toggleSlide(btn, target) {
     iconToggle(btn, "fa-toggle-on fa-toggle-off");
     toggleVisibility($(target));
@@ -258,9 +174,11 @@ $(document).ready(function(){
     $(card).find(submit).click();
     toggleOffSlideSibling(active_card, btn);
   }
-
-  function toggleOffSlideSibling(active_card, btn) {
-    if (active_card.length) $(active_card).find(btn).click();
+  // function toggleOffSlideSibling(active_card, btn) {
+  //   if (active_card.length) $(active_card).find(btn).click();
+  // }
+  function toggleOffSlideSibling(sibling_btn, btn) {
+    if (sibling_btn) $(sibling_btn).click();
   }
   function toggleOffSlide(card_target, vis_target, nav_btns) {
     $(nav_btns).attr('disabled', true);
@@ -269,14 +187,27 @@ $(document).ready(function(){
     if (vis_target==true) toggleVisibility($(card_target));
   }
 
-  // function navbarDataTestTwo(navbar, this_element, data) {
-  //   navCardData($(navbar).data(), data, {});
-  //   navToggleData(navbar, data, {});
-  //   return navTargetData(navbar, this_element, data, {});
-  // }
+  //NAVBAR UTILITY FUNCTIONS
+  function emptyNavTargets(nav_btns){
+    Array.from($(nav_btns)).forEach(function (nav_btn) {
+      $($(nav_btn).attr("data-target")).empty();
+    });
+  }
+  function hideNavTargets(nav_btns){
+    Array.from($(nav_btns)).forEach(function (nav_btn) {
+      $(nav_btn).removeClass("active");
+      hideTarget($($(nav_btn).attr("data-target")));
+    });
+  }
+  function setNavBrand(navbar, brand){
+    $(navbar).find(".navbar-brand span").text(brand);
+  }
+  function formatToggleTarget(parent, target){
+    return parent[0]=='#' ? $(target) : $(parent).find(target);
+  }
 
-  ///new
-  function navbarDataTestThree(navbar, this_element, data){
+  //NAVBAR-DATA: FOR navbarData
+  function navbarData(navbar, this_element, data){
     var nav_data = navbar.data();
     formData(navbar, nav_data, data,{});
     navBrandData(navbar, nav_data, data,{});
@@ -285,7 +216,6 @@ $(document).ready(function(){
     return navBtnGrpData(navbar, data, {});
   }
 
-  //a
   function formData(navbar, nav_data, data, forms){
     if ('form' in nav_data) {
       forms.form = nav_data.form;
@@ -294,8 +224,6 @@ $(document).ready(function(){
     }
     return data;
   }
-
-  //b
   function navBrandData(navbar, nav_data, data, brand){
     if ('brand' in nav_data) {
       brand.span = nav_data.brand;
@@ -303,91 +231,119 @@ $(document).ready(function(){
     }
     return data;
   }
-
-  //c
   function navBtnData(navbar, this_element, data, btn) {
     if ($(this_element).data("target") && $(this_element).has(".btn")) {
       btn.target = $(this_element).attr("data-target");
       btn.toggle_target = $(navbar).find(btn.target);
       btn.vis_target = isVisible($(navbar).find(btn.target));
+      visibleSibling(btn, btn.vis_target, this_element);
+      btn.sibling_btn = btn.active_sibling ? targetParent(btn.active_sibling) : false
       btn.context = $(this_element).hasClass("static") && !btn.vis_target ? 'show' : false;
       data.btn = btn
     }
     return data;
   }
-
-  //d
   function navBtnGrpData(navbar, data, btn_grp){
     btn_grp.btns = $(navbar).find(".nav-btn");
-    btn_grp.parent = navTargetDataParentTag(btn_grp.btns);
+    btn_grp.parent = parentTag(btn_grp.btns);
     btn_grp.dyno_btns = $(btn_grp.btns).filter(".dynamic");
     data.btn_grp = btn_grp;
     return data;
   }
-
-  //e
   function navCardData(nav_data, data, card){
     if ('card' in nav_data) {
       card = $(nav_data.card).data();
       card.id = nav_data.card;
-      if ('target' in card) card.vis_target = isVisible($(card.id).find(card.target));
-      if (data.btn.vis_target==false) data.btn.active_sibling = siblingWithVisibleTarget(card.id, data.btn.target);
+      visibleTarget(card, card.id, card.target);
+      //if (data.btn.vis_target==false) data.btn.active_sibling = siblingWithVisibleTarget(card.id, data.btn.target);
+      console.log(card.id)
       data.card = card
     }
     return data;
   }
-
-  function setNavBrand(navbar, brand){
-    //$(navbar + ".nav-brand").find("span.first").text(brandVal);
-    $(navbar).find("span").text(brand);
+  function visibleTarget(obj, parent, target) {
+    if ('target' in obj) obj.vis_target = isVisible($(parent).find(target));
+    return obj;
   }
-  ///new-end
-
-  // function navCardData(navbar_data, data, card){
-  //   if ('card' in navbar_data) {
-  //     card = $(navbar_data.card).data();
-  //     card.id = navbar_data.card;
-  //     if ('target' in card) card.vis_target = isVisible($(card.id).find(card.target));
-  //     data.card = card
-  //   }
-  //   return data;
-  // }
-
-  // function navToggleData(navbar, data, nav_toggle){
-  //   nav_toggle.btns = $(navbar).find(".nav-btn");
-  //   nav_toggle.parent = navTargetDataParentTag(nav_toggle.btns);
-  //   data.nav_toggle = nav_toggle;
-  //   return data;
-  // }
-  //
-  // function navTargetData(navbar, this_element, data, btn){
-  //   if ($(this_element).data("target") && $(this_element).has(".btn")) {
-  //     btn.target = $(this_element).attr("data-target");
-  //     btn.toggle_target = formatToggleTarget(btn.target, navbar);
-  //     btn.vis_target = isVisible(btn.toggle_target);
-  //     if (btn.vis_target==false) btn.active_sibling = siblingWithVisibleTarget(data.card.id, btn.target);
-  //     data.btn = btn
-  //   }
-  //   return data;
-  // }
-
-  function formatToggleTarget(target, ref){
-    return target[0]=='#' ? $(target) : $(ref).find(target);
+  function visibleSibling(obj, vis_target, this_element) {
+    if (vis_target==false) obj.active_sibling = visibleSiblingTarget(this_element);
+    return obj;
   }
 
-  //end navbar
+  //GET VISIBLE DATA-SIBLING TARGETS FROM TOGGLE-BTN
+  function visibleSiblingTarget(btn) {
+    var active_sibling = dataSiblings(btn).filter(":visible");
+    return active_sibling.length ? active_sibling : false;
+  }
+  //GET DATA-SIBLING TARGETS FROM NAV-BTN
+  function dataSiblings(btn) {
+    return dataTargets(btn).not($($(btn.attr("data-target"))));
+  }
+  //GET DATA-TARGETS FROM NAV-BTN
+  function dataTargets(btn) {
+    return parentTargets(parentTag(btn));
+  }
+  //GET DATA-PARENT FROM NAV-BTN
+  function parentTag(nav_btns){
+    return $($(nav_btns).attr("data-target")).attr("data-parent");
+  }
+  //GET DATA-TARGETS FROM DATA-PARENT
+  function parentTargets(parent_tag) {
+    return $(dataAttr('parent', parent_tag));
+  }
+  function targetParent(target) {
+    return dataAttr('target', "#"+$(target).attr("id"));
+  }
+  //GET NAV-BTNS FROM MEMBER
+  function navToggleBtns(a) {
+    return $(a).closest(".nav-toggle").find(".nav-btn");
+  }
+  //GET SIBLING NAV-BTNS FROM MEMBER
+  function navToggleSiblings(a) {
+    return $(navToggleBtns(a)).not(a);
+  }
+  function dataAttr(attr, tag) {
+    return "[data-"+attr+"='"+tag+"']";
+  }
 
-  //show/collapse
+  //TOGGLE-CLASSES
+
+  //TOGGLE-CLASS - ACTIVE (BINARY)
+  function toggleActive(a, sibling) {
+    var state = toggleIntraClass(a, "active");
+    if (state==true) $(sibling).removeClass("active");
+  }
+  //TOGGLE CLASS (BINARY)
+  function toggleIntraClass(target, klass) {
+    $(target).hasClass(klass) ? $(target).removeClass(klass) : $(target).addClass(klass)
+    return $(target).hasClass(klass) ? true : false
+  }
+  //TOGGLE-TAB & SIBLINGS CLASS - ACTIVE
+  function toggleTab(id, e) {
+    if ($('#'+id).hasClass("active")) {
+      e.stopPropagation();
+      e.preventDefault();
+      $('#'+id).removeClass("active");
+    }
+  }
+  //TOGGLE-CLASSES - SHOW/COLLAPSE
+  function toggleVisibility(target) {
+    $(target).toggleClass("show collapse");
+  }
+  //TOGGLE-ICON CLASSES
+  function iconToggle(icon_btn, classes) {
+    $(icon_btn).find("i").toggleClass(classes);
+  }
+
+  //TOGGLE SHOW/COLLAPSE
+
+  //DETECT & RETURN VISIBLE TOGGLE SIBLING
   function siblingWithVisibleTarget(parent, target) {
     var active_sibling = $(parent).siblings().has(target+":visible");
     return active_sibling.length ? active_sibling : false;
   }
   function hideTarget(target) {
     if (isVisible($(target))) $(target).removeClass("show");
-    //if (isVisible($(target))) $(target).toggleClass("show collapse");
-  }
-  function toggleVisibility(target) {
-    $(target).toggleClass("show collapse");
   }
   function isVisible(target) {
     return $(target).is(":visible");
@@ -408,12 +364,9 @@ $(document).ready(function(){
   function iconToggleAction(icon_btn, klass) {
     return $(icon_btn).find("i").hasClass(klass) ? 'collapse' : 'show'
   }
-  function iconToggle(icon_btn, classes) {
-    $(icon_btn).find("i").toggleClass(classes);
-  }
 
   //forms
-  function refreshSearchForm(target) {
+  function refreshForm(target) {
     clearInputs(target);
     $(target).submit();
   }

@@ -4,7 +4,7 @@
     <% rows.each_with_index do |(card_id, card), i| %>
 
       <div class="card border-0 px-1 py-0 mb-1 <%=table_strip(i)%>" data-target=".card-body">
-        <!-- <hr> -->
+
         <div class="card-header border-0 bg-transparent pt-1 pb-1 pl-0 pr-0">
           <div class="form-row">
             <% card[:header].each do |f_hsh| %>
@@ -12,6 +12,7 @@
             <% end %>
           </div>
         </div>
+
         <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-white border border-white border-top-0 rounded-bottom collapse">
           <div class="form-row">
             <% card[:body].each do |f_hsh| %>
@@ -19,6 +20,7 @@
             <% end %>
           </div>
         </div>
+
       </div>
     <% end %>
   </div>
