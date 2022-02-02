@@ -30,12 +30,15 @@ $(document).ready(function(){
   });
 
   $("body").on("click", ".slide-toggle", function(){
-    var data = navbarData($(this).closest(".navbar"), $(this), {});
-    slideToggle(data, $(this), ".slide-toggle");
+    //var data = navbarData($(this).closest(".navbar"), $(this), {});
+    var data = slideToggleData($(this), {}, {}, {});
+    console.log(data);
+    slideToggle(data);
   });
 
   $("body").on("click", ".item-nav .nav-btn", function(){
     var data = navbarData($(this).closest(".navbar"), $(this), {});
+    //var a = toggleBtnData($(this), {}, {});
     itemNavbarToggle(data, $(this));
   });
 
@@ -156,36 +159,55 @@ $(document).ready(function(){
     toggleActive(btn, navToggleSiblings(btn));
   }
   //ITEM-NAVBAR: SLIDE-TOGGLE BTN - TABLE-SKUS
-  function slideToggle(d, btn, btn_tag) {
-    console.log(d)
-    toggleSlide(btn, d.btn.toggle_target);
-    if (d.btn.vis_target==false){
-      toggleOnSlide(d.card.id, d.card.submit, d.btn.sibling_btn, d.btn.target, btn_tag);
-      //toggleOnSlide(d.card.id, d.card.submit, d.btn.target, btn_tag);
+  // function slideToggle(d, btn) {
+  //   toggleSlide(btn, d.btn.toggle_target);
+  //   if (d.btn.vis_target==false){
+  //     //toggleOnSlide(d.card.id, d.card.submit, d.btn.sibling_btn, d.btn.target);
+  //     toggleOnSlide(d.card.id, d.card.submit, d.btn.sibling_btn);
+  //   } else {
+  //     toggleOffSlide($(d.card.id).find(d.card.target), d.card.vis_target, d.btn_grp.btns);
+  //   }
+  // }
+  function slideToggle(d) {
+    toggleSlide(d.btn_hsh.this_btn, d.btn_hsh.target);
+    if (!d.btn_hsh.vis_target){
+      toggleOnSlide(d.btn_hsh.submit, d.btn_hsh.sibling_btn);
     } else {
-      toggleOffSlide($(d.card.id).find(d.card.target), d.card.vis_target, d.btn_grp.btns);
+      toggleOffSlide(d.btn_grp.parent, d.btn_grp.btns);
     }
   }
+  function slideToggleData(this_btn, data, btn_hsh, btn_grp) {
+    toggleBtnData(this_btn, data, btn_hsh);
+    navBtnGrpData(nav_btns(this_btn), data, btn_grp);
+    return data;
+  }
+
   function toggleSlide(btn, target) {
     iconToggle(btn, "fa-toggle-on fa-toggle-off");
     toggleVisibility($(target));
   }
-  function toggleOnSlide(card, submit, active_card, target, btn) {
-    $(card).find(submit).click();
-    toggleOffSlideSibling(active_card, btn);
+  function toggleOnSlide(submit, sibling_btn) {
+    $(submit).click();
+    toggleOffSlideSibling(sibling_btn);
   }
-  // function toggleOffSlideSibling(active_card, btn) {
-  //   if (active_card.length) $(active_card).find(btn).click();
+  function toggleOffSlide(btn_grp_parent, nav_btns) {
+    $(nav_btns).removeClass("active").attr('disabled', true);
+    $(btn_grp_parent).empty();
+    if (isVisible(btn_grp_parent)) toggleVisibility($(btn_grp_parent));
+  }
+  // function toggleOnSlide(card, submit, active_card, target) {
+  //   $(card).find(submit).click();
+  //   toggleOffSlideSibling(active_card);
   // }
-  function toggleOffSlideSibling(sibling_btn, btn) {
+
+  function toggleOffSlideSibling(sibling_btn) {
     if (sibling_btn) $(sibling_btn).click();
   }
-  function toggleOffSlide(card_target, vis_target, nav_btns) {
-    $(nav_btns).attr('disabled', true);
-    $(nav_btns).removeClass("active");
-    $(card_target).empty();
-    if (vis_target==true) toggleVisibility($(card_target));
-  }
+  // function toggleOffSlide(card_target, vis_target, nav_btns) {
+  //   $(nav_btns).removeClass("active").attr('disabled', true);
+  //   $(card_target).empty();
+  //   if (vis_target==true) toggleVisibility($(card_target));
+  // }
 
   //NAVBAR UTILITY FUNCTIONS
   function emptyNavTargets(nav_btns){
@@ -212,6 +234,8 @@ $(document).ready(function(){
     formData(navbar, nav_data, data,{});
     navBrandData(navbar, nav_data, data,{});
     navBtnData(navbar, this_element, data, {});
+
+    //console.log(data.btn_hsh);
     navCardData(nav_data, data, {});
     return navBtnGrpData(navbar, data, {});
   }
@@ -231,69 +255,138 @@ $(document).ready(function(){
     }
     return data;
   }
+  //slideBtnData
   function navBtnData(navbar, this_element, data, btn) {
     if ($(this_element).data("target") && $(this_element).has(".btn")) {
       btn.target = $(this_element).attr("data-target");
       btn.toggle_target = $(navbar).find(btn.target);
       btn.vis_target = isVisible($(navbar).find(btn.target));
       visibleSibling(btn, btn.vis_target, this_element);
-      btn.sibling_btn = btn.active_sibling ? targetParent(btn.active_sibling) : false
+      //visibleSiblings(this_element);
+      btn.sibling_btn = btn.active_sibling ? siblingToggle(btn.active_sibling) : false
       btn.context = $(this_element).hasClass("static") && !btn.vis_target ? 'show' : false;
       data.btn = btn
     }
     return data;
   }
+  // function toggleBtnData(this_btn, data, btn_hsh) {
+  //   btn_hsh.id = this_btn.attr("id");
+  //   btn_hsh.target = attrVal(this_btn, 'target');
+  //   btn_hsh.vis_target = isVisible(btn_hsh.target);
+  //   visibleSibling(btn_hsh, btn_hsh.vis_target, this_btn);
+  //   //visibleSiblings(this_element);
+  //   btn_hsh.context = $(this_btn).hasClass("static") && !btn_hsh.vis_target ? 'show' : false;
+  //   data.btn_hsh = $.extend(true, btn_hsh, this_btn.data());
+  //   return data
+  // }
   function navBtnGrpData(navbar, data, btn_grp){
     btn_grp.btns = $(navbar).find(".nav-btn");
-    btn_grp.parent = parentTag(btn_grp.btns);
+    btn_grp.parent = dataParent(btn_grp.btns);
     btn_grp.dyno_btns = $(btn_grp.btns).filter(".dynamic");
     data.btn_grp = btn_grp;
     return data;
   }
+
   function navCardData(nav_data, data, card){
     if ('card' in nav_data) {
       card = $(nav_data.card).data();
       card.id = nav_data.card;
       visibleTarget(card, card.id, card.target);
-      //if (data.btn.vis_target==false) data.btn.active_sibling = siblingWithVisibleTarget(card.id, data.btn.target);
-      console.log(card.id)
       data.card = card
     }
     return data;
   }
+  //new: replaces navBtnGrpData
+  function navBtnsData(nav_btns, data, btn_grp){
+    btn_grp.btns = nav_btns;
+    btn_grp.parent = dataParent(nav_btns);
+    btn_grp.dyno_btns = $(nav_btns).filter(".dynamic");
+    data.btn_grp = btn_grp;
+    return data;
+  }
+  function toggleBtnData(this_btn, data, btn_hsh) {
+    toggleTargetData(this_btn, data, btn_hsh);
+    siblingData(btn_hsh, btn_hsh.vis_target, visibleSiblings(this_btn));
+    btn_hsh.this_btn = this_btn;
+    data.btn_hsh = $.extend(true, btn_hsh, this_btn.data());
+    return data
+  }
+  function toggleTargetData(this_btn, data, btn_hsh) {
+    btn_hsh.target = attrVal(this_btn, 'target');
+    btn_hsh.vis_target = isVisible(btn_hsh.target);
+    return btn_hsh
+  }
+  function siblingData(obj, vis_target, vis_sibling) {
+    if (!vis_target) {
+      obj.vis_sibling = vis_sibling;
+      obj.sibling_btn = vis_sibling && siblingToggle(vis_sibling);
+    }
+    return obj;
+  }
+  //kill
   function visibleTarget(obj, parent, target) {
     if ('target' in obj) obj.vis_target = isVisible($(parent).find(target));
     return obj;
   }
+  // function visibleSibling(obj, vis_target, this_element) {
+  //   if (vis_target==false) obj.active_sibling = visibleSiblingTarget(this_element);
+  //   return obj;
+  // }
   function visibleSibling(obj, vis_target, this_element) {
-    if (vis_target==false) obj.active_sibling = visibleSiblingTarget(this_element);
+    if (!vis_target) {
+      obj.active_sibling = visibleSiblingTarget(this_element);
+      obj.sibling_btn = obj.active_sibling && siblingToggle(obj.active_sibling);
+    }
     return obj;
   }
-
+  //kill
+  function visibleSiblings(btn) {
+    var siblings = dataSiblingTargets(btn);
+    return siblings ? valid($(siblings).filter(":visible")) : false;
+  }
   //GET VISIBLE DATA-SIBLING TARGETS FROM TOGGLE-BTN
-  function visibleSiblingTarget(btn) {
-    var active_sibling = dataSiblings(btn).filter(":visible");
-    return active_sibling.length ? active_sibling : false;
+  // function visibleSiblingTarget(btn) {
+  //   var active_sibling = dataSiblingTargets(btn).filter(":visible");
+  //   return active_sibling.length ? active_sibling : false;
+  // }
+
+  //GET data-parent obj from given toggle-btn(s)
+  function dataParent(toggle_btn){
+    return attrVal(toggle_btn, 'target').attr("data-parent");
   }
-  //GET DATA-SIBLING TARGETS FROM NAV-BTN
-  function dataSiblings(btn) {
-    return dataTargets(btn).not($($(btn.attr("data-target"))));
-  }
-  //GET DATA-TARGETS FROM NAV-BTN
+  //GET all toggle-targets of a toggle-btn's data-parent
   function dataTargets(btn) {
-    return parentTargets(parentTag(btn));
+    return dataAttrVal('parent', dataParent(btn));
   }
-  //GET DATA-PARENT FROM NAV-BTN
-  function parentTag(nav_btns){
-    return $($(nav_btns).attr("data-target")).attr("data-parent");
+  //GET sibling targets from data-targets (exclude clicked toggle-btn) sibling-targets || false
+  function dataSiblingTargets(toggle_btn) {
+    var targets = valid(dataTargets(toggle_btn));
+    return targets ? $(targets).not(attrVal(toggle_btn, 'target')) : false;
   }
-  //GET DATA-TARGETS FROM DATA-PARENT
-  function parentTargets(parent_tag) {
-    return $(dataAttr('parent', parent_tag));
+  //GET visible sibling target
+  function visibleSiblingTarget(toggle_btn) {
+    var sibling_targets = dataSiblingTargets(toggle_btn);
+    return sibling_targets ? valid($(sibling_targets).filter(":visible")) : false;
   }
-  function targetParent(target) {
-    return dataAttr('target', "#"+$(target).attr("id"));
+  //GET sibling toggle btn from visible sibling target in order to toggle-off: `$(sibling_btn).click();`
+  function siblingToggle(sibling_target) {
+    return dataAttr('target', "#"+$(sibling_target).attr("id"));
   }
+
+  //ATTR FUNCTIONS
+  function dataAttrVal(attr, tag) {
+    return $(dataAttr(attr, tag));
+  }
+  function dataAttr(attr, tag) {
+    return "[data-"+attr+"='"+tag+"']";
+  }
+  function attrVal(ref, attr) {
+    return $(attrTag(ref, attr));
+  }
+  function attrTag(ref, attr) {
+    return $(ref).attr("data-"+attr);
+  }
+
   //GET NAV-BTNS FROM MEMBER
   function navToggleBtns(a) {
     return $(a).closest(".nav-toggle").find(".nav-btn");
@@ -302,10 +395,6 @@ $(document).ready(function(){
   function navToggleSiblings(a) {
     return $(navToggleBtns(a)).not(a);
   }
-  function dataAttr(attr, tag) {
-    return "[data-"+attr+"='"+tag+"']";
-  }
-
   //TOGGLE-CLASSES
 
   //TOGGLE-CLASS - ACTIVE (BINARY)
@@ -423,8 +512,14 @@ $(document).ready(function(){
   }
 
   //utilities ##################################################################
+  function nav_btns(this_btn) {
+    return $(this_btn).closest(".navbar").find(".nav-btn");
+  }
   function sliceTag(attr, i) {
     return attr.split('-')[i]
+  }
+  function valid(val) {
+    return val != undefined && val.length ? val : false;
   }
 });
 //end ########################################################################
