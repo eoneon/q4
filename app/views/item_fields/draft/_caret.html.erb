@@ -1,0 +1,5 @@
+<% if i == 0 && (body.blank? || context=='body') %>
+  <button id="<%= card_id %>" class="caret-toggle btn btn-sm bg-transparent mx-1 my-1 pl-2 py-0" type="button" <%= disable_btn(body) %>></button>
+<% elsif i == 0 %>
+  <button id="<%= card_id %>" class="caret-toggle btn btn-sm bg-transparent mx-1 my-1 pl-2 py-0" type="button"><%= (fa_icon "caret-right") %></button>
+<% end %>

@@ -1,6 +1,6 @@
 <div class="col-2">
   <div class="input-group input-group-sm">
-    <%= render "item_fields/caret", card_id: card_id, body: card[:body], i: i, context: context %>
+    <%= render "item_fields/caret", card_id: card_id, target: target, body: card[:body], i: i, context: context %>
     <%= render "item_fields/label", label: f_hsh %>
     <%= f.number_field f_hsh[:f_name], value: f_hsh[:selected], step: 0.5, class: boot_classes(:input, 'field-param') %>
   </div>

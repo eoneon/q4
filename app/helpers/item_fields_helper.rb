@@ -22,7 +22,7 @@ module ItemFieldsHelper
   end
 
   def disable_btn(v)
-    "disabled" if v.blank?
+    '' if v.blank?
   end
 
 end

@@ -9,7 +9,7 @@
 
           <div class="col-4 pt-2">
             <div class="input-group input-group-sm">
-              <%= render "item_fields/caret", card_id: 'skus', body: true, i: 0, context: 'header' %>
+              <%= render "item_fields/caret", card_id: 'skus', target: '#new-item-skus-body', body: true, i: 0, context: 'header' %>
               <%= render "item_fields/label", label: 'skus' %>
               <%= f.text_field :skus, placeholder: "enter sku range", class: boot_classes(:input, 'required') %>
             </div>
@@ -21,12 +21,12 @@
         </div>
       </div>
 
-      <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-gray-d border border-white border-top-0 rounded-bottom default-collapse collapse">
+      <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-gray-d border border-white border-top-0 rounded-bottom default-collapse collapse" id="new-item-skus-body" data-parent="#new-item-skus">
 
         <div class="form-row pt-2 pb-2 pr-2">
           <div class="col-4 ml-0">
             <div class="input-group input-group-sm">
-              <%= render "item_fields/caret", card_id: 'artist', body: true, i: 0, context: 'body' %>
+              <%= render "item_fields/caret", card_id: 'artist', target: nil, body: true, i: 0, context: 'body' %>
               <%= render "item_fields/label", label: 'artist' %>
               <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'artist_id'), id: "artist_id" %>
             </div>

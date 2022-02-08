@@ -1,5 +1,5 @@
 <%= f.fields_for f_hsh[:k].to_sym do |kind_scope| %>
   <%= kind_scope.fields_for f_hsh[:t_type].to_sym do |type_scope| %>
-    <%= render "item_fields/#{f_hsh[:t]}", f: type_scope, f_hsh: f_hsh, card_id: card_id, card: card, i: i, context: context %>
+    <%= render "item_fields/#{f_hsh[:t]}", f: type_scope, f_hsh: f_hsh, card_id: card_id, target: target, card: card, i: i, context: context %>
   <% end %>
 <% end %>

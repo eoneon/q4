@@ -1,6 +1,6 @@
 <div class="col-3">
   <div class="input-group input-group-sm">
-    <%= render "item_fields/caret", card_id: card_id, body: card[:body], i: i, context: context %>
+    <%= render "item_fields/caret", card_id: card_id, target: target, body: card[:body], i: i, context: context %>
     <%= render "item_fields/label", label: f_hsh %>
     <%= f.collection_select f_hsh[:f_name], f_hsh[:f_val].field_sets, :id, :field_name, {include_blank: true, selected: f_hsh[:selected]}, {class: boot_classes(:input, 'field-param')} %>
   </div>

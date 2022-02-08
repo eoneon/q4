@@ -19,9 +19,7 @@
 $(document).ready(function(){
 
   $("body").on("click", ".caret-toggle", function(){
-    var [action, parent, input] = [iconToggleAction($(this), "fa-caret-down"), $(this).closest(".card"), $(this).attr("data-input")];
-    toggleSet($("#caret-id"), $(this).attr("id"), $("#caret-id").val()); //toggleSet($(input), $(this).attr("id"), $(input).val());
-    caretToggle($(this), parent, $(parent).attr("data-target"), action, ".caret-toggle");
+    if ($(this).find("i").length) caretToggle(toggleBtnData($(this),{}));
   });
 
   //NAVBAR
@@ -121,39 +119,13 @@ $(document).ready(function(){
     $(toggle_targets).toggleClass("show collapse");
   });
 
-  $("a.nav-link.disabled").on("click", function(e){
+  $("a.nav-link.disabled, button.disabled").on("click", function(e){
     e.stopPropagation();
     e.preventDefault();
   });
 
   //NAVBAR
 
-  //ARTIST-NAVBAR: ADD, EDIT & SEARCH
-  // function artistNavbarToggle(navbar, d) {
-  //   setNavBrand(navbar, d.brand.span);
-  //   deselectOpt($(d.forms.input));
-  //   setAttrAccess(d.btn_grp.btns, true);
-  //   emptyNavTargets(d.btn_grp.dyno_btns);
-  // }
-  //ARTIST-NAVBAR: UPDATE NAVBAR FROM SEARCH FORM
-  // function searchArtistNavbarToggle(navbar, d, this_element) {
-  //   var [brand, disable, form_ref] = searchArtistNavbarData(d, this_element);
-  //   hideNavTargets(d.btn_grp.btns);
-  //   emptyNavTargets(d.btn_grp.dyno_btns);
-  //   setNavBrand(navbar, brand);
-  //   setAttrAccess(d.btn_grp.btns, disable);
-  //   if (disable==false) thisForm($(form_ref)).submit();
-  // }
-  // function searchArtistNavbarData(d, this_element) {
-  //   var selected = $(this_element).find(":selected").text();
-  //   return selected.length ? [selected, false, this_element] : [d.brand.span, true, false];
-  // }
-
-  //ITEM-NAVBAR: TABLE-SKUS
-  function itemNavbarToggle(d) {
-    if (!d.btn.vis_target && !isVisible(d.btn.parent) || d.btn.vis_target) toggleVisibility(d.btn.parent);
-    toggleActive(d.btn.this_btn, navToggleSiblings(d.btn.this_btn));
-  }
   //ITEM-NAVBAR: SLIDE-TOGGLE BTN - TABLE-SKUS
   function slideToggle(d) {
     toggleSlide(d.btn.this_btn, d.btn.target);
@@ -165,7 +137,7 @@ $(document).ready(function(){
   }
   function slideToggleData(this_btn, data) {
     toggleBtnData(this_btn, data);
-    navBtnsData(nav_btns(this_btn), data);
+    navBtnData(nav_btns(this_btn), data);
     return data;
   }
   function toggleSlide(btn, target) {
@@ -185,7 +157,32 @@ $(document).ready(function(){
     if (sibling_btn) $(sibling_btn).click();
   }
 
+  //ITEM-NAVBAR: TABLE-SKUS
+  function itemNavbarToggle(d) {
+    if (!d.btn.vis_target && !isVisible(d.btn.parent) || d.btn.vis_target) toggleVisibility(d.btn.parent);
+    toggleActive(d.btn.this_btn, navToggleSiblings(d.btn.this_btn));
+  }
+
+  //ARTIST-NAVBAR: from NAVBAR NAV-BTNS
+  function refreshArtistNavbar(d) {
+    setNavBrand(d.nav.navbar, d.nav.brand);
+    deselectOpt($(d.nav.input));
+    setAttrAccess(d.nav_grp.btns, true);
+    emptyNavTargets(d.nav_grp.dyno_btns);
+  }
+  //ARTIST-NAVBAR: from NAVBAR ARTIST SEARCH
+  function updateArtistNavbar(d) {
+    hideNavTargets(d.nav_grp.btns);
+    emptyNavTargets(d.nav_grp.dyno_btns);
+    setNavBrand(d.nav.navbar, d.brand);
+    setAttrAccess(d.nav_grp.btns, d.nav_grp.disable);
+    if (!d.nav_grp.disable) thisForm($(d.nav.form)).submit();
+  }
+
   //NAVBAR UTILITY FUNCTIONS
+  function setNavBrand(navbar, brand){
+    $(navbar).find(".navbar-brand span").text(brand);
+  }
   function emptyNavTargets(nav_btns){
     Array.from($(nav_btns)).forEach(function (nav_btn) {
       $($(nav_btn).attr("data-target")).empty();
@@ -197,107 +194,40 @@ $(document).ready(function(){
       hideTarget($($(nav_btn).attr("data-target")));
     });
   }
-  function setNavBrand(navbar, brand){
-    $(navbar).find(".navbar-brand span").text(brand);
-  }
 
-  //new
+  //CONTEXT-SPECIFIC DATA FUNCTIONS
+
+  //ARTIST-NAVBAR: from NAVBAR NAV-BTNS
   function artistNavData(this_btn, d) {
     navData(this_btn, d);
     toggleTargetData(this_btn, d);
-    navBtnsData(nav_btns(this_btn), d);
+    navBtnData(nav_btns(this_btn), d);
     return d
   }
-  function updateArtistNavbarData(search_field, d) {
-    artistNavData(search_field, d);
-    artistSearchData($(search_field).find(":selected").text(), d);
-    return d;
-  }
-  function updateArtistNavbar(d) {
-    hideNavTargets(d.nav_grp.btns);
-    emptyNavTargets(d.nav_grp.dyno_btns);
-    setNavBrand(d.nav.navbar, d.brand);
-    setAttrAccess(d.nav_grp.btns, d.nav_grp.disable);
-    if (!d.nav_grp.disable) thisForm($(d.nav.form)).submit();
-  }
-
+  //ARTIST-NAVBAR: from NAVBAR ARTIST SEARCH
   function artistSearchData(selected, d) {
     var [brand, disable] = selected.length ? [selected, false] : [d.nav.brand, true];
     d.brand = brand;
     d.nav_grp.disable = disable;
     return d;
   }
-  function refreshArtistNavbar(d) {
-    setNavBrand(d.nav.navbar, d.nav.brand);
-    deselectOpt($(d.nav.input));
-    setAttrAccess(d.nav_grp.btns, true);
-    emptyNavTargets(d.nav_grp.dyno_btns);
+  function updateArtistNavbarData(search_field, d) {
+    artistNavData(search_field, d);
+    artistSearchData($(search_field).find(":selected").text(), d);
+    return d;
   }
 
-  //NAVBAR-DATA: FOR navbarData
-  // function navbarData(navbar, this_element, data){
-  //   var nav_data = navbar.data();
-  //   formData(navbar, nav_data, data,{});
-  //   navBrandData(navbar, nav_data, data,{});
-  //   navBtnData(navbar, this_element, data, {});
-
-    //console.log(data.btn_hsh);
-  //   navCardData(nav_data, data, {});
-  //   return navBtnGrpData(navbar, data, {});
-  // }
-
-  // function formData(navbar, nav_data, data, forms){
-  //   if ('form' in nav_data) {
-  //     forms.form = nav_data.form;
-  //     forms.input = nav_data.input;
-  //     data.forms = forms;
-  //   }
-  //   return data;
-  // }
-  // function navBrandData(navbar, nav_data, data, brand){
-  //   if ('brand' in nav_data) {
-  //     brand.span = nav_data.brand;
-  //     data.brand = brand
-  //   }
-  //   return data;
-  // }
-  //slideBtnData: kill
-  // function navBtnData(navbar, this_element, data, btn) {
-  //   if ($(this_element).data("target") && $(this_element).has(".btn")) {
-  //     btn.target = $(this_element).attr("data-target");
-  //     btn.toggle_target = $(navbar).find(btn.target);
-  //     btn.vis_target = isVisible($(navbar).find(btn.target));
-  //     visibleSibling(btn, btn.vis_target, this_element);
-  //     btn.sibling_btn = btn.active_sibling ? siblingToggle(btn.active_sibling) : false
-  //     btn.context = $(this_element).hasClass("static") && !btn.vis_target ? 'show' : false;
-  //     data.btn = btn
-  //   }
-  //   return data;
-  // }
-  //kill
-  // function navBtnGrpData(navbar, data, btn_grp){
-  //   btn_grp.btns = $(navbar).find(".nav-btn");
-  //   btn_grp.parent = dataParent(btn_grp.btns);
-  //   btn_grp.dyno_btns = $(btn_grp.btns).filter(".dynamic");
-  //   data.btn_grp = btn_grp;
-  //   return data;
-  // }
-
-  // function navCardData(nav_data, data, card){
-  //   if ('card' in nav_data) {
-  //     card = $(nav_data.card).data();
-  //     card.id = nav_data.card;
-  //     visibleTarget(card, card.id, card.target);
-  //     data.card = card
-  //   }
-  //   return data;
-  // }
-
+  //ELEMENT-SPECIFIC DATA FUNCTION
   function navData(this_btn, d) {
     d.nav = navbar(this_btn).data();
     d.nav.navbar = navbar(this_btn);
-    return d
+    return d;
   }
+  function navBtnData(nav_btns, d){
+    d.nav_grp = {btns: nav_btns, parent: dataParent(nav_btns), dyno_btns: $(nav_btns).filter(".dynamic")};
+    return d;
+  }
+  //ELEMENT-SPECIFIC: TOGGLE-DATA: from SLIDE, NAV-BTN or CARET
   function toggleBtnData(this_btn, d) {
     toggleTargetData(this_btn, d);
     siblingData(d.btn.vis_target, valid(visibleDataSiblingTarget(this_btn)), d.btn);
@@ -306,7 +236,7 @@ $(document).ready(function(){
     return d
   }
   function toggleTargetData(this_btn, d) {
-    d.btn = {parent: dataParent(this_btn), target: attrVal(this_btn, 'target'), static: $(this_btn).hasClass("static")};
+    d.btn = {parent: dataParent(this_btn), target: attrObj(this_btn, 'target'), static: $(this_btn).hasClass("static")};
     d.btn.vis_target = isVisible(d.btn.target);
     return d
   }
@@ -314,37 +244,19 @@ $(document).ready(function(){
     btn.sibling = {vis_target: vis_sibling, this_btn: vis_sibling && siblingToggle(vis_sibling)};
     return btn;
   }
-  function navBtnsData(nav_btns, d){
-    d.nav_grp = {btns: nav_btns, parent: dataParent(nav_btns), dyno_btns: $(nav_btns).filter(".dynamic")};
-    return d;
-  }
-
-  //kill
-  // function visibleTarget(obj, parent, target) {
-  //   if ('target' in obj) obj.vis_target = isVisible($(parent).find(target));
-  //   return obj;
-  // }
-
-  // function visibleSibling(obj, vis_target, this_element) {
-  //   if (!vis_target) {
-  //     obj.active_sibling = visibleDataSiblingTarget(this_element);
-  //     obj.sibling_btn = obj.active_sibling && siblingToggle(obj.active_sibling);
-  //   }
-  //   return obj;
-  // }
 
   //GET data-parent obj from given toggle-btn(s)
   function dataParent(toggle_btn){
-    return attrVal(toggle_btn, 'target').attr("data-parent");
+    return attrObj(toggle_btn, 'target').attr("data-parent");
   }
   //GET all toggle-targets of a toggle-btn's data-parent
   function dataTargets(btn) {
-    return dataAttrVal('parent', dataParent(btn));
+    return dataObj('parent', dataParent(btn));
   }
   //GET sibling targets from data-targets (exclude clicked toggle-btn) sibling-targets || false
   function dataSiblingTargets(toggle_btn) {
     var targets = valid(dataTargets(toggle_btn));
-    return targets ? $(targets).not(attrVal(toggle_btn, 'target')) : false;
+    return targets ? $(targets).not(attrObj(toggle_btn, 'target')) : false;
   }
   //GET visible sibling target
   function visibleDataSiblingTarget(toggle_btn) {
@@ -357,27 +269,25 @@ $(document).ready(function(){
   }
 
   //ATTR FUNCTIONS
-  function dataAttrVal(attr, tag) {
+  function dataObj(attr, tag) {
     return $(dataAttr(attr, tag));
   }
   function dataAttr(attr, tag) {
     return "[data-"+attr+"='"+tag+"']";
   }
-  function attrVal(ref, attr) {
+  function hrefObj(id) {
+    return hrefAttr(id);
+  }
+  function hrefAttr(id) {
+    return "[href='#"+id+"']";
+  }
+  function attrObj(ref, attr) {
     return $(attrTag(ref, attr));
   }
   function attrTag(ref, attr) {
     return $(ref).attr("data-"+attr);
   }
 
-  //GET NAV-BTNS FROM MEMBER
-  function navToggleBtns(a) {
-    return $(a).closest(".nav-toggle").find(".nav-btn");
-  }
-  //GET SIBLING NAV-BTNS FROM MEMBER
-  function navToggleSiblings(a) {
-    return $(navToggleBtns(a)).not(a);
-  }
   //TOGGLE-CLASSES
 
   //TOGGLE-CLASS - ACTIVE (BINARY)
@@ -410,10 +320,10 @@ $(document).ready(function(){
   //TOGGLE SHOW/COLLAPSE
 
   //DETECT & RETURN VISIBLE TOGGLE SIBLING
-  function siblingWithVisibleTarget(parent, target) {
-    var active_sibling = $(parent).siblings().has(target+":visible");
-    return active_sibling.length ? active_sibling : false;
-  }
+  // function siblingWithVisibleTarget(parent, target) {
+  //   var active_sibling = $(parent).siblings().has(target+":visible");
+  //   return active_sibling.length ? active_sibling : false;
+  // }
   function hideTarget(target) {
     if (isVisible($(target))) $(target).removeClass("show");
   }
@@ -422,19 +332,14 @@ $(document).ready(function(){
   }
 
   //toggle current caret-icon & card-body ######################################
-  function caretToggle(caret_btn, parent, target, action, kill_btn) {
-    toggleCard(caret_btn, $(parent).find(target));
-    var active_sibling = $(parent).siblings().has(target+":visible");
-    if (action=='show' && active_sibling.length) {
-      toggleCard($(active_sibling).find(kill_btn), $(active_sibling).find(target));
-    }
+  function caretToggle(d) {
+    toggleSet(d.btn.this_btn, $(d.btn.this_btn).attr("id"), $(d.btn.input).val());
+    toggleCard(d.btn.this_btn, d.btn.target);
+    if (d.btn.sibling.vis_target) toggleCard(d.btn.sibling.this_btn, d.btn.sibling.vis_target);
   }
   function toggleCard(caret_btn, target) {
     iconToggle(caret_btn,"fa-caret-right fa-caret-down")
     toggleVisibility(target);
-  }
-  function iconToggleAction(icon_btn, klass) {
-    return $(icon_btn).find("i").hasClass(klass) ? 'collapse' : 'show'
   }
 
   //forms
@@ -491,17 +396,27 @@ $(document).ready(function(){
     clearInputs(form);
     if ($($(card).attr("data-target")).is(":visible")) toggleCard($(card).find(".caret-toggle"), $(card).find($(card).attr("data-target")));
   }
-  //utilities ##################################################################
+
+  //ELEMENT-SPECIFIC: get common elements by pattern utilities #################
   function inputGroupData(ref, data) {
     return $(ref).closest(".input-group").attr(data);
   }
   function navbar(this_btn) {
     return $(this_btn).closest(".navbar");
   }
-
   function nav_btns(this_btn) {
     return $(navbar(this_btn)).find(".nav-btn");
   }
+  //GET NAV-BTNS FROM MEMBER
+  function navToggleBtns(a) {
+    return $(a).closest(".nav-toggle").find(".nav-btn");
+  }
+  //GET SIBLING NAV-BTNS FROM MEMBER
+  function navToggleSiblings(a) {
+    return $(navToggleBtns(a)).not(a);
+  }
+
+  //utilities ##################################################################
   function formatToggleTarget(parent, target){
     return parent[0]=='#' ? $(target) : $(parent).find(target);
   }
