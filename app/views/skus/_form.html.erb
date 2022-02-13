@@ -1,6 +1,6 @@
 <%= form_with model: Item.new, url: invoice_skus_path(invoice), id: "new-skus" do |f| %>
   <div class="form">
-    <div class="card bg-gray-d p-0 mb-1" data-target=".card-body">
+    <div class="card bg-gray-d p-0 mb-1">
       <div class="card-header bg-transparent pt-0 pb-1 pl-0 pr-0">
         <div class="form-row mb-1">
 
@@ -25,25 +25,25 @@
             <div class="input-group input-group-sm">
               <%= render "item_fields/caret", card_id: 'artist', target: nil, body: true, i: 0, context: 'body' %>
               <%= render "item_fields/label", label: 'artist' %>
-              <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'artist_id'), id: "artist_id" %>
+              <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'artist', 'artist_id'), id: "artist_id" %>
             </div>
           </div>
 
           <div class="col-6 ml-0">
             <div class="input-group input-group-sm">
               <%= render "item_fields/label", label: 'product' %>
-              <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: boot_classes(:input, 'product_id'), id: "product_id" %>
+              <%= f.collection_select :product_id, Product.all, :id, :product_name, {include_blank: true}, class: boot_classes(:input, 'product', 'product_id'), id: "product_id" %>
             </div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="col-4 ml-0">
-            <div class="input-group input-group-sm">
+            <div class="input-group input-group-sm title-group" data-input=".title-text" data-target=".title-toggle">
               <%= render "item_fields/caret", card_id: 'title', target: nil, body: true, i: 0, context: 'body' %>
               <%= render 'items/title_toggle' %>
               <%= render 'items/title', titles: titles %>
-              <%= f.text_field :title, class: boot_classes(:input, 'default-show', 'show', 'title-toggle'), id: 'title-text' %>
+              <%= f.text_field :title, class: boot_classes(:input, 'show', 'title', 'title-toggle', 'title-text'), id: 'title-text' %>
             </div>
           </div>
 

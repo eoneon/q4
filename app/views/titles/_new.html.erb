@@ -1,4 +1,5 @@
 <%= form_with model: Item.new, url: new_invoice_title_path(invoice), method: "get", id: "new-title", class: "collapse" do |f| %>
-  <%= number_field_tag "item[product_id]", nil, class: "product_id" %>
-  <%= number_field_tag "item[artist_id]", nil, class: "artist_id" %>
+  <%= text_field_tag "item[context]", nil, class: "context" %>
+  <%= number_field_tag "item[product_id]", nil, class: "product" %>
+  <%= number_field_tag "item[artist_id]", nil, class: "artist" %>
 <% end %>

@@ -28,13 +28,11 @@ $(document).ready(function(){
   });
 
   $("body").on("click", ".slide-toggle", function(){
-    var data = slideToggleData($(this), {});
-    slideToggle(data);
+    slideToggle(slideToggleData($(this), {}));
   });
 
   $("body").on("click", ".item-nav .nav-btn", function(){
-    var data = toggleBtnData($(this), {});
-    itemNavbarToggle(data);
+    itemNavbarToggle(toggleBtnData($(this), {}));
   });
 
   $("body").on("click", "#artist-nav .nav-btn", function(){
@@ -44,33 +42,43 @@ $(document).ready(function(){
   });
 
   $("body").on("change", "select.artist-search", function(){
-    var d = updateArtistNavbarData($(this), {});
-    updateArtistNavbar(d);
+    updateArtistNavbar(updateArtistNavbarData($(this), {}));
   });
+
   //FORMS-FIELDS
   $("body").on("keyup, focusin, focusout", ".required", function(){
     requiredFields($(this));
   });
 
+  // [batch_items/form, items/title], [skus/form, items/title]
   $("body").on("change", "#title-select", function(){
-    var title = $(this).val();
-    $("#title-text").val(title);
-    $(".title-toggle").toggleClass("show collapse");
+    updateTitleInput(inputGroupData($(this)), $(this).val());
   });
 
   //FORMS-EVENT TRIGGERING SUBMIT
-  $("body").on("change", "select.search-select, .field-param", function(){
+  $("body").on("change", "select.search-select", function(){
     thisForm($(this)).submit();
+  });
+
+  //FORMS-EVENT TRIGGERING SUBMIT
+  $("body").on("change", ".field-param", function(){
+    if (sliceTag(thisForm($(this)).attr("id"), 0) == 'edit') thisForm($(this)).submit();
   });
 
   $("body").on("focusout", ".input-field", function(){
     thisForm($(this)).submit();
   });
 
-  $("body").on("change", "#artist-search, #product-search", function(){
-    var input = "."+sliceTag($(this).attr("id"), 0)+"_id"
-    toggleInputVal($(this).closest("form").parent().find(input), $(this).val());
-    $("#new-title").submit();
+  // [skus/form, items/title], [batch_items/form, items/title],
+  // $("body").on("change", ".artist-select, .product-select", function(){
+  //   updateTitleForm(searchGroupData($(this)));
+  // });
+  $("body").on("change", ".new-item-select-artist", function(){
+    newItemSelectArtist(searchData($(this))); //updateTitleForm(searchGroupData($(this)));
+  });
+
+  $("body").on("click", ".new-item-unselect-artist", function(){
+    newItemUnselectArtist(searchData($(this)));
   });
 
   $("body").on("change", "#artist_id, #product_id", function(){
@@ -80,23 +88,23 @@ $(document).ready(function(){
     $("#new-title").submit();
   });
 
-  //FORMS-UPDATE-SEARCH item-field
+  //FORMS-UPDATE-SEARCH
+  //for table-skus items: based on changing product selection: item_products/forms/search
   $("body").on("change", ".update-search", function(){
-    setValByInputName(inputGroupData($(this), "data-input"), $(this).val());
-    $(inputGroupData($(this), "data-form")).submit();
+    updateProductSearch(searchGroupData($(this)));
   });
-
-  //items#search
+  //for table-skus items: based on clicking reset_search: item_products/forms/search
   $("body").on("click", ".deselect", function(){
-    setValByInputName(inputGroupData($(this), "data-input"), "");
-    $(inputGroupData($(this), "data-form")).submit();
+    updateProductSearch(searchGroupData($(this)));
   });
 
   //items#search
   $("body").on("click", ".unselect", function(){
-    $(this).closest(".input-group").find(":selected").attr('selected', false);
-    $(inputGroupData($(this), "data-form")).submit();
+    deselectSelectedOpt(inputGroup($(this)));
+    thisForm($(this)).submit();
   });
+
+
 
   $("#new-skus-toggle, #new-item-skus-toggle").on("hide.bs.collapse", function(){
     var a = $("[href='#"+$(this).attr("id")+"']");
@@ -202,7 +210,7 @@ $(document).ready(function(){
     navData(this_btn, d);
     toggleTargetData(this_btn, d);
     navBtnData(nav_btns(this_btn), d);
-    return d
+    return d;
   }
   //ARTIST-NAVBAR: from NAVBAR ARTIST SEARCH
   function artistSearchData(selected, d) {
@@ -213,7 +221,7 @@ $(document).ready(function(){
   }
   function updateArtistNavbarData(search_field, d) {
     artistNavData(search_field, d);
-    artistSearchData($(search_field).find(":selected").text(), d);
+    artistSearchData(selectedOpt(search_field).text(), d);
     return d;
   }
 
@@ -318,12 +326,6 @@ $(document).ready(function(){
   }
 
   //TOGGLE SHOW/COLLAPSE
-
-  //DETECT & RETURN VISIBLE TOGGLE SIBLING
-  // function siblingWithVisibleTarget(parent, target) {
-  //   var active_sibling = $(parent).siblings().has(target+":visible");
-  //   return active_sibling.length ? active_sibling : false;
-  // }
   function hideTarget(target) {
     if (isVisible($(target))) $(target).removeClass("show");
   }
@@ -373,9 +375,8 @@ $(document).ready(function(){
       $(submit).attr('disabled', 'disabled');
     }
   }
-  function toggleInputVal(inputs, value) {
-    var val = value.length ? value : ""
-    $(inputs).val(value);
+  function toggleInputVal(input, value) {
+    $(input).val(value.length ? value : "");
   }
   function toggleSet(input, new_id, old_id) {
     $(input).val(toggleVal(new_id, old_id));
@@ -386,20 +387,90 @@ $(document).ready(function(){
   function setAttrAccess(elements, access) {
     $(elements).filter(".disable").attr("disabled", access);
   }
+
+  //MANIPULATE SELECTED OPTION
+  function setInputVals(input_sets){
+    Array.from(input_sets).forEach(function (input_set) { $(input_set[0]).val(input_set[1]); });
+  }
+  function deselectSelected(inputs){
+    Array.from($(inputs)).forEach(function (input) { if (valid(input)) deselect(input); });
+  }
+  function submitForms(forms){
+    Array.from(forms).forEach(function (form) { $(form).submit(); });
+  }
+  function getSelectedInputs(input_parent, input_target){
+    return $(input_parent).find(input_target).not(function() { return $(this).val() == ""; });
+  }
+  function deselect(input){
+    $(input).is('select') ? deselectOpt(input) : deselectInput(input);
+  }
   function deselectOpt(select){
     $(select).attr('selected', false);
-    $(select).val("");
+    deselectInput(select);
+  }
+  function deselectInput(input) {
+    $(input).val("");
+  }
+
+  //kill?
+  function deselectSelectedOpt(ref){
+    deselectOpt(selectedOpt(ref));
+  }
+  function selectedOpt(ref){
+    return $(ref).find(":selected");
   }
 
   //form #######################################################################
+  function newItemUnselectArtist(d){
+    deselectSelected([$(d.searchForm).find(d.artistInput), $(d.titleForm).find(d.artistInput), $(d.itemForm).find(d.artistInput), $(d.itemForm).find(d.titleInput)].flat());
+    submitForms([d.searchForm, d.titleForm]);
+  }
   function refreshCaretForm(form, card) {
     clearInputs(form);
     if ($($(card).attr("data-target")).is(":visible")) toggleCard($(card).find(".caret-toggle"), $(card).find($(card).attr("data-target")));
   }
-
+  function updateTitleForm(d) {
+    toggleInputVal($(d.form).find(d.input), d.val); //title
+    toggleInputVal($(d.context).find(d.input), d.val); //item-create
+    toggleInputVal($(d.form).find(".context"), d.context); //title
+    $(d.form).submit(); //title
+  }
+  function newItemSelectArtist(d){
+    //toggleInputVals([[$(d.itemForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.artistInput)], [$(d.titleForm).find(d.context_input), d.itemForm]]);
+    //$.each([[$(d.itemForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.context_input), d.itemForm]], function(i, set) { $(set[0]).val(set[1]) });
+    setInputVals([[$(d.itemForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.context_input), d.itemForm]])
+    // toggleInputVal($(d.itemForm).find(d.artistInput), d.selected);
+    // toggleInputVal($(d.titleForm).find(d.artistInput), d.selected);
+    // toggleInputVal($(d.titleForm).find(d.context_input), d.itemForm);
+    submitForms([d.searchForm, d.titleForm]);
+  }
+  function updateTitleInput(d, val){
+    $(d.input_grp).find(d.input).val(val);
+    toggleVisibility($(d.input_grp).find(d.target));
+  }
+  //CONTEXT-SPECIFIC get DATA and DO ###########################################
+  function updateProductSearch(d) {
+    $(d.form).find(d.input).val(d.val);
+    $(d.form).submit();
+  }
+  function searchGroupData(thisElement) {
+    var d = inputGroupData(thisElement);
+    d.val = $(thisElement).is("select") ? $(thisElement).val() : "";
+    return d;
+  }
+  function searchData(thisElement) {
+    var d = buildData(inputGroupData(thisElement).obj);
+    d.selected = $(thisElement).val();
+    return d;
+  }
   //ELEMENT-SPECIFIC: get common elements by pattern utilities #################
-  function inputGroupData(ref, data) {
-    return $(ref).closest(".input-group").attr(data);
+  function inputGroupData(ref) {
+    var d =  $(inputGroup(ref)).data();
+    d.input_grp = inputGroup(ref);
+    return d;
+  }
+  function inputGroup(ref) {
+    return $(ref).closest(".input-group");
   }
   function navbar(this_btn) {
     return $(this_btn).closest(".navbar");
@@ -425,6 +496,25 @@ $(document).ready(function(){
   }
   function valid(val) {
     return val != undefined && val.length ? val : false;
+  }
+
+  //test
+  function buildData(obj) {
+    var [keys, vals] = splitArray(obj.split(','));
+    //console.log([keys, vals])
+    return arrToObj(keys, vals);
+  }
+
+  function arrToObj(keys, vals, obj={}){
+    Array.from(keys).forEach(function (k) {
+      obj[k]= vals[keys.indexOf(k)];
+    });
+    return obj;
+  }
+  function splitArray(arr, even=[], odd=[]) {
+    for(var i=0; i<arr.length; i++)
+        (i % 2 == 0 ? even : odd).push(arr[i].trim());
+    return [even, odd];
   }
 });
 //end ########################################################################
