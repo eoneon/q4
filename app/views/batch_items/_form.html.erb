@@ -25,10 +25,10 @@
 
         <div class="form-row pt-2 pb-2 pr-2">
           <div class="col-4 ml-0">
-            <div class="input-group input-group-sm title">
+            <div class="input-group input-group-sm" data-obj="searchForm, #search-item-skus, titleForm, #new-title, artistInput, .artist, itemForm, #new-item-skus, titleInput, .title, context_input, .context">
               <%= render "item_fields/caret", card_id: 'artist', target: nil, body: true, i: 0, context: 'body' %>
               <%= render "item_fields/label", label: 'artist' %>
-              <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'artist', 'artist_id'), id: "artist_id" %>
+              <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'search', 'new', 'item', 'artist'), id: "new-item-skus-artist" %>
             </div>
           </div>
 
@@ -36,7 +36,7 @@
             <div class="input-group input-group-sm" data-input=".title-text" data-target=".title-toggle">
               <%= render 'items/title_toggle' %>
               <%= render 'items/title', titles: [] %>
-              <%= f.text_field :title, class: boot_classes(:input, 'show', 'title-toggle', 'title-text'), id: 'title-text' %>
+              <%= f.text_field :title, class: boot_classes(:input, 'show', 'title', 'title-toggle', 'title-text'), id: 'title-text' %>
             </div>
           </div>
 

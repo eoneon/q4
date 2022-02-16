@@ -13,10 +13,10 @@
         <% end %>
 
         <div class="col-6 border-light-gray p-1">
-          <div class="input-group input-group-sm" data-form="#<%= dom_ref('edit-item', item) %>" data-input=".product">
+          <div class="input-group input-group-sm" data-obj="itemForm, #<%= dom_ref('edit-item', item) %>, productInput, .product">
             <%= render 'item_products/forms/search_label', input_name: 'product' %>
-            <%= render 'item_products/forms/reset_search', class_param: 'deselect' %>
-            <%= f.collection_select :product, products, :id, :product_name, {include_blank: true, selected: item.product.try(:id)}, id: "product-select", class: boot_classes(:search_input, 'update-search') %>
+            <%= render 'item_products/forms/reset_search', class_param: 'edit-item-unselect-product' %>
+            <%= f.collection_select :product, products, :id, :product_name, {include_blank: true, selected: item.product.try(:id)}, id: "product-select", class: boot_classes(:search_input, 'edit-item-select-product') %>
           </div>
         </div>
       </div>

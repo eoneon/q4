@@ -73,41 +73,60 @@ $(document).ready(function(){
   // $("body").on("change", ".artist-select, .product-select", function(){
   //   updateTitleForm(searchGroupData($(this)));
   // });
-  $("body").on("change", ".new-item-select-artist", function(){
-    newItemSelectArtist(searchData($(this))); //updateTitleForm(searchGroupData($(this)));
+  $("body").on("change", ".search.new.item.artist", function(){
+    newItemSelectArtist(searchData($(this)));
+  });
+
+  $("body").on("change", ".new-item-select-product", function(){
+    newItemSelectProduct(searchData($(this)));
   });
 
   $("body").on("click", ".new-item-unselect-artist", function(){
     newItemUnselectArtist(searchData($(this)));
   });
 
-  $("body").on("change", "#artist_id, #product_id", function(){
-    var id = $(this).val();
-    var input = "."+$(this).attr("id");
-    toggleInputVal($("#new-title").find(input), id);
-    $("#new-title").submit();
+  $("body").on("click", ".new-item-unselect-product", function(){
+    newItemUnselectProduct(searchData($(this)));
   });
 
-  //FORMS-UPDATE-SEARCH
-  //for table-skus items: based on changing product selection: item_products/forms/search
-  $("body").on("change", ".update-search", function(){
-    updateProductSearch(searchGroupData($(this)));
-  });
-  //for table-skus items: based on clicking reset_search: item_products/forms/search
-  $("body").on("click", ".deselect", function(){
-    updateProductSearch(searchGroupData($(this)));
-  });
-
-  //items#search
   $("body").on("click", ".unselect", function(){
     deselectSelectedOpt(inputGroup($(this)));
     thisForm($(this)).submit();
   });
 
+  // $("body").on("change", "#artist_id, #product_id", function(){
+  //   var id = $(this).val();
+  //   var input = "."+$(this).attr("id");
+  //   toggleInputVal($("#new-title").find(input), id);
+  //   $("#new-title").submit();
+  // });
 
+  //FORMS-UPDATE-SEARCH
+  //for table-skus items: based on changing product selection: item_products/forms/search
+  $("body").on("change", ".edit-item-select-product", function(){
+    editItemSelectProduct(searchData($(this)));
+  });
+  // $("body").on("change", ".update-search", function(){
+  //   updateProductSearch(searchGroupData($(this)));
+  // });
+  //for table-skus items: based on clicking reset_search: item_products/forms/search
+  $("body").on("click", ".edit-item-unselect-product", function(){
+    editItemUnselectProduct(searchData($(this)));
+  });
+
+  // $("body").on("click", ".deselect", function(){
+  //   updateProductSearch(searchGroupData($(this)));
+  // });
+
+  //items#search
+  // $("body").on("click", ".unselect", function(){
+  //   deselectSelectedOpt(inputGroup($(this)));
+  //   thisForm($(this)).submit();
+  // });
 
   $("#new-skus-toggle, #new-item-skus-toggle").on("hide.bs.collapse", function(){
-    var a = $("[href='#"+$(this).attr("id")+"']");
+    var a = hrefObj($(this).attr("id"))
+    //var a = $("[href='#"+$(this).attr("id")+"']");
     refreshCaretForm($(a).attr("data-form"), $($(a).attr("data-form")).find(".card"));
     clearInputsOpts("#title-select");
     refreshForm($(a).attr("data-search"));
@@ -425,10 +444,22 @@ $(document).ready(function(){
     deselectSelected([$(d.searchForm).find(d.artistInput), $(d.titleForm).find(d.artistInput), $(d.itemForm).find(d.artistInput), $(d.itemForm).find(d.titleInput)].flat());
     submitForms([d.searchForm, d.titleForm]);
   }
+  function newItemUnselectProduct(d){
+    deselectSelected([$(d.searchForm).find(d.productInput), $(d.itemForm).find(d.productInput)]);
+    $(d.searchForm).submit();
+  }
+
   function refreshCaretForm(form, card) {
     clearInputs(form);
     if ($($(card).attr("data-target")).is(":visible")) toggleCard($(card).find(".caret-toggle"), $(card).find($(card).attr("data-target")));
   }
+
+  function newItemSelectProduct(d) {
+    var targetForm = sliceTag(d.form_id, 0)=='search' ? d.itemForm : d.searchForm;
+    $(targetForm).find(d.productInput).val(d.selected);
+    $(d.searchForm).submit();
+  }
+
   function updateTitleForm(d) {
     toggleInputVal($(d.form).find(d.input), d.val); //title
     toggleInputVal($(d.context).find(d.input), d.val); //item-create
@@ -436,22 +467,27 @@ $(document).ready(function(){
     $(d.form).submit(); //title
   }
   function newItemSelectArtist(d){
-    //toggleInputVals([[$(d.itemForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.artistInput)], [$(d.titleForm).find(d.context_input), d.itemForm]]);
-    //$.each([[$(d.itemForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.context_input), d.itemForm]], function(i, set) { $(set[0]).val(set[1]) });
-    setInputVals([[$(d.itemForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.context_input), d.itemForm]])
-    // toggleInputVal($(d.itemForm).find(d.artistInput), d.selected);
-    // toggleInputVal($(d.titleForm).find(d.artistInput), d.selected);
-    // toggleInputVal($(d.titleForm).find(d.context_input), d.itemForm);
+    var targetForm = sliceTag(d.form_id, 0)=='search' ? d.itemForm : d.searchForm;
+    deselect($(d.itemForm).find(d.titleInput));
+    setInputVals([[$(targetForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.context_input), d.itemForm]])
     submitForms([d.searchForm, d.titleForm]);
+  }
+  function editItemUnselectProduct(d) {
+    deselect($(d.itemForm).find(d.productInput))
+    $(d.itemForm).submit();
   }
   function updateTitleInput(d, val){
     $(d.input_grp).find(d.input).val(val);
     toggleVisibility($(d.input_grp).find(d.target));
   }
   //CONTEXT-SPECIFIC get DATA and DO ###########################################
-  function updateProductSearch(d) {
-    $(d.form).find(d.input).val(d.val);
-    $(d.form).submit();
+  // function updateProductSearch(d) {
+  //   $(d.form).find(d.input).val(d.val);
+  //   $(d.form).submit();
+  // }
+  function editItemSelectProduct(d) {
+    $(d.itemForm).find(d.productInput).val(d.selected);
+    $(d.itemForm).submit();
   }
   function searchGroupData(thisElement) {
     var d = inputGroupData(thisElement);
@@ -461,6 +497,7 @@ $(document).ready(function(){
   function searchData(thisElement) {
     var d = buildData(inputGroupData(thisElement).obj);
     d.selected = $(thisElement).val();
+    d.form_id = thisForm(thisElement).attr("id");
     return d;
   }
   //ELEMENT-SPECIFIC: get common elements by pattern utilities #################
