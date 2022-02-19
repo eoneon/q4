@@ -2,6 +2,7 @@ var toggle = "<%= raw @toggle %>"
 $("#<%= dom_ref('edit-item-fields', @item) %>").html("<%= j render 'item_fields/edit', item: @item, rows: @rows %>");
 $("#<%= dom_ref('edit-item', @item) %>").html("<%= j render 'items/edit', invoice: @item.invoice, item: @item, titles: @titles %>");
 $("#description-toggle").html("<%= j render 'items/description', item: @item %>");
+$("#<%= dom_ref('tagline', @item) %>").html("<%= j render 'table_skus/abbrv_tagline', item: @item %>");
 
 if (toggle.length && $('#'+toggle).hasClass("caret-toggle")){
   var id = $('#'+toggle).attr("id");

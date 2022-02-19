@@ -72,6 +72,8 @@ class Item < ApplicationRecord
 
   ##############################################################################
 
+  ##############################################################################
+
   class << self
 
     def item_search(product:nil, artist:nil, title: nil, hattrs:nil, hstore:'csv_tags', inputs:{})

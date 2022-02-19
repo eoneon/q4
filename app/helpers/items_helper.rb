@@ -26,19 +26,3 @@ module ItemsHelper
   end
 
 end
-
-
-# def field_set_rows(fs_hsh)
-#   row_assocs.each_with_object([]) do |row_key,rows|
-#     field_row = field_set_row(fs_hsh, row_key_sets.assoc(row_key).last)
-#     next if field_row.empty?
-#     rows << field_row
-#   end
-# end
-
-# def field_set_row(fs_hsh, key_sets)
-#   key_sets.each_with_object({}) do |k,hsh|
-#     next if fs_hsh.keys.exclude?(k)
-#     hsh[k] = fs_hsh[k]
-#   end
-# end

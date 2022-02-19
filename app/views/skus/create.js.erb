@@ -1,3 +1,3 @@
 $("#search-skus").html("<%= j render 'skus/search', invoice: @invoice, results: @nav_products, inputs: @nav_search_inputs %>");
 $("#new-skus").html("<%= j render 'skus/form', invoice: @invoice, titles: [] %>");
-$("#items-table").replaceWith("<%= j render 'items/table', invoice: @invoice %>");
+$("#items-table").html("<%= j render 'table_skus/table', invoice: @invoice %>");

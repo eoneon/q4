@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-auto p-0 pt-1 pr-0 ml-0 mr-0 my-0">
         <span class="fs-s sku-span pt-1"><%= item.sku %></span>
-        <span class="ml-0 pl-0 fs-s pt-1"><%= abbrv_tagline(item) %></span>
+        <%= render 'table_skus/abbrv_tagline', item: item %>
       </div>
 
       <div class="col d-flex flex-row-reverse ml-0 pl-0 py-0 my-0 mr-1">

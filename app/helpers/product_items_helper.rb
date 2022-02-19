@@ -35,20 +35,3 @@ module ProductItemsHelper
   #   target.class.base_class.to_s.underscore.pluralize
   # end
 end
-
-#we can filter each assoc's collection using: scope = obj.tags[[assoc.singularize, "scope"].join("_")]
-#assoc.singularize.classify.constantize.where("tags -> ")
-
-# def fk_id(assoc)
-#   [assoc.singularize, 'id'].join("_")
-# end
-
-# def scoped_assoc(obj, assoc)
-#   k = scope_tag(assoc)
-#   v = obj.tags[k]
-#   str_to_class(assoc).where("tags -> \'#{k}\' = \'#{v}\'")
-# end
-#
-# def scope_tag(str)
-#   [str.singularize, 'scope'].join('_')
-# end
