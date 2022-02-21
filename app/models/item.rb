@@ -16,10 +16,10 @@ class Item < ApplicationRecord
 
   has_many :item_groups, as: :origin, dependent: :destroy
   has_many :products, through: :item_groups, source: :target, source_type: "Product"
+  has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
-  has_many :artists, through: :item_groups, source: :target, source_type: "Artist"
   belongs_to :invoice, optional: true
 
   def product
@@ -84,6 +84,16 @@ class Item < ApplicationRecord
       results = order_hstore_search(results, %w[search_tagline item_size], hstore)
       a, b = uniq_hattrs(results, search_keys, hstore), form_inputs(product, artist, title, hattrs, results, hstore, inputs)
     end
+
+    # def item_search(product:nil, artist:nil, title: nil, hattrs:nil, hstore:'csv_tags', inputs:{})
+    #   hattrs = hattr_params(product, hattrs, hstore)
+    #   results_or_self = search_case(artist, product)
+    #   results_or_self = title_search(results_or_self, title)
+    #   results = hstore_cascade_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, [])
+    #   form_inputs = form_inputs(product, artist, title, hattrs, results, hstore, inputs)
+    #   results = order_hstore_search(results, %w[search_tagline item_size], hstore)
+    #   a, b = uniq_hattrs(results, search_keys, hstore), form_inputs
+    # end
 
     def form_inputs(product, artist, title, hattrs, results, hstore, inputs)
       origins_targets_inputs(product, 'Item', 'Product', results, inputs)

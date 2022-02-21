@@ -10,6 +10,9 @@ class Product < ApplicationRecord
   validates :product_name, uniqueness: true
 
   has_many :item_groups, as: :origin
+  has_many :item_groups, as: :target
+
+  has_many :items, through: :item_groups, source: :origin, source_type: "Item"
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
@@ -18,9 +21,9 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  def items
-    Item.joins(:products).where(products: {id: id})
-  end
+  # def items
+  #   Item.joins(:products).where(products: {id: id})
+  # end
 
   # GROUPING METHODS: CRUD/VIEW ################################################
   def product_item_loop(i_hsh, f_grp, keys)

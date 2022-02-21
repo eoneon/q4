@@ -466,12 +466,6 @@ $(document).ready(function(){
     toggleVisibility($(d.input_grp).find(d.target));
   }
   //CONTEXT-SPECIFIC get DATA and DO ###########################################
-
-  // function searchGroupData(thisElement) {
-  //   var d = inputGroupData(thisElement);
-  //   d.val = $(thisElement).is("select") ? $(thisElement).val() : "";
-  //   return d;
-  // }
   function searchData(thisElement) {
     var d = buildData(inputGroupData(thisElement).obj);
     d.selected = $(thisElement).val();
@@ -486,9 +480,6 @@ $(document).ready(function(){
   }
 
   //utilities ##################################################################
-  // function formatToggleTarget(parent, target){
-  //   return parent[0]=='#' ? $(target) : $(parent).find(target);
-  // }
   function sliceTag(attr, i) {
     return attr.split('-')[i]
   }
@@ -504,33 +495,37 @@ $(document).ready(function(){
       }, {});
     return data;
   }
-
-  // function buildData(strArr) {
-  //   var data = strArr.split(',').reduce(function(a, k, i) {
-  //     if (i % 2 ==0) a[k.trim()] = obj.split(',')[i+1].trim();
-  //       return a;
-  //     }, {});
-  //   return data;
-  // }
-  //test
-  // function buildData(obj) {
-  //   var [keys, vals] = splitArray(obj.split(','));
-  //   return arrToObj(keys, vals);
-  // }
-
-  // function arrToObj(keys, vals, obj={}){
-  //   Array.from(keys).forEach(function (k) {
-  //     obj[k]= vals[keys.indexOf(k)];
-  //   });
-  //   return obj;
-  // }
-  // function splitArray(arr, even=[], odd=[]) {
-  //   for(var i=0; i<arr.length; i++)
-  //       (i % 2 == 0 ? even : odd).push(arr[i].trim());
-  //   return [even, odd];
-  // }
 });
 //end ########################################################################
+
+// function formatToggleTarget(parent, target){
+//   return parent[0]=='#' ? $(target) : $(parent).find(target);
+// }
+
+// function buildData(strArr) {
+//   var data = strArr.split(',').reduce(function(a, k, i) {
+//     if (i % 2 ==0) a[k.trim()] = obj.split(',')[i+1].trim();
+//       return a;
+//     }, {});
+//   return data;
+// }
+//test
+// function buildData(obj) {
+//   var [keys, vals] = splitArray(obj.split(','));
+//   return arrToObj(keys, vals);
+// }
+
+// function arrToObj(keys, vals, obj={}){
+//   Array.from(keys).forEach(function (k) {
+//     obj[k]= vals[keys.indexOf(k)];
+//   });
+//   return obj;
+// }
+// function splitArray(arr, even=[], odd=[]) {
+//   for(var i=0; i<arr.length; i++)
+//       (i % 2 == 0 ? even : odd).push(arr[i].trim());
+//   return [even, odd];
+// }
 
   //what is this?
   // $("body").on("click", ".search-btn", function(){

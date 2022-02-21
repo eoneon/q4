@@ -1,6 +1,7 @@
 class Artist < ApplicationRecord
-  has_many :item_groups, as: :origin
-  #belongs_to :item, optional: true #, through: :item_groups, source: :target, source_type: "Item"
+
+  has_many :item_groups, as: :target
+  has_many :items, through: :item_groups, source: :origin, source_type: "Item"
 
   def formal_name
     [artist_name, life_span].compact.join(' ')
@@ -54,12 +55,16 @@ class Artist < ApplicationRecord
     end
   end
 
-  def items
-    Item.joins(:artists).where(artists: {id: id})
-  end
+  # def items
+  #   Item.joins(:artists).where(artists: {id: id})
+  # end
 
   def product_items(product)
     items.where(id: product.items.ids)
+  end
+
+  def products
+    Product.joins(:items).where(items: {id: items.ids}).distinct
   end
 
   def titles(product)

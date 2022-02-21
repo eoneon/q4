@@ -68,15 +68,22 @@ module Search
     def uniq_results(results, hstore, keys)
       results.delete{|i| i.id != id && hstore_tags(i, hstore, keys).all?{|k,v| public_send(hstore).dig(k) == v}}
     end
-    #####################################################################
+    ############################################################################
+
     # sort #####################################################################
     def order_search(results, sort_keys, hstore)
       results.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
     end
 
     def order_hstore_search(results, sort_keys, hstore)
+      puts "results: #{results}"
       results.any? ? results.order(order_hstore_query(sort_keys,hstore)) : results
     end
+
+    # def order_hstore_search(results, sort_keys, hstore)
+    #   puts "results: #{results}"
+    #   results.any? ? order_search(results, sort_keys, hstore) : results
+    # end
 
     def sort_value(val)
       is_numeric?(val) ? val.to_i : val
