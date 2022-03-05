@@ -1,6 +1,7 @@
 class SkusController < ApplicationController
 
   def search
+    #puts "search_params: #{search_params(scope_params)}"
     @invoice = Invoice.find(params[:invoice_id])
     product = cond_find(Product, params[:item][:product_id])
     artist_id = cond_id(params[:item][:artist_id])

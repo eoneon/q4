@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
   def cond_id(fk_id)
     fk_id ? fk_id : nil
   end
-  
+
   def cond_val(val, default=nil)
     val ? val : default
   end
@@ -22,6 +22,45 @@ class ApplicationController < ActionController::Base
   def titles(artist=nil, product=nil)
     artist ? artist.titles(product) : []
   end
+
+  #search ######################
+  def search_params(scope_params)
+    {scopes: scope_params, hattrs: scoped_hattr_params(scope_params[:product], params[:items][:hattrs].to_unsafe_h)}
+  end
+
+  #scope ######################
+  def scope_params
+    [:product_id, :artist_id, :title].each_with_object({}) do |k,hsh|
+      next if k==:title && !params[:item].has_key?(k)
+      hsh.merge!(cond_search_param(k.to_s.split('_')[0], params[:item][k]))
+    end
+  end
+
+  def cond_search_param(k, v)
+    {k.to_sym => (%w[product artist].include?(k) ? cond_find(k.to_s.classify.constantize, v) : v)}
+  end
+
+  #hattr ######################
+  # def hattr_search_params(product, hattrs)
+  #   product ? product_hattr_params(product, hattrs.keys) : hattrs
+  # end
+  
+  def hattr_params(args, hattrs)
+    args.each_with_object({}) {|(k,keys), h| h[k] = filter_h(keys, hattrs)}
+  end
+
+  def scoped_hattr_params(product, hattrs)
+    product ? filter_h(hattrs.keys, product.tags) : hattrs
+  end
+
+  # def product_hattr_params(product, search_keys)
+  #   search_keys.each_with_object({}){|k,h| h[k] = product.tags.dig(k)}
+  # end
+
+  def filter_h(keys, hattrs={})
+    keys.each_with_object(hattrs) {|k,hattrs| hattrs[k] = hattrs.dig(k)}
+  end
+  #######################
   ############################################################################
 
   def format_skus(skus)

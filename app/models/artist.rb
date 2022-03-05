@@ -55,20 +55,34 @@ class Artist < ApplicationRecord
     end
   end
 
-  # def items
-  #   Item.joins(:artists).where(artists: {id: id})
-  # end
-
-  def product_items(product)
-    items.where(id: product.items.ids)
-  end
-
+  # COLLECTIONS ################################################################
   def products
     Product.joins(:items).where(items: {id: items.ids}).distinct
   end
 
+  # def items_scoped_by_artist_product_items(product)
+  #   items.where(id: product.items.ids)
+  # end
+  #
+  # def titles(product)
+  #   (product ? items_scoped_by_artist_product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
+  # end
+
+  # def titles
+  #   items.pluck(:title).uniq.reject{|i| i.blank?}.sort
+  # end
+
+  #replace with above
+  def product_items(product)
+    items.where(id: product.items.ids)
+  end
+  #replace with above
   def titles(product)
     (product ? product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
+  end
+  #kill?
+  def self.scoped_artists(products)
+    Artist.joins(:items).where(items: {id: Item.scoped_products(products)}).distinct
   end
 end
 

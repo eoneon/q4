@@ -1,4 +1,4 @@
-<%= form_with model: item, url: invoice_sku_path(invoice, item), id: dom_ref(item, 'edit-sku') do |f| %>
+<%= form_with model: item, url: invoice_sku_path(invoice, item), id: dom_ref('edit-sku', item) do |f| %>
   <div class="form">
     <div class="card bg-gray-d p-0 mb-1">
       <div class="form-row pl-1 ml-0 mb-2">

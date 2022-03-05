@@ -123,25 +123,26 @@ module Description
         media: %w[category medium sculpture_type material leafing remarque dimension],
         authentication: [:disclaimer, :unsigned]
       },
-
-      invoice_tagline:{
+      property_room: {
+        keys: %w[artist title mounting embellishing category medium sculpture_type material dimension leafing remarque numbering signature animator_seal sports_seal certificate disclaimer],
+        set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Numbered', 'No'], ['Hand Pulled', '']]
+      },
+      invoice_tagline: {
         keys:%w[artist title embellishing category medium sculpture_type material dimension leafing numbering signature certificate],
         set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Limited Edition', 'Ltd Ed'], ['Edition', 'Ed'], ['Numbered', 'No'], ['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]
       },
 
-      search_tagline:{
+      search_tagline: {
         keys:%w[embellishing category medium sculpture_type material leafing numbering signature certificate],
         set: [['Letter of Authenticity', 'LOA'], ['Certificate of Authenticity', 'COA'], ['with ', 'w/'], ['Limited Edition', 'Ltd Ed'], ['Edition', 'Ed'], ['Numbered', 'No'], ['Mixed Media', 'MM'], ['Hand Pulled', 'HP'], [' and ', ' & ']]
       },
-
-      body:{
+      body: {
         keys: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
         media: %w[text_after_title category numbering medium sculpture_type material leafing remarque artist],
         authentication: %w[dated numbering signature]
       },
-
-      csv:{
-        export: %w[sku artist artist_id title retail width height frame_width frame_height tagline description qty],
+      csv: {
+        export: %w[sku artist artist_id title retail width height frame_width frame_height medium material tagline property_room description art_type art_category item_type qty],
         item_product: %w[title width height frame_width frame_height tagline description tagline_search invoice_tagline mounting_search measurements item_size]
       }
     }

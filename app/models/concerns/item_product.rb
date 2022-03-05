@@ -188,6 +188,7 @@ module ItemProduct
     hsh['tagline'] = build_tagline(context, store)
     hsh['description'] = build_body(context, store)
     hsh['invoice_tagline'] = build_invoice_tagline(context, store)
+    hsh['property_room'] = build_property_room(context, store)
     hsh['search_tagline'] = build_search_tagline(context, store)
     hsh
   end
@@ -204,6 +205,13 @@ module ItemProduct
     invoice_tagline = update_invoice_tagline(context, invoice_hsh.keys, invoice_hsh)
     invoice_tagline = tagline_punct(context, invoice_tagline, invoice_tagline.keys)
     Item.char_limit(invoice_tagline, contexts[:invoice_tagline][:set], 140)
+  end
+
+  def build_property_room(context, store)
+    invoice_hsh = filtered_params(store, contexts[:property_room][:keys], 'property_room', 'tagline')
+    property_room = update_invoice_tagline(context, invoice_hsh.keys, invoice_hsh)
+    property_room = tagline_punct(context, property_room, property_room.keys)
+    Item.char_limit(property_room, contexts[:property_room][:set], 128)
   end
 
   def build_search_tagline(context, store)

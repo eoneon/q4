@@ -22,6 +22,7 @@ class Item < ApplicationRecord
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
   belongs_to :invoice, optional: true
 
+  # COLLECTIONS ################################################################
   def product
     products.first if products.any?
   end
@@ -119,6 +120,18 @@ class Item < ApplicationRecord
 
     def search_keys
       %w[category_search medium_search material_search mounting_search measurements edition] #measurements item_size
+    end
+
+    def items_scoped_by_products(products)
+      joins(:products).where(products: {id: products.ids})
+    end
+    #
+    # def items_scoped_by_artist(artist)
+    #   joins(:artists).where(artists: {id: artist.id}).distinct
+    # end
+
+    def scoped_products(products)
+      joins(:products).where(products: {id: products.ids})
     end
 
     def artist_items(artist_id)

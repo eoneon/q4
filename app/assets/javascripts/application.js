@@ -77,12 +77,12 @@ $(document).ready(function(){
   $("body").on("change", ".field-param", function(){
     if (sliceTag(thisForm($(this)).attr("id"), 0) == 'edit') thisForm($(this)).submit();
   });
-  $("body").on("focusout", ".input-field", function(){
+  $("body").on("focusout, keyup", ".input-field", function(){
     thisForm($(this)).submit();
   });
 
-  //FORMS-FIELD VALIDATION
-  $("body").on("keyup, focusin, focusout", ".required", function(){
+  //FORMS-FIELD VALIDATION: keyup, focusin,
+  $("body").on("focusout", ".required", function(){
     requiredFields($(this));
   });
 

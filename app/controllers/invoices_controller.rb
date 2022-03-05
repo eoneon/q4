@@ -54,11 +54,4 @@ class InvoicesController < ApplicationController
     params.require(:invoice).permit!
   end
 
-  # def search_params(search_item_params)
-  #   if search_params = params[:search]
-  #     search_params.reject{|k,v| v.blank?}.to_a
-  #   else
-  #     []
-  #   end
-  # end
 end

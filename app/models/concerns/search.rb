@@ -76,8 +76,7 @@ module Search
     end
 
     def order_hstore_search(results, sort_keys, hstore)
-      puts "results: #{results}"
-      results.any? ? results.order(order_hstore_query(sort_keys,hstore)) : results
+      results.any? ? results.order(order_hstore_query(sort_keys, hstore)) : results
     end
 
     # def order_hstore_search(results, sort_keys, hstore)
@@ -107,11 +106,11 @@ module Search
     end
 
     # sort hstore ##############################################################
-    def order_hstore_query(keys,hstore)
-      keys.map{|k| order_hstore_params(k,hstore)}.join(', ')
+    def order_hstore_query(keys, hstore)
+      keys.map{|k| order_hstore_params(k, hstore)}.join(', ')
     end
 
-    def order_hstore_params(k,hstore)
+    def order_hstore_params(k, hstore)
       "#{hstore} -> \'#{k}\'"
     end
 

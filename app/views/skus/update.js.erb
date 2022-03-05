@@ -1,1 +1,2 @@
-$("#<%= dom_ref(@item, 'edit-sku') %>").html("<%= j render 'skus/edit', invoice: @invoice, item: @item %>");
+$("#<%= dom_ref('edit-sku', @item) %>").html("<%= j render 'skus/edit', invoice: @invoice, item: @item %>");
+$("#<%= dom_ref('card', @item) %>").find(".sku-span").text("<%= @item.sku %>");

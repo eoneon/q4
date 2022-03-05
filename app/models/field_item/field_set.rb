@@ -12,7 +12,6 @@ class FieldSet < FieldItem
   #validates :field_name, uniqueness: true
 
   def add_and_assoc_targets(target_group)
-    #puts "target_group: #{target_group}"
     assoc_targets(add_targets(target_group))
   end
 

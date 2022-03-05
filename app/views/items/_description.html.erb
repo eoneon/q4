@@ -8,7 +8,7 @@
       <div><span class="font-weight-bold">Body: </span><span id="description"><%= item.hattr('csv_tags', 'description') %></span></div>
     </div>
     <div class="card p-1 mb-2 border-0">
-      <div><span class="font-weight-bold">Search: </span><span id="search_tagline"><%= item.hattr('csv_tags', 'search_tagline') %></span></div>
+      <div><span class="font-weight-bold">P-Room: </span><span id="property_room"><%= "#{item.hattr('csv_tags', 'property_room')} (#{item.hattr('csv_tags', 'property_room').try(:length)})" %></span></div>
     </div>
   </div>
 </div>

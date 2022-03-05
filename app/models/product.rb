@@ -10,20 +10,19 @@ class Product < ApplicationRecord
   validates :product_name, uniqueness: true
 
   has_many :item_groups, as: :origin
-  has_many :item_groups, as: :target
-
-  has_many :items, through: :item_groups, source: :origin, source_type: "Item"
+  #has_many :field_items, through: :item_groups, source: :target, source_type: "FieldItem"
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
-  has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"
+  has_many :field_sets, through: :item_groups, as: :origin, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
   has_many :radio_buttons, through: :item_groups, source: :target, source_type: "RadioButton"
   has_many :text_fields, through: :item_groups, source: :target, source_type: "TextField"
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  # def items
-  #   Item.joins(:products).where(products: {id: id})
-  # end
+  # COLLECTIONS ################################################################
+  def items
+    Item.joins(:products).where(products: {id: id})
+  end
 
   # GROUPING METHODS: CRUD/VIEW ################################################
   def product_item_loop(i_hsh, f_grp, keys)
@@ -126,7 +125,9 @@ class Product < ApplicationRecord
     def invoice_search(product:nil, artist_id:nil, hattrs:nil, hstore:'tags', inputs:{})
       form_inputs(hattrs, product, artist_id, hstore, inputs)
       results = search_results(product, artist_id, inputs['hattrs'].reject{|k,v| v.blank?}, hstore)
+      #puts "search_results::results: #{results}"
       results = order_hstore_search(results, %w[category_search medium_search material_search], hstore)
+      #puts "order_hstore_search::results: #{results.ids}"
       inputs['hattrs'] = search_inputs(results, inputs['hattrs'], hstore)
       a, b = results, inputs
     end
@@ -139,6 +140,8 @@ class Product < ApplicationRecord
 
     def search_results(product, artist_id, hattrs, hstore)
       results_or_self = scope_search_or_self(product, artist_id)
+      #puts "results_or_self 144: #{results_or_self}"
+      #puts "results_or_self.ids 144: #{results_or_self.ids}"
       hstore_search(results_or_self, hattrs, hstore)
     end
 
@@ -146,6 +149,11 @@ class Product < ApplicationRecord
       return self unless !product && artist_id && search_by_artists(artist_id).any?
       search_by_artists(artist_id)
     end
+
+    # def scope_search_or_self(product, artist_id)
+    #   return self unless !product && artist_id && Artist.find(artist_id).products.any?
+    #   Artist.find(artist_id).products
+    # end
 
     def search_by_artists(artist_id)
       where(id: ItemGroup.join_group('Item', Item.artist_items(artist_id).ids, 'Product').pluck(:target_id))
@@ -162,6 +170,20 @@ class Product < ApplicationRecord
     def search_keys
       %w[category_search medium_search] #material_search
     end
+
+    def ordered_search_keys
+      %w[category_search medium_search material_search]
+    end
+
+    # COLLECTIONS ##############################################################
+    def artists
+      Artist.joins(:items).where(items: {id: items.ids}).distinct
+    end
+
+    def sorted_products
+      all.order(order_hstore_query(ordered_search_keys, 'tags'))
+    end
+
     # SEEDING METHODS ##########################################################
     def seed(store)
       Medium.class_group('ProductGroup').each_with_object(store) do |c, store|

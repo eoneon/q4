@@ -1,4 +1,5 @@
 class ItemArtistsController < ApplicationController
+
   def search
     @items, @item_inputs = Item.item_search(search_params)
 
