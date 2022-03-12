@@ -60,9 +60,21 @@ $(document).ready(function(){
     updateTitleInput(inputGroupData($(this)), $(this).val());
   });
   //FORMS-SUBMIT: GET search-hattrs
+  // $("body").on("change", "select.search-select", function(){
+  //   thisForm($(this)).submit();
+  // });
+
   $("body").on("change", "select.search-select", function(){
-    thisForm($(this)).submit();
+    if ($(this).val().length && ['category_search', 'medium_search', 'material_search'].includes($(this).attr("id"))) {
+      var ref = thisForm($(this)).find(".new-item-select-product");
+      console.log(ref)
+      //newItemUnselectProduct(searchData(ref));
+      thisForm($(this)).submit();
+    } else {
+      thisForm($(this)).submit();
+    }
   });
+
   $("body").on("click", ".unselect", function(){
     deselectSelectedOpt(inputGroup($(this)));
     thisForm($(this)).submit();
@@ -468,13 +480,14 @@ $(document).ready(function(){
   //CONTEXT-SPECIFIC get DATA and DO ###########################################
   function searchData(thisElement) {
     var d = buildData(inputGroupData(thisElement).obj);
+    d.thisElement = thisElement;
     d.selected = $(thisElement).val();
     d.form_id = thisForm(thisElement).attr("id");
     return d;
   }
   //ELEMENT-SPECIFIC: get common elements by pattern utilities #################
   function inputGroupData(ref) {
-    var d =  $(inputGroup(ref)).data();
+    var d = $(inputGroup(ref)).data();
     d.input_grp = inputGroup(ref);
     return d;
   }

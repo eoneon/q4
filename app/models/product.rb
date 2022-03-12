@@ -122,6 +122,69 @@ class Product < ApplicationRecord
 
   class << self
 
+    def psearch(scopes:, product_hattrs:)
+      inputs = scopes.each_with_object({}) {|(k,v), inputs| inputs[k.to_s] = {'selected' => (v.present? ? v.id : nil), 'opts' => []}}
+      results_and_inputs(sorted_products, product_hattrs.reject{|k,v| v.blank?}, product_hattrs, inputs)
+      inputs
+    end
+
+    def results_and_inputs(products, search_params, hattrs, inputs)
+      product_search_options(products, inputs['product']['selected'], inputs['artist']['selected'], search_params, inputs)
+      inputs['hattrs'] = product_search_hattr_inputs(products, hattrs)
+    end
+
+    def product_search_options(products, product, artist, search_params, inputs)
+      if product
+        results_scoped_by_product(product, artist, product_search(products, search_params), inputs)
+      elsif artist
+        results_scoped_by_artist(artist, product_search(artist.products, search_params), inputs)
+      elsif search_params.any?
+        results_scoped_by_search_params(product_search(products, search_params), inputs)
+      else
+        inputs['product']['opts'] = products
+        inputs['artist']['opts'] = Artist.all
+      end
+    end
+
+    def results_scoped_by_product(product, artist, products, inputs)
+      inputs['product']['opts'] = products
+      inputs['artist']['opts'] = product.artists if artist
+      inputs['title']['opts'] = artist.titles if artist && inputs['title']
+    end
+
+    def results_scoped_by_artist(artist, products, inputs)
+      inputs['product']['opts'] = products
+      inputs['artist']['opts'] = Artist.scoped_artists(products)
+      inputs['title']['opts'] = artist.titles if inputs['title']
+    end
+
+    def results_scoped_by_search_params(products, inputs)
+      inputs['product']['opts'] = products
+      inputs['artist']['opts'] = Artist.scoped_artists(products)
+    end
+
+    def product_search_hattr_inputs(products, hattrs)
+      hattrs.each_with_object([]) do |(k,v), hattr_inputs|
+        hattr_inputs.append(ssearch_input(k, v, scoped_products(products, 'material_search', hattrs))) if filter_medium_options_by_material?(k, hattrs)
+        products = scoped_products(products, k, hattrs) if k=='category_search' && !v.blank?
+        hattr_inputs.append(ssearch_input(k, v, products.pluck(:tags)))
+      end
+    end
+
+    def filter_medium_options_by_material?(k, hattrs)
+      k=='medium_search' && hattrs['medium_search'].blank? && hattrs['category_search'].blank? && !hattrs.dig('material_search').blank?
+    end
+
+    def product_search(set, search_params, hstore='tags')
+      search_query(set, search_params, hstore).order(order_hstore_query(ordered_search_keys, hstore))
+    end
+
+    def scoped_products(set, k, hattrs)
+      product_search(set, {k=> hattrs[k]})
+    end
+
+    ##########################################################
+
     def invoice_search(product:nil, artist_id:nil, hattrs:nil, hstore:'tags', inputs:{})
       form_inputs(hattrs, product, artist_id, hstore, inputs)
       results = search_results(product, artist_id, inputs['hattrs'].reject{|k,v| v.blank?}, hstore)
@@ -166,6 +229,16 @@ class Product < ApplicationRecord
       results = order_hstore_search(results, search_keys, hstore)
       a, b = results, search_inputs(results, hattrs, hstore)
     end
+
+    #new
+    def scope_keys
+      %w[product_id artist_id]
+    end
+
+    def hattr_keys
+      %w[category_search medium_search material_search]
+    end
+    #end
 
     def search_keys
       %w[category_search medium_search] #material_search

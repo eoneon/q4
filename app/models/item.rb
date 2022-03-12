@@ -77,6 +77,29 @@ class Item < ApplicationRecord
 
   class << self
 
+    def search(scopes:, product_hattrs:, item_hattrs:)
+      inputs = Product.psearch(scopes: scopes, product_hattrs: product_hattrs)
+      results_and_inputs(item_hattrs.reject{|k,v| v.blank?}, item_hattrs, inputs)
+      inputs
+    end
+
+    def results_and_inputs(search_params, item_hattrs, inputs, hstore='csv_tags')
+      inputs['items'] = order_hstore_search(item_results(search_params, inputs, hstore), search_keys, hstore)
+      items_tags = inputs['items'].any? ? inputs['items'].pluck(hstore) : []
+      inputs['hattrs'].concat(item_search_hattr_inputs(item_hattrs, items_tags))
+    end
+
+    def item_results(search_params, inputs, hstore)
+      !inputs['product']['selected'] ? [] : search_query(inputs['product']['selected'].items, search_params, hstore)
+    end
+
+    def item_search_hattr_inputs(hattrs, items_tags)
+      hattrs.each_with_object([]) do |(k,v), hattr_inputs|
+        hattr_inputs.append({'input_name'=> k, 'selected'=> v, 'opts'=> search_opts(items_tags, k)})
+      end
+    end
+    ############################################################################
+
     def item_search(product:nil, artist:nil, title: nil, hattrs:nil, hstore:'csv_tags', inputs:{})
       hattrs = hattr_params(product, hattrs, hstore)
       results_or_self = search_case(artist, product)
@@ -117,6 +140,16 @@ class Item < ApplicationRecord
     def title_search(results_or_self, title)
       title.blank? ? results_or_self : results_or_self.where(title: title)
     end
+
+    #new
+    def scope_keys
+      %w[product_id artist_id title]
+    end
+
+    def hattr_keys
+      %w[mounting_search measurements edition]
+    end
+    #end
 
     def search_keys
       %w[category_search medium_search material_search mounting_search measurements edition] #measurements item_size

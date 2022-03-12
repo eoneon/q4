@@ -1,6 +1,8 @@
 class TableSkusController < ApplicationController
   def show
     @item = Item.find(params[:id])
+    puts "product-search-test: #{product_search_params(product: @item.product)}"
+    #Product.search(product_search_params(product: @item.product))
     @products, @inputs = Product.search(scope: @item.product)
     @titles = titles(@item.artist)
     @rows, attrs = @item.input_group
@@ -33,7 +35,7 @@ class TableSkusController < ApplicationController
     @item = Item.find(params[:id])
     @invoice = @item.invoice
     @item.destroy
-    
+
     respond_to do |format|
       format.js
     end

@@ -166,6 +166,19 @@ module Hashable
     end
 
     #hash filter methods ####################################################### might want to check this one out
+    def update_default_hsh_from_old_hsh(required_keys, default_hsh, store_hsh)
+      return default_hsh if required_keys.empty?
+      store_hsh.each_with_object(default_hsh) do |(k,v), default_hsh|
+        if v.is_a? Hash
+    	    update_default_hsh_from_old_hsh(required_keys, default_hsh, v)
+        elsif required_keys.include?(k)
+          required_keys.delete(k)
+          store_hsh.delete(k)
+    	    default_hsh[k] = v if !v.blank?
+        end
+      end
+    end
+
     def filter_hsh(h, key_set, reject_set=[])
       if h = filter_hsh_by_keys(h, key_set)
         h = filter_hsh_vals(h, reject_set)

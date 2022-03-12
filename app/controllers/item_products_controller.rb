@@ -2,6 +2,8 @@ class ItemProductsController < ApplicationController
 
   def create
     @item = Item.find(params[:id])
+    #scopes = {product: @item.product, artist:nil}
+    #Product.search(search_params(scopes, product_hattrs(scopes[:product])))
     @product = Product.find(params[:product_id])
     @products, @inputs = Product.search(scope: @product)
     @item.add_product(@product)
@@ -15,6 +17,8 @@ class ItemProductsController < ApplicationController
 
   def update
     @item = Item.find(params[:id])
+    #scopes = scope_params(Product.scope_keys, params)
+    #Product.search(search_params(Product.scope_keys, product_hattrs(@item.product)))
     @product = Product.find(params[:product_id])
     @products, @inputs = Product.search(scope: @product)
     @item.replace_product(@product, @item.product)
@@ -28,6 +32,7 @@ class ItemProductsController < ApplicationController
 
   def search
     @item = Item.find(params[:id])
+    puts "product-search-test: #{product_search_params}"
     @products, @inputs = Product.search(scope: @item.product, hattrs: params[:items][:search].to_unsafe_h)
 
     respond_to do |format|

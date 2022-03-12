@@ -44,6 +44,7 @@
   <div class="collapse" id="new-skus-toggle" data-parent="#invoice-navbar-forms">
     <hr>
     <%= render 'skus/search', invoice: invoice, results: results, inputs: inputs %>
+    <%#= render 'skus/search', invoice: invoice, inputs: inputs %>
     <%= render 'skus/form', invoice: invoice, titles: [] %>
     <%= render 'titles/new', invoice: invoice %>
   </div>
@@ -59,6 +60,7 @@
       <%= render 'batch_items/form', invoice: invoice %>
     </div>
     <div id="search-table">
+      <%#= render 'batch_items/table', items: items['items'] %>
       <%= render 'batch_items/table', items: items %>
     </div>
   </div>

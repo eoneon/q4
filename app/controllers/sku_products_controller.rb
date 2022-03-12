@@ -1,6 +1,7 @@
 class SkuProductsController < ApplicationController
   def update
     @item = Item.find(params[:id])
+    #Product.search(search_params(Product.scope_keys, product_hattrs(@item.product)))
     @product = Product.find(params[:product_id])
     @products, @inputs = Product.search(scope: @product)
     @titles = titles(@item.artist)

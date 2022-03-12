@@ -1,12 +1,11 @@
 class SkusController < ApplicationController
 
   def search
-    #puts "search_params: #{search_params(scope_params)}"
     @invoice = Invoice.find(params[:invoice_id])
     product = cond_find(Product, params[:item][:product_id])
     artist_id = cond_id(params[:item][:artist_id])
+    @product_inputs = Product.psearch(product_search_params)
     @nav_products, @nav_search_inputs = Product.invoice_search(product: product, artist_id: artist_id, hattrs: params[:items][:hattrs].to_unsafe_h)
-
     respond_to do |format|
       format.js
     end
@@ -17,6 +16,7 @@ class SkusController < ApplicationController
     artist = cond_find(Artist, params[:item][:artist_id])
     product = cond_find(Product, params[:item][:product_id])
     Item.new.batch_create_skus(skus, item_params, artist, product, product_args(product)) if skus
+    @product_inputs = Product.psearch(product_search_params)
     @nav_products, @nav_search_inputs = Product.invoice_search
 
     respond_to do |format|

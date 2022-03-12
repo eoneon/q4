@@ -4,6 +4,23 @@ module Search
   extend ActiveSupport::Concern
 
   class_methods do
+    # new search methods #######################################################
+    def search_query(set, search_params, hstore)
+      search_params.any? ? hstore_query(set, search_params, hstore) : set
+    end
+
+    def ssearch_input(k,v,set)
+      {'input_name'=> k, 'selected'=> selected_input_val(v), 'opts'=> search_opts(set,k)}
+    end
+
+    def selected_input_val(v)
+      v.class == String ? v : v.try(:id)
+    end
+
+    def search_opts(set,k)
+      set.pluck(k).uniq.compact
+    end
+
     # join_search (I) ##########################################################
     def scope_group(scope, joins, input_group)
       input_group['scope'] = scope.try(:id)

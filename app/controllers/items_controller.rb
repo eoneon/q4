@@ -1,11 +1,11 @@
 class ItemsController < ApplicationController
 
-  def show
-    @item = Item.find(params[:id])
-    @products, @inputs = Product.search(scope: @item.product)
-    @titles = titles(@item.artist)
-    @rows, attrs = @item.input_group
-  end
+  # def show
+  #   @item = Item.find(params[:id])
+  #   @products, @inputs = Product.search(scope: @item.product)
+  #   @titles = titles(@item.artist)
+  #   @rows, attrs = @item.input_group
+  # end
 
   def create
     @invoice = Invoice.find(params[:invoice_id])
@@ -21,10 +21,12 @@ class ItemsController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
-    @titles = titles(cond_find(Artist, params[:item][:artist_id]))
-
-    @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
     @item.update_product_case('product', @item.product, params[:item][:product_id])
+    @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
+    @titles = titles(@item.artist)
+    #@titles = titles(cond_find(Artist, params[:item][:artist_id]))
+    puts "product-search-test: #{product_search_params(store: {}, product: @item.product)}"
+    #Product.search(product_search_params(store: {}, product: @item.product))
     @products, @inputs = Product.search(scope: @item.product)
     @rows, attrs = @item.input_group
     @item.update_csv_tags(attrs)

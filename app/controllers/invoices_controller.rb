@@ -1,4 +1,5 @@
 class InvoicesController < ApplicationController
+
   def index
     @invoices = Invoice.all.order(invoice_number: 'desc')
   end
@@ -6,6 +7,9 @@ class InvoicesController < ApplicationController
   def show
     @invoice = Invoice.find(params[:id])
     @nav_products, @nav_search_inputs = Product.invoice_search
+    @product_inputs = Product.psearch(product_search_params)
+    @item_inputs = Item.search(item_search_params)
+    #puts "isearch: #{Item.search(item_search_params)}"
     @items, @item_inputs = Item.item_search
   end
 
