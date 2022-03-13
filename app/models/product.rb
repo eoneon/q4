@@ -163,13 +163,44 @@ class Product < ApplicationRecord
       inputs['artist']['opts'] = Artist.scoped_artists(products)
     end
 
+    # def product_search_hattr_inputs(products, hattrs)
+    #   hattr_keys.each_with_object([]) do |k, hattr_inputs|
+    #     next if !hattrs.has_key?(k)
+    #     v = hattrs[k]
+    #     products = category_search(products, hattrs, k, v, hattr_inputs) if k=='category_search'
+    #     medium_search(products, hattrs, k, v, hattr_inputs) if k=='medium_search'
+    #     hattr_inputs.append(ssearch_input(k, v, products.pluck(:tags))) if k=='material_search'
+    #   end
+    # end
+
     def product_search_hattr_inputs(products, hattrs)
-      hattrs.each_with_object([]) do |(k,v), hattr_inputs|
-        hattr_inputs.append(ssearch_input(k, v, scoped_products(products, 'material_search', hattrs))) if filter_medium_options_by_material?(k, hattrs)
-        products = scoped_products(products, k, hattrs) if k=='category_search' && !v.blank?
-        hattr_inputs.append(ssearch_input(k, v, products.pluck(:tags)))
+      hattrs.select{|k,v| hattr_keys.include?(k)}.each_with_object([]) do |(k,v), hattr_inputs|
+        products = category_search(products, hattrs, k, v, hattr_inputs) if k=='category_search'
+        medium_search(products, hattrs, k, v, hattr_inputs) if k=='medium_search'
+        hattr_inputs.append(ssearch_input(k, v, products.pluck(:tags))) if k=='material_search'
       end
     end
+
+    def category_search(products, hattrs, k, v, hattr_inputs)
+      hattr_inputs.append(ssearch_input(k, v, products.pluck(:tags)))
+      products = !v.blank? ? scoped_products(products, k, hattrs) : products
+    end
+
+    def medium_search(products, hattrs, k, v, hattr_inputs)
+      products = scoped_products(products, 'material_search', hattrs) if filter_medium_options_by_material?(k, hattrs)
+      hattr_inputs.append(ssearch_input(k, v, products.pluck(:tags)))
+    end
+
+    # def product_search_hattr_inputs(products, hattrs)
+    #   hattrs.each_with_object([]) do |(k,v), hattr_inputs|
+    #     hattr_inputs.append(ssearch_input(k, v, scoped_products(products, 'material_search', hattrs))) if filter_medium_options_by_material?(k, hattrs)
+    #     products = scoped_products(products, k, hattrs) if k=='category_search' && !v.blank?
+    #     products_tags = products.pluck(:tags)
+    #     puts "products_tags.pluck: #{products_tags.pluck(k).compact.uniq}"
+    #     hattr_inputs.append({'input_name'=> k, 'selected'=> v, 'opts'=> products.pluck(:tags).pluck(k).compact.uniq})
+    #     #hattr_inputs.append(ssearch_input(k, v, products_tags))
+    #   end
+    # end
 
     def filter_medium_options_by_material?(k, hattrs)
       k=='medium_search' && hattrs['medium_search'].blank? && hattrs['category_search'].blank? && !hattrs.dig('material_search').blank?

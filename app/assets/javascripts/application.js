@@ -67,9 +67,7 @@ $(document).ready(function(){
   $("body").on("change", "select.search-select", function(){
     if ($(this).val().length && ['category_search', 'medium_search', 'material_search'].includes($(this).attr("id"))) {
       var ref = thisForm($(this)).find(".new-item-select-product");
-      console.log(ref)
-      //newItemUnselectProduct(searchData(ref));
-      thisForm($(this)).submit();
+      newItemUnselectProduct(searchData(ref));
     } else {
       thisForm($(this)).submit();
     }
