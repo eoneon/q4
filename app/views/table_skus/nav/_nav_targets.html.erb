@@ -3,7 +3,8 @@
 </div>
 
 <div class="collapse" id="edit-item-toggle" data-parent="#<%= dom_ref('navbar-forms', item) %>">
-  <%= render "item_products/forms/search", item: item, inputs: inputs, products: products %>
+  <!--inputs['hattrs']  inputs['products']['opts']-->
+  <%= render "item_products/forms/search", item: item, inputs: inputs %>
   <%= render "items/edit", invoice: invoice, item: item, titles: titles %>
   <%= render "item_fields/edit", item: item, rows: rows %>
 </div>

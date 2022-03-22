@@ -1,3 +1,3 @@
 <%= render 'item_products/forms/search_label', input_name: input_name %>
 <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
-<%= select_tag "items[#{scope}][#{input_name}]", options_for_select(search_opts(opts), selected), {include_blank: true, id: input_name, class: boot_classes(:search_input, 'search-select')} %>
+<%= select_tag "items[#{scope}][#{input_name}]", options_for_select(search_opts(opts), selected), {include_blank: true, id: input_name, class: boot_classes(:search_input, search_label(input_name), 'search-select')} %>

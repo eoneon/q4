@@ -71,21 +71,6 @@ class ApplicationController < ActionController::Base
     params.to_unsafe_h.reject{|k,v| %w[utf8 controller action].include?(k)}
   end
 
-  # def search_params(scope_params)
-  #   {scopes: scope_params, hattrs: scoped_hattr_params(scope_params[:product], params[:items][:hattrs].to_unsafe_h)}
-  # end
-
-  #remove: replaced by above
-  def search_params(scope_params, hattr_params)
-    {scopes: scope_params}.merge!(hattr_params)
-  end
-
-  # def search_params(scope_params, hattr_params)
-  #   h={scopes: scope_params, product_hattrs: scoped_hattr_params(scope_params[:product], hattr_params[:product])}
-  #   h[:item_hattrs] = hattr_params[:item] if hattr_params.has_key?(:item) || hattr_params.has_key?(:items)
-  #   h
-  # end
-
   #remove: replaced by scope_hsh
   def scope_params(scope_keys, scope_attrs={})
     scope_keys.each_with_object({}) do |k,hsh|
@@ -96,24 +81,6 @@ class ApplicationController < ActionController::Base
   def cond_search_param(k, id, v)
     {k.to_sym => (id ? cond_find(k.classify.constantize, v) : v)}
   end
-  #remove: replaced by above
-  def product_hattr_args
-    hattr_args.select{|k,v| k==:product}
-  end
-  #remove: replaced by above
-  def hattr_args
-    {product: Product.hattr_keys, item: Item.hattr_keys}
-  end
-
-  #new ######################
-  #remove: replaced by above
-  def product_and_item_hattrs(product:nil, hattrs:{})
-    {product: product_hattrs(product: product, hattrs: hattrs), item: item_hattrs(hattrs: hattrs)}
-  end
-
-  # def searchable(product:nil, hattrs:{})
-  #   {product_hattrs(product: product, hattrs: hattrs), item_hattrs(hattrs: hattrs)}
-  # end
 
   def product_hattrs(product:nil, hattrs:{})
     hattr_params(product_keys, (product ? product.tags : hattrs))
@@ -128,38 +95,8 @@ class ApplicationController < ActionController::Base
   end
 
   def product_keys
-    %w[table_skus items].include?(controller_name) ? Product.hattr_keys[0..1] : Product.hattr_keys
+    %w[table_skus items item_products].include?(controller_name) ? Product.hattr_keys[0..1] : Product.hattr_keys
   end
-
-  #scope ######################
-  # def scope_params
-  #   [:product_id, :artist_id, :title].each_with_object({}) do |k,hsh|
-  #     next if k==:title && !params[:item].has_key?(k)
-  #     hsh.merge!(cond_search_param(k.to_s.split('_')[0], params[:item][k]))
-  #   end
-  # end
-
-  # def cond_search_param(k, v)
-  #   {k.to_sym => (%w[product artist].include?(k) ? cond_find(k.to_s.classify.constantize, v) : v)}
-  # end
-
-  #hattr ######################
-  # def hattr_search_params(product, hattrs)
-  #   product ? product_hattr_params(product, hattrs.keys) : hattrs
-  # end
-
-  # def hattr_params(args:{}, hattrs:{})
-  #   args.blank? && !hattrs.blank? ? hattrs : args.each_with_object({}) {|(k,keys), h| h[k] = filter_h(keys, hattrs)}
-  # end
-
-  #remove: replaced by above
-  def scoped_hattr_params(product, hattrs)
-    product ? filter_h(hattrs.keys, product.tags) : hattrs
-  end
-
-  # def product_hattr_params(product, search_keys)
-  #   search_keys.each_with_object({}){|k,h| h[k] = product.tags.dig(k)}
-  # end
 
   def filter_h(keys, hattrs={})
     keys.each_with_object({}) {|k,h| h[k] = hattrs.dig(k)}

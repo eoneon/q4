@@ -1,10 +1,9 @@
 class BatchItemsController < ApplicationController
+
   def search
     @invoice = Invoice.find(params[:invoice_id])
-    puts "item-search: #{item_search_params}"
-    #Item.search(item_search_params)
-    @items, @item_inputs = Item.item_search(search_param)
-    scope_params = scope_params(Item.scope_keys, params[:items])
+    @item_inputs = Item.search(item_search_params)
+
     respond_to do |format|
       format.js
     end
@@ -13,11 +12,9 @@ class BatchItemsController < ApplicationController
   def create
     @invoice = Invoice.find(params[:invoice_id])
     item = Item.find(params[:item_id])
-    puts "item-search: #{item_search_params}"
     artist = cond_find(Artist, params[:item][:artist_id])
     item.batch_dup_skus(skus, item_params, artist) if skus
-    #Item.search(item_search_params)
-    @items, @item_inputs = Item.item_search
+    @item_inputs = Item.search(item_search_params)
 
     respond_to do |format|
       format.js

@@ -79,18 +79,18 @@ class Item < ApplicationRecord
 
     def search(scopes:, product_hattrs:, item_hattrs:)
       inputs = Product.psearch(scopes: scopes, product_hattrs: product_hattrs)
-      results_and_inputs(item_hattrs.reject{|k,v| v.blank?}, item_hattrs, inputs)
+      results_and_inputs(item_hattrs.reject{|k,v| v.blank?}, item_hattrs, scopes[:product], inputs)
       inputs
     end
 
-    def results_and_inputs(search_params, item_hattrs, inputs, hstore='csv_tags')
-      inputs['items'] = order_hstore_search(item_results(search_params, inputs, hstore), search_keys, hstore)
+    def results_and_inputs(search_params, item_hattrs, product, inputs, hstore='csv_tags')
+      inputs['items'] = order_hstore_search(item_results(search_params, product, hstore), search_keys, hstore)
       items_tags = inputs['items'].any? ? inputs['items'].pluck(hstore) : []
       inputs['hattrs'].concat(item_search_hattr_inputs(item_hattrs, items_tags))
     end
 
-    def item_results(search_params, inputs, hstore)
-      !inputs['product']['selected'] ? [] : search_query(inputs['product']['selected'].items, search_params, hstore)
+    def item_results(search_params, product, hstore)
+      product ? search_query(product.items, search_params, hstore) : []
     end
 
     def item_search_hattr_inputs(hattrs, items_tags)
@@ -108,16 +108,6 @@ class Item < ApplicationRecord
       results = order_hstore_search(results, %w[search_tagline item_size], hstore)
       a, b = uniq_hattrs(results, search_keys, hstore), form_inputs(product, artist, title, hattrs, results, hstore, inputs)
     end
-
-    # def item_search(product:nil, artist:nil, title: nil, hattrs:nil, hstore:'csv_tags', inputs:{})
-    #   hattrs = hattr_params(product, hattrs, hstore)
-    #   results_or_self = search_case(artist, product)
-    #   results_or_self = title_search(results_or_self, title)
-    #   results = hstore_cascade_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, [])
-    #   form_inputs = form_inputs(product, artist, title, hattrs, results, hstore, inputs)
-    #   results = order_hstore_search(results, %w[search_tagline item_size], hstore)
-    #   a, b = uniq_hattrs(results, search_keys, hstore), form_inputs
-    # end
 
     def form_inputs(product, artist, title, hattrs, results, hstore, inputs)
       origins_targets_inputs(product, 'Item', 'Product', results, inputs)
@@ -176,14 +166,6 @@ end
 
 ############################################################################## #results_or_self = attr_group(results_or_self, default_params(attrs, attr_search_keys), input_group)
 
-# def self.search(scope:nil, attrs:{}, hattrs:{}, input_group:{}, hstore: 'csv_tags')
-#   results_or_self = scope_group(scope, :item_groups, input_group)
-#   results = hstore_group(results_or_self, default_params(hattrs, search_keys), hstore, input_group, nil)
-#   args = results.any? ? [results, input_group['hattrs'], hstore] : [Product, input_group['hattrs'], 'tags']
-#   input_group['hattrs'] = search_inputs(*args)
-#   a, b = results, input_group
-# end
-#
 # def self.hattr_search_fields(results, hattrs, hstore)
 #   hattrs.each_with_object({}) do |(k,v), hattr_inputs|
 #     hattr_inputs.merge!({k=> search_input(k, v, results, hstore)})
@@ -198,8 +180,4 @@ end
 #   attrs.each_with_object({}) do |(k,v), attr_inputs|
 #     attr_inputs.merge!({k => {'opts' => results.pluck(k.to_sym).uniq, 'selected' =>v}})
 #   end
-# end
-#
-# def self.table_keys
-#   %w[tagline_search mounting_search measurements]
 # end
