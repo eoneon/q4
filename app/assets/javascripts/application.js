@@ -38,6 +38,10 @@ $(document).ready(function(){
     if (d.btn.static && !d.btn.vis_target) refreshArtistNavbar(d);
   });
 
+  //FORMS-SUBMIT: GET search-product
+  // $("body").on("change", ".new-item-select-product", function(){
+  //   newItemSelectProduct(searchData($(this)));
+  // });
   //FORMS-SUBMIT: GET search-artist
   $("body").on("change", ".search.new.item.artist", function(){
     newItemSelectArtist(searchData($(this)));
@@ -49,14 +53,9 @@ $(document).ready(function(){
     updateArtistNavbar(updateArtistNavbarData($(this), {}));
   });
 
-  //FORMS-SUBMIT: GET search-product
-  $("body").on("change", ".new-item-select-product", function(){
-    newItemSelectProduct(searchData($(this)));
-  });
   $("body").on("click", ".new-item-unselect-product", function(){
     newItemUnselectProduct(searchData($(this)));
   });
-
 
   //FORMS-SUBMIT: GET @titles
   $("body").on("change", "#title-select", function(){
@@ -84,7 +83,8 @@ $(document).ready(function(){
   //     thisForm($(this)).submit();
   //   }
   // });
-  $("body").on("change", ".table.hattrs .category, .table.hattrs .medium, .table.hattrs .material", function() {
+
+  $("body").on("change", ".hattrs .category, .hattrs .medium, .hattrs .material", function() {
     var product = thisForm($(this)).find(".product");
     if ( $(this).val().length && valid($(product).val()) ) clearProductSearchInputs($(this), product, $(searchData(product).itemForm).find(".product"));
     thisForm($(this)).submit();
@@ -112,7 +112,7 @@ $(document).ready(function(){
   //   thisForm($(this)).submit();
   // });
 
-  $("body").on("change", ".table-product", function(){
+  $("body").on("change", ".new-item-select-product, .table-product", function(){
     var d = searchData($(this));
     $(d.itemForm).find(d.productInput).val(d.selected);
     thisForm($(this)).submit();

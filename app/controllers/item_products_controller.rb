@@ -14,11 +14,7 @@ class ItemProductsController < ApplicationController
 
   def search
     @item = Item.find(params[:id])
-
-    #product_inputs = Product.ppsearch(product_search_params)
-    #puts "product_search_params: #{product_inputs}"
-    @product_inputs = Product.ppsearch(product_search_params)
-    puts "@product_inputs['hattrs'] = #{@product_inputs['hattrs']}"
+    @product_inputs = Product.search(product_search_params)
     @update = !@item.skip?(@item.product, @product_inputs['product']['selected'])
 
     respond_to do |format|
@@ -35,26 +31,35 @@ class ItemProductsController < ApplicationController
 end
 
 
-  # def create
-  #   @item = Item.find(params[:id])
-  #   @product = Product.find(params[:product_id])
-  #   @products, @inputs = Product.search(scope: @product)
-  #   @item.add_product(@product)
-  #   @rows, attrs = @item.input_group
-  #   @item.update_csv_tags(attrs)
-  #
-  #   respond_to do |format|
-  #     format.js
-  #   end
-  # end
 
-  # def destroy
-  #   @item = Item.find(params[:id])
-  #   @products, @inputs = Product.search
-  #   @item.remove_product(@item.product)
-  #   @rows, attrs = @item.input_group
-  #
-  #   respond_to do |format|
-  #     format.js
-  #   end
-  # end
+
+
+
+
+
+
+
+
+# def create
+#   @item = Item.find(params[:id])
+#   @product = Product.find(params[:product_id])
+#   @products, @inputs = Product.search(scope: @product)
+#   @item.add_product(@product)
+#   @rows, attrs = @item.input_group
+#   @item.update_csv_tags(attrs)
+#
+#   respond_to do |format|
+#     format.js
+#   end
+# end
+
+# def destroy
+#   @item = Item.find(params[:id])
+#   @products, @inputs = Product.search
+#   @item.remove_product(@item.product)
+#   @rows, attrs = @item.input_group
+#
+#   respond_to do |format|
+#     format.js
+#   end
+# end

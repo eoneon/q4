@@ -1,1 +1,9 @@
 $("#search-skus").html("<%= j render 'skus/search', invoice: @invoice, inputs: @product_inputs %>");
+var artist_id, id = [$("#new-title").find(".artist").val(), "<%= @product_inputs['artist']['selected'] %>"]
+
+$(function(){
+	if (artist_id==id) {
+		$("#new-title").find(".artist").val(id);
+		$("#<%= dom_ref('edit-item', @item) %>").submit();
+	}
+});

@@ -10,6 +10,7 @@ class Product < ApplicationRecord
   validates :product_name, uniqueness: true
 
   has_many :item_groups, as: :origin
+  has_many :items, through: :item_groups, source: :origin, source_type: "Item"
   #has_many :field_items, through: :item_groups, source: :target, source_type: "FieldItem"
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
   has_many :field_sets, through: :item_groups, as: :origin, source: :target, source_type: "FieldSet"
@@ -22,6 +23,10 @@ class Product < ApplicationRecord
   # COLLECTIONS ################################################################
   def items
     Item.joins(:products).where(products: {id: id})
+  end
+
+  def artists
+    Artist.joins(:items).where(items: {id: items.ids}).distinct
   end
 
   # GROUPING METHODS: CRUD/VIEW ################################################
@@ -121,15 +126,100 @@ class Product < ApplicationRecord
   end
 
   class << self
-    #A #########################################################################
+    #A ########################################################################
+    ###################################################################################################
     #A
-    def ppsearch(scopes:, product_hattrs:)
-      inputs, hattrs, products = config_inputs_and_params(scopes, product_hattrs, sorted_products)
-      product_search_options(products, inputs['product']['selected'], inputs['artist']['selected'], hattrs.reject{|k,v| v.blank?}, inputs)
-      inputs
+    def search(scopes:, product_hattrs:)
+    	search_params, hattrs, inputs = product_hattrs.reject{|k,v| v.blank?}, product_hattrs, initialize_scope_inputs(scopes) #ok
+    	products = config_selected_scopes_and_initialize_products(scopes[:product], scopes[:artist], scopes, search_params)
+    	scopes[:products] = products
+    	config_hattrs_and_their_inputs(product_hattrs, hattrs, products, inputs)
+    	config_scopes_and_their_inputs(scopes[:product], scopes[:artist], scopes[:products], hattrs.reject{|k,v| v.blank?}, inputs)
+    	inputs
     end
 
     #B
+    def initialize_scope_inputs(scopes)
+    	scopes.each_with_object({}) {|(k,v), inputs| inputs[k.to_s] = {'selected' => (v.present? ? v.id : nil), 'opts' => []}}.merge!({'hattrs'=>[]})
+    end
+
+    #C: sorted_products OR artist.products =>
+    def config_selected_scopes_and_initialize_products(product, artist, scopes, search_params)
+    	if product || !product && !artist
+    		config_scopes_for_products(artist, scopes, sorted_products)
+    	else
+    		config_scopes_for_artist_products(scopes, artist.products, search_params)
+    	end
+    end
+
+    #C.1: reset artist & title if needed
+    def config_scopes_for_products(artist, scopes, products)
+    	reset_artist(scopes) if artist && Artist.with_these(products).include?(artist)
+    	products
+    end
+
+    #C.2: reset artist & title if needed; return either: product_search(products, search_params) OR sorted_products
+    def config_scopes_for_artist_products(scopes, products, search_params)
+    	return products if search_params.none? || product_search(products, search_params).any?
+    	reset_artist(scopes)
+    	sorted_products
+    end
+
+    #C.1.a
+    def reset_artist(scopes)
+    	scopes[:artist] = nil
+    	scopes[:title] = nil if scopes.dig(:title)
+    end
+
+    #D
+    def config_hattrs_and_their_inputs(product_hattrs, hattrs, products, inputs)
+    	product_hattrs.each do |k,v|
+    		products = category_search(products, hattrs, k, v, inputs['hattrs']) if k=='category_search'
+    		products = mmedium_search(products, hattrs, k, v, inputs['hattrs']) if k=='medium_search'
+    		inputs['hattrs'].append(ssearch_input(k, v, products.pluck(:tags))) if k=='material_search'
+    	end
+    end
+
+    #E
+    def config_scopes_and_their_inputs(product, artist, products, search_params, inputs)
+    	inputs['product']['opts'] = config_products(product, artist, products, search_params)
+    	inputs['artist']['opts'] = config_artists(product, products)
+    	config_titles(artist, inputs)
+    end
+
+    #E.1
+    def config_products(product, artist, products, search_params)
+    	#product || !artist && search_params.any? ? product_search(products, search_params) : products
+      search_params.any? ? product_search(products, search_params) : products
+    end
+
+    #E.2
+    def config_artists(product, products)
+    	product ? product.artists : Artist.with_these(products)
+    end
+
+    #E.3
+    def config_titles(artist, inputs)
+    	inputs['title']['opts'] = artist.titles if artist && inputs['title']
+    end
+    ###################################################################################################
+    # def search(scopes:, product_hattrs:)
+    #   inputs, hattrs, products = config_inputs_and_params(scopes, product_hattrs, sorted_products)
+    #   products = config_products_for_results(products, inputs['product']['selected'], inputs['artist']['selected'], hattrs.reject{|k,v| v.blank?}, inputs)
+    #   scope_inputs_and_results(products, inputs['product']['selected'], inputs['artist']['selected'], hattrs.reject{|k,v| v.blank?}, inputs)
+    #   inputs
+    # end
+
+    #A
+    # def search(scopes:, product_hattrs:)
+    #   products = scopes[:artist] && product_hattrs.reject{|k,v| v.blank?}.blank? ? scopes[:artist].products : sorted_products
+    #   #inputs, hattrs, products = config_inputs_and_params(scopes, product_hattrs, sorted_products)
+    #   inputs, hattrs, products = config_inputs_and_params(scopes, product_hattrs, products)
+    #   #config_search_inputs(products, scopes[:product], scopes[:artist], hattrs.reject{|k,v| v.blank?}, inputs)
+    #   config_search_inputs(products, scopes[:product], scopes[:artist], hattrs.reject{|k,v| v.blank?}, inputs)
+    #   inputs
+    # end
+
     def config_inputs_and_params(scopes, product_hattrs, products)
       inputs = scopes.each_with_object({}) {|(k,v), inputs| inputs[k.to_s] = {'selected' => (v.present? ? v.id : nil), 'opts' => []}}
       hattrs, hattr_inputs = reset_hattrs_and_build_their_inputs(product_hattrs, products, {'products'=> products, 'hattrs'=> product_hattrs, 'hattr_inputs'=>[]})
@@ -137,45 +227,51 @@ class Product < ApplicationRecord
       [inputs, hattrs, products]
     end
 
-    #C
+    def config_search_inputs(products, product, artist, search_params, inputs)
+      products = config_products_for_results(products, product, artist, search_params)
+      scope_inputs_and_results(products, product, artist, search_params, inputs)
+    end
+
     def reset_hattrs_and_build_their_inputs(product_hattrs, products, p_grp)
       product_hattrs.each do |k,v|
   	    products = category_search(products, p_grp['hattrs'], k, v, p_grp['hattr_inputs']) if k=='category_search'
       	products = mmedium_search(products, p_grp['hattrs'], k, v, p_grp['hattr_inputs']) if k=='medium_search'
-      	hattr_inputs.append(ssearch_input(k, v, products.pluck(:tags))) if k=='material_search'
+      	p_grp['hattr_inputs'].append(ssearch_input(k, v, products.pluck(:tags))) if k=='material_search'
       end
       [p_grp['hattrs'], p_grp['hattr_inputs']]
     end
 
-    # def ppsearch(scopes:, product_hattrs:)
-    #   p_grp = {'products'=> sorted_products, 'hattrs'=> product_hattrs, 'hattr_inputs'=>[]}
-    #   p_grp = reset_hattrs_and_build_their_inputs(product_hattrs, p_grp['products'], p_grp)
-    #   inputs = scopes.each_with_object({}) {|(k,v), inputs| inputs[k.to_s] = {'selected' => (v.present? ? v.id : nil), 'opts' => []}}
-    #   inputs['hattrs'] = p_grp['hattr_inputs']
-    #   product_search_options(p_grp['products'], inputs['product']['selected'], inputs['artist']['selected'], p_grp['hattrs'].reject{|k,v| v.blank?}, inputs)
-    #   inputs
-    # end
-    #
-    # #B args: product_hattrs, hattrs_and_inputs={'hattrs'=>product_hattrs, hattr_inputs=>[]}
-    # def reset_hattrs_and_build_their_inputs(product_hattrs, products, p_grp)
-    #   product_hattrs.each_with_object(p_grp) do |(k,v), p_grp|
-    #     products = category_search(products, p_grp['hattrs'], k, v, p_grp['hattr_inputs']) if k=='category_search'
-    #     products = mmedium_search(products, p_grp['hattrs'], k, v, p_grp['hattr_inputs']) if k=='medium_search'
-    #     hattr_inputs.append(ssearch_input(k, v, products.pluck(:tags))) if k=='material_search'
-    #   end
-    # end
-
-    #C
     def mmedium_search(products, hattrs, k, selected, hattr_inputs)
-      hattrs[k] = nil if reset_search_param?(products, k, selected, hattrs)
-      hattrs['material_search'] = nil if filter_medium_options_by_material?(selected, hattrs) && reset_search_param?(products, 'material_search', hattrs['material_search'], hattrs)
+      hattrs[k] = nil if reset_hattr_param?(products, k, selected, hattrs)
+      hattrs['material_search'] = nil if filter_medium_options_by_material?(selected, hattrs) && reset_hattr_param?(products, 'material_search', hattrs['material_search'], hattrs)
       products = scoped_products(products, 'material_search', hattrs) if filter_medium_options_by_material?(selected, hattrs)
       hattr_inputs.append(ssearch_input(k, selected, products.pluck(:tags)))
       products = !selected.blank? ? scoped_products(products, k, hattrs) : products
     end
 
-    #D
-    def reset_search_param?(products, k, v, hattrs)
+    def config_products_for_results(products, product, artist, search_params)
+      product || search_params.any? ? product_search(products, search_params) : products
+    end
+
+    #E
+    def scope_inputs_and_results(products, product, artist, search_params, inputs)
+      if product
+        results_scoped_by_product(product, artist, products, inputs)
+      elsif artist
+	      results_scoped_by_artist(artist, products, inputs)
+      elsif search_params.any?
+	      results_scoped_by_search_params(products, inputs)
+      else
+      	inputs['product']['opts'] = products
+      	inputs['artist']['opts'] = Artist.all
+      end
+    end
+
+    def reset_artist?(product, artist, search_params)
+      !product && artist && product_search(artist.products, search_params).none?
+    end
+
+    def reset_hattr_param?(products, k, v, hattrs)
       !v.blank? && scoped_products(products, k, hattrs).none?
     end
     ############################################################################
@@ -212,7 +308,7 @@ class Product < ApplicationRecord
 
     def results_scoped_by_artist(artist, products, inputs)
       inputs['product']['opts'] = products
-      inputs['artist']['opts'] = Artist.scoped_artists(products)
+      inputs['artist']['opts'] = Artist.with_these(products)
       inputs['title']['opts'] = artist.titles if inputs['title']
     end
 
@@ -242,7 +338,6 @@ class Product < ApplicationRecord
 
     def filter_medium_options_by_material?(v, hattrs)
       v.blank? && hattrs['category_search'].blank? && !hattrs.dig('material_search').blank?
-      #k=='medium_search' && hattrs['medium_search'].blank? && hattrs['category_search'].blank? && !hattrs.dig('material_search').blank?
     end
 
     def product_search(set, search_params, hstore='tags')
@@ -293,12 +388,12 @@ class Product < ApplicationRecord
     end
 
     # SEARCH METHODS ###########################################################
-    def search(scope:nil, hattrs:nil, hstore:'tags')
-      hattrs = hattr_params(scope, hattrs, hstore)
-      results = hstore_search(self, hattrs.reject{|k,v| v.blank?}, hstore)
-      results = order_hstore_search(results, search_keys, hstore)
-      a, b = results, search_inputs(results, hattrs, hstore)
-    end
+    # def search(scope:nil, hattrs:nil, hstore:'tags')
+    #   hattrs = hattr_params(scope, hattrs, hstore)
+    #   results = hstore_search(self, hattrs.reject{|k,v| v.blank?}, hstore)
+    #   results = order_hstore_search(results, search_keys, hstore)
+    #   a, b = results, search_inputs(results, hattrs, hstore)
+    # end
 
     #new
     def scope_keys
@@ -319,10 +414,6 @@ class Product < ApplicationRecord
     end
 
     # COLLECTIONS ##############################################################
-    def artists
-      Artist.joins(:items).where(items: {id: items.ids}).distinct
-    end
-
     def sorted_products
       all.order(order_hstore_query(ordered_search_keys, 'tags'))
     end

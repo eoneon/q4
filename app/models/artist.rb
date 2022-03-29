@@ -2,6 +2,7 @@ class Artist < ApplicationRecord
 
   has_many :item_groups, as: :target
   has_many :items, through: :item_groups, source: :origin, source_type: "Item"
+  #has_many :products, through: :item_groups, source: :target, source_type: "Product"
 
   def formal_name
     [artist_name, life_span].compact.join(' ')
@@ -56,21 +57,30 @@ class Artist < ApplicationRecord
   end
 
   # COLLECTIONS ################################################################
-  def products
-    Product.joins(:items).where(items: {id: items.ids}).distinct
+  def self.sorted_set(artists)
+  	artists.order("artists.tags -> 'sort_name'")
   end
 
-  # def items_scoped_by_artist_product_items(product)
-  #   items.where(id: product.items.ids)
-  # end
-  #
-  # def titles(product)
-  #   (product ? items_scoped_by_artist_product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
-  # end
+  def self.sorted
+    sorted_set(all)
+  end
 
-  # def titles
-  #   items.pluck(:title).uniq.reject{|i| i.blank?}.sort
-  # end
+  def self.with_items
+  	sorted_set(joins(:items)).uniq #.distinct #.order("artists.tags -> 'sort_name'")
+  end
+
+  def self.ordered_artists
+    all.order("artists.tags -> 'sort_name'")
+  end
+
+  def self.with_these(products)
+  	sorted_set(joins(:items).where(items: {id: Item.with_these(products)})).uniq #.distinct
+  end
+
+  def products
+    Product.where(id: items.includes(:products).map(&:products).flatten.uniq)
+    #Product.joins(:items).where(items: {id: items.ids}).distinct
+  end
 
   #replace with above
   def product_items(product)
@@ -81,10 +91,25 @@ class Artist < ApplicationRecord
     (product ? product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
   end
   #kill?
+
+
   def self.scoped_artists(products)
     Artist.joins(:items).where(items: {id: Item.scoped_products(products)}).distinct
   end
 end
+
+
+# def items_scoped_by_artist_product_items(product)
+#   items.where(id: product.items.ids)
+# end
+#
+# def titles(product)
+#   (product ? items_scoped_by_artist_product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
+# end
+
+# def titles
+#   items.pluck(:title).uniq.reject{|i| i.blank?}.sort
+# end
 
 # def title_tag
 #   tags.try(:[], 'title_tag')

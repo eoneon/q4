@@ -44,7 +44,9 @@ class ApplicationController < ActionController::Base
 
   def scopes_from_params(scope_keys, new_scope_hsh, store_hsh)
     scopes = update_default_hsh_from_old_hsh(new_scope_hsh.keys, new_scope_hsh, store_hsh)
-    scope_hsh(scopes)
+    scopes = scope_hsh(scopes)
+    puts "scopes: #{scopes}"
+    scopes
   end
 
   def scope_hsh(scope_hsh)

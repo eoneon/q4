@@ -157,6 +157,10 @@ class Item < ApplicationRecord
       joins(:products).where(products: {id: products.ids})
     end
 
+    def with_these(products)
+    	joins(:products).where(products: {id: products}).uniq
+    end
+
     def artist_items(artist_id)
       joins(:artists).where(artists: {id: artist_id}).distinct
     end
