@@ -78,7 +78,7 @@ class Item < ApplicationRecord
   class << self
 
     def search(scopes:, product_hattrs:, item_hattrs:)
-      inputs = Product.psearch(scopes: scopes, product_hattrs: product_hattrs)
+      inputs = Product.search(scopes: scopes, product_hattrs: product_hattrs)
       results_and_inputs(item_hattrs.reject{|k,v| v.blank?}, item_hattrs, scopes[:product], inputs)
       inputs
     end

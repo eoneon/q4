@@ -4,6 +4,10 @@ class Artist < ApplicationRecord
   has_many :items, through: :item_groups, source: :origin, source_type: "Item"
   #has_many :products, through: :item_groups, source: :target, source_type: "Product"
 
+  def items
+    Item.joins(:artists).where(artists: {id: id})
+  end
+
   def formal_name
     [artist_name, life_span].compact.join(' ')
   end
@@ -75,6 +79,7 @@ class Artist < ApplicationRecord
 
   def self.with_these(products)
   	sorted_set(joins(:items).where(items: {id: Item.with_these(products)})).uniq #.distinct
+    #sorted_set(joins(:items).where(items: {id: Item.scoped_products(products)})).uniq
   end
 
   def products
