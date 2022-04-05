@@ -19,9 +19,9 @@ class ApplicationController < ActionController::Base
     val ? val : default
   end
 
-  def titles(artist=nil, product=nil)
-    artist ? artist.titles(product) : []
-  end
+  # def titles(artist=nil, product=nil)
+  #   artist ? artist.titles(product) : []
+  # end
 
   #search ######################
   def item_search_params(store: param_hsh, scope_keys: Item.scope_keys, product: nil)

@@ -148,14 +148,6 @@ class Item < ApplicationRecord
     def items_scoped_by_products(products)
       joins(:products).where(products: {id: products.ids})
     end
-    #
-    # def items_scoped_by_artist(artist)
-    #   joins(:artists).where(artists: {id: artist.id}).distinct
-    # end
-
-    def scoped_products(products)
-      joins(:products).where(products: {id: products.ids})
-    end
 
     def with_these(products)
     	joins(:products).where(products: {id: products}).uniq

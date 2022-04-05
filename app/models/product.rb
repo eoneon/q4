@@ -10,8 +10,6 @@ class Product < ApplicationRecord
   validates :product_name, uniqueness: true
 
   has_many :item_groups, as: :origin
-  #has_many :items, through: :item_groups, source: :origin, source_type: "Item"
-  #has_many :field_items, through: :item_groups, source: :target, source_type: "FieldItem"
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
   has_many :field_sets, through: :item_groups, as: :origin, source: :target, source_type: "FieldSet"
   has_many :select_fields, through: :item_groups, source: :target, source_type: "SelectField"
@@ -127,18 +125,20 @@ class Product < ApplicationRecord
 
   class << self
     #A #########################################################################
-
     def search(scopes:, product_hattrs:)
-      search_params, hattrs = product_hattrs.reject{|k,v| v.blank?}, product_hattrs
+    	hattrs, products, product_opts, inputs = config_scopes(product_hattrs, product_hattrs.reject{|k,v| v.blank?}, scopes)
+    	config_params_and_their_inputs(product_hattrs, scopes[:product], scopes[:artist], hattrs, products, product_opts, inputs)
+    	inputs
+    end
 
-      products = config_selected_scopes_and_initialize_products(scopes[:product], scopes[:artist], scopes, search_params)
-      inputs = initialize_scope_inputs(scopes)
-      scopes[:products] = products
+    def config_scopes(product_hattrs, search_params, scopes)
+    	products = config_selected_scopes_and_initialize_products(scopes[:product], scopes[:artist], scopes, search_params)
+    	[product_hattrs, products, products, initialize_scope_inputs(scopes)]
+    end
 
-      config_hattrs_and_their_inputs(product_hattrs, hattrs, products, inputs)
-      config_scopes_and_their_inputs(scopes[:product], scopes[:artist], scopes[:products], hattrs.reject{|k,v| v.blank?}, inputs)
-
-      inputs
+    def config_params_and_their_inputs(product_hattrs, product, artist, hattrs, products, product_opts, inputs)
+    	config_hattrs_and_their_inputs(product_hattrs, hattrs, product_opts, inputs)
+    	config_scopes_and_their_inputs(product, artist, products, hattrs.reject{|k,v| v.blank?}, inputs)
     end
 
     #B
@@ -257,7 +257,7 @@ class Product < ApplicationRecord
       products
     end
 
-    #E.2
+    #E.2-> HERE:
     def config_artists(product, products)
     	product ? product.artists : Artist.with_these(products)
     end
@@ -277,41 +277,52 @@ class Product < ApplicationRecord
 
     ##########################################################
 
-    def invoice_search(product:nil, artist_id:nil, hattrs:nil, hstore:'tags', inputs:{})
-      form_inputs(hattrs, product, artist_id, hstore, inputs)
-      results = search_results(product, artist_id, inputs['hattrs'].reject{|k,v| v.blank?}, hstore)
-      #puts "search_results::results: #{results}"
-      results = order_hstore_search(results, %w[category_search medium_search material_search], hstore)
-      #puts "order_hstore_search::results: #{results.ids}"
-      inputs['hattrs'] = search_inputs(results, inputs['hattrs'], hstore)
-      a, b = results, inputs
-    end
+    # def search(scopes:, product_hattrs:)
+    #   search_params, hattrs = product_hattrs.reject{|k,v| v.blank?}, product_hattrs
+    #
+    #   products = config_selected_scopes_and_initialize_products(scopes[:product], scopes[:artist], scopes, search_params)
+    #   inputs = initialize_scope_inputs(scopes)
+    #   scopes[:products] = products
+    #
+    #   config_hattrs_and_their_inputs(product_hattrs, hattrs, products, inputs)
+    #   config_scopes_and_their_inputs(scopes[:product], scopes[:artist], scopes[:products], hattrs.reject{|k,v| v.blank?}, inputs)
+    #
+    #   inputs
+    # end
 
-    def form_inputs(hattrs, product, artist_id, hstore, inputs)
-      inputs['artist'] = product ? nil : artist_id
-      inputs['hattrs'] = hattr_params(product, hattrs, hstore)
-      inputs['product'] = !product ? nil : product.id
-    end
+    # def invoice_search(product:nil, artist_id:nil, hattrs:nil, hstore:'tags', inputs:{})
+    #   form_inputs(hattrs, product, artist_id, hstore, inputs)
+    #   results = search_results(product, artist_id, inputs['hattrs'].reject{|k,v| v.blank?}, hstore)
+    #   #puts "search_results::results: #{results}"
+    #   results = order_hstore_search(results, %w[category_search medium_search material_search], hstore)
+    #   #puts "order_hstore_search::results: #{results.ids}"
+    #   inputs['hattrs'] = search_inputs(results, inputs['hattrs'], hstore)
+    #   a, b = results, inputs
+    # end
+    #
+    # def form_inputs(hattrs, product, artist_id, hstore, inputs)
+    #   inputs['artist'] = product ? nil : artist_id
+    #   inputs['hattrs'] = hattr_params(product, hattrs, hstore)
+    #   inputs['product'] = !product ? nil : product.id
+    # end
+    #
+    # def search_results(product, artist_id, hattrs, hstore)
+    #   results_or_self = scope_search_or_self(product, artist_id)
+    #   hstore_search(results_or_self, hattrs, hstore)
+    # end
+    #
+    # def scope_search_or_self(product, artist_id)
+    #   return self unless !product && artist_id && search_by_artists(artist_id).any?
+    #   search_by_artists(artist_id)
+    # end
 
-    def search_results(product, artist_id, hattrs, hstore)
-      results_or_self = scope_search_or_self(product, artist_id)
-      #puts "results_or_self 144: #{results_or_self}"
-      #puts "results_or_self.ids 144: #{results_or_self.ids}"
-      hstore_search(results_or_self, hattrs, hstore)
-    end
-
-    def scope_search_or_self(product, artist_id)
-      return self unless !product && artist_id && search_by_artists(artist_id).any?
-      search_by_artists(artist_id)
-    end
-
-    def search_by_artists(artist_id)
-      where(id: ItemGroup.join_group('Item', Item.artist_items(artist_id).ids, 'Product').pluck(:target_id))
-    end
+    # def search_by_artists(artist_id)
+    #   where(id: ItemGroup.join_group('Item', Item.artist_items(artist_id).ids, 'Product').pluck(:target_id))
+    # end
 
     # SEARCH METHODS ###########################################################
     def scope_keys
-      %w[product_id artist_id]
+      %w[product_id artist_id title]
     end
 
     def hattr_keys
@@ -360,46 +371,6 @@ end
 #   items.pluck(:title).uniq.reject{|i| i.blank?}
 # end
 
-# def input_and_products(k, selected, products, hattrs, hattr_inputs)
-# 	if scoped_products = valid_scope_search(selected, scoped_products(products, k, hattrs))
-# 		config_input_and_scope_products(k, selected, products, hattr_inputs, scoped_products)
-# 	else
-# 		hattrs[k] = nil if !selected.blank?
-# 		config_input_and_products(k, hattrs[k], products, hattr_inputs)
-# 	end
-# end
-
-# def config_inputs_and_params(scopes, product_hattrs, products)
-#   inputs = scopes.each_with_object({}) {|(k,v), inputs| inputs[k.to_s] = {'selected' => (v.present? ? v.id : nil), 'opts' => []}}
-#   hattrs, hattr_inputs = reset_hattrs_and_build_their_inputs(product_hattrs, products, {'products'=> products, 'hattrs'=> product_hattrs, 'hattr_inputs'=>[]})
-#   inputs['hattrs'] = hattr_inputs
-#   [inputs, hattrs, products]
-# end
-#
-# def config_search_inputs(products, product, artist, search_params, inputs)
-#   products = config_products_for_results(products, product, artist, search_params)
-#   scope_inputs_and_results(products, product, artist, search_params, inputs)
-# end
-
-#
-# def config_products_for_results(products, product, artist, search_params)
-#   product || search_params.any? ? product_search(products, search_params) : products
-# end
-#
-# #E
-# def scope_inputs_and_results(products, product, artist, search_params, inputs)
-#   if product
-#     results_scoped_by_product(product, artist, products, inputs)
-#   elsif artist
-#     results_scoped_by_artist(artist, products, inputs)
-#   elsif search_params.any?
-#     results_scoped_by_search_params(products, inputs)
-#   else
-#   	inputs['product']['opts'] = products
-#   	inputs['artist']['opts'] = Artist.all
-#   end
-# end
-#
 # def reset_artist?(product, artist, search_params)
 #   !product && artist && product_search(artist.products, search_params).none?
 # end

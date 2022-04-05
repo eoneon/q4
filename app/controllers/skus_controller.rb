@@ -3,6 +3,7 @@ class SkusController < ApplicationController
   def search
     @invoice = Invoice.find(params[:invoice_id])
     @product_inputs = Product.search(product_search_params)
+    puts "product_inputs: #{@product_inputs['title']}"
 
     respond_to do |format|
       format.js

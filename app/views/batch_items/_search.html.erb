@@ -2,7 +2,7 @@
   <div class="form">
     <div class="card bg-gray-d p-1 mb-1">
 
-      <div class="form-row mt-1">
+      <div class="form-row mt-1 hattrs">
         <% rejected_inputs(inputs['hattrs'], 'measurements', 'edition').each do |input| %>
           <div class="col-3 ml-0">
             <div class="input-group input-group-sm">
@@ -34,10 +34,11 @@
 
       <div class="form-row mb-1">
         <div class="col-6 ml-0">
-          <div class="input-group input-group-sm" data-form="#new-title" data-input=".artist" data-context="#new-item-skus">
+          <!-- <div class="input-group input-group-sm" data-form="#new-title" data-input=".artist" data-context="#new-item-skus"> -->
+          <div class="input-group input-group-sm" data-obj="searchForm, #search-item-skus, productInput, .product, itemForm, #new-item-skus">
             <%= render 'item_products/forms/search_label', input_name: 'product' %>
             <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
-            <%= select "items", "product_id", inputs['product']['opts'].map{|a| [a.product_name, a.id]}, {include_blank: true, selected: inputs['product']['selected']}, {class: boot_classes(:search_input, 'search-select', 'product', 'product-select')} %>
+            <%= select "items", "product_id", inputs['product']['opts'].map{|a| [a.product_name, a.id]}, {include_blank: true, selected: inputs['product']['selected']}, {class: boot_classes(:search_input, 'new-item-select-product', 'search-select', 'product', 'product-select')} %>
           </div>
         </div>
 

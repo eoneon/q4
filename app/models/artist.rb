@@ -2,7 +2,6 @@ class Artist < ApplicationRecord
 
   has_many :item_groups, as: :target
   has_many :items, through: :item_groups, source: :origin, source_type: "Item"
-  #has_many :products, through: :item_groups, source: :target, source_type: "Product"
 
   def items
     Item.joins(:artists).where(artists: {id: id})
@@ -78,8 +77,7 @@ class Artist < ApplicationRecord
   end
 
   def self.with_these(products)
-  	sorted_set(joins(:items).where(items: {id: Item.with_these(products)})).uniq #.distinct
-    #sorted_set(joins(:items).where(items: {id: Item.scoped_products(products)})).uniq
+  	sorted_set(joins(:items).where(items: {id: Item.with_these(products)})).uniq
   end
 
   def products
@@ -91,16 +89,18 @@ class Artist < ApplicationRecord
   def product_items(product)
     items.where(id: product.items.ids)
   end
+
+  def titles
+    items.pluck(:title).uniq.reject{|i| i.blank?}.sort
+  end
   #replace with above
-  def titles(product)
-    (product ? product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
-  end
+  # def titles(product)
+  #   (product ? product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
+  # end
   #kill?
-
-
-  def self.scoped_artists(products)
-    Artist.joins(:items).where(items: {id: Item.scoped_products(products)}).distinct
-  end
+  # def self.scoped_artists(products)
+  #   Artist.joins(:items).where(items: {id: Item.scoped_products(products)}).distinct
+  # end
 end
 
 
@@ -112,9 +112,7 @@ end
 #   (product ? items_scoped_by_artist_product_items(product) : items).pluck(:title).uniq.reject{|i| i.blank?}
 # end
 
-# def titles
-#   items.pluck(:title).uniq.reject{|i| i.blank?}.sort
-# end
+
 
 # def title_tag
 #   tags.try(:[], 'title_tag')

@@ -1,2 +1,11 @@
 $("#search-item-skus").html("<%= j render 'batch_items/search', invoice: @invoice, inputs: @item_inputs %>");
 $("#search-table").html("<%= j render 'batch_items/table', items: @item_inputs['items'] %>");
+
+var [artist_id, id] = [$("#new-title").find(".artist").val(), "<%= @item_inputs['artist']['selected'] %>"]
+
+$(function(){
+	if (artist_id!=id) {
+		$("#new-title").find(".artist").val(id);
+		$("#new-title").submit();
+	}
+});

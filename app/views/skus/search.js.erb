@@ -1,11 +1,9 @@
 $("#search-skus").html("<%= j render 'skus/search', invoice: @invoice, inputs: @product_inputs %>");
-var [artist_id, id] = [$("#new-title").find(".artist").val(), "<%= @product_inputs['artist']['selected'] %>"]
+var [artist_id, id] = [$("#new-skus").find(".artist").val(), "<%= @product_inputs['artist']['selected'] %>"]
 
 $(function(){
 	if (artist_id!=id) {
-		console.log(artist_id)
-		console.log(id)
-		$("#new-title").find(".artist").val(id);
-		$("#new-title").submit();
+		$("#new-skus").find(".artist").val(id);
+		$("#new-skus").find(".title-select").html("<%= j render 'items/title', titles: @product_inputs['title']['opts'] %>");
 	}
 });

@@ -44,7 +44,8 @@ $(document).ready(function(){
   // });
   //FORMS-SUBMIT: GET search-artist
   $("body").on("change", ".search.new.item.artist", function(){
-    newItemSelectArtist(searchData($(this)));
+    //newItemSelectArtist(searchData($(this)));
+    thisForm($(this)).submit();
   });
   $("body").on("click", ".new-item-unselect-artist", function(){
     newItemUnselectArtist(searchData($(this)));
@@ -62,96 +63,23 @@ $(document).ready(function(){
     updateTitleInput(inputGroupData($(this)), $(this).val());
   });
 
-  //FORMS-SUBMIT: GET search-hattrs
-  // $("body").on("change", "table-product-select", function(){
-  //   thisForm($(this)).submit();
-  // });
-
-  // $("body").on("change", "select.search-select", function(){
-  //   if ($(this).val().length && ['category_search', 'medium_search', 'material_search'].includes($(this).attr("id"))) {
-  //     var form = thisForm($(this));
-  //     var product_select = $(form).find(".product");
-  //     if ($(form).attr("id") == "search-skus") {
-  //       newItemUnselectProduct(searchData(product_select));
-  //     } else if ($(form).attr("id") == "search-item-skus") {
-  //       deselectSelectedOpt(inputGroup(product_select));
-  //       $(form).submit();
-  //     } else {
-  //       editItemUnselectProduct(searchData($(form).find(".edit-item-select-product")));
-  //     }
-  //   } else {
-  //     thisForm($(this)).submit();
-  //   }
-  // });
-
   $("body").on("change", ".hattrs .category, .hattrs .medium, .hattrs .material", function() {
     var product = thisForm($(this)).find(".product");
     if ( $(this).val().length && valid($(product).val()) ) clearProductSearchInputs($(this), product, $(searchData(product).itemForm).find(".product"));
     thisForm($(this)).submit();
   });
 
-  // function clearProductSearchInputs(this_input, product, new_product) {
-  //   var inputs = $(this_input).has(".category") ? thisForm(this_input).find(".product, .medium, .material").concat(new_product) : product.concat(new_product);
-  //   deselectSelected(inputs)
-  // }
+  $("body").on("change", ".hattrs .mounting, .hattrs .measurements, .hattrs .edition", function() {
+    thisForm($(this)).submit();
+  });
 
   //HERE: REMOVE MERGE: ONLY clear product_ids
-  function clearProductSearchInputs(this_input, product, new_product) {
-    //deselectSelected($(this_input).hasClass("category") ? $.merge(thisForm(this_input).find(".medium, .material"), product) : product)
-    deselect(product);
-    deselect(new_product);
-  }
-
-  // $("body").on("change", ".table.hattrs .category, .table.hattrs .medium, .table.hattrs .material", function() {
-  // 	var product_select = thisForm($(this)).find(".product");
-  // 	if ( $(this).val().length && valid($(product_select).val()) ) {
-  //     var d = searchData($(thisForm($(this))).find(".table-product"));
-  //     if ($(this).hasClass("category")) deselectSelected(thisForm($(this)).find(".medium, .material"))
-  //     deselectSelected([product_select,$(d.itemForm).find(d.productInput)])
-  // 	}
-  //   thisForm($(this)).submit();
-  // });
 
   $("body").on("change", ".new-item-select-product, .table-product", function(){
     var d = searchData($(this));
     $(d.itemForm).find(d.productInput).val(d.selected);
     thisForm($(this)).submit();
   });
-
-  // $("body").on("change", "select.search-select", function(){
-  //   var form = thisForm($(this));
-  //   var product_select = $(form).find(".product");
-  //   if ( $(this).val().length && ['category_search', 'medium_search', 'material_search'].includes($(this).attr("id")) && valid($(product_select).val()) ) {
-  //     if ($(form).attr("id") == "search-skus") {
-  //       newItemUnselectProduct(searchData(product_select));
-  //     } else if ($(form).attr("id") == "search-item-skus") {
-  // 	    deselectSelectedOpt(inputGroup(product_select));
-  // 	    $(form).submit();
-  //     } //else {
-  //       // deselect(product_select)
-  //       // $(form).submit();
-  // 	    //editItemUnselectProduct(searchData($(form).find(".edit-item-select-product")));
-  //     //}
-  //   } else {
-  //     $(form).submit();
-  //   }
-  // });
-  //
-  // $("body").on("change", "select.search-select", function(){
-  //   if ($(this).val().length && ['category_search', 'medium_search', 'material_search'].includes($(this).attr("id"))) {
-  //     //var ref = thisForm($(this)).find(".new-item-select-product");
-  //     var form = thisForm($(this));
-  //     var product_select = $(form).find(".product");
-  //     if ($(form).attr("id") == "search-skus") {
-  //       newItemUnselectProduct(searchData(product_select));
-  //     } else {
-  //       deselectSelectedOpt(inputGroup(product_select));
-  //       $(form).submit();
-  //     }
-  //   } else {
-  //     thisForm($(this)).submit();
-  //   }
-  // });
 
   $("body").on("click", ".unselect", function(){
     deselectSelectedOpt(inputGroup($(this)));
@@ -201,6 +129,10 @@ $(document).ready(function(){
   });
 
   //NAVBAR
+  function clearProductSearchInputs(this_input, product, new_product) {
+    deselect(product);
+    deselect(new_product);
+  }
 
   //ITEM-NAVBAR: SLIDE-TOGGLE BTN - TABLE-SKUS
   function slideToggle(d) {
