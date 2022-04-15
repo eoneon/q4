@@ -1,6 +1,6 @@
 class ArtistItemsController < ApplicationController
   def search
-    @items, @item_inputs = Item.item_search(search_params)
+    @item_inputs = Item.search(artist_search_params(artist: cond_find(Artist, params[:items][:artist_id])))
 
     respond_to do |format|
       format.js

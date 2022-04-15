@@ -3,7 +3,6 @@ class SkusController < ApplicationController
   def search
     @invoice = Invoice.find(params[:invoice_id])
     @product_inputs = Product.search(product_search_params)
-    puts "product_inputs: #{@product_inputs['title']}"
 
     respond_to do |format|
       format.js
@@ -15,7 +14,7 @@ class SkusController < ApplicationController
     artist = cond_find(Artist, params[:item][:artist_id])
     product = cond_find(Product, params[:item][:product_id])
     Item.new.batch_create_skus(skus, item_params, artist, product, product_args(product)) if skus
-    @product_inputs = Product.psearch(product_search_params)
+    @product_inputs = Product.search(product_search_params)
 
     respond_to do |format|
       format.js

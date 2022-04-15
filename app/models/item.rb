@@ -22,6 +22,12 @@ class Item < ApplicationRecord
   has_many :options, through: :item_groups, source: :target, source_type: "Option"
   belongs_to :invoice, optional: true
 
+  before_create :set_qty
+
+  def set_qty
+    self.qty = 1 if qty.blank?
+  end
+  
   # COLLECTIONS ################################################################
   def product
     products.first if products.any?
@@ -78,25 +84,44 @@ class Item < ApplicationRecord
   class << self
 
     def search(scopes:, product_hattrs:, item_hattrs:)
-      inputs = Product.search(scopes: scopes, product_hattrs: product_hattrs)
-      results_and_inputs(item_hattrs.reject{|k,v| v.blank?}, item_hattrs, scopes[:product], inputs)
-      inputs
+    	inputs = Product.search(scopes: scopes, product_hattrs: product_hattrs)
+    	results_and_inputs(scopes[:product], scopes[:artist], scopes[:title], inputs['product']['opts'], valid_params(item_hattrs), item_hattrs, inputs)
+    	inputs
     end
 
-    def results_and_inputs(search_params, item_hattrs, product, inputs, hstore='csv_tags')
-      inputs['items'] = order_hstore_search(item_results(search_params, product, hstore), search_keys, hstore)
+    def results_and_inputs(product, artist, title, products, item_params, item_hattrs, inputs, hstore='csv_tags')
+      inputs['items'] = uniq_and_sorted_set(item_results(product, artist, title, products, item_params, hstore), hstore, table_keys)
       items_tags = inputs['items'].any? ? inputs['items'].pluck(hstore) : []
       inputs['hattrs'].concat(item_search_hattr_inputs(item_hattrs, items_tags))
     end
 
-    def item_results(search_params, product, hstore)
-      product ? search_query(product.items, search_params, hstore) : []
+    def item_results(product, artist, title, products, item_params, hstore)
+    	return [] unless product || artist
+    	items = item_opts(product, artist)
+      items = items.where(title: title) if title
+    	items.empty? || item_params.empty? ? items : search_query(items, item_params, hstore)
+    end
+
+    def item_opts(product, artist)
+    	case
+    		when product && artist; artist.product_items(product)
+    		when product; product.items
+    		when artist; artist.items
+    	end
+    end
+
+    def valid_params(hsh)
+    	hsh.reject{|k,v| v.blank?}
     end
 
     def item_search_hattr_inputs(hattrs, items_tags)
       hattrs.each_with_object([]) do |(k,v), hattr_inputs|
         hattr_inputs.append({'input_name'=> k, 'selected'=> v, 'opts'=> search_opts(items_tags, k)})
       end
+    end
+
+    def table_keys
+    	%w[search_tagline mounting_search item_size width height]
     end
     ############################################################################
 

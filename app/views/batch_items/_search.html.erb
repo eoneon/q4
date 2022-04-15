@@ -17,16 +17,16 @@
         <div class="col-6 ml-0">
           <div class="input-group input-group-sm" data-obj="searchForm, #search-item-skus, titleForm, #new-title, artistInput, .artist, itemForm, #new-item-skus, titleInput, .title, context_input, .context">
             <%= render 'item_products/forms/search_label', input_name: 'artist' %>
-            <%= render 'item_products/forms/reset_search', class_param: 'new-item-unselect-artist' %>
-            <%= select "items", "artist_id", inputs['artist']['opts'].map{|a| [a.artist_name, a.id]}, {include_blank: true, selected: inputs['artist']['selected']}, {id: "artist-search-item-skus", class: boot_classes(:search_input, 'search', 'new', 'item', 'artist')} %>
+            <%= render 'item_products/forms/reset_search', class_param: 'artist-unselect' %>
+            <%= select "items", "artist_id", inputs['artist']['opts'].map{|a| [a.artist_name, a.id]}, {include_blank: true, selected: inputs['artist']['selected']}, {id: "artist-search-item-skus", class: boot_classes(:search_input, 'search', 'artist')} %>
           </div>
         </div>
 
-        <div class="col-6 ml-0">
+        <div class="col-6 ml-0 hattrs">
           <div class="input-group input-group-sm">
             <%= render 'item_products/forms/search_label', input_name: 'title' %>
             <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
-            <%= select "items", "title", inputs['title']['opts'], {include_blank: true, selected: inputs['title']['selected']}, {class: boot_classes(:search_input, 'search-select', 'title-select')} %>
+            <%= select "items", "title", inputs['title']['opts'], {include_blank: true, selected: inputs['title']['selected']}, {class: boot_classes(:search_input, 'title', 'title-select')} %>
           </div>
         </div>
       </div>

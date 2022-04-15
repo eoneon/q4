@@ -3,11 +3,12 @@
     <div class="row align-items-center">
       <div class="col-auto">
         <a href="<%= supplier_invoice_path(invoice.supplier, invoice) %>" class="btn btn-sm btn-link" type="button">
-          <span class="fs-s"><%= invoice.invoice_number %></span>
+          <span class="fs-s"><%= invoice.display %></span>
         </a>
       </div>
 
       <div class="col d-flex flex-row-reverse mr-1">
+        <span class="fs-s"><%#= invoice.invoice_name %></span>
         <%#= render 'invoices/nav_toggle', invoice: invoice %>
       </div>
     </div>

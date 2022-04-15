@@ -7,7 +7,7 @@ class Invoice < ApplicationRecord
   end
 
   def display
-    "#{invoice_name}: #{invoice_number}" 
+    "#{invoice_number}: #{invoice_name}" 
   end
 
   ##############################################################################

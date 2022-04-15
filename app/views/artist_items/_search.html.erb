@@ -1,11 +1,12 @@
 <%= form_with model: Item.new, url: search_artist_items_path, method: :get, id: "search-items" do |f| %>
   <div class="form">
+    <%#= number_field_tag "item[artist_id]", nil, class: "artist" %>
     <div class="card bg-gray-d p-1 mb-1">
 
-      <div class="form-row mt-1">
+      <div class="form-row mt-1 hattrs">
         <% rejected_inputs(inputs['hattrs'], 'measurements', 'edition').each do |input| %>
           <div class="col-3 ml-0">
-            <div class="input-group input-group-sm" data-form="#search-items">
+            <div class="input-group input-group-sm">
               <%= render 'item_products/forms/search_group', scope: 'hattrs', input_name: input['input_name'], opts: input['opts'], selected: input['selected'] %>
             </div>
           </div>
@@ -15,13 +16,12 @@
 
       <div class="form-row">
         <div class="col-6 ml-0">
-          <div class="input-group input-group-sm" data-form="#search-items">
+          <div class="input-group input-group-sm" data-obj="searchForm, #search-items">
             <%= render 'item_products/forms/search_label', input_name: 'artist' %>
             <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
             <%= select "items", "artist_id", inputs['artist']['opts'].map{|a| [a.artist_name, a.id]}, {selected: inputs['artist']['selected']}, {id: "artist-search", class: boot_classes(:search_input, 'search-select', 'artist-select'), readonly: 'readonly'} %>
           </div>
         </div>
-
         <div class="col-6 ml-0">
           <div class="input-group input-group-sm" data-form="#search-items">
             <%= render 'item_products/forms/search_label', input_name: 'title' %>
@@ -42,7 +42,7 @@
         </div>
 
         <% included_inputs(inputs['hattrs'], 'measurements', 'edition').each do |input| %>
-          <div class="col-3 ml-0">
+          <div class="col-3 ml-0 hattrs">
             <div class="input-group input-group-sm" data-form="#search-items">
               <%= render 'item_products/forms/search_group', scope: 'hattrs', input_name: input['input_name'], opts: input['opts'], selected: input['selected'] %>
             </div>

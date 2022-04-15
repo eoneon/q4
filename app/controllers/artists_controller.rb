@@ -9,7 +9,11 @@ class ArtistsController < ApplicationController
 
   def search
     @artist = Artist.find(params[:id])
-    @items, @item_inputs = Item.item_search(artist: @artist)
+    asp = artist_search_params(artist: @artist)
+    puts "#{asp}"
+    @item_inputs = Item.search(asp)
+    #@item_inputs = Item.search(artist_search_params(artist: @artist))
+    #@items, @item_inputs = Item.item_search(artist: @artist)
 
     respond_to do |format|
       format.js

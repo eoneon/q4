@@ -25,10 +25,10 @@
 
         <div class="form-row pt-2 pb-2 pr-2">
           <div class="col-4 ml-0">
-            <div class="input-group input-group-sm" data-obj="searchForm, #search-item-skus, titleForm, #new-title, artistInput, .artist, itemForm, #new-item-skus, titleInput, .title, context_input, .context">
+            <div class="input-group input-group-sm" data-obj="searchForm, #search-item-skus, artistInput, .artist, itemForm, #new-item-skus">
               <%= render "item_fields/caret", card_id: 'artist', target: nil, body: true, i: 0, context: 'body' %>
               <%= render "item_fields/label", label: 'artist' %>
-              <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'search', 'new', 'item', 'artist'), id: "new-item-skus-artist" %>
+              <%= f.collection_select :artist_id, Artist.ordered_artists, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'item', 'artist'), id: "new-item-skus-artist" %>
             </div>
           </div>
 

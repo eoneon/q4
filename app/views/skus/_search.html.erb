@@ -16,8 +16,8 @@
         <div class="col-3 ml-0">
           <div class="input-group input-group-sm" data-obj="searchForm, #search-skus, titleForm, #new-title, artistInput, .artist, itemForm, #new-skus, titleInput, .title, context_input, .context">
             <%= render 'item_products/forms/search_label', input_name: 'artist' %>
-            <%= render 'item_products/forms/reset_search', class_param: 'new-item-unselect-artist' %>
-            <%= f.collection_select :artist_id, inputs['artist']['opts'], :id, :artist_name, {include_blank: true, selected: inputs['artist']['selected']}, id: "artist-search", class: boot_classes(:search_input, 'search', 'new', 'item', 'artist') %>
+            <%= render 'item_products/forms/reset_search', class_param: 'artist-unselect' %>
+            <%= f.collection_select :artist_id, inputs['artist']['opts'], :id, :artist_name, {include_blank: true, selected: inputs['artist']['selected']}, id: "artist-search", class: boot_classes(:search_input, 'search', 'artist') %>
           </div>
         </div>
 

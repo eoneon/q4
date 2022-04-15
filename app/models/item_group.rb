@@ -1,5 +1,4 @@
 class ItemGroup < ApplicationRecord
-  #include STI
 
   before_create :set_sort, :set_base_type
   before_destroy :update_sort

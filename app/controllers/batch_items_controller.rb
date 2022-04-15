@@ -23,12 +23,12 @@ class BatchItemsController < ApplicationController
 
   private
 
-  def search_param
-    {product: cond_find(Product, params[:items][:product_id]),
-    artist: cond_find(Artist, params[:items][:artist_id]),
-    title: cond_val(params[:items][:title]),
-    hattrs: params[:items][:hattrs].to_unsafe_h}
-  end
+  # def search_param
+  #   {product: cond_find(Product, params[:items][:product_id]),
+  #   artist: cond_find(Artist, params[:items][:artist_id]),
+  #   title: cond_val(params[:items][:title]),
+  #   hattrs: params[:items][:hattrs].to_unsafe_h}
+  # end
 
   def item_params
     {title: cond_val(params[:item][:title]), retail: cond_val(params[:item][:retail]), qty: cond_val(params[:item][:qty]), invoice: @invoice}.reject{|k,v| v.blank?}

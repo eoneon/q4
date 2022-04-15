@@ -42,12 +42,8 @@ $(document).ready(function(){
   // $("body").on("change", ".new-item-select-product", function(){
   //   newItemSelectProduct(searchData($(this)));
   // });
-  //FORMS-SUBMIT: GET search-artist
-  $("body").on("change", ".search.new.item.artist", function(){
-    //newItemSelectArtist(searchData($(this)));
-    thisForm($(this)).submit();
-  });
-  $("body").on("click", ".new-item-unselect-artist", function(){
+
+  $("body").on("click", ".artist-unselect", function(){
     newItemUnselectArtist(searchData($(this)));
   });
   $("body").on("change", "select.artist-search", function(){
@@ -69,7 +65,7 @@ $(document).ready(function(){
     thisForm($(this)).submit();
   });
 
-  $("body").on("change", ".hattrs .mounting, .hattrs .measurements, .hattrs .edition", function() {
+  $("body").on("change", ".search.artist, .hattrs .title, .hattrs .mounting, .hattrs .measurements, .hattrs .edition", function() {
     thisForm($(this)).submit();
   });
 
@@ -453,15 +449,10 @@ $(document).ready(function(){
     $(targetForm).find(d.productInput).val(d.selected);
     $(d.searchForm).submit();
   }
-  function newItemSelectArtist(d){
-    var targetForm = sliceTag(d.form_id, 0)=='search' ? d.itemForm : d.searchForm;
-    deselect($(d.itemForm).find(d.titleInput));
-    setInputVals([[$(targetForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.artistInput), d.selected], [$(d.titleForm).find(d.context_input), d.itemForm]])
-    submitForms([d.searchForm, d.titleForm]);
-  }
+
   function newItemUnselectArtist(d){
-    deselectSelected([$(d.searchForm).find(d.artistInput), $(d.titleForm).find(d.artistInput), $(d.itemForm).find(d.artistInput), $(d.itemForm).find(d.titleInput)].flat());
-    submitForms([d.searchForm, d.titleForm]);
+    deselectSelected([$(d.searchForm).find(d.artistInput), $(d.itemForm).find(d.artistInput), $(d.itemForm).find(d.titleInput)].flat());
+    $(d.searchForm).submit();
   }
   function newItemUnselectProduct(d){
     deselectSelected([$(d.searchForm).find(d.productInput), $(d.itemForm).find(d.productInput)]);

@@ -9,7 +9,7 @@ module Search
       search_params.any? ? hstore_query(set, search_params, hstore) : set
     end
 
-    def ssearch_input(k,v,set)
+    def search_input(k,v,set)
       {'input_name'=> k, 'selected'=> selected_input_val(v), 'opts'=> search_opts(set,k)}
     end
 
@@ -88,6 +88,18 @@ module Search
     ############################################################################
 
     # sort #####################################################################
+    def uniq_and_sorted_set(set, hstore, uniq_keys, sort_keys=nil)
+    	sorted_set(uniq_set(set, hstore, uniq_keys), hstore, (sort_keys ? sort_keys : uniq_keys))
+    end
+
+    def uniq_set(set, hstore, uniq_keys)
+    	set.uniq{|i| uniq_keys.map{|k| i.public_send(hstore)[k]}}
+    end
+
+    def sorted_set(set, hstore, sort_keys)
+    	set.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}}
+    end
+
     def order_search(results, sort_keys, hstore)
       results.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
     end
@@ -102,7 +114,7 @@ module Search
     # end
 
     def sort_value(val)
-      is_numeric?(val) ? val.to_i : val
+      val==nil || is_numeric?(val) ? val.to_i : val
     end
 
     def is_numeric?(s)
@@ -145,15 +157,15 @@ module Search
     end
 
     # search_inputs ############################################################
-    def search_inputs(results, hattrs, hstore)
-      hattrs.each_with_object([]) do |(k,v), inputs|
-        inputs.append(search_input(k, v, results, hstore))
-      end
-    end
+    # def search_inputs(results, hattrs, hstore)
+    #   hattrs.each_with_object([]) do |(k,v), inputs|
+    #     inputs.append(search_input(k, v, results, hstore))
+    #   end
+    # end
 
-    def search_input(k, v, results, hstore)
-      {'input_name'=> k, 'selected'=> v, 'opts'=> results.pluck(hstore).pluck(k).uniq.compact}
-    end
+    # def search_input(k, v, results, hstore)
+    #   {'input_name'=> k, 'selected'=> v, 'opts'=> results.pluck(hstore).pluck(k).uniq.compact}
+    # end
 
     def origins_targets_inputs(target, origin_name, target_name, results, inputs)
       inputs[target_name.underscore] = {'selected'=> target.try(:id), 'opts'=> origins_targets_opts(results, origin_name, target_name)}

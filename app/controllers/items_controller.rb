@@ -6,7 +6,7 @@ class ItemsController < ApplicationController
     @item.assign_attributes(item_params)
     @item.update_product_case('product', @item.product, params[:item][:product_id])
     @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
-    @titles = titles(@item.artist)
+    @titles = Artist.titles(@item.artist)
     @rows, attrs = @item.input_group
     @item.update_csv_tags(attrs)
 
