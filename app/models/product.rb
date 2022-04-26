@@ -127,7 +127,9 @@ class Product < ApplicationRecord
     #A #########################################################################
     def search(scopes:, product_hattrs:)
     	hattrs, products, product_opts, inputs = config_scopes(product_hattrs, product_hattrs.reject{|k,v| v.blank?}, scopes)
-    	config_params_and_their_inputs(product_hattrs, scopes[:product], scopes[:artist], hattrs, products, product_opts, inputs)
+      config_hattrs_and_their_inputs(product_hattrs, hattrs, product_opts, inputs)
+      config_scopes_and_their_inputs(scopes[:product], scopes[:artist], products, hattrs.reject{|k,v| v.blank?}, inputs)
+    	#config_params_and_their_inputs(product_hattrs, scopes[:product], scopes[:artist], hattrs, products, product_opts, inputs)
     	inputs
     end
 
@@ -136,10 +138,10 @@ class Product < ApplicationRecord
     	[product_hattrs, products, products, initialize_scope_inputs(scopes).merge!({'hattrs'=>[]})]
     end
 
-    def config_params_and_their_inputs(product_hattrs, product, artist, hattrs, products, product_opts, inputs)
-    	config_hattrs_and_their_inputs(product_hattrs, hattrs, product_opts, inputs)
-    	config_scopes_and_their_inputs(product, artist, products, hattrs.reject{|k,v| v.blank?}, inputs)
-    end
+    # def config_params_and_their_inputs(product_hattrs, product, artist, hattrs, products, product_opts, inputs)
+    # 	config_hattrs_and_their_inputs(product_hattrs, hattrs, product_opts, inputs)
+    # 	config_scopes_and_their_inputs(product, artist, products, hattrs.reject{|k,v| v.blank?}, inputs)
+    # end
 
     def initialize_scope_inputs(scopes)
     	scopes.each_with_object({}) do |(k,v), inputs|
@@ -170,7 +172,7 @@ class Product < ApplicationRecord
     end
 
     #C.1.a
-    def reset_title(scopes)
+    def reset_artist(scopes)
       scopes[:artist] = nil
       scopes[:title] = nil if scopes.dig(:title)
     end
@@ -270,6 +272,10 @@ class Product < ApplicationRecord
 
     def scoped_products(set, k, hattrs)
       product_search(set, {k=> hattrs[k]})
+    end
+
+    def with_these(items)
+    	Product.where(id: items.includes(:products).map(&:products).flatten.uniq)
     end
 
     # SEARCH METHODS ###########################################################

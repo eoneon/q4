@@ -22,69 +22,69 @@ module Search
     end
 
     # join_search (I) ##########################################################
-    def scope_group(scope, joins, input_group)
-      input_group['scope'] = scope.try(:id)
-      results = scope_search(scope, joins)
-      results.blank? ? self : results
-    end
+    # def scope_group(scope, joins, input_group)
+    #   input_group['scope'] = scope.try(:id)
+    #   results = scope_search(scope, joins)
+    #   results.blank? ? self : results
+    # end
+    #
+    # def scope_search(scope, joins)
+    #   joins && scope ? scope_query(scope, joins) : []
+    # end
 
-    def scope_search(scope, joins)
-      joins && scope ? scope_query(scope, joins) : []
-    end
-
-    def scope_query(scope, joins)
-      self.joins(joins).where(joins => {target_type: scope.class.base_class.name, target_id: scope.id})
-    end
+    # def scope_query(scope, joins)
+    #   self.joins(joins).where(joins => {target_type: scope.class.base_class.name, target_id: scope.id})
+    # end
 
     # attr_search (II) #########################################################
-    def attr_group(results_or_self, attrs, input_group)
-      input_group['attrs'] = attrs
-      results = attr_search(results_or_self, attrs.reject{|k,v| v.blank?})
-      results.blank? ? results_or_self : results
-    end
-
-    def attr_search(results_or_self, attrs)
-      attrs.any? ? results_or_self.where(attrs) : []
-    end
+    # def attr_group(results_or_self, attrs, input_group)
+    #   input_group['attrs'] = attrs
+    #   results = attr_search(results_or_self, attrs.reject{|k,v| v.blank?})
+    #   results.blank? ? results_or_self : results
+    # end
+    #
+    # def attr_search(results_or_self, attrs)
+    #   attrs.any? ? results_or_self.where(attrs) : []
+    # end
 
     # hattr_search (III) #######################################################
-    def hstore_group(results_or_self, hattrs, hstore, input_group, default_set)
-      input_group['hattrs'] = hattrs
-      hstore_cascade_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, default_set)
-    end
+    # def hstore_group(results_or_self, hattrs, hstore, input_group, default_set)
+    #   input_group['hattrs'] = hattrs
+    #   hstore_cascade_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, default_set)
+    # end
 
-    def hstore_cascade_search(results_or_self, hattrs, hstore, default_set)
-      hattrs.empty? && results_or_self.class.name == "ActiveRecord::Relation" ? results_or_self : hstore_search(results_or_self, hattrs, hstore, default_set)
-    end
+    # def hstore_cascade_search(results_or_self, hattrs, hstore, default_set)
+    #   hattrs.empty? && results_or_self.class.name == "ActiveRecord::Relation" ? results_or_self : hstore_search(results_or_self, hattrs, hstore, default_set)
+    # end
 
-    def hstore_search(results_or_self, hattrs, hstore, default_set=:all)
-      hattrs.any? ? hstore_query(results_or_self, hattrs, hstore) : default_results(results_or_self, default_set)
-    end
-
-    def default_results(results_or_self, default_set)
-      default_set==:all ? results_or_self.all : []
-    end
+    # def hstore_search(results_or_self, hattrs, hstore, default_set=:all)
+    #   hattrs.any? ? hstore_query(results_or_self, hattrs, hstore) : default_results(results_or_self, default_set)
+    # end
+    #
+    # def default_results(results_or_self, default_set)
+    #   default_set==:all ? results_or_self.all : []
+    # end
 
     # filtering search: uniq/order ############################################# uniq_search uniq_hattr_search
     # uniq #####################################################################
-    def uniq_hattrs(results, keys, hstore, running_list=[])
-      results.each_with_object([]){|i,uniq_set| assign_unique(i, keys, hstore, running_list, uniq_set)}
-    end
-
-    def assign_unique(i, keys, hstore, running_list, uniq_set)
-      comparison_hsh = hstore_tags(i, hstore, keys)
-      return if running_list.include?(comparison_hsh)
-      running_list << comparison_hsh
-      uniq_set << i
-    end
+    # def uniq_hattrs(results, keys, hstore, running_list=[])
+    #   results.each_with_object([]){|i,uniq_set| assign_unique(i, keys, hstore, running_list, uniq_set)}
+    # end
+    #
+    # def assign_unique(i, keys, hstore, running_list, uniq_set)
+    #   comparison_hsh = hstore_tags(i, hstore, keys)
+    #   return if running_list.include?(comparison_hsh)
+    #   running_list << comparison_hsh
+    #   uniq_set << i
+    # end
     #new test methods ####################################################################
-    def hstore_tags(obj, hstore, keys)
-      keys.each_with_object({}) {|k,h| h[k] = obj.public_send(hstore).dig(k)}
-    end
-
-    def uniq_results(results, hstore, keys)
-      results.delete{|i| i.id != id && hstore_tags(i, hstore, keys).all?{|k,v| public_send(hstore).dig(k) == v}}
-    end
+    # def hstore_tags(obj, hstore, keys)
+    #   keys.each_with_object({}) {|k,h| h[k] = obj.public_send(hstore).dig(k)}
+    # end
+    #
+    # def uniq_results(results, hstore, keys)
+    #   results.delete{|i| i.id != id && hstore_tags(i, hstore, keys).all?{|k,v| public_send(hstore).dig(k) == v}}
+    # end
     ############################################################################
 
     # sort #####################################################################
@@ -114,7 +114,9 @@ module Search
     # end
 
     def sort_value(val)
-      val==nil || is_numeric?(val) ? val.to_i : val
+      v = val==nil || is_numeric?(val) ? val.to_i : val
+      puts "sort_value: #{v}"
+      v
     end
 
     def is_numeric?(s)

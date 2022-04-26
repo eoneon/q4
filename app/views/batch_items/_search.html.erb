@@ -1,4 +1,5 @@
 <%= form_with model: Item.new, url: search_invoice_batch_items_path(invoice), method: :get, id: "search-item-skus" do |f| %>
+  <%= hidden_field_tag "items[context]", nil, class: "search-context" %>
   <div class="form">
     <div class="card bg-gray-d p-1 mb-1">
 
@@ -43,7 +44,7 @@
         </div>
 
         <% included_inputs(inputs['hattrs'], 'measurements', 'edition').each do |input| %>
-          <div class="col-3 ml-0">
+          <div class="col-3 ml-0 hattrs">
             <div class="input-group input-group-sm">
               <%= render 'item_products/forms/search_group', scope: 'hattrs', input_name: input['input_name'], opts: input['opts'], selected: input['selected'] %>
             </div>

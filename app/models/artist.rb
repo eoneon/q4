@@ -61,6 +61,52 @@ class Artist < ApplicationRecord
     end
   end
 
+  ##############################################################################
+  
+  def self.search(scopes:, product_hattrs: , item_hattrs:)
+  	inputs = Product.initialize_scope_inputs(scopes).merge!({'hattrs'=>[]})
+  	products = config_products(scopes[:product], scopes[:artist], Item.valid_params(product_hattrs))
+
+    config_scopes_and_their_inputs(scopes[:artist], products, inputs)
+  	Product.config_hattrs_and_their_inputs(product_hattrs, product_hattrs, products, inputs)
+  	items_and_inputs(scopes[:title], products, scopes[:artist].items, Item.valid_params(product_hattrs.merge!(item_hattrs)), item_hattrs, inputs)
+  	inputs
+  end
+
+  def self.config_products(product, artist, search_params)
+  	#products = product ? [product] : artist.products
+    products = artist.products
+  	products.any? ? Product.config_products(product, artist, products, search_params) : products
+  end
+
+  def self.config_scopes_and_their_inputs(artist, products, inputs)
+  	inputs['product']['opts'] = products
+  	inputs['artist']['opts'] = [artist]
+  	inputs['title']['opts'] = artist.titles
+  end
+
+  def self.items_and_inputs(title, products, items, item_params, item_hattrs, inputs, hstore='csv_tags')
+  	items = config_items(products, items, title, item_params, hstore, Item.table_keys)
+  	items_tags = items.any? ? items.pluck(hstore) : []
+  	config_scopes_hattrs_and_their_inputs(items, item_hattrs, items_tags, inputs)
+  end
+
+  def self.config_items(products, items, title, item_params, hstore, table_keys)
+  	return items if items.empty? && products.empty?
+  	items = items.where(title: title) if title
+  	items = Item.search_query(items, item_params, hstore) if item_params.any?
+  	Item.uniq_and_sorted_set(items, hstore, Item.table_keys)
+  end
+
+  def self.config_scopes_hattrs_and_their_inputs(items, item_hattrs, items_tags, inputs)
+  	inputs['items'] = items
+  	inputs['hattrs'].concat(Item.item_search_hattr_inputs(item_hattrs, items_tags))
+  end
+
+  def self.item_opts(product, artist)
+  	product && artist ? artist.product_items(product) : artist.items
+  end
+
   # COLLECTIONS ################################################################
   # artists ####################################################################
   # all artists (sorted)

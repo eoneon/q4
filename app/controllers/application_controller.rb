@@ -28,7 +28,7 @@ class ApplicationController < ActionController::Base
 
   def item_search_params(store: param_hsh, scope_keys: Item.scope_keys, product: nil)
     search_params, new_item_hsh = product_search_params(store: store, scope_keys: scope_keys, product: product), filter_h(Item.hattr_keys)
-    search_params[:item_hattrs] = (product ? update_default_hsh_from_old_hsh(new_item_hsh.keys, new_item_hsh, store) : new_item_hsh)
+    search_params[:item_hattrs] = (product || search_params[:scopes][:artist] ? Product.update_default_hsh_from_old_hsh(new_item_hsh.keys, new_item_hsh, store) : new_item_hsh)
     search_params
   end
 
@@ -38,11 +38,19 @@ class ApplicationController < ActionController::Base
   	{scopes: scope_hsh, product_hattrs: product_hattrs}
   end
 
+  # def config_product_search_params(product, new_scope_hsh, new_product_hsh, store)
+  # 	if action_name=='create'
+  # 		new_product_search_args(new_scope_hsh, new_product_hsh)
+  # 	else
+  # 		[scopes_from_params(new_scope_hsh.keys, new_scope_hsh, store), Product.update_default_hsh_from_old_hsh(new_product_hsh.keys, new_product_hsh, store)]
+  # 	end
+  # end
   def config_product_search_params(product, new_scope_hsh, new_product_hsh, store)
   	if action_name=='create'
       new_product_search_args(new_scope_hsh, new_product_hsh)
     else
-      update_product_search_args(product, new_scope_hsh, new_product_hsh, store)
+      [scopes_from_params(new_scope_hsh.keys, new_scope_hsh, store), Product.update_default_hsh_from_old_hsh(new_product_hsh.keys, new_product_hsh, store)]
+      #update_product_search_args(product, new_scope_hsh, new_product_hsh, store)
     end
   end
 
@@ -51,13 +59,13 @@ class ApplicationController < ActionController::Base
   end
 
   def config_scope_hsh(scope_hsh)
-    scope_hsh.transform_keys!{|k,v| k.split('_')[0]}
+    scope_hsh.transform_keys!{|k,v| k.split('_')[0].to_sym}
   end
 
   def update_product_search_args(product, new_scope_hsh, new_product_hsh, store)
   	scope_hsh = product ? scopes_from_product(product, new_scope_hsh) : scopes_from_params(new_scope_hsh.keys, new_scope_hsh, store)
   	store_hsh = scope_hsh[:product] ? scope_hsh[:product].tags : store
-  	[scope_hsh, update_default_hsh_from_old_hsh(new_product_hsh.keys, new_product_hsh, store_hsh)]
+  	[scope_hsh, Product.update_default_hsh_from_old_hsh(new_product_hsh.keys, new_product_hsh, store_hsh)]
   end
 
   def scopes_from_product(product, new_scope_hsh)
@@ -67,7 +75,7 @@ class ApplicationController < ActionController::Base
   end
 
   def scopes_from_params(scope_keys, new_scope_hsh, store_hsh)
-    scopes = update_default_hsh_from_old_hsh(new_scope_hsh.keys, new_scope_hsh, store_hsh)
+    scopes = Product.update_default_hsh_from_old_hsh(new_scope_hsh.keys, new_scope_hsh, store_hsh)
     scopes = scope_hsh(scopes)
     scopes
   end
@@ -75,20 +83,6 @@ class ApplicationController < ActionController::Base
   def scope_hsh(scope_hsh)
     scope_hsh.each_with_object({}) do |(k,v),hsh|
       hsh.merge!(cond_search_param(k.split('_')[0], (k.split('_')[1]=='id'), v))
-    end
-  end
-
-  #remove and use as class method from Hashables
-  def update_default_hsh_from_old_hsh(required_keys, default_hsh, store_hsh)
-    return default_hsh if required_keys.empty?
-    store_hsh.each_with_object(default_hsh) do |(k,v), default_hsh|
-      if v.is_a? Hash
-        update_default_hsh_from_old_hsh(required_keys, default_hsh, v)
-      elsif required_keys.include?(k)
-        required_keys.delete(k)
-        store_hsh.delete(k)
-        default_hsh[k] = v if !v.blank?
-      end
     end
   end
 
