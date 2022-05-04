@@ -2,7 +2,7 @@
   <div class="form artist-brand">
     <div class="input-group input-group-sm">
       <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
-      <%= f.collection_select :id, Artist.all, :id, :artist_name, {include_blank: true, selected: artist.try(:id)}, class: boot_classes(:search_input, 'artist-search') %>
+      <%= f.collection_select :id, Artist.sorted, :id, :last_name_first, {include_blank: true, selected: artist.try(:id)}, class: boot_classes(:search_input, 'artist-search') %>
     </div>
   </div>
 <% end %>

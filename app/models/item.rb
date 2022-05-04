@@ -95,18 +95,11 @@ class Item < ApplicationRecord
       inputs[:hattrs].merge!(initialize_search_inputs(item_hattrs, inputs[:items].pluck(hstore)))
     end
 
-    #search_params:
     def item_results(product, artist, title, search_params, hstore)
     	items = item_set(product, artist)
     	items = search_query(items, search_params, hstore)
     	items.any? && title ? items.where(title: title) : items
     end
-
-    # def item_results(product, artist, title, item_params, hstore)
-    # 	items = item_set(product, artist)
-    # 	items = items.where(title: title) if items.any? && title
-    # 	search_query(items, item_params, hstore)
-    # end
 
     def item_set(product, artist)
     	case
@@ -121,7 +114,6 @@ class Item < ApplicationRecord
     	%w[search_tagline mounting_search item_size width height]
     end
 
-    #new
     def scope_keys
       %w[product_id artist_id title]
     end
@@ -129,7 +121,6 @@ class Item < ApplicationRecord
     def hattr_keys
       %w[mounting_search measurements edition]
     end
-    #end
 
     def search_keys
       %w[category_search medium_search material_search mounting_search measurements edition] #measurements item_size

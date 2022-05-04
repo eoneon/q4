@@ -8,7 +8,6 @@
           <div class="col-3 ml-0">
             <div class="input-group input-group-sm">
               <%= render 'item_products/forms/search_group', scope: 'hattrs', input_name: k, opts: input[:opts], selected: input[:selected] %>
-              <%#= render 'item_products/forms/search_group', scope: 'hattrs', input_name: input['input_name'], opts: input['opts'], selected: input['selected'] %>
             </div>
           </div>
         <% end %>
@@ -20,7 +19,6 @@
             <%= render 'item_products/forms/search_label', input_name: 'artist' %>
             <%= render 'item_products/forms/reset_search', class_param: 'artist-unselect' %>
             <%= f.collection_select :artist_id, inputs[:artist][:opts], :id, :last_name_first, {include_blank: true, selected: inputs[:artist][:selected]}, {id: "artist-search", class: boot_classes(:search_input, 'search', 'artist')} %>
-            <%#= f.collection_select :artist_id, inputs['artist']['opts'], :id, :artist_name, {include_blank: true, selected: inputs['artist']['selected']}, id: "artist-search", class: boot_classes(:search_input, 'search', 'artist') %>
           </div>
         </div>
 
@@ -29,7 +27,6 @@
             <%= render 'item_products/forms/search_label', input_name: 'product' %>
             <%= render 'item_products/forms/reset_search', class_param: 'new-item-unselect-product' %>
             <%= f.collection_select :product_id, inputs[:product][:opts], :id, :product_name, {include_blank: true, selected: inputs[:product][:selected]}, id: "product-search", class: boot_classes(:search_input, 'product', 'new-item-select-product') %>
-            <%#= f.collection_select :product_id, inputs['product']['opts'], :id, :product_name, {include_blank: true, selected: inputs['product']['selected']}, id: "product-search", class: boot_classes(:search_input, 'product', 'new-item-select-product') %>
           </div>
         </div>
       </div>

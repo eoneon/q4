@@ -11,8 +11,7 @@ class ArtistsController < ApplicationController
     @artist = Artist.find(params[:id])
     store_hsh = filter_h(Item.scope_keys)
     store_hsh['artist_id'] = params[:id]
-    @item_inputs = Item.search(item_search_params(store: store_hsh))
-    @item_inputs[:artist][:opts] = [@artist]
+    @item_inputs = Artist.search(item_search_params(store: store_hsh))
     @items = @item_inputs[:items]
 
     respond_to do |format|

@@ -126,9 +126,6 @@ class Product < ApplicationRecord
   class << self
 
     def search(scopes:, product_hattrs:, context:)
-    	# inputs = initialize_search_inputs(scopes)
-    	# inputs[:hattrs] = initialize_search_inputs(product_hattrs)
-    	# inputs[:product][:opts] = product_set(scopes[:artist], context)
       inputs = config_search_params(context, scopes, product_hattrs)
     	filter_results_and_config_hattr_inputs(product_hattrs, :product, inputs)
       reset_scopes(inputs[:product][:opts], scopes, inputs) if context=='hattrs'
@@ -187,59 +184,6 @@ class Product < ApplicationRecord
     end
 
     ######################################################################
-    # def search(scopes:, product_hattrs:, context: nil)
-    # 	products = config_products(scopes[:artist], context)
-    #   hattr_inputs = initialize_search_inputs(product_hattrs)
-    # 	config_hattrs_and_their_inputs(product_hattrs, hattr_inputs, products)
-    # 	scope_inputs = config_scopes(scopes, products, valid_hattr_params(hattr_inputs), context)
-    # 	scope_inputs.merge!({:hattrs=>hattr_inputs})
-    # end
-
-    def config_hattrs_and_their_inputs(product_hattrs, hattr_inputs, products, hstore='tags')
-    	product_hattrs.each do |k,selected|
-    		hattr_inputs[k][:opts] = search_opts(products.pluck(hstore),k)
-    		products = search_query(products, {k=>selected}, hstore) if k=='category_search' && selected
-    		products = reset_hattrs_and_filter_results(k, selected, products, hattr_inputs, hstore) if k=='medium_search'
-    		hattr_inputs[k][:selected] = nil if valid_scope_search(selected, search_query(products, {k=>selected}, hstore)) if k=='material_search'
-    	end
-    end
-
-    def reset_hattrs_and_filter_results(k, selected, products, hattr_inputs, hstore)
-    	if medium_products = results_or_reset_hattr(k, selected, products, hattr_inputs, hstore)
-    		medium_products
-    	elsif material_products = material_scope(valid_params(p_hattrs(hattr_inputs)), products, hstore)
-    		material_products
-    	else
-    		products
-    	end
-    end
-
-    def material_scope(hattrs, products, hstore)
-    	valid_set(search_query(products, hattrs, hstore))  if hattrs.keys[0]=='material_search' #&& hattrs.values.count==1
-    end
-
-    def config_scopes(scopes, products, search_params, context, hstore='tags')
-    	products = search_query(products, search_params, hstore)
-    	config_artist_scope(scopes[:artist], products, scopes, context)
-    	scope_inputs = initialize_search_inputs(scopes, [])
-    	config_scope_inputs(scopes[:product], scopes[:artist], products, search_params, scope_inputs)
-    	scope_inputs
-    end
-
-    def config_scope_inputs(product, artist, products, search_params, scope_inputs)
-    	scope_inputs[:product][:opts] = products
-      config_artist_inputs(product, artist, products, scope_inputs)
-      scope_inputs
-    end
-
-    def config_artist_scope(artist, products, scopes, context)
-      [:artist, :title].map{|k| scopes[k] = nil} if context=='hattrs' && !artist.has_any_of_these?(products)
-    end
-
-    # def config_artist_inputs(product, artist, products, scope_inputs)
-    # 	scope_inputs[:artist][:opts] = product ? product.artists : Artist.with_these(products)
-    #   scope_inputs[:title][:opts] = artist ? artist.titles : []
-    # end
 
     def with_these(items)
     	Product.where(id: items.includes(:products).map(&:products).flatten.uniq)

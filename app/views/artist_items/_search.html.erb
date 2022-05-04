@@ -25,7 +25,7 @@
           <div class="input-group input-group-sm" data-form="#search-items">
             <%= render 'item_products/forms/search_label', input_name: 'title' %>
             <%= render 'item_products/forms/reset_search', class_param: 'unselect' %>
-            <%= select "items", "title", inputs[:title][:opts], {include_blank: true, selected: inputs[:title][:selected]}, {class: boot_classes(:search_input, 'search-select', 'title-select')} %>
+            <%= select "items", "title", inputs[:title][:opts], {include_blank: true, selected: inputs[:title][:selected]}, {class: boot_classes(:search_input, 'search-select', 'title-select', 'title')} %>
           </div>
         </div>
       </div>

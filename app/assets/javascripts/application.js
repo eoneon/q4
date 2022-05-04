@@ -59,21 +59,6 @@ $(document).ready(function(){
     updateTitleInput(inputGroupData($(this)), $(this).val());
   });
 
-  // $("body").on("change", ".hattrs .category, .hattrs .medium, .hattrs .material", function() {
-  //   var product = thisForm($(this)).find(".product");
-  //   if ( $(this).val().length && valid($(product).val()) ) clearProductSearchInputs($(this), product, $(searchData(product).itemForm).find(".product"));
-  //   thisForm($(this)).submit();
-  // });
-
-  // $("body").on("change", ".hattrs .category, .hattrs .medium, .hattrs .material", function() {
-  // 	var product = thisForm($(this)).find(".product");
-  // 	if ( $(this).val().length && valid($(product).val()) ) {
-  // 		//clearProductSearchInputs($(this), product, $(searchData(product).itemForm).find(".product"));
-  // 		if (thisForm($(this)).attr('id')=='search-skus' || thisForm($(this)).attr('id')=='search-item-skus') {$(thisForm($(this))).find("input.search-context").val('hattrs')};
-  // 	}
-  // 	thisForm($(this)).submit();
-  // });
-
   $("body").on("change", ".hattrs .category, .hattrs .medium, .hattrs .material", function() {
   	var product = thisForm($(this)).find(".product");
   	if ( $(this).val().length && valid($(product).val()) && thisForm($(this)).attr('id')=='search-skus' || thisForm($(this)).attr('id')=='search-item-skus') {
@@ -82,7 +67,7 @@ $(document).ready(function(){
   	thisForm($(this)).submit();
   });
 
-  $("body").on("change", "#search-items .product, .search.artist, .hattrs .title, .hattrs .mounting, .hattrs .measures, .hattrs .edition", function() {
+  $("body").on("change", "#search-items .product, .search.artist, .title, .hattrs .mounting, .hattrs .measures, .hattrs .edition", function() {
     thisForm($(this)).submit();
   });
 
@@ -98,10 +83,7 @@ $(document).ready(function(){
     deselectSelectedOpt(inputGroup($(this)));
     thisForm($(this)).submit();
   });
-  //FORMS-SUBMIT: POST deselect($(d.itemForm).find(d.productInput))
-  // $("body").on("change", ".edit-item-select-product", function(){
-  //   editItemSelectProduct(searchData($(this)));
-  // });
+  
   $("body").on("click", ".unselect-table-product", function(){
     editItemUnselectProduct(searchData($(this)));
   });
