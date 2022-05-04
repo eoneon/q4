@@ -15,7 +15,7 @@ class ItemProductsController < ApplicationController
   def search
     @item = Item.find(params[:id])
     @product_inputs = Product.search(product_search_params)
-    @update = !@item.skip?(@item.product, @product_inputs['product']['selected'])
+    @update = !@item.skip?(@item.product, @product_inputs[:product][:selected])
 
     respond_to do |format|
       format.js

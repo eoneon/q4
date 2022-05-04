@@ -1,10 +1,10 @@
 $("#search-item-skus").html("<%= j render 'batch_items/search', invoice: @invoice, inputs: @item_inputs %>");
-$("#new-item-skus").find(".title-select").html("<%= j render 'items/title', titles: @item_inputs['title']['opts'] %>");
-$("#search-table").html("<%= j render 'batch_items/table', items: @item_inputs['items'] %>");
-var [artist_id, id] = [$("#new-title").find(".artist").val(), "<%= @item_inputs['artist']['selected'] %>"]
+$("#new-item-skus").find(".title-select").html("<%= j render 'items/title', titles: @item_inputs[:title][:opts] %>");
+$("#search-table").html("<%= j render 'batch_items/table', items: @item_inputs[:items] %>");
+var [artist_id, id] = [$("#new-item-skus").find(".artist").val(), "<%= @item_inputs[:artist][:selected] %>"]
+var [product_id, p_id] = [$("#new-item-skus").find(".product").val(), "<%= @item_inputs[:product][:selected] %>"]
 
 $(function(){
-	if (artist_id!=id) {
-		$("#new-item-skus").find(".artist").val(id);
-	}
+	if (artist_id!=id) $("#new-item-skus").find(".artist").val(id);
+	if (product_id!=p_id) $("#new-item-skus").find(".product").val(p_id);
 });

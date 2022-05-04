@@ -35,22 +35,16 @@ class ApplicationController < ActionController::Base
   def product_search_params(store: param_hsh, scope_keys: Product.scope_keys, product:nil)
   	new_scope_hsh, new_product_hsh = filter_h(scope_keys), filter_h(product_keys)
     scope_hsh, product_hattrs = config_product_search_params(product, new_scope_hsh, new_product_hsh, store)
-  	{scopes: scope_hsh, product_hattrs: product_hattrs}
+  	{scopes: scope_hsh, product_hattrs: product_hattrs, context: param_hsh.dig('items', 'context')}
   end
 
-  # def config_product_search_params(product, new_scope_hsh, new_product_hsh, store)
-  # 	if action_name=='create'
-  # 		new_product_search_args(new_scope_hsh, new_product_hsh)
-  # 	else
-  # 		[scopes_from_params(new_scope_hsh.keys, new_scope_hsh, store), Product.update_default_hsh_from_old_hsh(new_product_hsh.keys, new_product_hsh, store)]
-  # 	end
-  # end
   def config_product_search_params(product, new_scope_hsh, new_product_hsh, store)
   	if action_name=='create'
       new_product_search_args(new_scope_hsh, new_product_hsh)
+    elsif %w[table_skus items].include?(controller_name)
+      update_product_search_args(product, new_scope_hsh, new_product_hsh, store)
     else
       [scopes_from_params(new_scope_hsh.keys, new_scope_hsh, store), Product.update_default_hsh_from_old_hsh(new_product_hsh.keys, new_product_hsh, store)]
-      #update_product_search_args(product, new_scope_hsh, new_product_hsh, store)
     end
   end
 

@@ -6,11 +6,27 @@ module Search
   class_methods do
     # new search methods #######################################################
     def search_query(set, search_params, hstore)
-      search_params.any? ? hstore_query(set, search_params, hstore) : set
+      set.any? && search_params.any? ? hstore_query(set, search_params, hstore) : set
     end
 
-    def search_input(k,v,set)
-      {'input_name'=> k, 'selected'=> selected_input_val(v), 'opts'=> search_opts(set,k)}
+    def valid_params(hsh)
+    	hsh.reject{|k,v| v.blank?}
+    end
+
+    def p_hattrs(hattr_params)
+      hattr_params.each_with_object({}){|(k,v), params| params[k] = v[:selected]}
+    end
+
+    def valid_hattr_params(hattr_params)
+      valid_params(p_hattrs(hattr_params))
+    end
+
+    def initialize_search_inputs(hattrs, set=[])
+    	hattrs.each_with_object({}) {|(k,v), inputs| inputs[k] = search_input(k,v,set)}
+    end
+
+    def search_input(k,v,set=[])
+    	{:selected=> selected_input_val(v), :opts=> search_opts(set,k)}
     end
 
     def selected_input_val(v)
@@ -20,6 +36,106 @@ module Search
     def search_opts(set,k)
       set.pluck(k).uniq.compact
     end
+
+    # validating search params #################################################
+    def results_or_reset_hattr(k, selected, products, hattr_inputs, hstore)
+    	if scoped_products = valid_scope_search(selected, search_query(products, {k=>selected}, hstore))
+    		scoped_products
+    	elsif selected
+    		hattr_inputs[k][:selected] = nil
+    	end
+    end
+
+    def valid_scope_search(selected, set)
+    	valid_set(set) if !selected.blank?
+    end
+
+    def valid_set(set)
+    	set if set.any?
+    end
+
+    # sort #####################################################################
+    def uniq_and_sorted_set(set, hstore, uniq_keys, sort_keys=nil)
+    	sorted_set(uniq_set(set, hstore, uniq_keys), hstore, (sort_keys ? sort_keys : uniq_keys))
+    end
+
+    def uniq_set(set, hstore, uniq_keys)
+    	set.empty? ? [] : set.uniq{|i| uniq_keys.map{|k| i.public_send(hstore)[k]}}
+    end
+
+    def sorted_set(set, hstore, sort_keys)
+    	set.empty? ? [] : set.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}}
+    end
+
+    def order_search(results, sort_keys, hstore)
+      results.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
+    end
+
+    def order_hstore_search(results, sort_keys, hstore)
+      results.any? ? results.order(order_hstore_query(sort_keys, hstore)) : results
+    end
+
+    def sort_value(val)
+      v = val==nil || is_numeric?(val) ? val.to_i : val
+      puts "sort_value: #{v}"
+      v
+    end
+
+    def is_numeric?(s)
+      !!Float(s) rescue false
+    end
+
+    # hstore query/params methods ##############################################
+    def index_query(results_or_self, keys, hstore)
+      results_or_self.where("#{hstore}?& ARRAY[:keys]", keys: keys)
+    end
+
+    def hstore_query(results_or_self, search_params, hstore)
+      results_or_self.where(search_params.to_a.map{|kv| hstore_params(kv[0], kv[1], hstore)}.join(" AND "))
+    end
+
+    def hstore_params(k,v, hstore)
+      "#{hstore} -> \'#{k}\' = \'#{v}\'"
+    end
+
+    # sort hstore ##############################################################
+    def order_hstore_query(keys, hstore)
+      keys.map{|k| order_hstore_params(k, hstore)}.join(', ')
+    end
+
+    def order_hstore_params(k, hstore)
+      "#{hstore} -> \'#{k}\'"
+    end
+
+    def hattr_params(scope, hattrs, hstore)
+      hattrs ? hattrs : build_hattr_params(scope, hstore)
+    end
+
+    # build params from product or search_keys #################################
+    def build_hattr_params(scope, hstore)
+      scope ? scope_hattr_params(scope, hstore) : search_keys.each_with_object({}) {|k,h| h[k]=""}
+    end
+
+    def scope_hattr_params(scope, hstore)
+      search_keys.each_with_object({}){|k,h| h[k] = scope.public_send(hstore).dig(k)}
+    end
+
+    def origins_targets_inputs(target, origin_name, target_name, results, inputs)
+      inputs[target_name.underscore] = {'selected'=> target.try(:id), 'opts'=> origins_targets_opts(results, origin_name, target_name)}
+    end
+
+    def origins_targets_opts(results, origin_name, target_name)
+      results.any? ? ItemGroup.origins_targets(results, origin_name, target_name) : target_name.to_s.classify.constantize.all
+    end
+
+    def default_params(params, keys)
+      params.any? ? params : defualt_hsh(keys)
+    end
+
+  end
+end
+
+
 
     # join_search (I) ##########################################################
     # def scope_group(scope, joins, input_group)
@@ -86,103 +202,6 @@ module Search
     #   results.delete{|i| i.id != id && hstore_tags(i, hstore, keys).all?{|k,v| public_send(hstore).dig(k) == v}}
     # end
     ############################################################################
-
-    # sort #####################################################################
-    def uniq_and_sorted_set(set, hstore, uniq_keys, sort_keys=nil)
-    	sorted_set(uniq_set(set, hstore, uniq_keys), hstore, (sort_keys ? sort_keys : uniq_keys))
-    end
-
-    def uniq_set(set, hstore, uniq_keys)
-    	set.uniq{|i| uniq_keys.map{|k| i.public_send(hstore)[k]}}
-    end
-
-    def sorted_set(set, hstore, sort_keys)
-    	set.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}}
-    end
-
-    def order_search(results, sort_keys, hstore)
-      results.sort_by{|i| sort_keys.map{|k| sort_value(i.public_send(hstore)[k])}} if sort_keys
-    end
-
-    def order_hstore_search(results, sort_keys, hstore)
-      results.any? ? results.order(order_hstore_query(sort_keys, hstore)) : results
-    end
-
-    # def order_hstore_search(results, sort_keys, hstore)
-    #   puts "results: #{results}"
-    #   results.any? ? order_search(results, sort_keys, hstore) : results
-    # end
-
-    def sort_value(val)
-      v = val==nil || is_numeric?(val) ? val.to_i : val
-      puts "sort_value: #{v}"
-      v
-    end
-
-    def is_numeric?(s)
-      !!Float(s) rescue false
-    end
-
-    # hstore query/params methods ##############################################
-    def index_query(results_or_self, keys, hstore)
-      results_or_self.where("#{hstore}?& ARRAY[:keys]", keys: keys)
-    end
-
-    def hstore_query(results_or_self, search_params, hstore)
-      results_or_self.where(search_params.to_a.map{|kv| hstore_params(kv[0], kv[1], hstore)}.join(" AND "))
-    end
-
-    def hstore_params(k,v, hstore)
-      "#{hstore} -> \'#{k}\' = \'#{v}\'"
-    end
-
-    # sort hstore ##############################################################
-    def order_hstore_query(keys, hstore)
-      keys.map{|k| order_hstore_params(k, hstore)}.join(', ')
-    end
-
-    def order_hstore_params(k, hstore)
-      "#{hstore} -> \'#{k}\'"
-    end
-
-    def hattr_params(scope, hattrs, hstore)
-      hattrs ? hattrs : build_hattr_params(scope, hstore)
-    end
-
-    # build params from product or search_keys #################################
-    def build_hattr_params(scope, hstore)
-      scope ? scope_hattr_params(scope, hstore) : search_keys.each_with_object({}) {|k,h| h[k]=""}
-    end
-
-    def scope_hattr_params(scope, hstore)
-      search_keys.each_with_object({}){|k,h| h[k] = scope.public_send(hstore).dig(k)}
-    end
-
-    # search_inputs ############################################################
-    # def search_inputs(results, hattrs, hstore)
-    #   hattrs.each_with_object([]) do |(k,v), inputs|
-    #     inputs.append(search_input(k, v, results, hstore))
-    #   end
-    # end
-
-    # def search_input(k, v, results, hstore)
-    #   {'input_name'=> k, 'selected'=> v, 'opts'=> results.pluck(hstore).pluck(k).uniq.compact}
-    # end
-
-    def origins_targets_inputs(target, origin_name, target_name, results, inputs)
-      inputs[target_name.underscore] = {'selected'=> target.try(:id), 'opts'=> origins_targets_opts(results, origin_name, target_name)}
-    end
-
-    def origins_targets_opts(results, origin_name, target_name)
-      results.any? ? ItemGroup.origins_targets(results, origin_name, target_name) : target_name.to_s.classify.constantize.all
-    end
-
-    def default_params(params, keys)
-      params.any? ? params : defualt_hsh(keys)
-    end
-
-  end
-end
 
 # def select_input_opts(opt_set, k, hstore)
 #   opt_set.map{|i| i.public_send(hstore)[k]}.uniq.compact.prepend('-- All --')

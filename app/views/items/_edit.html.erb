@@ -8,7 +8,7 @@
         <div class="col-3 pl-4 pr-2 py-1">
           <div class="input-group input-group-sm">
             <%= render "item_fields/label", label: 'artist' %>
-            <%= f.collection_select :artist_id, Artist.all, :id, :artist_name, {include_blank: true, selected: item.artist.try(:id)}, class: boot_classes(:input, 'field-param') %>
+            <%= f.collection_select :artist_id, Artist.all, :id, :last_name_first, {include_blank: true, selected: item.artist.try(:id)}, class: boot_classes(:input, 'field-param') %>
           </div>
         </div>
 

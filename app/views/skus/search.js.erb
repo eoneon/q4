@@ -1,9 +1,21 @@
 $("#search-skus").html("<%= j render 'skus/search', invoice: @invoice, inputs: @product_inputs %>");
-$("#new-skus").find(".title-select").html("<%= j render 'items/title', titles: @product_inputs['title']['opts'] %>");
-var [artist_id, id] = [$("#new-skus").find(".artist").val(), "<%= @product_inputs['artist']['selected'] %>"]
+$("#new-skus").find(".title-select").html("<%= j render 'items/title', titles: @product_inputs[:title][:opts] %>");
+var [artist_id, a_id] = [$("#new-skus").find(".artist").val(), "<%= @product_inputs[:artist][:selected] %>"]
+var [product_id, p_id] = [$("#new-skus").find(".product").val(), "<%= @product_inputs[:product][:selected] %>"]
 
 $(function(){
-	if (artist_id!=id) {
-		$("#new-skus").find(".artist").val(id);
-	}
+	if (artist_id!=a_id) $("#new-skus").find(".artist").val(a_id);
+	if (product_id!=p_id) $("#new-skus").find(".product").val(p_id);
 });
+
+
+// function deselect(input){
+// 	$(input).is('select') ? deselectOpt(input) : deselectInput(input);
+// }
+// function deselectOpt(select){
+// 	$(select).attr('selected', false);
+// 	deselectInput(select);
+// }
+// function deselectInput(input) {
+// 	$(input).val("");
+// }

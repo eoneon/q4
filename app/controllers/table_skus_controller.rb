@@ -3,7 +3,7 @@ class TableSkusController < ApplicationController
   def show
     @item = Item.find(params[:id])
     @product_inputs = Product.search(product_search_params(product: @item.product))
-    @titles = @product_inputs['title']['opts'] 
+    @titles = @product_inputs[:title][:opts] 
     @rows, attrs = @item.input_group
 
     respond_to do |format|

@@ -65,11 +65,19 @@ $(document).ready(function(){
   //   thisForm($(this)).submit();
   // });
 
+  // $("body").on("change", ".hattrs .category, .hattrs .medium, .hattrs .material", function() {
+  // 	var product = thisForm($(this)).find(".product");
+  // 	if ( $(this).val().length && valid($(product).val()) ) {
+  // 		//clearProductSearchInputs($(this), product, $(searchData(product).itemForm).find(".product"));
+  // 		if (thisForm($(this)).attr('id')=='search-skus' || thisForm($(this)).attr('id')=='search-item-skus') {$(thisForm($(this))).find("input.search-context").val('hattrs')};
+  // 	}
+  // 	thisForm($(this)).submit();
+  // });
+
   $("body").on("change", ".hattrs .category, .hattrs .medium, .hattrs .material", function() {
   	var product = thisForm($(this)).find(".product");
-  	if ( $(this).val().length && valid($(product).val()) ) {
-  		clearProductSearchInputs($(this), product, $(searchData(product).itemForm).find(".product"));
-  		if (thisForm($(this)).attr('id')=='search-skus' || thisForm($(this)).attr('id')=='search-item-skus') $(thisForm($(this))).find("input.search-context").val('hattrs');
+  	if ( $(this).val().length && valid($(product).val()) && thisForm($(this)).attr('id')=='search-skus' || thisForm($(this)).attr('id')=='search-item-skus') {
+  		$(thisForm($(this))).find("input.search-context").val('hattrs');
   	}
   	thisForm($(this)).submit();
   });

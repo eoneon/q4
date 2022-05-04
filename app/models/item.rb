@@ -83,78 +83,43 @@ class Item < ApplicationRecord
 
   class << self
 
-    def search(scopes:, product_hattrs:, item_hattrs:)
-    	inputs = Product.search(scopes: scopes, product_hattrs: product_hattrs)
-    	results_and_inputs(scopes[:product], scopes[:artist], scopes[:title], inputs['product']['opts'], valid_params(item_hattrs), item_hattrs, inputs)
+    def search(scopes:, product_hattrs:, item_hattrs:, context: nil)
+    	inputs = Product.search(scopes: scopes, product_hattrs: product_hattrs, context: context)
+      results_and_inputs(scopes[:product], scopes[:artist], scopes[:title], inputs[:product][:opts], valid_params(item_hattrs), item_hattrs, inputs)
     	inputs
     end
 
     def results_and_inputs(product, artist, title, products, item_params, item_hattrs, inputs, hstore='csv_tags')
-      inputs['items'] = uniq_and_sorted_set(item_results(product, artist, title, products, item_params, hstore), hstore, table_keys)
-      items_tags = inputs['items'].any? ? inputs['items'].pluck(hstore) : []
-      inputs['hattrs'].concat(item_search_hattr_inputs(item_hattrs, items_tags))
+      items = item_results(product, artist, title, valid_hattr_params(inputs[:hattrs]).merge(item_params), hstore)
+      inputs[:items] = uniq_and_sorted_set(items, hstore, table_keys)
+      inputs[:hattrs].merge!(initialize_search_inputs(item_hattrs, inputs[:items].pluck(hstore)))
     end
 
-    def item_results(product, artist, title, products, item_params, hstore)
-    	return [] unless product || artist
-    	items = item_opts(product, artist)
-      items = items.where(title: title) if title
-    	items.empty? || item_params.empty? ? items : search_query(items, item_params, hstore)
+    #search_params:
+    def item_results(product, artist, title, search_params, hstore)
+    	items = item_set(product, artist)
+    	items = search_query(items, search_params, hstore)
+    	items.any? && title ? items.where(title: title) : items
     end
 
-    def item_opts(product, artist)
+    # def item_results(product, artist, title, item_params, hstore)
+    # 	items = item_set(product, artist)
+    # 	items = items.where(title: title) if items.any? && title
+    # 	search_query(items, item_params, hstore)
+    # end
+
+    def item_set(product, artist)
     	case
+    		when !product && !artist; []
     		when product && artist; artist.product_items(product)
     		when product; product.items
     		when artist; artist.items
     	end
     end
 
-    def valid_params(hsh)
-    	hsh.reject{|k,v| v.blank?}
-    end
-
-    def item_search_hattr_inputs(hattrs, items_tags)
-      hattrs.each_with_object([]) do |(k,v), hattr_inputs|
-        hattr_inputs.append({'input_name'=> k, 'selected'=> v, 'opts'=> search_opts(items_tags, k)})
-      end
-    end
-
     def table_keys
     	%w[search_tagline mounting_search item_size width height]
     end
-    ############################################################################
-
-    # def item_search(product:nil, artist:nil, title: nil, hattrs:nil, hstore:'csv_tags', inputs:{})
-    #   hattrs = hattr_params(product, hattrs, hstore)
-    #   results_or_self = search_case(artist, product)
-    #   results_or_self = title_search(results_or_self, title)
-    #   results = hstore_cascade_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, [])
-    #   results = order_hstore_search(results, %w[search_tagline item_size], hstore)
-    #   a, b = uniq_hattrs(results, search_keys, hstore), form_inputs(product, artist, title, hattrs, results, hstore, inputs)
-    # end
-    #
-    # def form_inputs(product, artist, title, hattrs, results, hstore, inputs)
-    #   origins_targets_inputs(product, 'Item', 'Product', results, inputs)
-    #   origins_targets_inputs(artist, 'Item', 'Artist', results, inputs)
-    #   inputs['title'] = {'selected' => title, 'opts'=> (results.any? ? results.pluck(:title).uniq : results)}
-    #   results, hstore = results.any? ? [results, hstore] : [Product, 'tags']
-    #   inputs['hattrs'] = search_inputs(results, hattrs, hstore)
-    #   inputs
-    # end
-    #
-    # def search_case(artist, product)
-    #   case
-    #     when artist && product; artist.product_items(product)
-    #     when artist; artist.items
-    #     when product; product.items
-    #     when !artist && !product; self
-    #   end
-    # end
-    #
-    # def title_search(results_or_self, title)
-    #   title.blank? ? results_or_self : results_or_self.where(title: title)
-    # end
 
     #new
     def scope_keys
@@ -186,6 +151,44 @@ class Item < ApplicationRecord
 end
 
 ############################################################################## #results_or_self = attr_group(results_or_self, default_params(attrs, attr_search_keys), input_group)
+############################################################################
+# def item_search_hattr_inputs(hattrs, items_tags)
+#   hattrs.each_with_object([]) do |(k,v), hattr_inputs|
+#     #{k=>search_input(k,v,items_tags)}
+#     hattr_inputs.append({'input_name'=> k, 'selected'=> v, 'opts'=> search_opts(items_tags, k)})
+#   end
+# end
+
+# def item_search(product:nil, artist:nil, title: nil, hattrs:nil, hstore:'csv_tags', inputs:{})
+#   hattrs = hattr_params(product, hattrs, hstore)
+#   results_or_self = search_case(artist, product)
+#   results_or_self = title_search(results_or_self, title)
+#   results = hstore_cascade_search(results_or_self, hattrs.reject{|k,v| v.blank?}, hstore, [])
+#   results = order_hstore_search(results, %w[search_tagline item_size], hstore)
+#   a, b = uniq_hattrs(results, search_keys, hstore), form_inputs(product, artist, title, hattrs, results, hstore, inputs)
+# end
+#
+# def form_inputs(product, artist, title, hattrs, results, hstore, inputs)
+#   origins_targets_inputs(product, 'Item', 'Product', results, inputs)
+#   origins_targets_inputs(artist, 'Item', 'Artist', results, inputs)
+#   inputs['title'] = {'selected' => title, 'opts'=> (results.any? ? results.pluck(:title).uniq : results)}
+#   results, hstore = results.any? ? [results, hstore] : [Product, 'tags']
+#   inputs['hattrs'] = search_inputs(results, hattrs, hstore)
+#   inputs
+# end
+#
+# def search_case(artist, product)
+#   case
+#     when artist && product; artist.product_items(product)
+#     when artist; artist.items
+#     when product; product.items
+#     when !artist && !product; self
+#   end
+# end
+#
+# def title_search(results_or_self, title)
+#   title.blank? ? results_or_self : results_or_self.where(title: title)
+# end
 
 # def self.hattr_search_fields(results, hattrs, hstore)
 #   hattrs.each_with_object({}) do |(k,v), hattr_inputs|
