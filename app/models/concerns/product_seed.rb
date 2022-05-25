@@ -79,17 +79,3 @@ module ProductSeed
 
   end
 end
-
-
-# def origin_hsh(o_hsh, store)
-#   dig_keys_with_end_val(o_hsh).each_with_object([]) do |vals, set|
-#     set.append({f: store.dig(*vals[0..-2]), set:[], group:[], assocs: vals[-1]})
-#   end
-# end
-
-# def assocs_hsh(k, store)
-#   dig_keys_with_end_val(store[k]).each_with_object({}) do |vals, h|
-#     assoc, f_names = vals.pop(2)
-#     f_names.map{|f_name| case_merge(h, [store.dig(*vals[0..1].append(f_name))], k, assoc)}
-#   end
-# end

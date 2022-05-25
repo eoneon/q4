@@ -114,7 +114,10 @@ class ApplicationController < ActionController::Base
   def filter_h(keys, hattrs={})
     keys.each_with_object({}) {|k,h| h[k] = hattrs.dig(k)}
   end
-  #######################
+  #######################dig_keys_for_param_update
+  def dig_keys_for_param_update(str)
+  	Item.strip_space([['[',' '], [']', '']].map{|swap| str.gsub!(swap[0], swap[1])}.last).split(' ')
+  end
   ############################################################################
 
   def format_skus(skus)

@@ -13,10 +13,32 @@ module ProductCrud
   end
 
   def add_product(product)
-    add_obj(product)
-    self.tags = hsh_init(self.tags)
-    add_default_fields(product.f_args(product.g_hsh))
+  	add_obj(product)
+  	tags = add_default_product_fields(product.unpacked_fields)
+  	self.tags = tags
+  	self.save
   end
+
+  def add_default_product_fields(fields)
+  	fields.each_with_object({}) do |f, tags|
+  		k, t, f_name = *f.fattrs
+  		next if no_assocs?(t)
+  		add_default(k, t, f_name, f, tags)
+  	end
+  end
+
+  # def add_default(k, t, f_name, f, tags)
+  # 	if selected = default_field(k, t, f)
+  # 		add_field(k, selected.type.underscore, f_name, selected, tags)
+  # 	end
+  # end
+
+  # def add_product(product)
+  #   add_obj(product)
+  #   self.tags = hsh_init(self.tags)
+  #   add_default_fields(product.f_args(product.g_hsh))
+  #   #new_product_group(product.unpacked_fields)
+  # end
 
   def remove_product(product)
     remove_fieldables

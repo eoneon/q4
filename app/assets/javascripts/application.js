@@ -67,7 +67,7 @@ $(document).ready(function(){
   	thisForm($(this)).submit();
   });
 
-  $("body").on("change", "#search-items .product, .search.artist, .title, .hattrs .mounting, .hattrs .measures, .hattrs .edition", function() {
+  $("body").on("change", "#search-items .product, .search.artist, hattrs .title, .hattrs .mounting, .hattrs .measures, .hattrs .edition", function() {
     thisForm($(this)).submit();
   });
 
@@ -83,12 +83,21 @@ $(document).ready(function(){
     deselectSelectedOpt(inputGroup($(this)));
     thisForm($(this)).submit();
   });
-  
+
   $("body").on("click", ".unselect-table-product", function(){
     editItemUnselectProduct(searchData($(this)));
   });
+
+  $("body").on("focusin", ".field-param", function(){
+    $(this).data("oldVal", $(this).val());
+  });
+
   $("body").on("change", ".field-param", function(){
-    if (sliceTag(thisForm($(this)).attr("id"), 0) == 'edit') thisForm($(this)).submit();
+    if (sliceTag(thisForm($(this)).attr("id"), 0) == 'edit') {
+      thisForm($(this)).find('.update-field').val($(this).attr('name'))
+      thisForm($(this)).find('.update-context').val($(this).data("oldVal"))
+      thisForm($(this)).submit()
+    };
   });
 
   $("body").on("focusout, keyup", ".input-field", function(){

@@ -1,12 +1,12 @@
 class Artist < ApplicationRecord
   include Search
 
+  has_many :item_groups, as: :target
+  has_many :items, through: :item_groups, source: :origin, source_type: "Item"
+
   validates :artist_name, presence: true
   validates :artist_id, presence: true
   validates :artist_id, uniqueness: true
-
-  has_many :item_groups, as: :target
-  has_many :items, through: :item_groups, source: :origin, source_type: "Item"
 
   def formal_name
     [artist_name, life_span].compact.join(' ')

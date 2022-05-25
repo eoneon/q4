@@ -26,7 +26,11 @@ module Fieldable
   end
 
   def fieldables
-    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
+  	FieldItem.where(id: item_groups.where(base_type: 'FieldItem').order(:sort).pluck(:target_id)).to_a
+  end
+
+  def grouped_fields
+    grouped_hsh(enum: unpacked_fields)
   end
 
   ##############################################################################
@@ -59,3 +63,14 @@ module Fieldable
   end
 
 end
+
+# def fieldables
+#   item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
+# end
+
+# def grouped_item_hsh
+# 	grouped_hsh(enum: unpacked_fields, attrs: [:kind, :type])
+# end
+# def product_fields
+#   grouped_hsh(enum: nested_fieldables)
+# end

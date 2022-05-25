@@ -2,10 +2,29 @@ require 'active_support/concern'
 
 module ItemProduct
   extend ActiveSupport::Concern
-  # i = Item.find(97)   h = Item.find(97).input_group
+
+  def form_and_data(action:nil, f_grp:{context: {reorder:[], remove:[]}, attrs:{}, store:{}})
+  	return [[], {}] if !product
+  	f_grp.merge!(inputs_and_tag_hsh(input_group: param_group))
+  	product.config_form_group(f_grp)
+  	return f_grp[:rows] if action == 'show'
+  	related_and_divergent_params(f_grp)
+  	a,b = f_grp[:rows], f_grp[:attrs]
+  end
+
+  # def form_and_data(action:nil, f_grp:{context: {reorder:[], remove:[]}, attrs:{}, store:{}})
+  # 	return [[], {}] if !product
+  # 	product.config_form_group(f_grp, i_args)
+  # 	return f_grp[:rows] if action == 'show'
+  #   related_and_divergent_params(f_grp)
+  #   a,b = f_grp[:rows], f_grp[:attrs]
+  # end
+
+  # i = Item.find(97)   h = Item.find(183).input_group
   def input_group(f_grp={rows:[], context:{reorder:[], remove:[]}, d_hsh:{}, attrs:{}, store:{}})
-    return [f_grp[:rows], f_grp[:attrs] ]if !product
+    return [f_grp[:rows], f_grp[:attrs] ] if !product
     product.product_item_loop(input_params, f_grp, keys=%w[tagline invoice_tagline tagline_search body material_dimension mounting_dimension material_mounting mounting_search])
+    #puts "2f_grp[:rows] = #{f_grp[:rows]}"
     related_and_divergent_params(f_grp)
     a,b = f_grp[:rows], f_grp[:attrs]
   end
@@ -314,6 +333,7 @@ module ItemProduct
   def tb_keys
     %w[tagline invoice_tagline tagline_search body]
   end
+
 end
 
 # THE END ######################################################################

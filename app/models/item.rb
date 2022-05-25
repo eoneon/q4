@@ -41,6 +41,9 @@ class Item < ApplicationRecord
     public_send(hstore).dig(k) unless !public_send(hstore)
   end
 
+  def i_args
+    {i_params: config_item_params, options: options, field_sets: joined_field_sets} if tags
+  end
   ##############################################################################
 
   def sku_pos
@@ -78,6 +81,58 @@ class Item < ApplicationRecord
   end
 
   ##############################################################################
+  def unpacked_fields
+  	fieldables.each_with_object([]) do |f, set|
+  		set.push(f)
+  		set.push(*f.fieldables) if field_set?(f.type)
+  	end
+  end
+
+  def joined_field_sets
+  	field_sets.each_with_object([]) do|f,set|
+  		set.push(f)
+  		set.push(*f.field_sets) if f.field_sets.any?
+  	end
+  end
+
+  # def param_group
+  # 	return nil if !tags
+  # 	input_group = {:options=> options, :field_sets=> field_sets, :inputs=> []}
+  # 	input_group[:tag_hsh] = input_group.values.each_with_object({}) {|fields,h| fields.map{|f| tag_key_loop(*f.fattrs, f, h)}}
+  # 	input_group[:i_params] = config_item_params
+  # 	input_group
+  # end
+
+  def param_group(input_group={:inputs=> []})
+    input_group[:tag_hsh] = options.each_with_object({}) {|opt,tag_hsh| tag_key_loop(*opt.fattrs, opt, tag_hsh)}
+    input_group[:i_params] = config_item_params
+    input_group
+  end
+
+  def inputs_and_tag_hsh(fields:nil, input_group:nil)
+    (fields ? fields : field_sets).each_with_object(input_group ? input_group : param_group) do |f, input_group|
+      k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
+      if field_set?(f.type)
+        inputs_and_tag_hsh(fields: f.fieldables, input_group: input_group)
+      else
+        config_input_and_selected(k, t, f_name, f, input_group)
+      end
+    end
+  end
+
+  # def inputs_and_tag_hsh(fields:nil, input_group:)
+  # 	(fields ? fields : input_group[:field_sets]).each_with_object(input_group) do |f, input_group|
+  # 		if no_assocs?(f.type)
+  # 			tag_key_loop(*f.fattrs, f, input_group[:tag_hsh])
+  # 		elsif field_set?(f.type)
+  # 			inputs_and_tag_hsh(fields: f.fieldables, input_group: input_group)
+  # 		else
+  # 			k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
+  # 			input_group[:inputs] << f_hsh(k, t, f_name, f)
+  # 			set_selected_and_push(input_group, input_group[:i_params].dig(tag_key(k, t_type(t), f_name)))
+  # 		end
+  # 	end
+  # end
 
   ##############################################################################
 

@@ -4,10 +4,14 @@ class ItemsController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(item_params)
+
     @item.update_product_case('product', @item.product, params[:item][:product_id])
     @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
+
+    @rows, attrs = @item.form_and_data
+
     @titles = Artist.titles(@item.artist)
-    @rows, attrs = @item.input_group
+    #@rows, attrs = @item.input_group
     @item.update_csv_tags(attrs)
 
     @item.save

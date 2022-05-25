@@ -4,7 +4,6 @@
     <div class="card bg-gray-d p-1 mb-1">
       <div class="form-row mb-2 hattrs">
         <% inputs[:hattrs].each do |k, input| %>
-        <%# inputs['hattrs'].each do |input| %>
           <div class="col-3 ml-0">
             <div class="input-group input-group-sm">
               <%= render 'item_products/forms/search_group', scope: 'hattrs', input_name: k, opts: input[:opts], selected: input[:selected] %>

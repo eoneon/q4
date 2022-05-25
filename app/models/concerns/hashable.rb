@@ -143,6 +143,7 @@ module Hashable
     #replaces param_set ########################################################
     def build_params(params, *args)
       hsh = dig_keys_with_end_val(h: params)
+      puts "(c) dig_keys_with_end_val: #{hsh}"
       map_args(hsh,*args)
     end
 

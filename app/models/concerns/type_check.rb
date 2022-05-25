@@ -54,11 +54,15 @@ module TypeCheck
   end
 
   def tag_attr?(t)
-    tag_attrs.include?(t)
+    number_field?(t) || tag_attrs.include?(t.underscore)
   end
 
   def tag_attrs
-    %w[number_field text_field text_area_field]
+    %w[text_field text_area_field number_field]
+  end
+
+  def no_assocs?(t)
+    option?(t) || radio_button?(t)
   end
 
   def product_category(product_type)

@@ -8,7 +8,7 @@ module Crudable
   end
 
   def remove_obj(obj)
-    remove_hmt(obj)
+    remove_hmt(obj: obj)
   end
 
   def replace_obj(old_obj, new_obj)
@@ -84,9 +84,9 @@ module Crudable
     public_send(assoc)
   end
 
-  def remove_hmt(obj, join_assoc=:item_groups)
-    self.public_send(join_assoc).where(target_id: obj.id, target_type: obj.class.name).first.destroy
-  end
+  # def remove_hmt(obj, join_assoc=:item_groups)
+  #   self.public_send(join_assoc).where(target_id: obj.id, target_type: obj.class.name).first.destroy
+  # end
 
   # ############################################################################
 

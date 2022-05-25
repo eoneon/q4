@@ -54,7 +54,7 @@ class Medium
 
         class WatercolorPainting < PaperOnly
           def self.targets
-            ['watercolor painting', 'sumi ink painting']
+            ['watercolor painting', 'mixed media watercolor painting', 'sumi ink painting']
           end
         end
 
@@ -293,7 +293,7 @@ class Medium
         # end
 
         def self.targets
-          ['production drawing', 'production drawing set']
+          ['production drawing', 'production drawing set', 'story board production painting']
         end
       end
     end
