@@ -27,19 +27,6 @@ module ProductCrud
   	end
   end
 
-  # def add_default(k, t, f_name, f, tags)
-  # 	if selected = default_field(k, t, f)
-  # 		add_field(k, selected.type.underscore, f_name, selected, tags)
-  # 	end
-  # end
-
-  # def add_product(product)
-  #   add_obj(product)
-  #   self.tags = hsh_init(self.tags)
-  #   add_default_fields(product.f_args(product.g_hsh))
-  #   #new_product_group(product.unpacked_fields)
-  # end
-
   def remove_product(product)
     remove_fieldables
     remove_obj(product)
@@ -50,3 +37,17 @@ module ProductCrud
     add_product(product)
   end
 end
+
+
+# def add_default(k, t, f_name, f, tags)
+# 	if selected = default_field(k, t, f)
+# 		add_field(k, selected.type.underscore, f_name, selected, tags)
+# 	end
+# end
+
+# def add_product(product)
+#   add_obj(product)
+#   self.tags = hsh_init(self.tags)
+#   add_default_fields(product.f_args(product.g_hsh))
+#   #new_product_group(product.unpacked_fields)
+# end

@@ -11,9 +11,11 @@ class SkusController < ApplicationController
 
   def create
     @invoice = Invoice.find(params[:invoice_id])
-    artist = cond_find(Artist, params[:item][:artist_id])
-    product = cond_find(Product, params[:item][:product_id])
-    Item.new.batch_create_skus(skus, item_params, artist, product, product_args(product)) if skus
+    Item.batch_create_skus(skus, item_params, cond_find(Artist, params[:item][:artist_id]), cond_find(Product, params[:item][:product_id]))
+    #artist = cond_find(Artist, params[:item][:artist_id])
+    #product = cond_find(Product, params[:item][:product_id])
+    #Item.new.batch_create_skus(skus, item_params, artist, product, product_args(product)) if skus
+    #Item.new.batch_create_skus(skus, item_params, artist, product) if skus
     @product_inputs = Product.search(product_search_params)
 
     respond_to do |format|

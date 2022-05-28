@@ -49,7 +49,7 @@ class Artist < ApplicationRecord
     elsif artist_arr.count == 1
       artist_arr[0]
     else
-      artist_arr(' ')
+      artist_arr.join(' ')
     end
   end
 

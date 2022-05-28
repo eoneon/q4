@@ -27,14 +27,10 @@ class Product < ApplicationRecord
   	f_grp
   end
 
-  # def config_form_group(f_grp, i_args=nil)
-  # 	product_attrs(f_grp[:context], f_grp[:attrs], tags)
-  # 	inputs_and_tags = inputs_and_tag_hsh(i_args: i_args)
-  #   puts "inputs_and_tags => #{inputs_and_tags[:inputs]}"
-  # 	f_grp[:rows] = build_form_rows(inputs_and_tags[:inputs].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
-  # 	f_grp[:d_hsh] = inputs_and_tags[:tag_hsh]
-  #   f_grp
-  # end
+  def product_attrs(context, attrs, p_tags)
+    context[product_category(p_tags['product_type'])] = true
+    Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
+  end
 
   def inputs_and_tag_hsh(input_group)
   	unpacked_fields.each_with_object(input_group) do |f, input_group|
@@ -44,155 +40,10 @@ class Product < ApplicationRecord
   	end
   end
 
-  # def inputs_and_tag_hsh(fields:nil, i_args:nil, input_group:{:inputs=>[], :tag_hsh=>{}})
-  # 	(fields ? fields : unpacked_fields).each_with_object(input_group) do |f, input_group|
-  # 		k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
-  # 		next if no_assocs?(t)
-  # 		input_group[:inputs] << f_hsh(k, t, f_name, f) unless field_set?(t)
-  #     puts "k=> #{k}, t=> #{t}, t_type=> #{t_type(t)}, f_name=>#{f_name}, f=>#{f}"
-  # 		if selected_param = i_args.dig(:i_params, tag_key(k, t_type(t), f_name))
-  # 			input_group[:inputs][-1][:selected] = selected_param
-  #       puts "selected_param-0=> #{selected_param}"
-  # 			if select_field?(t)
-  # 				f = i_args[:options].detect{|f| f.id==selected_param}
-  # 				k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
-  # 			elsif select_menu?(t)
-  #         puts "selected_param-1=> #{selected_param}"
-  #         #puts "field_sets=> #{i_args[:field_sets]}"
-  #         puts "field_sets=> #{i_args[:field_sets].to_a}"
-  #         #puts "field_sets.ids=> #{i_args[:field_sets].ids}"
-  # 				f = i_args[:field_sets].detect{|f| f.id==selected_param}
-  #         puts "f=> #{f}"
-  # 				k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
-  # 				inputs_and_tag_hsh(fields: f.fieldables, i_args: i_args, input_group: input_group)
-  # 			elsif field_set?(t)
-  #         f = i_args[:field_sets].detect{|f| f.id==selected_param}
-  #         k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
-  #         puts "k=> #{k}, t=> #{t}, f_name=>#{f_name}, f=>#{f}"
-  # 				inputs_and_tag_hsh(fields: f.fieldables, i_args: i_args, input_group: input_group)
-  # 			end
-  # 		end
-  # 	end
-  # end
-
-  # def inputs_and_tag_hsh(fields:nil, i_args:nil, input_group:{:inputs=>[], :tag_hsh=>{}})
-  # 	(fields ? fields : unpacked_fields).each_with_object(input_group) do |f, input_group|
-  # 		k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
-  # 		next if no_assocs?(f.type)
-  #
-  # 		selected = push_input_and_selected(k, t, f_name, f, i_args, input_group)
-  # 		next unless selected
-  #
-  # 		if i_args && !tag_attr?(f_assoc(t))
-  # 			show_item_group(f_assoc(t), selected, i_args, input_group)
-  # 		elsif !i_args
-  # 			new_item_group(selected, input_group)
-  # 		end
-  #
-  # 	end
-  # end
-
-  def push_input_and_selected(k, t, f_name, f, i_args, input_group)
-  	input_group[:inputs] << f_hsh(k, t, f_name, f) unless field_set?(t)
-  	selected = i_args ? i_args.dig(:i_params, tag_key(k, t_type(t), f_name)) : default_field(k, t, f)
-    #selected = i_args ? i_args.dig(:i_params, tag_key(k, t, f_name)) : default_field(k, t, f)
-  	input_group[:inputs][-1][:selected] = i_args ? selected : selected.id if selected
-    selected
-  end
-
-  def show_item_group(t_type, selected_param, i_args, input_group)
-  	f = (option?(t_type) ? i_args[:options] : i_args[:field_sets]).detect{|f| f.id==selected_param}
-  	k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
-  	inputs_and_tag_hsh(fields: f.fieldables, i_args: i_args, input_group: input_group) if field_set?(t)
-  end
-
-  def new_item_group(selected_obj, input_group)
-  	k, t, f_name = pull_tags_and_return_fargs(selected_obj, input_group, *selected_obj.fattrs)
-  	return if no_assocs?(t)
-  	input_group[:inputs] << f_hsh(k, t, f_name, selected_obj)
-  	inputs_and_tag_hsh(fields: selected_obj.fieldables, input_group: input_group) if field_set?(selected_obj.type)
-  end
-
-  # def fattrs
-  # 	[:kind, :type, :field_name].map{|attr| public_send(attr).underscore}
-  # end
-
-  # def f_hsh(k, t, f_name, f)
-  # 	{k: k, t: t, t_type: f_assoc(t), f_name: f_name, f_val: f, selected: nil}
-  # end
-
   def unpacked_fields(fields:nil, set:[])
   	(fields ? fields : fieldables).each_with_object(set) do |f, set|
   		field_set?(f.type) ? unpacked_fields(fields: f.fieldables, set: set) : set.push(f)
   	end
-  end
-
-  # def unpacked_fields
-  #   fieldables.each_with_object([]) {|f, set| field_set?(f.type) ? set.push(*f.fieldables) : set.push(f)}
-  # end
-  ##############################################################################
-
-  # GROUPING METHODS: CRUD/VIEW ################################################
-  def product_item_loop(i_hsh, f_grp, keys)
-    product_attrs(f_grp[:context], f_grp[:attrs], tags)
-    product_item_fields_loop(g_hsh, i_hsh, f_grp[:rows], f_grp[:d_hsh], keys)
-    f_grp[:rows] = build_form_rows(f_grp[:rows].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
-  end
-
-  def product_attrs(context, attrs, p_tags)
-    context[product_category(p_tags['product_type'])] = true
-    Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
-  end
-
-  # inputs_and_selected_make_attrs_and_rows ####################################
-  def product_item_fields_loop(g_hsh, i_hsh, rows, d_hsh, keys)
-    inputs = product_fields_loop(g_hsh, d_hsh, keys)
-    item_fields_loop(inputs, i_hsh, rows, d_hsh, keys)
-  end
-
-  def product_fields_loop(g_hsh, d_hsh, keys, inputs=[])
-    Product.dig_keys_with_end_val(h: g_hsh).each_with_object(inputs) do |args, inputs|
-      k, t, t_type, f_name, f = input_vals(*args[0..-2].map!(&:underscore).append(args[-1]))
-      tags_loop(k, f_name, f, d_hsh, keys) if f.tags
-      if field_set?(t)
-        product_fields_loop(f.g_hsh, d_hsh, keys, inputs)
-      elsif !radio_button?(t)
-        inputs.append(input_hsh(k, t, f_name, f))
-      end
-    end
-  end
-
-  def item_fields_loop(inputs, i_hsh, rows, d_hsh, keys)
-    inputs.each do |f_hsh|
-      k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
-      selected = i_hsh.dig(k, t_type, f_name)
-      rows.append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
-      tags_and_rows(k, f_name, selected, i_hsh, rows, d_hsh, keys) if selected
-    end
-  end
-
-  def tags_and_rows(k, f_name, selected, i_hsh, rows, d_hsh, keys)
-    if selected.is_a?(String)
-      Item.case_merge(d_hsh, selected, k, f_name)
-    else
-      tags_loop(k, format_fname(k, selected, f_name), selected, d_hsh, keys)
-      product_item_fields_loop(selected.g_hsh, i_hsh, rows, d_hsh, keys) if field_set?(selected.type)
-    end
-  end
-
-  def tags_loop(k, f_name, f, d_hsh, keys)
-    keys.each_with_object(d_hsh) do |tag, d_hsh|
-      Item.case_merge(d_hsh, f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag)
-    end
-  end
-
-  def format_selected(selected, attr)
-    return selected if selected.nil? || selected.is_a?(String)
-    selected.public_send(attr)
-  end
-
-  def format_fname(k, selected, f_name)
-    k == 'dimension' && field_set?(selected.type) ? selected.field_name : f_name
   end
 
   ##############################################################################
@@ -348,6 +199,64 @@ class Product < ApplicationRecord
 
 end
 
+
+# GROUPING METHODS: CRUD/VIEW ################################################
+# def product_item_loop(i_hsh, f_grp, keys)
+#   product_attrs(f_grp[:context], f_grp[:attrs], tags)
+#   product_item_fields_loop(g_hsh, i_hsh, f_grp[:rows], f_grp[:d_hsh], keys)
+#   f_grp[:rows] = build_form_rows(f_grp[:rows].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
+# end
+
+# inputs_and_selected_make_attrs_and_rows ####################################
+# def product_item_fields_loop(g_hsh, i_hsh, rows, d_hsh, keys)
+#   inputs = product_fields_loop(g_hsh, d_hsh, keys)
+#   item_fields_loop(inputs, i_hsh, rows, d_hsh, keys)
+# end
+#
+# def product_fields_loop(g_hsh, d_hsh, keys, inputs=[])
+#   Product.dig_keys_with_end_val(h: g_hsh).each_with_object(inputs) do |args, inputs|
+#     k, t, t_type, f_name, f = input_vals(*args[0..-2].map!(&:underscore).append(args[-1]))
+#     tags_loop(k, f_name, f, d_hsh, keys) if f.tags
+#     if field_set?(t)
+#       product_fields_loop(f.g_hsh, d_hsh, keys, inputs)
+#     elsif !radio_button?(t)
+#       inputs.append(input_hsh(k, t, f_name, f))
+#     end
+#   end
+# end
+#
+# def item_fields_loop(inputs, i_hsh, rows, d_hsh, keys)
+#   inputs.each do |f_hsh|
+#     k, t, t_type, f_name, f = [:k,:t,:t_type,:f_name,:f_val].map{|key| f_hsh[key]}
+#     selected = i_hsh.dig(k, t_type, f_name)
+#     rows.append(f_hsh.merge!({:selected=> format_selected(selected,:id)}))
+#     tags_and_rows(k, f_name, selected, i_hsh, rows, d_hsh, keys) if selected
+#   end
+# end
+#
+# def tags_and_rows(k, f_name, selected, i_hsh, rows, d_hsh, keys)
+#   if selected.is_a?(String)
+#     Item.case_merge(d_hsh, selected, k, f_name)
+#   else
+#     tags_loop(k, format_fname(k, selected, f_name), selected, d_hsh, keys)
+#     product_item_fields_loop(selected.g_hsh, i_hsh, rows, d_hsh, keys) if field_set?(selected.type)
+#   end
+# end
+
+# def tags_loop(k, f_name, f, d_hsh, keys)
+#   keys.each_with_object(d_hsh) do |tag, d_hsh|
+#     Item.case_merge(d_hsh, f.tags[tag], k, tag, f_name) if f.tags&.has_key?(tag)
+#   end
+# end
+
+# def format_selected(selected, attr)
+#   return selected if selected.nil? || selected.is_a?(String)
+#   selected.public_send(attr)
+# end
+
+# def format_fname(k, selected, f_name)
+#   k == 'dimension' && field_set?(selected.type) ? selected.field_name : f_name
+# end
 
 # def show_product_group(fields, i_hsh, options, field_sets, input_group={:inputs=>[], :tag_hsh=>{}})
 # 	fields.each_with_object(input_group) do |f, input_group|

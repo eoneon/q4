@@ -81,26 +81,18 @@ class Item < ApplicationRecord
   end
 
   ##############################################################################
-  def unpacked_fields
-  	fieldables.each_with_object([]) do |f, set|
-  		set.push(f)
-  		set.push(*f.fieldables) if field_set?(f.type)
-  	end
-  end
-
-  def joined_field_sets
-  	field_sets.each_with_object([]) do|f,set|
-  		set.push(f)
-  		set.push(*f.field_sets) if f.field_sets.any?
-  	end
-  end
-
-  # def param_group
-  # 	return nil if !tags
-  # 	input_group = {:options=> options, :field_sets=> field_sets, :inputs=> []}
-  # 	input_group[:tag_hsh] = input_group.values.each_with_object({}) {|fields,h| fields.map{|f| tag_key_loop(*f.fattrs, f, h)}}
-  # 	input_group[:i_params] = config_item_params
-  # 	input_group
+  # def unpacked_fields
+  # 	fieldables.each_with_object([]) do |f, set|
+  # 		set.push(f)
+  # 		set.push(*f.fieldables) if field_set?(f.type)
+  # 	end
+  # end
+  #
+  # def joined_field_sets
+  # 	field_sets.each_with_object([]) do|f,set|
+  # 		set.push(f)
+  # 		set.push(*f.field_sets) if f.field_sets.any?
+  # 	end
   # end
 
   def param_group(input_group={:inputs=> []})
