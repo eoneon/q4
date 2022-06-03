@@ -99,10 +99,16 @@ module BatchCreate
   	self.save
   end
 
+  # def add_model_sku_product(product)
+  # 	add_product(product)
+  # 	self.csv_tags = form_and_data[-1]
+  # 	self.save
+  # end
+
   def add_model_sku_product(product)
-  	add_product(product)
-  	self.csv_tags = form_and_data[-1]
-  	self.save
+  	fields_and_tags = adds_product(product)
+  	# self.csv_tags = form_and_data[-1]
+  	# self.save
   end
 
   class_methods do
@@ -112,10 +118,15 @@ module BatchCreate
     	i.batch_loop_create_skus(skus[1..-1], sku_params) if skus[1..-1].any?
     end
 
+    # def model_sku(sku, sku_params, artist, product)
+    # 	i = new_sku(sku, sku_params, artist)
+    # 	i.add_model_sku_product(product) if product
+    # 	i
+    # end
+
     def model_sku(sku, sku_params, artist, product)
-    	i = new_sku(sku, sku_params, artist)
-    	i.add_model_sku_product(product) if product
-    	i
+        i = new_sku(sku, sku_params, artist)
+        product ? i.adds_product(product, :dup) : i
     end
 
     def new_sku(sku, sku_params, artist)

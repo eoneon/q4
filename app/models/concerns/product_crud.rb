@@ -12,13 +12,61 @@ module ProductCrud
     end
   end
 
-  def add_product(product)
+  # def add_product(product)
+  # 	add_obj(product)
+  # 	tags = add_default_product_fields(product.unpacked_fields)
+  # 	self.tags = tags
+  # 	self.save
+  # end
+  ##############################################################################
+
+  def adds_product(product, dup=nil)
   	add_obj(product)
-  	tags = add_default_product_fields(product.unpacked_fields)
-  	self.tags = tags
-  	self.save
+  	assign_fields_and_tags(get_default_product_fields(product.unpacked_fields))
+  	assign_cvtags_with_rows(form_and_data, dup)
   end
 
+  def assign_fields_and_tags(fields_and_tags)
+  	fields_and_tags[:fields].map{|f| assoc_unless_included(f)}
+  	self.tags = fields_and_tags[:tags]
+  end
+
+  def assign_cvtags_with_rows(form_and_data, dup)
+  	self.csv_tags = form_and_data[-1]
+  	self.save
+  	dup ? self : form_and_data[0]
+  end
+
+  # def adds_product(product)
+  #   add_obj(product)
+  #   fields_and_tags = get_default_product_fields(product.unpacked_fields)
+  #   fields_and_tags[:fields].map{|f| assoc_unless_included(f)}
+  #
+  #   self.tags = fields_and_tags[:tags]
+  #   self.csv_tags = form_and_data[-1]
+  #   self.save
+  #
+  #   fields_and_tags[:rows] = form_and_data[0]
+  #   fields_and_tags[:attrs] = form_and_data[1]
+  #
+  #   fields_and_tags
+  # end
+
+  def get_default_product_fields(fields)
+  	fields.each_with_object({:fields=>[], :tags=>{}}) do |f, fields_and_tags|
+  		k, t, f_name = *f.fattrs
+  		next if no_assocs?(t)
+  		get_default_fields_and_tags(k, t, f_name, f, fields_and_tags)
+  	end
+  end
+
+  def get_default_fields_and_tags(k, t, f_name, f_val, fields_and_tags)
+  	if f = default_field(k, t, f_val)
+  		fields_and_tags[:fields] << f
+  		add_tag_assoc(f.kind.underscore, t, f_name, f.id, fields_and_tags[:tags])
+  	end
+  end
+  ##############################################################################
   def add_default_product_fields(fields)
   	fields.each_with_object({}) do |f, tags|
   		k, t, f_name = *f.fattrs
@@ -37,17 +85,3 @@ module ProductCrud
     add_product(product)
   end
 end
-
-
-# def add_default(k, t, f_name, f, tags)
-# 	if selected = default_field(k, t, f)
-# 		add_field(k, selected.type.underscore, f_name, selected, tags)
-# 	end
-# end
-
-# def add_product(product)
-#   add_obj(product)
-#   self.tags = hsh_init(self.tags)
-#   add_default_fields(product.f_args(product.g_hsh))
-#   #new_product_group(product.unpacked_fields)
-# end
