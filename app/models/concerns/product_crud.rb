@@ -12,15 +12,9 @@ module ProductCrud
     end
   end
 
-  # def add_product(product)
-  # 	add_obj(product)
-  # 	tags = add_default_product_fields(product.unpacked_fields)
-  # 	self.tags = tags
-  # 	self.save
-  # end
   ##############################################################################
 
-  def adds_product(product, dup=nil)
+  def add_product(product, dup=nil)
   	add_obj(product)
   	assign_fields_and_tags(get_default_product_fields(product.unpacked_fields))
   	assign_cvtags_with_rows(form_and_data, dup)
@@ -31,26 +25,11 @@ module ProductCrud
   	self.tags = fields_and_tags[:tags]
   end
 
-  def assign_cvtags_with_rows(form_and_data, dup)
-  	self.csv_tags = form_and_data[-1]
+  def assign_cvtags_with_rows(form_n_data, dup=nil)
+    self.csv_tags = form_n_data[-1]
   	self.save
-  	dup ? self : form_and_data[0]
+  	dup ? self : form_n_data[0]
   end
-
-  # def adds_product(product)
-  #   add_obj(product)
-  #   fields_and_tags = get_default_product_fields(product.unpacked_fields)
-  #   fields_and_tags[:fields].map{|f| assoc_unless_included(f)}
-  #
-  #   self.tags = fields_and_tags[:tags]
-  #   self.csv_tags = form_and_data[-1]
-  #   self.save
-  #
-  #   fields_and_tags[:rows] = form_and_data[0]
-  #   fields_and_tags[:attrs] = form_and_data[1]
-  #
-  #   fields_and_tags
-  # end
 
   def get_default_product_fields(fields)
   	fields.each_with_object({:fields=>[], :tags=>{}}) do |f, fields_and_tags|
@@ -66,14 +45,8 @@ module ProductCrud
   		add_tag_assoc(f.kind.underscore, t, f_name, f.id, fields_and_tags[:tags])
   	end
   end
+
   ##############################################################################
-  def add_default_product_fields(fields)
-  	fields.each_with_object({}) do |f, tags|
-  		k, t, f_name = *f.fattrs
-  		next if no_assocs?(t)
-  		add_default(k, t, f_name, f, tags)
-  	end
-  end
 
   def remove_product(product)
     remove_fieldables
@@ -85,3 +58,11 @@ module ProductCrud
     add_product(product)
   end
 end
+
+# def add_default_product_fields(fields)
+# 	fields.each_with_object({}) do |f, tags|
+# 		k, t, f_name = *f.fattrs
+# 		next if no_assocs?(t)
+# 		add_default(k, t, f_name, f, tags)
+# 	end
+# end

@@ -84,10 +84,6 @@ module Crudable
     public_send(assoc)
   end
 
-  # def remove_hmt(obj, join_assoc=:item_groups)
-  #   self.public_send(join_assoc).where(target_id: obj.id, target_type: obj.class.name).first.destroy
-  # end
-
   # ############################################################################
 
   def find_target(target_type, target_id)
@@ -99,3 +95,8 @@ module Crudable
   end
 
 end
+
+
+# def remove_hmt(obj, join_assoc=:item_groups)
+#   self.public_send(join_assoc).where(target_id: obj.id, target_type: obj.class.name).first.destroy
+# end

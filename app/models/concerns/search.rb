@@ -77,7 +77,6 @@ module Search
 
     def sort_value(val)
       v = val==nil || is_numeric?(val) ? val.to_i : val
-      puts "sort_value: #{v}"
       v
     end
 
