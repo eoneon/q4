@@ -97,6 +97,9 @@ module Search
       "#{hstore} -> \'#{k}\' = \'#{v}\'"
     end
 
+    def assoc_query(hstore, *keys)
+      where("#{hstore}?& ARRAY[:keys]", keys: keys)
+    end
     # sort hstore ##############################################################
     def order_hstore_query(keys, hstore)
       keys.map{|k| order_hstore_params(k, hstore)}.join(', ')

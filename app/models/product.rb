@@ -20,9 +20,12 @@ class Product < ApplicationRecord
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
   def config_form_group(f_grp)
+    inputs = f_grp[:inputs]
+    puts "inputs=>#{inputs}"
+    f_grp[:inputs]=[]
   	product_attrs(f_grp[:context], f_grp[:attrs], tags)
   	inputs_and_tags = inputs_and_tag_hsh(f_grp)
-  	f_grp[:rows] = build_form_rows(inputs_and_tags[:inputs].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
+  	f_grp[:rows] = build_form_rows(inputs_and_tags[:inputs].concat(inputs).group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
   	f_grp[:d_hsh] = inputs_and_tags[:tag_hsh]
   	f_grp
   end
@@ -179,6 +182,10 @@ class Product < ApplicationRecord
     end
 
     # SEEDING METHODS ##########################################################
+    # def update_assocs
+    # 	all.map{|p| p.fieldables.map{|ff| ff.update_field_assocs(*f.fattrs.join('::'))}}
+    # end
+
     def seed(store)
       Medium.class_group('ProductGroup').each_with_object(store) do |c, store|
         c.product_group(store)

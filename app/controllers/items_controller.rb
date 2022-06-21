@@ -8,7 +8,6 @@ class ItemsController < ApplicationController
     @rows = @item.update_product_case('product', @item.product, params[:item][:product_id])
     @titles = Artist.titles(@item.artist)
 
-
     @item.save
 
     respond_to do |format|

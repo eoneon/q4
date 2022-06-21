@@ -25,10 +25,12 @@ module Fieldable
     field_set?(t) && product_class?
   end
 
+  # def fieldables
+  # 	FieldItem.where(id: item_groups.where(base_type: 'FieldItem').order(:sort).pluck(:target_id)).to_a
+  # end
   def fieldables
-  	FieldItem.where(id: item_groups.where(base_type: 'FieldItem').order(:sort).pluck(:target_id)).to_a
+    item_groups.where(base_type: 'FieldItem').order(:sort).includes(:target).map(&:target)
   end
-
   def grouped_fields
     grouped_hsh(enum: unpacked_fields)
   end

@@ -28,6 +28,15 @@ class Category
         end
       end
 
+      class Unique < Original
+        def self.name_values
+          {category_search: 'Unique', tagline: 'Unique (UNQ)', body: 'unique (UNQ)'}
+        end
+        
+        def self.targets
+        end
+      end
+
       class OneOfAKind < Original
         def self.targets
         end

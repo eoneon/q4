@@ -65,7 +65,7 @@ Rails.application.routes.draw do
   #   end
   # end
 
-  root to: 'product_items#index'
+  root to: 'invoices#index'
 end
 
 # resources :items, only: [:search] do

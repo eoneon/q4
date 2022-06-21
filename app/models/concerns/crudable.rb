@@ -28,6 +28,12 @@ module Crudable
     self.save
   end
 
+  def update_field_assocs(assoc_key)
+  	return if field_assocs&.has_key?(assoc_key)
+  	!field_assocs ? self.field_assocs = {assoc_key=>true} : self.field_assocs[assoc_key] = true
+  	self.save
+  end
+  
   def assign_or_merge(h, h2)
     h.nil? ? h2 : h.merge(h2)
   end

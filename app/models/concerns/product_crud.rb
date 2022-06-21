@@ -9,6 +9,7 @@ module ProductCrud
       when :add; add_product(new_val(t, new_id))
       when :remove; remove_product(old_val)
       when :replace; replace_product(new_val(t, new_id), old_val)
+      when :skip; assign_cvtags_with_rows(form_and_data)
     end
   end
 

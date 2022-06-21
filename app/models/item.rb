@@ -85,6 +85,7 @@ class Item < ApplicationRecord
   def param_group(input_group={:inputs=> []})
     input_group[:tag_hsh] = options.each_with_object({}) {|opt,tag_hsh| tag_key_loop(*opt.fattrs, opt, tag_hsh)}
     input_group[:i_params] = config_item_params
+    merge_tag_attrs(input_group)
     input_group
   end
 

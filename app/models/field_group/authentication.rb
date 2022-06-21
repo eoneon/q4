@@ -49,7 +49,7 @@ class Authentication
 
       class StandardSignature < Signature
         def self.targets
-          ['hand signed', 'hand signed inverso', 'plate signed', 'authorized', 'estate signed', 'estate signed inverso', 'unsigned']
+          ['hand signed', 'hand signed inverso', 'hand signed and thumbprinted', 'hand signed and thumbprinted inverso', 'plate signed', 'authorized', 'estate signed', 'estate signed inverso', 'unsigned']
         end
       end
 

@@ -87,54 +87,6 @@ module FieldSeed
   end
 end
 
-##############################################################################
-##############################################################################
-
-# def field_group(m, store)
-#   field_data(m).each_with_object(store) do |f_hsh, store|
-#     kind, type, f_name = [:kind,:type,:f_name].map{|k| f_hsh[:attrs][k].to_sym}
-#     add_field_and_merge(to_class(type), kind, type, f_name, f_hsh[:tags], f_hsh[:targets], store)
-#     #merge_origin(f_hsh[:origin], :origin, kind, type, f_name, store)
-#     #merge_assocs(f_hsh[:assocs], :assocs, kind, type, f_name, store)
-#   end
-# end
-
-##############################################################################
-##############################################################################
-
-# def merge_origin(origin, k, kind, type, f_name, store)
-#   case_merge(store, origin, k, kind, type, f_name) if origin&.any?
-# end
-#
-# def merge_assocs(assoc_set, k, kind, type, f_name, store)
-#   assoc_set.each_with_object(store) {|assoc, store| case_merge(store, [f_name], k, kind, type, assoc)} if assoc_set&.any?
-# end
-
-# def product_vals(p, tag)
-#   p.select{|f| f.tags&.has_key?(tag)}
-# end
-
 ############################################################################
+#f.tags&.has_key?(tag)}
 ############################################################################
-
-# def origin_hsh(o_hsh, store)
-#   dig_keys_with_end_val(o_hsh).each_with_object([]) do |vals, set|
-#     set.append({f: store.dig(*vals[0..-2]), set:[], group:[], assocs: vals[-1]})
-#   end
-# end
-
-# def assoc_hsh(assoc, store)
-#   dig_keys_with_end_val(store[assoc]).each_with_object({}) do |vals, a_hsh|
-#     a_key, f_names = vals.pop(2)
-#     f_names.map{|f_name| case_merge(a_hsh, [store.dig(*vals[0..1].append(f_name))], assoc, a_key)}
-#   end
-# end
-
-#p_hsh: p_hsh, a_hsh: assoc_hsh[a_key], assocs: h[:assocs]
-# def assign_set_or_group(p_hsh, a_key, a_hsh, assocs)
-#   assocs.each_with_object(p_hsh) do |assoc, p_hsh|
-#     if a_hsh&.has_key?(assoc)
-#       a_key == :set ? a_hsh[assoc].map{|f| p_hsh[a_key].append(f)} : p_hsh[a_key] << a_hsh[assoc]
-#     end
-#   end
-# end

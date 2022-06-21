@@ -43,7 +43,7 @@ module Description
 
   def edition_value(sub_hsh)
     if sub_hsh.keys.count == 2
-      sub_hsh.values.join('/')
+      sub_hsh.values.sort.join('/')
     elsif sub_hsh.keys.include?('edition_size')
       "out of #{sub_hsh['edition_size']}"
     end

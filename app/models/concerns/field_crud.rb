@@ -185,7 +185,14 @@ module FieldCrud
   end
 
   def tag_key_loop(k, t, f_name, f, tag_hsh)
-  	f.tags.map {|tag_key, v| Item.case_merge(tag_hsh, v, k, tag_key, f_name) if field_tag_keys.include?(tag_key)} if f.tags
+    f.tags.map {|tag_key, v| Item.case_merge(tag_hsh, v, k, tag_key, f_name)} if f.tags
+  end
+
+  def merge_tag_attrs(input_group)
+  	input_group[:i_params].each do |k,v|
+  		k, t, f_name = k.split('::')
+  		Item.case_merge(input_group[:tag_hsh], v, k, f_name) if tag_attr?(t)
+  	end
   end
 
   def field_tag_keys
