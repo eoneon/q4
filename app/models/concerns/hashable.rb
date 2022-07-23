@@ -4,8 +4,12 @@ module Hashable
   extend ActiveSupport::Concern
 
   # parameter methods  #########################################################
-  def defualt_hsh(*keys)
-    keys.each_with_object({}) {|k,h| h[k]=nil}
+  # def defualt_hsh(*keys)
+  #   keys.each_with_object({}) {|k,h| h[k]=nil}
+  # end
+
+  def default_hsh(*keys)
+    keys.each_with_object({}) {|k,h| h[k]=""}
   end
 
   def trans_args(arg_list)
@@ -64,6 +68,14 @@ module Hashable
     end
   end
 
+  def slice_valid_subhsh!(h,*keys)
+    new_hsh = h.select{|k,v| keys.include?(k) && v.present?}
+    if new_hsh.any?
+      new_hsh.keys.map{|k| h.delete(k)}
+      new_hsh
+    end
+  end
+
   def hsh_slice_and_delete(h,k)
     if v = h.dig(k)
       h.delete(k)
@@ -103,7 +115,6 @@ module Hashable
   def slice_and_transfer(h:,h2:,keys:,k:nil)
     if hsh = slice_vals_and_delete(h,keys)
       k ? h2[k] = hsh : h2[keys[0]] = hsh[keys[0]]
-      # h2[(k ? k : keys[0])] = hsh
     end
   end
 
@@ -222,6 +233,15 @@ module Hashable
 
     def include_pat?(str, pat)
       str.index(/#{pat}/)
+    end
+
+    def clean_hsh(hsh)
+    	hsh.reject! do |k,v|
+    		v.blank? || v.class==Hash && v.all?{|key, val| val.blank?}
+    		if v.class==Hash && v.any?{|key, val| val.present?}
+    			clean_hsh(v)
+    		end
+    	end
     end
 
   end

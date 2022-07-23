@@ -24,7 +24,6 @@ module Description
   end
 
   def animator_seal_params(context, store, v, k, tag_key)
-    puts "animator_seal_params: #{v}"
     v = v+'.' unless context[:sports_seal]
     Item.case_merge(store, v, k, tag_key)
   end
@@ -105,9 +104,43 @@ module Description
     end
   end
 
+  def product_type
+    {
+      compound_kinds: [[:embellishing, :category], [:leafing, :remarque], [:numbered, :signed], [:animator_seal, :sports_seal], [:seal, :certificate]],
+      category: [['Limited Edition']], medium: [['Giclee'],['Hand Pulled']], material: [['Gallery Wrapped'], ['Rice'], ['Paper']], mounting: [['Framed']], signature: [['Unsigned'],['Plate Signed', 'Signed'],['Signed'],['Signature', 'Signed']], disclaimer: [['Disclaimer']],
+      csv: {
+        export: %w[sku artist artist_id title retail width height frame_width frame_height tagline property_room description art_type art_category material medium qty],
+        item_product: %w[title width height frame_width frame_height tagline description tagline_search invoice_tagline mounting_search measurements item_size]
+      },
+
+      flat_art: {
+        present_keys: %w[embellishing category medium material numbering leafing remarque date seal animator_seal sports_seal certificate],
+        tagline: {
+          order: %w[artist title mounting embellishing category medium material dimension leafing remarque numbering signature animator_seal sports_seal certificate disclaimer],
+          punct: {
+            media: %w[category medium sculpture_type material leafing remarque dimension],
+            end_key: %w[disclaimer unsigned]
+          }
+        },
+
+        body: {
+          order: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
+          punct: {
+            media: %w[text_after_title category numbering medium sculpture_type material leafing remarque artist],
+            end_key: %w[dated numbering signature]
+          }
+        }
+      }
+    }
+  end
+
   def contexts
     {
-      present_keys: %w[artist embellishing category medium sculpture_type material leafing remarque date seal certificate], #
+      present_keys: %w[embellishing category medium material numbering sculpture_type leafing remarque date seal animator_seal sports_seal certificate],
+      #present_keys: %w[category medium sculpture_type leafing remarque certificate],
+      dependent_kinds: {
+        LimitedEdition: ['numbering'], Dimension: ['dimension'], Disclaimer: ['disclaimer'], Authentication: %w[dated verification animator_seal sports_seal], Submedium: %w[leafing remarque]
+      },
       compound_kinds: [[:embellishing, :category], [:leafing, :remarque], [:numbered, :signed], [:animator_seal, :sports_seal], [:seal, :certificate]],
       related_args: [
         {k: 'material', related: 'mounting', d_tag: 'material_dimension', end_key: 'body'},
@@ -119,7 +152,8 @@ module Description
 
       tagline: {
         keys: %w[artist title mounting embellishing category medium sculpture_type material dimension leafing remarque numbering signature animator_seal sports_seal certificate disclaimer],
-        vals: [['Limited Edition'],['Giclee'],['Hand Pulled'],['Unsigned'],['Plate Signed', 'Signed'],['Signed'],['Signature', 'Signed'],['Disclaimer']], #['Gallery Wrapped'],['Paper'],
+        category: [['Limited Edition']], medium: [['Giclee'],['Hand Pulled']], material: [['Gallery Wrapped'], ['Rice'], ['Paper']], mounting: [['Framed']], signature: [['Unsigned'],['Plate Signed', 'Signed'],['Signed'],['Signature', 'Signed']], disclaimer: [['Disclaimer']],
+        vals: [['Limited Edition'], ['Giclee'],['Hand Pulled'], ['Unsigned'],['Plate Signed', 'Signed'],['Signed'],['Signature', 'Signed'],['Disclaimer']], #['Gallery Wrapped'],['Paper'],
         media: %w[category medium sculpture_type material leafing remarque dimension],
         authentication: [:disclaimer, :unsigned]
       },
@@ -142,9 +176,12 @@ module Description
         authentication: %w[dated numbering signature]
       },
       csv: {
-        export: %w[sku artist artist_id title retail width height frame_width frame_height medium material tagline property_room description art_type art_category item_type qty],
+        export: %w[sku artist artist_id title retail width height frame_width frame_height tagline property_room description art_type art_category material medium qty],
         item_product: %w[title width height frame_width frame_height tagline description tagline_search invoice_tagline mounting_search measurements item_size]
       }
+      # grammar: {
+      #   %w[leafing remarque numbering signature dated]
+      # }
     }
   end
 

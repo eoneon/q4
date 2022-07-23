@@ -185,7 +185,11 @@ module FieldCrud
   end
 
   def tag_key_loop(k, t, f_name, f, tag_hsh)
-  	f.tags.map {|tag_key, v| Item.case_merge(tag_hsh, v, k, tag_key, f_name) if field_tag_keys.include?(tag_key)} if f.tags
+  	f.tags.each_with_object(tag_hsh) {|(tag_key, v), tag_hsh| Item.case_merge(tag_hsh, v, k, tag_key, f_name) if field_tag_keys.include?(tag_key)} if f.tags
+  end
+
+  def tag_hsh_loop(f, tag_hsh)
+  	f.tags.select{|tag_key, tag_val| field_tag_keys.include?(tag_key)}.map {|tag_key, tag_val| Item.case_merge(tag_hsh, tag_val, f.kind.underscore, tag_key)} if f.tags
   end
 
   def field_tag_keys

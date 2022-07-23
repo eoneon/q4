@@ -12,6 +12,44 @@ class Authentication
     [5, %w[dated signature seal certificate verification]]
   end
 
+  def self.config_auth_params(k, v, auth_hsh, context, d_hsh)
+  	d_hsh.merge!({k=> auth_hsh.transform_values!{|tag_val| "#{v} (#{tag_val})"}})
+    context[k.to_sym] = true
+  end
+
+  def self.config_authenication(k, auth_hsh, input_group, context, d_hsh)
+  	tb_hsh = Item.new.slice_valid_subhsh!(auth_hsh, *Item.new.tb_keys)
+    if %w[dated verification].include?(k) && auth_hsh.any?
+      d_hsh.merge!({k=> auth_hsh.transform_values!{|tag_val| "#{v} (#{tag_val})"}})
+      context[k.to_sym] = true
+    elsif %w[animator_seal sports_seal].include?(k)
+      config_seal(k, tb_hsh, context, d_hsh)
+    end
+  end
+
+  def self.config_seal(k, tb_hsh, context, d_hsh)
+  	d_hsh.merge!({k=> tb_hsh.transform_values!{|tag_val| config_seal_value(k, tag_val, context)}})
+  end
+
+  # def self.config_seal_params(seal_key, seal_hsh, context, d_hsh)
+  # 	seal_hsh.each do |tag_key, tag_val|
+  #     Item.case_merge(d_hsh, config_seal_value(seal_key, tag_val, context), seal_key, tag_key)
+  #   end
+  # end
+
+  def self.config_seal_value(seal_key, tag_val, context)
+  	seal_key=='animator_seal' ? config_animator_seal_value(tag_val, context) : config_sports_seal_value(tag_val, context)
+  end
+
+  def self.config_animator_seal_value(tag_val, context)
+    !context[:sports_seal] ? tag_val+'.' : tag_val
+  end
+
+  def self.config_sports_seal_value(tag_val, context)
+  	tag_val = tag_val.sub('This piece bears', 'and') if context[:animator_seal]
+    tag_val+'.'
+  end
+
   class SelectField < Authentication
     class Dated < SelectField
       def self.target_tags(f_name)

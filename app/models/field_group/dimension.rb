@@ -7,6 +7,95 @@ class Dimension
     {kind: 0, type: 1, f_name: -1}
   end
 
+  def self.material_units
+    %w[width height depth diameter]
+  end
+
+  def self.mounting_units
+    %w[mounting_width mounting_height]
+  end
+
+  def self.tags
+    %w[material_dimension mounting_dimension]
+  end
+
+  def self.related_kinds
+    %w[material mounting dimension]
+  end
+
+  # def self.measurement_hsh(tag_hsh, selected, k, f_name, key='measurements')
+  # 	if dimension_tag = dimension_tag(f_name)
+  # 		Item.case_merge(tag_hsh, selected, 'related_params', k, dimension_tag, key, f_name)
+  # 	end
+  # end
+  def self.config_dimension(k, dimension_hsh, input_group, context, d_hsh)
+    config_dimension_hsh(dimension_hsh, context, input_group[:attrs])
+    Dimension.new.tb_dimensions(k, *Dimension.tags.map{|key| dimension_hsh.dig(key)}, d_hsh)
+  end
+
+  def self.measurement_hsh(tag_hsh, selected, k, f_name, key='measurements')
+    if dimension_tag = dimension_tag(f_name)
+      Item.case_merge(tag_hsh, selected, k, dimension_tag, key, f_name)
+    end
+  end
+
+  def self.dimension_tag(f_name)
+  	if material_units.include?(f_name)
+  		tags[0]
+  	elsif mounting_units.include?(f_name)
+  		tags[1]
+  	end
+  end
+
+  def self.config_dimension_hsh(dimension_hsh, context, attrs)
+  	Dimension.tags.each_with_object(dimension_hsh) do |dimension_key|
+  		if measurement_hsh = dimension_hsh.dig(dimension_key, 'measurements')
+  			dimensions = Dimension.public_send("#{dimension_key.split('_')[0]}_units").each_with_object({}){|unit_key, hsh| hsh[unit_key] = measurement_hsh[unit_key]}.reject{|k,v| v.blank?}
+        unit_keys, unit_values = dimensions.keys, dimensions.values
+        format_measurement_values(dimension_key, unit_keys, unit_values, dimension_hsh, context, attrs)
+  		end
+  	end
+  end
+
+  def self.format_measurement_values(dimension_key, unit_keys, unit_values, dimension_hsh, context, attrs)
+  	if valid_dimensions = valid_dimension_values(unit_keys, unit_values)
+  		dimension_hsh[dimension_key]['item_size'] = valid_dimensions.map(&:to_i).inject(:*)
+  		dimension_hsh[dimension_key]['measurements'] = format_measurements(unit_values)
+  		dimension_attrs(dimension_key, valid_dimensions, context[:framed], attrs)
+  	end
+  end
+
+  def self.valid_dimension_values(unit_keys, unit_values)
+  	if unit_keys.count==1 && unit_keys[0]=='diameter'
+  		[unit_values[0], unit_values[0]]
+  	elsif unit_values.count>=2
+  		unit_values[0..1]
+  	end
+  end
+
+  def self.dimension_attrs(dimension_key, valid_dimensions, framed, attrs)
+    if units = attr_keys(dimension_key, framed)
+      units.each_with_index{|unit,i| attrs[unit] = valid_dimensions[i]}
+    end
+  end
+
+  def self.attr_keys(dimension_key, framed)
+  	if dimension_key=='material_dimension'
+  		%w[width height]
+  	elsif dimension_key=='mounting_dimension' && framed
+  		%w[frame_width frame_height]
+  	end
+  end
+
+  def self.format_measurements(dims)
+    dims.map{|i| i+"\""}.join(' x ')
+  end
+
+  def self.item_size(dims, dim_name=nil)
+    dims = dims.map(&:to_i)
+    dim_name == 'diameter' ? dims[0]**2 : dims.inject(:*)
+  end
+
   class FieldSet < Dimension
     class FlatArt < FieldSet
       def self.name_values
@@ -107,6 +196,122 @@ class Dimension
 
   end
 
+  def config_dimension_params(k, dimension_hsh, d_hsh, context, attrs)
+    config_dimension_hsh(dimension_hsh, context, attrs)
+    tb_dimensions(k, *Dimension.tags.map{|key| dimension_hsh.dig(key)}, d_hsh)
+  end
+
+  ##############################################################################
+  def config_related_params(related_hsh, d_hsh, context, attrs)
+  	related_hsh.keys.each do |k|
+  		if k_hsh = related_hsh.dig(k)
+  			config_param(k, k_hsh, d_hsh, context, attrs)
+  			if tagline_val = k_hsh.dig('tagline')
+  				config_context(k, tagline_val, context)
+  			end
+  		end
+  	end
+  end
+
+  # def config_related_params(related_hsh, d_hsh, context, attrs)
+  # 	related_hsh.each_with_object(d_hsh) do |(k, k_hsh), d_hsh|
+  # 		config_param(k, k_hsh, d_hsh)
+  # 		if tagline_val = k_hsh.dig('tagline')
+  # 			config_context(k, tagline_val, context)
+  # 		end
+  # 	end
+  # end
+  def config_param(k, k_hsh, d_hsh, context, attrs)
+  	if k == 'dimension'
+  		config_dimension_hsh(k_hsh, context, attrs)
+  		tb_dimensions(k, *Dimension.tags.map{|key| k_hsh.dig(key)}, d_hsh)
+  	else
+  		d_hsh[k] = k_hsh
+  	end
+  end
+  #b
+  # def config_param(k, k_hsh, d_hsh)
+  # 	if k == 'dimension'
+  # 		config_dimension_hsh(k_hsh)
+  # 		tb_dimensions(k, *Dimension.tags.map{|key| k_hsh.dig(key)}, d_hsh)
+  # 	else
+  # 		d_hsh[k] = k_hsh
+  # 	end
+  # end
+  def config_dimension_hsh(dimension_hsh, context, attrs)
+  	Dimension.tags.each_with_object(dimension_hsh) do |dimension_key|
+  		if measurement_hsh = dimension_hsh.dig(dimension_key, 'measurements')
+  			dimensions = Dimension.public_send("#{dimension_key.split('_')[0]}_units").each_with_object({}){|unit_key, hsh| hsh[unit_key] = measurement_hsh[unit_key]}.reject{|k,v| v.blank?}
+        unit_keys, unit_values = dimensions.keys, dimensions.values
+        format_measurement_values(dimension_key, unit_keys, unit_values, dimension_hsh, context, attrs)
+  		end
+  	end
+  end
+
+  def format_measurement_values(dimension_key, unit_keys, unit_values, dimension_hsh, context, attrs)
+  	if valid_dimensions = valid_dimension_values(unit_keys, unit_values)
+  		dimension_hsh[dimension_key]['item_size'] = valid_dimensions.map(&:to_i).inject(:*)
+  		dimension_hsh[dimension_key]['measurements'] = format_measurements(unit_values)
+  		dimension_attrs(dimension_key, valid_dimensions, context[:framed], attrs)
+  	end
+  end
+
+  def valid_dimension_values(unit_keys, unit_values)
+  	if unit_keys.count==1 && unit_keys[0]=='diameter'
+  		[unit_values[0], unit_values[0]]
+  	elsif unit_values.count>=2
+  		unit_values[0..1]
+  	end
+  end
+
+  def dimension_attrs(dimension_key, valid_dimensions, framed, attrs)
+    if units = attr_keys(dimension_key, framed)
+      units.each_with_index{|unit,i| attrs[unit] = valid_dimensions[i]}
+    end
+  end
+
+  def attr_keys(dimension_key, framed)
+  	if dimension_key=='material_dimension'
+  		%w[width height]
+  	elsif dimension_key=='mounting_dimension' && framed
+  		%w[frame_width frame_height]
+  	end
+  end
+
+  #c
+  def config_context(k, tagline_val, context)
+  	if context_key = related_context(k, tagline_val)
+  		context[context_key] = true
+  	end
+  end
+
+  # def config_context(k, tagline_val, context)
+  #   context[k.to_sym] = true unless k=='mounting'
+  #   if context_key = related_context(k, tagline_val)
+  #     context[context_key] = true
+  #   end
+  # end
+
+  #d
+  def related_context(k, tagline_val)
+  	if i = ['Framed', 'Gallery Wrapped', 'Rice', 'Paper'].detect{|i| tagline_val.index(i)}
+  		Item.new.symbolize(i)
+  	end
+  end
+
+  # def config_dimension_hsh(dimension_hsh)
+  # 	Dimension.tags.each_with_object(dimension_hsh) do |k|
+  # 		if measurement_hsh = dimension_hsh.dig(k, 'measurements')
+  #       keys, values = Dimension.public_send("#{k.split('_')[0]}_units").each_with_object({}){|(key,val), hsh| hsh[key] = measurement_hsh[key]}.to_a
+  #       dimension_hsh[k]['item_size'] = item_size(values[0..1], (keys.count==1 && keys[0]=='diameter' ? 'diameter' :nil))
+  # 			dimension_hsh[k]['measurements'] = format_measurements(values)
+  # 		end
+  # 	end
+  # end
+
+  #dims.map(&:to_i).inject(:*)
+  ##############################################################################
+
   def material_mounting_dimension_params(k_hsh, f_grp, args)
     if args[:k]!='dimension'
       material_mounting_params(args[:k], k_hsh, args[:related], args[:d_tag], args[:end_key], f_grp)
@@ -116,7 +321,8 @@ class Dimension
   end
 
   def material_mounting_params(k, k_hsh, related, d_tag, end_key, f_grp)
-    transfer_description_vals(k, flatten_hsh(k_hsh), f_grp[:attrs], f_grp[:store])
+    #transfer_description_vals(k, flatten_hsh(k_hsh), f_grp[:attrs], f_grp[:store])
+    transfer_description_vals(k, k_hsh, f_grp[:attrs], f_grp[:store])
     if sub_tag = k_hsh.dig(d_tag)
       Item.case_merge(f_grp[:d_hsh], sub_tag, related, d_tag, end_key)
     end
