@@ -81,211 +81,13 @@ class Item < ApplicationRecord
   end
 
   ##############################################################################
-  #############################################################
-  def init_input_group(fields, input_group={:param_hsh=>{}, :d_hsh=>{}, :context=>{}, :inputs=>[], :attrs=>{}})
-    tags.each_with_object (input_group) {|(key, selected), hsh| Item.case_merge(input_group, (tag_attr?(key.split('::')[1]) ? selected : fields.detect{|f| f.id==(selected.to_i)}), :param_hsh, *key.split('::'))}
-  end
 
-  def config_inputs_and_d_hsh(fields:nil, input_group:nil)
-  	(fields ? fields : product.unpacked_fields).each_with_object(input_group ? input_group : init_input_group(fieldables)) do |f, input_group|
-      k, t, f_name = f.fattrs
-      tb_tags_from_field(input_group[:d_hsh], f, k)
-  		if field_set?(t)
-  			config_inputs_and_d_hsh(fields: f.fieldables, input_group: input_group)
-  		elsif !no_assocs?(t)
-  			push_input_and_config_selected(k, t, f_name, f, input_group)
-      elsif no_assocs?(t)
-        input_group[:context][k.to_sym] = true if contexts[:present_keys].include?(k)
-  		end
-  	end
-  end
-
-
-  # def config_inputs_and_d_hsh(fields:nil, input_group:nil)
-  # 	(fields ? fields : product.unpacked_fields).each_with_object(input_group ? input_group : init_input_group(fieldables)) do |f, input_group|
-  #     tb_tags_from_field(input_group[:d_hsh], f, f.kind.underscore)
-  # 		if field_set?(f.type)
-  # 			config_inputs_and_d_hsh(fields: f.fieldables, input_group: input_group)
-  # 		elsif !no_assocs?(f.type)
-  # 			push_input_and_config_selected(*f.fattrs, f, input_group)
-  #     elsif no_assocs?(f.type)
-  #       input_group[:context][f.kind.underscore.to_sym] = true if contexts[:present_keys].include?(f.kind.underscore)
-  # 		end
-  # 	end
-  # end
-
-  def push_input_and_config_selected(k, t, f_name, f, input_group)
-  	input_group[:inputs] << f_hsh(k, t, f_name, f)
-  	if selected = input_group[:param_hsh].dig(k, t_type(t), f_name)
-      context_from_selected(k, t, f_name, selected, input_group[:context])
-  		input_group[:inputs][-1][:selected] = format_selected(t, selected)
-  		tag_attr?(t) ? selected_tag_attr(input_group[:d_hsh], selected, k, f_name) : selected_field(input_group, selected, *selected.fattrs)
-  	end
-  end
-
-  # def update_prev_kind(k, input_group)
-  #   if !input_group[:prev_kind]
-  #     input_group[:prev_kind] = k
-  #   elsif input_group[:prev_kind] != k
-  #     #puts "2-k=>#{k}, 2-prev_kind=>#{input_group[:prev_kind]}"
-  #     update_prev_kind_case(input_group[:prev_kind], tb_keys, input_group[:context], input_group[:d_hsh])
-  #   	input_group[:prev_kind] = k
-  #     #puts "d_hsh=>#{input_group[:d_hsh]}"
+  # def merge_tag_hsh(i_params)
+  #   i_params.each_with_object({}) do |(k,v), tag_hsh|
+  #   	k,t,f_name = k.split('::')
+  #   	Item.case_merge(tag_hsh, v, k, t, f_name) if tag_attr?(t)
   #   end
   # end
-
-  # def update_prev_kind_case(k, tb_keys, context, d_hsh)
-  #   puts "d_hsh[k]=>#{d_hsh[k]}"
-  # 	case k
-  # 	when 'numbering'; LimitedEdition.config_numbering_params(k, tb_keys, context, d_hsh)
-  # 	end
-  # end
-
-  def selected_tag_attr(d_hsh, selected, k, f_name)
-    if k=='dimension'
-      Dimension.measurement_hsh(d_hsh, selected, k, f_name)
-    else
-      Item.case_merge(d_hsh, selected, k, f_name)
-    end
-  end
-
-  def selected_field(input_group, selected, k, t, f_name)
-  	tags_from_selected_field(input_group[:d_hsh], input_group[:context], selected, k, t, f_name) if selected.tags
-  	config_inputs_and_d_hsh(fields: selected.fieldables, input_group: input_group) if field_set?(t)
-  end
-
-  def context_from_selected(k, t, f_name, selected, context)
-  	context[k.to_sym] = true if contexts[:present_keys].include?(k)
-    context[:valid] = true if %w[medium sculpture_type].include?(k)
-  	LimitedEdition.numbering_context(f_name, context) if k == 'numbering'
-  	return if tag_attr?(t) || selected.tags.blank?
-  	if tag_val = selected.tags.dig('tagline')
-  		set_tagline_vals_context(k, tag_val, context)
-  	end
-  end
-
-  # def tags_from_selected_field(d_hsh, context, selected, k, t, f_name)
-  # 	if Dimension.related_kinds.include?(k)
-  # 		related_field_params(d_hsh, selected, k, t, f_name)
-  # 	else
-  # 		tb_tags_from_field(d_hsh, selected, k)
-  # 	end
-  # end
-
-  def tags_from_selected_field(d_hsh, context, selected, k, t, f_name)
-    related_field_params(d_hsh, selected, k, t, f_name) if Dimension.related_kinds.include?(k)
-  	tb_tags_from_field(d_hsh, selected, k) unless k=='dimension'
-  end
-
-  def tb_tags_from_field(d_hsh, f, k)
-    (%w[material_mounting mounting_search] + tb_keys).map {|tag_key| Item.case_merge(d_hsh, f.tags[tag_key], k, tag_key)} if f.tags
-  end
-
-  # def related_field_params(d_hsh, f, k, t, f_name, top_key='related_params')
-  # 	f.tags.select{|k,v| (tb_keys + %w[material_mounting mounting_search] + Dimension.tags).include?(k) && v != 'n/a'}.each do |tag_key, tag_val|
-  # 		keys = Dimension.tags.include?(tag_key) ? [top_key, 'dimension', tag_key, 'tag'] : [top_key, k, tag_key]
-  # 		Item.case_merge(d_hsh, tag_val, *keys)
-  # 	end
-  # end
-
-  def related_field_params(d_hsh, f, k, t, f_name)
-  	f.tags.select{|k,v| Dimension.tags.include?(k) && v != 'n/a'}.each do |tag_key, tag_val|
-  		Item.case_merge(d_hsh, tag_val, 'dimension', tag_key, 'tag')
-  	end
-  end
-
-  def format_selected(t, selected)
-  	tag_attr?(t) ? selected : selected.id
-  end
-  #############################################################
-  # def config_params
-  # 	tags.select{|k,v| tag_attr?((k.split('::')[1]))}.each_with_object ({:inputs=>[]}) do |(key, val), hsh|
-  # 		Item.case_merge(hsh, val, :param_hsh, *key.split('::'))
-  # 		Item.case_merge(hsh, val, :tag_hsh, key.split('::')[0], key.split('::')[-1])
-  # 	end
-  # end
-
-
-  # def config_params
-  # 	fields = fieldables
-  # 	tags.each_with_object ({:param_hsh=>{}, :tag_hsh=>{}, :inputs=>[]}) do |(key, val), hsh|
-  # 		k,t,f_name = key.split('::')
-  # 		if tag_attr?(t)
-  # 			Item.case_merge(hsh, val, :param_hsh, k, t, f_name)
-  # 			Item.case_merge(hsh, val, :tag_hsh, k, f_name)
-  # 		elsif f = fields.detect{|f| f.id==(val.to_i)}
-  # 			tag_hsh_loop(f, hsh[:tag_hsh])
-  # 			Item.case_merge(hsh[:param_hsh], f, k, t, f_name)
-  # 		end
-  # 	end
-  # end
-
-  def get_inputs_and_tag_hsh(fields:nil, input_group:nil)
-  	(fields ? fields : product.unpacked_fields).each_with_object(input_group ? input_group : config_params) do |f, input_group|
-  		tag_hsh_loop(f, input_group[:tag_hsh])
-  		if field_set?(f.type)
-  			get_inputs_and_tag_hsh(fields: f.fieldables, input_group: input_group)
-  		elsif !no_assocs?(f.type)
-  			push_input_and_selected(*f.fattrs, f, input_group)
-  		end
-  	end
-  end
-  # def config_params
-	# 	hsh = tags.each_with_object ({}) {|(k,v), tag_hsh| Item.case_merge(tag_hsh, v, *k.split('::')) if tag_attr?(k.split('::')[1])}
-	# 	{:tag_hsh=> hsh, :param_hsh=> hsh, :inputs=>[]}
-  # end
-
-  # def grouped_params
-  # 	fieldables.each_with_object (config_params) do |f, config_params|
-  # 		tag_key_loop(*f.fattrs, f, config_params[:tag_hsh])
-  #     puts "tag_hsh1=======>#{config_params[:tag_hsh]}"
-  # 		if kv_pair = tags.reject{|k,v| tag_attr?(k.split('::')[1])}.detect{|k,v| f.id==v.to_i}
-  # 			Item.case_merge(config_params[:param_hsh], f, *kv_pair[0].split('::'))
-  # 		end
-  # 	end
-  # end
-
-  # def push_input_and_selected(k, t, f_name, f, input_group)
-  # 	input_group[:inputs] << f_hsh(k, t, f_name, f)
-  # 	if selected = input_group[:param_hsh].dig(k, t_type(t), f_name)
-  #     #here?
-  # 		input_group[:inputs][-1][:selected] =  tag_attr?(t) ? selected : selected.id
-  #     get_inputs_and_tag_hsh(fields: selected.fieldables, input_group: input_group) if !tag_attr?(t) && field_set?(selected.type)
-  # 	end
-  # end
-  ##############################################################################
-  # def config_fparams
-  # 	fieldables.each_with_object ({}) do |f, param_hsh|
-  # 		if kv_pair = tags.reject{|k,v| tag_attr?(k.split('::')[1])}.detect{|k,v| f.id==v.to_i}
-  # 			Item.case_merge(param_hsh, f, *kv_pair[0].split('::'))
-  # 		end
-  # 	end
-  # end
-
-  def param_group(input_group={:inputs=> []})
-    input_group[:tag_hsh] = options.each_with_object({}) {|opt,tag_hsh| tag_key_loop(*opt.fattrs, opt, tag_hsh)}
-    input_group[:i_params] = config_item_params
-    #input_group[:tag_hsh].merge!(merge_tag_hsh(input_group[:i_params]))
-    input_group
-  end
-
-  def merge_tag_hsh(i_params)
-    i_params.each_with_object({}) do |(k,v), tag_hsh|
-    	k,t,f_name = k.split('::')
-    	Item.case_merge(tag_hsh, v, k, t, f_name) if tag_attr?(t)
-    end
-  end
-
-  def inputs_and_tag_hsh(fields:nil, input_group:nil)
-    (fields ? fields : field_sets).each_with_object(input_group ? input_group : param_group) do |f, input_group|
-      k, t, f_name = pull_tags_and_return_fargs(f, input_group, *f.fattrs)
-      if field_set?(f.type)
-        inputs_and_tag_hsh(fields: f.fieldables, input_group: input_group)
-      else
-        config_input_and_selected(k, t, f_name, f, input_group)
-      end
-    end
-  end
 
   ##############################################################################
 
@@ -351,6 +153,25 @@ end
 
 ############################################################################## #results_or_self = attr_group(results_or_self, default_params(attrs, attr_search_keys), input_group)
 ############################################################################
+
+# def update_prev_kind(k, input_group)
+#   if !input_group[:prev_kind]
+#     input_group[:prev_kind] = k
+#   elsif input_group[:prev_kind] != k
+#     #puts "2-k=>#{k}, 2-prev_kind=>#{input_group[:prev_kind]}"
+#     update_prev_kind_case(input_group[:prev_kind], tb_keys, input_group[:context], input_group[:d_hsh])
+#   	input_group[:prev_kind] = k
+#     #puts "d_hsh=>#{input_group[:d_hsh]}"
+#   end
+# end
+
+# def update_prev_kind_case(k, tb_keys, context, d_hsh)
+#   puts "d_hsh[k]=>#{d_hsh[k]}"
+# 	case k
+# 	when 'numbering'; LimitedEdition.config_numbering_params(k, tb_keys, context, d_hsh)
+# 	end
+# end
+
 # def item_search_hattr_inputs(hattrs, items_tags)
 #   hattrs.each_with_object([]) do |(k,v), hattr_inputs|
 #     #{k=>search_input(k,v,items_tags)}

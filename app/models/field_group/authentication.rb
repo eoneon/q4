@@ -12,34 +12,89 @@ class Authentication
     [5, %w[dated signature seal certificate verification]]
   end
 
-  def self.config_auth_params(k, v, auth_hsh, context, d_hsh)
-  	d_hsh.merge!({k=> auth_hsh.transform_values!{|tag_val| "#{v} (#{tag_val})"}})
-    context[k.to_sym] = true
+  # def self.config_certificate(k, tb_hsh, input_group, context, d_hsh)
+  # 	if v = detect_swap(tb_hsh['tagline'], [['with Letter of Authenticity', 'w/LOA'], ['with Certificate of Authenticity', 'w/COA']])
+  #     tb_hsh['invoice_tagline'] = v
+  #     tb_hsh['search_tagline'] = v
+  #   end
+  #   d_hsh[k] = tb_hsh #d_hsh.merge!({k=> tb_hsh})
+  # end
+  def self.config_certificate(k, tb_hsh, k_hsh, input_group, context)
+  	config_certificate_title(tb_hsh)
   end
+
+  def self.config_certificate_title(tb_hsh, tag_key='tagline')
+    if v = detect_swap(tb_hsh[tag_key], [['with Letter of Authenticity', 'w/LOA'], ['with Certificate of Authenticity', 'w/COA']])
+      tb_hsh['invoice_tagline'] = v
+      tb_hsh['search_tagline'] = v
+    end
+  end
+
+  # def self.config_auth_params(k, v, auth_hsh, context, d_hsh)
+  #   #d_hsh.merge!({k=> auth_hsh.transform_values!{|tag_val| config_auth_value(context, k, "#{v} (#{tag_val})")}})
+  #   d_hsh[k] = auth_hsh.transform_values!{|tag_val| config_auth_value(context, k, "#{v} (#{tag_val})")}
+  #   #context[k.to_sym] = true
+  # end
 
   def self.config_authenication(k, auth_hsh, input_group, context, d_hsh)
   	tb_hsh = Item.new.slice_valid_subhsh!(auth_hsh, *Item.new.tb_keys)
     if %w[dated verification].include?(k) && auth_hsh.any?
       d_hsh.merge!({k=> auth_hsh.transform_values!{|tag_val| "#{v} (#{tag_val})"}})
-      context[k.to_sym] = true
+      #context[k.to_sym] = true
     elsif %w[animator_seal sports_seal].include?(k)
       config_seal(k, tb_hsh, context, d_hsh)
     end
   end
 
-  def self.config_seal(k, tb_hsh, context, d_hsh)
-  	d_hsh.merge!({k=> tb_hsh.transform_values!{|tag_val| config_seal_value(k, tag_val, context)}})
+  def self.config_dated(k, tb_hsh, k_hsh, input_group, context)
+    config_auth_params(k, tb_hsh, k_hsh, context)
   end
 
+  def self.config_verification(k, tb_hsh, k_hsh, input_group, context)
+    config_auth_params(k, k_hsh.values[0], context)
+  end
+
+  def self.config_auth_params(k, tb_hsh, input_val, context)
+    tb_hsh.transform_values!{|tag_val| config_auth_value(context, k, "#{tag_val} (#{input_val})")}
+  end
+
+  # def self.config_auth_params(k, auth_hsh, context)
+  #   tb_hsh = Item.new.slice_valid_subhsh!(auth_hsh, *Item.new.tb_keys)
+  #   tb_hsh.transform_values!{|tag_val| config_auth_value(context, k, "#{tag_val} (#{auth_hsh.values[0]})")}
+  # end
+
+  def self.config_auth_value(context, k, v)
+    k=='dated' ? format_date(context, v) : v
+  end
+
+  def self.format_date(context, v)
+    case
+      when context[:numbered_signed]; v+','
+      when context[:signed] || context[:numbered]; v+' and'
+      else v+'.'
+    end
+  end
+
+  # def self.config_seal(k, tb_hsh, context, d_hsh)
+  # 	d_hsh.merge!({k=> tb_hsh.transform_values!{|tag_val| config_seal_value(k, tag_val, context)}})
+  # end
+
+  def self.config_animator_seal(k, tb_hsh, k_hsh, input_group, context)
+  	tb_hsh.transform_values!{|tag_val| config_animator_seal_value(tag_val, context)}
+  end
+
+  def self.config_sports_seal_value(k, tb_hsh, k_hsh, input_group, context)
+    tb_hsh.transform_values!{|tag_val| config_sports_seal_value(tag_val, context)}
+  end
   # def self.config_seal_params(seal_key, seal_hsh, context, d_hsh)
   # 	seal_hsh.each do |tag_key, tag_val|
   #     Item.case_merge(d_hsh, config_seal_value(seal_key, tag_val, context), seal_key, tag_key)
   #   end
   # end
 
-  def self.config_seal_value(seal_key, tag_val, context)
-  	seal_key=='animator_seal' ? config_animator_seal_value(tag_val, context) : config_sports_seal_value(tag_val, context)
-  end
+  # def self.config_seal_value(seal_key, tag_val, context)
+  # 	seal_key=='animator_seal' ? config_animator_seal_value(tag_val, context) : config_sports_seal_value(tag_val, context)
+  # end
 
   def self.config_animator_seal_value(tag_val, context)
     !context[:sports_seal] ? tag_val+'.' : tag_val

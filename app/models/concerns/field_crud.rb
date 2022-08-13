@@ -193,7 +193,7 @@ module FieldCrud
   end
 
   def field_tag_keys
-  	%w[tagline invoice_tagline tagline_search body material_dimension mounting_dimension material_mounting mounting_search]
+  	%w[tagline invoice_tagline search_tagline body material_dimension mounting_dimension material_mounting mounting_search]
   end
 
   def f_hsh(k, t, f_name, f)

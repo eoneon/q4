@@ -7,15 +7,6 @@ class ItemArtistsController < ApplicationController
       format.js
     end
   end
-  # def update
-  #   @item = Item.find(params[:id])
-  #   @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
-  #   @item.save
-  #
-  #   respond_to do |format|
-  #     format.js
-  #   end
-  # end
 
   private
 
@@ -27,3 +18,13 @@ class ItemArtistsController < ApplicationController
   end
 
 end
+
+# def update
+#   @item = Item.find(params[:id])
+#   @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
+#   @item.save
+#
+#   respond_to do |format|
+#     format.js
+#   end
+# end

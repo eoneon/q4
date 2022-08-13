@@ -2,16 +2,12 @@ class SearchItemsController < ApplicationController
 
   def new
     @invoice = Invoice.find(params[:invoice_id])
-    puts "SearchItemsController: #{search_params(Item.scope_keys, product_and_item_hattrs)}"
-    #Item.search(search_params(Item.scope_keys, product_and_item_hattrs))
     @items, @inputs = Item.item_search
   end
 
   def search
     @invoice = Invoice.find(params[:invoice_id])
     scope_params = scope_params(Item.scope_keys, hattr_params[:item])
-    puts "SearchItemsControllerTest:#{search_params(scope_params, product_and_item_hattrs(scope_params[:product], params[:items][:hattrs].to_unsafe_h))}"
-    #Item.search(search_params(scope_params, product_and_item_hattrs(scope_params[:product], params[:items][:hattrs].to_unsafe_h)))
     @items, @inputs = Item.item_search(search_param)
 
     respond_to do |format|
@@ -22,7 +18,6 @@ class SearchItemsController < ApplicationController
   def create
     @invoice = Invoice.find(params[:invoice_id])
     item = Item.find(params[:item_id])
-    # Product.search(search_params(Product.scope_keys, product_hattrs))
     artist = cond_find(Artist, params[:item][:artist_id])
     item.batch_dup_skus(skus, item_params, artist) if skus
     @results, @inputs = Product.invoice_search

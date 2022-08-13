@@ -8,12 +8,25 @@ class Submedium
     {kind: 2, type: 1, f_name: -1}
   end
 
-  def self.config_submedia(k, tb_hsh, input_group, context, d_hsh)
-    k=='leafing' ? config_leafing_params(context, tb_hsh) : config_remarque_params(context, tb_hsh)
-    d_hsh.merge!({k=> tb_hsh})
+
+  def self.config_leafing(k, tb_hsh, k_hsh, input_group, context)
+    config_submedia(k, tb_hsh, input_group, context)
   end
 
-  def self.config_leafing_params(context, tb_hsh)
+  def self.config_remarque(k, tb_hsh, k_hsh, input_group, context)
+    config_submedia(k, tb_hsh, input_group, context)
+  end
+
+  def self.config_submedia(k, tb_hsh, input_group, context)
+    k=='leafing' ? config_leafing_params(context, tb_hsh) : config_remarque_params(context, tb_hsh)
+  end
+
+  # def self.config_submedia(k, tb_hsh, input_group, context, d_hsh)
+  #   k=='leafing' ? config_leafing_params(context, tb_hsh) : config_remarque_params(context, tb_hsh)
+  #   d_hsh[k] = tb_hsh
+  # end
+
+  def self.config_leafing_params(k, tb_hsh, input_group, context)
   	Item.new.transform_params(tb_hsh, 'and', 1) if context[:leafing_remarque]
   end
 
@@ -21,10 +34,25 @@ class Submedium
     Item.new.transform_params(tb_hsh, 'with') if !context[:leafing]
   end
 
-  def self.config_embellising_params(k, context, d_hsh)
-  	Item.case_merge(d_hsh, 'Embellished', k, 'invoice_tagline')
-  	context[k.to_sym] = true
-  end
+
+
+  # def self.config_embellising(k, context, d_hsh)
+  # 	Item.case_merge(d_hsh, 'Embellished', k, 'invoice_tagline')
+  # 	#context[k.to_sym] = true
+  # end
+
+  # def self.config_leafing_params(context, tb_hsh)
+  #   Item.new.transform_params(tb_hsh, 'and', 1) if context[:leafing_remarque]
+  # end
+  #
+  # def self.config_remarque_params(context, tb_hsh)
+  #   Item.new.transform_params(tb_hsh, 'with') if !context[:leafing]
+  # end
+  #
+  # def self.config_embellising_params(k, context, d_hsh)
+  #   Item.case_merge(d_hsh, 'Embellished', k, 'invoice_tagline')
+  #   #context[k.to_sym] = true
+  # end
 
   class SelectField < Submedium
     class Embellishing < SelectField

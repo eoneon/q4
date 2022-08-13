@@ -32,6 +32,17 @@ module Textable
       char_limit(str, abbrv_set, limit)
     end
 
+    def inject_swap(str, swap_sets)
+      strip_space(swap_sets.inject(str) {|str, replace_this_with_that| str.gsub(*replace_this_with_that)})
+    end
+
+    def detect_swap(str, swap_sets)
+      if swap_set = swap_sets.detect{|swap_set| swap_set.index(swap_set[0])}
+        strip_space(str.sub(*swap_set))
+      else
+        str
+      end
+    end
     ############################################################################
 
     def uncamel(class_word)

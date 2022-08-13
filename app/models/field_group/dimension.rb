@@ -30,7 +30,10 @@ class Dimension
   # end
   def self.config_dimension(k, dimension_hsh, input_group, context, d_hsh)
     config_dimension_hsh(dimension_hsh, context, input_group[:attrs])
-    Dimension.new.tb_dimensions(k, *Dimension.tags.map{|key| dimension_hsh.dig(key)}, d_hsh)
+    material_dimension, mounting_dimension = Dimension.tags.map{|key| dimension_hsh.dig(key)}
+    input_group[:attrs].merge!({'item_size'=> material_dimension['item_size']})
+    Dimension.new.tb_dimensions(k, material_dimension, mounting_dimension, d_hsh)
+    context[:order]['tagline'].delete(k) unless d_hsh.dig(k, 'tagline')
   end
 
   def self.measurement_hsh(tag_hsh, selected, k, f_name, key='measurements')

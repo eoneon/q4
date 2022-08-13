@@ -7,6 +7,13 @@ module Hashable
   # def defualt_hsh(*keys)
   #   keys.each_with_object({}) {|k,h| h[k]=nil}
   # end
+  def order_hsh(keys, hsh)
+    keys.each_with_object({}) {|k,h| h[k]=hsh.dig(k)}
+  end
+
+  def order_valid_hsh(keys, hsh)
+    order_hsh(keys, hsh).reject{|k,v| v.blank?}
+  end
 
   def default_hsh(*keys)
     keys.each_with_object({}) {|k,h| h[k]=""}
@@ -154,7 +161,6 @@ module Hashable
     #replaces param_set ########################################################
     def build_params(params, *args)
       hsh = dig_keys_with_end_val(h: params)
-      puts "(c) dig_keys_with_end_val: #{hsh}"
       map_args(hsh,*args)
     end
 
