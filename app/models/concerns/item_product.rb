@@ -11,14 +11,20 @@ module ItemProduct
 
     # config_form_group(input_group, p.tags)
     # return input_group[:rows] if action == 'show'
+    finish_config_group(input_group, input_group[:context], input_group[:d_hsh])
 
-    # compound_kind_context.map{|kinds| compound_keys(input_group[:context], kinds)}
-    config_dependent_kinds(input_group, input_group[:context], input_group[:d_hsh])
+    #description_hsh(key_group, input_group[:context], input_group[:d_hsh])
+
+    #set_media_and_end_keys(input_group[:context], key_group)
+    #set_media_keys(input_group[:context])
+    #set_end_keys(input_group[:context])
+
     #config_dependent_kinds(input_group, input_group[:context], input_group[:d_hsh])
     #config_description_hsh(input_group[:context], input_group[:d_hsh])
     #config_descriptions(input_group[:context], input_group[:d_hsh], input_group[:attrs])
     #[input_group[:rows], input_group[:attrs]]
-    input_group
+
+    input_group[:context]
   end
 
   ##############################################################################
@@ -41,7 +47,9 @@ module ItemProduct
   	elsif !no_assocs?(t)
   		push_input_and_config_selected(k, t, f_name, f, input_group)
   	elsif no_assocs?(t)
-  		config_order(input_group[:context], k)
+    elsif tags_hsh = f.tags
+  		#config_order(input_group[:context], k)
+      field_context_order(k, tags_hsh, context)
   	end
   end
 
@@ -108,14 +116,16 @@ module ItemProduct
   def init_attrs(attrs)
     attrs.merge!(default_hsh(*contexts[:csv][:export]))
   end
+
   ##############################################################################
   ##############################################################################
 
   def artist_params(context, attrs, d_hsh, k='artist')
     return unless artist
-    config_order(context, k)
+    #config_order(context, k)
     d_hsh.merge!({k=> artist.artist_params['d_hsh']})
     attrs.merge!(artist.artist_params['attrs'])
+    field_context_order(k, d_hsh[k], context)
   end
 
   def title_params(context, attrs, d_hsh, k='title')
@@ -124,10 +134,11 @@ module ItemProduct
   end
 
   def config_title_value(context, d_hsh, k)
-  	%w[tagline body].each do |tag_key|
+  	admin_tb_keys.each do |tag_key|
   		if v = public_send("#{tag_key}_#{k}")
   			Item.case_merge(d_hsh, v, k, tag_key)
-        config_order(context, k)
+        set_order(context, tag_key.to_sym, k)
+        #config_order(context, k)
   		end
   	end
   end
@@ -135,26 +146,26 @@ module ItemProduct
   def config_dimensions(input_group, context, d_hsh, k='dimension')
   	if dimension_hsh = hsh_slice_and_delete(d_hsh, k)
       Dimension.config_dimension(k, dimension_hsh, input_group, context, d_hsh)
-  		config_order(context, k)
-      context[:order]['tagline'].delete(k) unless d_hsh.dig(k, 'tagline')
+      field_context_order(k, d_hsh[k], context)
+      #admin_tb_keys.reject{|k| d_hsh.dig(k, tag_key).nil?}.map{|tag_key| set_order(context, tag_key.to_sym, k)}
+      #admin_tb_keys.map{|tag_key| set_order(context, tag_key.to_sym, k) if d_hsh.dig(k, tag_key)}
   	end
   end
 
-  # def config_dependent_kinds(input_group, context, d_hsh)
-  #   kinds_hsh = dependend_kinds_hsh(context[:order]['body'])
-  #   kinds_hsh.each do |klass, kinds|
-  #     kinds.each do |k|
-  #       k_hsh = d_hsh[k].slice!(*tb_keys)
-  #       config_public_kind(k, klass, d_hsh[k], k_hsh, input_group, context)
-  #     end
-  #   end
-  # end
+  ##############################################################################
+  ##############################################################################
+
+  def finish_config_group(input_group, context, d_hsh)
+    set_compound_keys(context)
+    config_dependent_kinds(input_group, context, d_hsh)
+  end
 
   def config_dependent_kinds(input_group, context, d_hsh)
-    dependend_kinds_hsh(context[:order]['body']).each do |klass, kinds|
+    dependent_kinds_hsh(context[:body][:order].keys).each do |klass, kinds|
       kinds.each do |k|
         k_hsh = d_hsh[k].slice!(*tb_keys)
         config_public_kind(k, klass, d_hsh[k], k_hsh, input_group, context)
+        field_context_order(k, d_hsh[k], context)
       end
     end
   end
@@ -208,6 +219,14 @@ module ItemProduct
 
   def tb_keys
     %w[tagline invoice_tagline search_tagline body]
+  end
+
+  def admin_tb_keys
+    tb_keys.values_at(0,-1)
+  end
+
+  def all_title_keys
+    tb_keys[0..2]
   end
 
   ##############################################################################

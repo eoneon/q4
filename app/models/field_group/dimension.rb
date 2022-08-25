@@ -23,17 +23,13 @@ class Dimension
     %w[material mounting dimension]
   end
 
-  # def self.measurement_hsh(tag_hsh, selected, k, f_name, key='measurements')
-  # 	if dimension_tag = dimension_tag(f_name)
-  # 		Item.case_merge(tag_hsh, selected, 'related_params', k, dimension_tag, key, f_name)
-  # 	end
-  # end
   def self.config_dimension(k, dimension_hsh, input_group, context, d_hsh)
     config_dimension_hsh(dimension_hsh, context, input_group[:attrs])
     material_dimension, mounting_dimension = Dimension.tags.map{|key| dimension_hsh.dig(key)}
     input_group[:attrs].merge!({'item_size'=> material_dimension['item_size']})
     Dimension.new.tb_dimensions(k, material_dimension, mounting_dimension, d_hsh)
-    context[:order]['tagline'].delete(k) unless d_hsh.dig(k, 'tagline')
+    #context[:order]['tagline'].delete(k) unless d_hsh.dig(k, 'tagline')
+    #d_hsh.dig(k, 'tagline') ? context['tagline'][:media_punct] = 'dimension' : context['tagline'][:order].delete(k)
   end
 
   def self.measurement_hsh(tag_hsh, selected, k, f_name, key='measurements')
@@ -408,28 +404,28 @@ class Dimension
   end
 
   # tagline, body & attributes 26 ##############################################
-  def tb_dimensions(k, material_dimensions, mounting_dimensions, store)
-    tagline_dimensions(k, (mounting_dimensions.present? ? mounting_dimensions : material_dimensions), store)
-    body_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, store)
-    abbrv_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, store)
+  def tb_dimensions(k, material_dimensions, mounting_dimensions, d_hsh)
+    tagline_dimensions(k, (mounting_dimensions.present? ? mounting_dimensions : material_dimensions), d_hsh)
+    body_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, d_hsh)
+    abbrv_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, d_hsh)
   end
 
-  def tagline_dimensions(k, dimension_hsh, store)
+  def tagline_dimensions(k, dimension_hsh, d_hsh)
     if dimension_hsh.dig('item_size').to_i >= 1300
-      Item.case_merge(store, "(#{dimension_hsh.dig('measurements')})", k, 'tagline')
+      Item.case_merge(d_hsh, "(#{dimension_hsh.dig('measurements')})", k, 'tagline')
     end
   end
 
-  def body_dimensions(k, material_measurements, material_tag, mounting_dimensions, store)
+  def body_dimensions(k, material_measurements, material_tag, mounting_dimensions, d_hsh)
     material_measurements = body_material_measurements(material_measurements, material_tag, (';' if material_tag && material_tag.index('weight')))
     measurements = ["Measures approx.", body_mounting_measurements(mounting_dimensions), material_measurements].compact.join(' ')
-    Item.case_merge(store, measurements, k, 'body')
+    Item.case_merge(d_hsh, measurements, k, 'body')
   end
 
-  def abbrv_dimensions(k, material_measurements, material_tag, mounting_dimensions, store)
+  def abbrv_dimensions(k, material_measurements, material_tag, mounting_dimensions, d_hsh)
     measurements = [material_measurements, abbrv_mounting_measurements(mounting_dimensions)].compact
     measurements = measurements.count>1 ? measurements.join(' - ') : measurements[0]
-    Item.case_merge(store, "(#{measurements})", k, 'invoice_tagline')
+    Item.case_merge(d_hsh, "(#{measurements})", k, 'invoice_tagline')
   end
 
   def dimension_description_params(dimensions, diameter, dimension_tag)

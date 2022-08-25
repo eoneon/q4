@@ -12,13 +12,6 @@ class LimitedEdition
     config_edition(tb_hsh, numbering_hsh, context, input_group[:attrs])
   end
 
-  # def self.config_numbering(k, numbering_hsh, input_group, context, d_hsh)
-  #   tb_hsh = Item.new.slice_valid_subhsh!(numbering_hsh, *Item.new.tb_keys)
-  #   config_edition(tb_hsh, numbering_hsh, context, input_group[:attrs])
-  #   d_hsh[k] = tb_hsh
-  #   #d_hsh.merge!({k=>tb_hsh})
-  # end
-
   def self.config_edition(tb_hsh, edition_hsh, context, attrs)
     if context[:proof_edition]
       config_proof_edition(tb_hsh, attrs)
@@ -33,45 +26,24 @@ class LimitedEdition
     attrs['edition'] = tb_hsh['search_tagline'].split(' ')[2..3].join(' ')
   end
 
-  # def self.config_numbered_edition(tb_hsh, edition_hsh, context, attrs)
-  #   attrs['edition'] = tb_hsh['tagline'].sub('Numbered', 'No')
-  #   edition_hsh.keys.count<2 ? tb_hsh : tb_hsh.transform_values!{|tag_val| [tag_val, edition_hsh.values.join('/')].join(' ')}
-  #   Item.new.transform_params(tb_hsh, 'and', 1) if context[:numbered_signed]
-  #   tb_hsh['search_tagline'] = tb_hsh['tagline'].sub('Numbered', 'No')
-  # end
-
   def self.config_numbered_edition(tb_hsh, edition_hsh, context, attrs)
     attrs['edition'] = tb_hsh['tagline'].sub('Numbered', 'No')
     tb_hsh['invoice_tagline'] = attrs['edition']
+    update_numbering(tb_hsh, edition_hsh, attrs)
+    tb_hsh['search_tagline'] = attrs['edition']
+    Item.new.transform_params(tb_hsh, 'and', 1) if context[:numbered_signed]
+  end
+
+  def self.update_numbering(tb_hsh, edition_hsh, attrs)
     if edition_hsh.keys.count==2
       attrs['numbering'] = edition_hsh.values.join('/')
       tb_hsh.transform_values!{|tag_val| [tag_val, attrs['numbering']].join(' ')}
     end
-    tb_hsh['search_tagline'] = attrs['edition']
-    Item.new.transform_params(tb_hsh, 'and', 1) if context[:numbered_signed]
   end
 
   def self.numbering_context(k, f_name, context)
     context[f_name.to_sym] = true if %w[proof_edition numbered].include?(f_name)
   end
-
-  # def self.edition_numbering(edition_hsh)
-  #   edition_hsh.values.join('/') if edition_hsh.keys.count == 2
-  # end
-
-  # def self.search_edition(d_hsh, attrs)
-  #   if ed_val = d_hsh.dig("numbering", "tagline")
-  #     attrs.merge!({'edition'=>ed_val.sub('Numbered', 'No')})
-  #   end
-  # end
-
-  # def self.edition_value(edition_hsh)
-  #   if edition_hsh.keys.count == 2
-  #     edition_hsh.values.join('/')
-  #   elsif edition_hsh.keys.include?('edition_size')
-  #     "out of #{edition_hsh['edition_size']}"
-  #   end
-  # end
 
   class SelectField < LimitedEdition
     class Numbering < SelectField
@@ -162,3 +134,36 @@ class LimitedEdition
     end
   end
 end
+
+
+  # def self.config_numbering(k, numbering_hsh, input_group, context, d_hsh)
+  #   tb_hsh = Item.new.slice_valid_subhsh!(numbering_hsh, *Item.new.tb_keys)
+  #   config_edition(tb_hsh, numbering_hsh, context, input_group[:attrs])
+  #   d_hsh[k] = tb_hsh
+  #   #d_hsh.merge!({k=>tb_hsh})
+  # end
+
+  # def self.config_numbered_edition(tb_hsh, edition_hsh, context, attrs)
+  #   attrs['edition'] = tb_hsh['tagline'].sub('Numbered', 'No')
+  #   edition_hsh.keys.count<2 ? tb_hsh : tb_hsh.transform_values!{|tag_val| [tag_val, edition_hsh.values.join('/')].join(' ')}
+  #   Item.new.transform_params(tb_hsh, 'and', 1) if context[:numbered_signed]
+  #   tb_hsh['search_tagline'] = tb_hsh['tagline'].sub('Numbered', 'No')
+  # end
+
+  # def self.edition_numbering(edition_hsh)
+  #   edition_hsh.values.join('/') if edition_hsh.keys.count == 2
+  # end
+
+  # def self.search_edition(d_hsh, attrs)
+  #   if ed_val = d_hsh.dig("numbering", "tagline")
+  #     attrs.merge!({'edition'=>ed_val.sub('Numbered', 'No')})
+  #   end
+  # end
+
+  # def self.edition_value(edition_hsh)
+  #   if edition_hsh.keys.count == 2
+  #     edition_hsh.values.join('/')
+  #   elsif edition_hsh.keys.include?('edition_size')
+  #     "out of #{edition_hsh['edition_size']}"
+  #   end
+  # end
