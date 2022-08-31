@@ -12,19 +12,8 @@ module ItemProduct
     # config_form_group(input_group, p.tags)
     # return input_group[:rows] if action == 'show'
     finish_config_group(input_group, input_group[:context], input_group[:d_hsh])
-
-    #description_hsh(key_group, input_group[:context], input_group[:d_hsh])
-
-    #set_media_and_end_keys(input_group[:context], key_group)
-    #set_media_keys(input_group[:context])
-    #set_end_keys(input_group[:context])
-
-    #config_dependent_kinds(input_group, input_group[:context], input_group[:d_hsh])
-    #config_description_hsh(input_group[:context], input_group[:d_hsh])
-    #config_descriptions(input_group[:context], input_group[:d_hsh], input_group[:attrs])
-    #[input_group[:rows], input_group[:attrs]]
-
-    input_group[:context]
+    description_hsh(key_group, input_group[:context], input_group[:d_hsh], input_group[:attrs])
+    [input_group[:rows], input_group[:attrs]]
   end
 
   ##############################################################################
@@ -46,18 +35,16 @@ module ItemProduct
   		config_loop(fields: f.fieldables, input_group: input_group)
   	elsif !no_assocs?(t)
   		push_input_and_config_selected(k, t, f_name, f, input_group)
-  	elsif no_assocs?(t)
     elsif tags_hsh = f.tags
-  		#config_order(input_group[:context], k)
-      field_context_order(k, tags_hsh, context)
+      field_context_order(k, tags_hsh, input_group[:context])
   	end
   end
 
   def push_input_and_config_selected(k, t, f_name, f, input_group)
   	input_group[:inputs] << f_hsh(k, t, f_name, f)
   	if selected = input_group[:param_hsh].dig(k, t_type(t), f_name)
-      context_from_selected(k, t, f_name, selected, input_group[:context])
   		input_group[:inputs][-1][:selected] = format_selected(t, selected)
+      context_from_selected(k, t, f_name, selected, input_group[:context])
   		tag_attr?(t) ? selected_tag_attr(input_group[:d_hsh], selected, k, f_name) : selected_field(input_group, selected, *selected.fattrs)
   	end
   end
@@ -122,7 +109,6 @@ module ItemProduct
 
   def artist_params(context, attrs, d_hsh, k='artist')
     return unless artist
-    #config_order(context, k)
     d_hsh.merge!({k=> artist.artist_params['d_hsh']})
     attrs.merge!(artist.artist_params['attrs'])
     field_context_order(k, d_hsh[k], context)
@@ -138,7 +124,6 @@ module ItemProduct
   		if v = public_send("#{tag_key}_#{k}")
   			Item.case_merge(d_hsh, v, k, tag_key)
         set_order(context, tag_key.to_sym, k)
-        #config_order(context, k)
   		end
   	end
   end
@@ -147,8 +132,6 @@ module ItemProduct
   	if dimension_hsh = hsh_slice_and_delete(d_hsh, k)
       Dimension.config_dimension(k, dimension_hsh, input_group, context, d_hsh)
       field_context_order(k, d_hsh[k], context)
-      #admin_tb_keys.reject{|k| d_hsh.dig(k, tag_key).nil?}.map{|tag_key| set_order(context, tag_key.to_sym, k)}
-      #admin_tb_keys.map{|tag_key| set_order(context, tag_key.to_sym, k) if d_hsh.dig(k, tag_key)}
   	end
   end
 
@@ -163,9 +146,8 @@ module ItemProduct
   def config_dependent_kinds(input_group, context, d_hsh)
     dependent_kinds_hsh(context[:body][:order].keys).each do |klass, kinds|
       kinds.each do |k|
-        k_hsh = d_hsh[k].slice!(*tb_keys)
-        config_public_kind(k, klass, d_hsh[k], k_hsh, input_group, context)
-        field_context_order(k, d_hsh[k], context)
+        #config_public_kind(k, klass, d_hsh[k], k_hsh, input_group, context)
+        config_public_kind(k, klass, d_hsh[k], d_hsh[k].slice!(*tb_keys), input_group, context)
       end
     end
   end

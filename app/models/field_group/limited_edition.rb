@@ -41,9 +41,9 @@ class LimitedEdition
     end
   end
 
-  def self.numbering_context(k, f_name, context)
-    context[f_name.to_sym] = true if %w[proof_edition numbered].include?(f_name)
-  end
+  # def self.numbering_context(k, f_name, context)
+  #   context[f_name.to_sym] = true if %w[proof_edition numbered].include?(f_name)
+  # end
 
   class SelectField < LimitedEdition
     class Numbering < SelectField
