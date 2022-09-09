@@ -5,6 +5,7 @@ class Item < ApplicationRecord
   include FieldCrud
   include ProductCrud
   include ItemProduct
+  include KindContext
   include BatchCreate
   include Hashable
   include TypeCheck

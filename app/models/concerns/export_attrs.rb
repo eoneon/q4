@@ -3,6 +3,10 @@ require 'active_support/concern'
 module ExportAttrs
   extend ActiveSupport::Concern
 
+  def csv_export_keys
+    %w[sku artist artist_id title retail width height frame_width frame_height tagline property_room description art_type art_category material medium qty]
+  end
+
   class_methods do
 
     def to_csv(items)
@@ -19,7 +23,7 @@ module ExportAttrs
     end
 
     def attr_keys
-      Item.new.contexts[:csv][:export]
+      Item.new.csv_export_keys #contexts[:csv][:export]
     end
 
   end

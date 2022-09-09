@@ -5,64 +5,20 @@ module Description
 
   def description_hsh(key_group, context, d_hsh, attrs)
     admin_description_keys(context, key_group)
-    descriptions = set_descriptions(key_group[:skip_hsh], context, d_hsh, attrs)
-    #set_descriptions(descriptions, attrs)
+    set_descriptions(key_group[:skip_hsh], context, d_hsh, attrs)
   end
 
   ##############################################################################
   ##############################################################################
-  # def config_description_keys(skip_hsh, context, d_hsh)
-  # 	tb_keys.map(&:to_sym).each_with_object({}) do |tag_key, new_hsh|
-  # 		description_keys = filter_order(context[tag_key][:order], skip_hsh[tag_key.to_s])
-  # 		punct_hsh = punct_hsh(context, description_keys, tag_key)
-  #     d_hsh[tag_key] = public_send("config_#{tag_key.to_s}_hsh", description_keys, tag_key.to_s, d_hsh, new_hsh)
-  # 		new_hsh[tag_key] = public_send("#{tag_key.to_s}_punct", d_hsh[tag_key], *punct_hsh.values)
-  # 	end
-  # end
-
-  # def config_description_keys(skip_hsh, context, d_hsh, attrs)
-  #   tb_keys.map(&:to_sym).each_with_object({}) do |tag_key, new_hsh|
-  #     description_keys = filter_order(context[tag_key][:order], skip_hsh[tag_key.to_s])
-  #     punct_hsh = punct_hsh(context, description_keys, tag_key)
-  #     #puts "punct_hsh=>#{punct_hsh}"
-  #     description_hsh = public_send("config_#{tag_key.to_s}_hsh", description_keys, tag_key.to_s, d_hsh, new_hsh)
-  #     d_hsh[tag_key] = description_hsh
-  #     attrs[(tag_key==:body ? 'description' : tag_key.to_s)] = new_hsh[tag_key] = public_send("#{tag_key.to_s}_punct", description_hsh, *punct_hsh.values).values.join(' ')
-  #   end
-  # end
 
   def set_descriptions(skip_hsh, context, d_hsh, attrs)
     tb_keys.map(&:to_sym).map {|tag_key| config_description(tag_key, filter_order(context[tag_key][:order], skip_hsh[tag_key.to_s]), context, d_hsh, attrs)}
     attrs['property_room'] = config_property_room(d_hsh, d_hsh[:tagline])
-    #description_keys = filter_order(context[tag_key][:order], skip_hsh[tag_key.to_s])
-
-      #set_description_value(tag_key, punct_hsh(context, description_keys, tag_key), public_send("config_#{tag_key.to_s}_hsh", description_keys, tag_key.to_s, d_hsh), d_hsh, attrs)
-      #d_hsh[tag_key] = public_send("config_#{tag_key.to_s}_hsh", description_keys, tag_key.to_s, d_hsh)
-      #attrs[(tag_key==:body ? 'description' : tag_key.to_s)] = public_send("#{tag_key.to_s}_punct", d_hsh[tag_key], *punct_hsh.values).values.join(' ')
-
   end
 
   def config_description(tag_key, description_keys, context, d_hsh, attrs)
     d_hsh[tag_key] = public_send("config_#{tag_key.to_s}_hsh", description_keys, tag_key.to_s, d_hsh)
     attrs[(tag_key==:body ? 'description' : tag_key.to_s)] = public_send("#{tag_key.to_s}_punct", d_hsh[tag_key], *punct_hsh(context, description_keys, tag_key).values).values.join(' ')
-  end
-
-  # def set_description_value(tag_key, punct_hsh, description_hsh, d_hsh, attrs)
-  #   d_hsh[tag_key] = description_hsh
-  #   attrs[(tag_key==:body ? 'description' : tag_key.to_s)] = public_send("#{tag_key.to_s}_punct", d_hsh[tag_key], *punct_hsh.values).values.join(' ')
-  # end
-
-  # def set_description_value(tag_key, punct_hsh, description_hsh, d_hsh, attrs)
-  #   d_hsh[tag_key] = description_hsh
-  #   attrs[(tag_key==:body ? 'description' : tag_key.to_s)] = public_send("#{tag_key.to_s}_punct", d_hsh[tag_key], *punct_hsh.values).values.join(' ')
-  # end
-
-  #context
-  def punct_hsh(context, description_keys, tag_key, hsh={})
-  	hsh[:media] = filter_media(context[tag_key][:media], description_keys)[-1]
-  	hsh[:end_key] = end_punct_key(context, description_keys, tag_key)
-  	hsh[:title_key] = description_keys[description_keys.index('title')+1] if tag_key==:body
-  	hsh
   end
 
   ##############################################################################
@@ -98,58 +54,43 @@ module Description
   		tag_val
   	end
   end
+
+  def abbrv_hsh
+    {category: [['Limited Edition', 'Ltd Ed']], medium: [['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]}
+  end
   ##context ####################################################################
-  def filter_order(description_keys, skip_keys)
-    description_keys.select{|k| !skip_keys.include?(k)}
-  end
-
-  def filter_media(media_keys, description_keys)
-  	media_keys.select{|k| description_keys.include?(k)}
-  end
-
-  def end_punct_key(context, description_keys, tag_key, sub_key=:end_key)
-    tag_key==:body ? context[tag_key][sub_key][-1] : description_keys[context[tag_key][sub_key].detect{|k| context[k]} ? -2 : -1]
-  end
+  # def filter_order(description_keys, skip_keys)
+  #   description_keys.select{|k| !skip_keys.include?(k)}
+  # end
+  #
+  # def filter_media(media_keys, description_keys)
+  # 	media_keys.select{|k| description_keys.include?(k)}
+  # end
+  #
+  # def end_punct_key(context, description_keys, tag_key, sub_key=:end_key)
+  #   tag_key==:body ? context[tag_key][sub_key][-1] : description_keys[context[tag_key][sub_key].detect{|k| context[k]} ? -2 : -1]
+  # end
 
   ###context ###################################################################
-  def admin_description_keys(context, key_group, sub_key=:order)
-    set_media_and_end_keys(context, key_group)
-    admin_tb_keys.map(&:to_sym).map{|tag_key| context[tag_key][sub_key] = ordered_description_keys(context, tag_key)}
-    update_taglines_keys(context, key_group[:skip_hsh], sub_key)
-  end
+  # def admin_description_keys(context, key_group, sub_key=:order)
+  #   set_media_and_end_keys(context, key_group)
+  #   admin_tb_keys.map(&:to_sym).map{|tag_key| context[tag_key][sub_key] = ordered_description_keys(context, tag_key)}
+  #   update_taglines_keys(context, key_group[:skip_hsh], sub_key)
+  # end
+  #
+  # def update_taglines_keys(context, skip_hsh, sub_key, tb_key=:tagline)
+  #   tb_keys[1..2].map(&:to_sym).map {|tag_key| context[tag_key] = context[tb_key]}
+  #   remove_giclee_and_paper(context, skip_hsh[tb_key.to_s])
+  # end
+  #
+  # def ordered_description_keys(context, tag_key)
+  # 	ordered_keys = sorted_description_keys(context[tag_key][:order])
+  # 	reorder_numbering_and_embellishing(ordered_keys, context)
+  # 	reorder_signature(ordered_keys, context) if tag_key ==:tagline
+  # 	ordered_keys
+  # end
 
-  def update_taglines_keys(context, skip_hsh, sub_key, tb_key=:tagline)
-    tb_keys[1..2].map(&:to_sym).map {|tag_key| context[tag_key] = context[tb_key]}
-    remove_giclee_and_paper(context, skip_hsh[tb_key.to_s])
-  end
-
-  def ordered_description_keys(context, tag_key)
-  	ordered_keys = sorted_description_keys(context[tag_key][:order])
-  	reorder_numbering_and_embellishing(ordered_keys, context)
-  	reorder_signature(ordered_keys, context) if tag_key ==:tagline
-  	ordered_keys
-  end
-
-  def sorted_description_keys(order_hsh)
-  	order_hsh.sort_by{|k,v| v}.to_h.keys
-  end
   ##############################################################################
-  # def set_descriptions(descriptions, attrs)
-  # 	descriptions.each do |tag_key, description_hsh|
-  # 		build_description(descriptions, tag_key, description_hsh, attrs)
-  # 	end
-  # end
-
-
-
-  # def build_description(descriptions_hsh, tag_key, description_hsh, attrs)
-  # 	attrs[(tag_key==:body ? 'description' : tag_key.to_s)] = description_hsh.values.join(' ')
-  # 	attrs['property_room'] = config_property_room(descriptions_hsh, description_hsh) if tag_key==:tagline
-  # end
-
-  # def set_descriptions(descriptions, attrs)
-  #   attrs['property_room'] = config_property_room(descriptions, descriptions[:tagline])
-  # end
 
   def config_property_room(descriptions_hsh, tagline_hsh)
   	['certificate', [' with ', ' w/'], 'numbered', 'numbering', [' and ', ' & '], 'artist', 'title'].each do |k|
@@ -173,91 +114,91 @@ module Description
   end
 
   ##context ####################################################################
-  def remove_giclee_and_paper(context, remove)
-    [{:giclee=> 'medium'}, {:paper=> 'material'}].map {|hsh| hsh.each {|key, kind| remove << remove_kind(context, key, kind) if context[key]}}
-  end
-
-  def remove_kind(context, key, kind)
-  	kind if public_send("remove_#{key.to_s}?", context)
-  end
-
-  def remove_paper?(context)
-  	[:category, :embellishing, :leafing, :remarque, :signature].any?{|k| context[k]}
-  end
-
-  def remove_giclee?(context)
-  	context[:proof_edition] || context[:numbered] && context[:embellishing] || !context[:paper]
-  end
+  # def remove_giclee_and_paper(context, remove)
+  #   [{:giclee=> 'medium'}, {:paper=> 'material'}].map {|hsh| hsh.each {|key, kind| remove << remove_kind(context, key, kind) if context[key]}}
+  # end
+  #
+  # def remove_kind(context, key, kind)
+  # 	kind if public_send("remove_#{key.to_s}?", context)
+  # end
+  #
+  # def remove_paper?(context)
+  # 	[:category, :embellishing, :leafing, :remarque, :signature].any?{|k| context[k]}
+  # end
+  #
+  # def remove_giclee?(context)
+  # 	context[:proof_edition] || context[:numbered] && context[:embellishing] || !context[:paper]
+  # end
   ##############################################################################
 
   ##############################################################################
 
-  def join_title(body,k)
-    body[k] = ['is', Item.indefinite_article(body[k]), body[k]].join(' ')
-  end
-
-  ##############################################################################
-  def tagline_punct(tagline_hsh, media_key, end_key, punct=',')
-    tagline_hsh[media_key] = tagline_hsh[media_key]+punct if media_key != end_key && tagline_hsh[media_key][-1] != punct
-    tagline_hsh
-  end
-
-  def body_punct(body_hsh, media_key, end_key, title_key)
-  	join_title(body_hsh, title_key)
-  	body_hsh[end_key] = body_hsh[end_key]+'.' if body_hsh[end_key]
-  	body_hsh[media_key] = body_hsh[media_key]+(body_hsh[end_key] ? ',' : '.')
-  	body_hsh
-  end
-
-  def invoice_tagline_punct(tagline_hsh, media_key, end_key)
-  	tagline_punct(tagline_hsh, media_key, end_key)
-  end
-
-  def search_tagline_punct(tagline_hsh, media_key, end_key)
-    tagline_punct(tagline_hsh, media_key, end_key)
-  end
+  # def join_title(body,k)
+  #   body[k] = ['is', Item.indefinite_article(body[k]), body[k]].join(' ')
+  # end
+  #
+  # ##############################################################################
+  # def tagline_punct(tagline_hsh, media_key, end_key, punct=',')
+  #   tagline_hsh[media_key] = tagline_hsh[media_key]+punct if media_key != end_key && tagline_hsh[media_key][-1] != punct
+  #   tagline_hsh
+  # end
+  #
+  # def body_punct(body_hsh, media_key, end_key, title_key)
+  # 	join_title(body_hsh, title_key)
+  # 	body_hsh[end_key] = body_hsh[end_key]+'.' if body_hsh[end_key]
+  # 	body_hsh[media_key] = body_hsh[media_key]+(body_hsh[end_key] ? ',' : '.')
+  # 	body_hsh
+  # end
+  #
+  # def invoice_tagline_punct(tagline_hsh, media_key, end_key)
+  # 	tagline_punct(tagline_hsh, media_key, end_key)
+  # end
+  #
+  # def search_tagline_punct(tagline_hsh, media_key, end_key)
+  #   tagline_punct(tagline_hsh, media_key, end_key)
+  # end
 
   ##context ####################################################################
 
-  def reorder_numbering_and_embellishing(ordered_keys, context)
-  	if args = reorder_args(context)
-  		reorder_keys({keys: ordered_keys}.merge!(args))
-  	end
-  end
-
-  def reorder_args(context)
-  	if context[:proof_edition]
-  		reorder_proof_edition
-  	elsif !context[:numbering] && context[:embellishing_category]
-  		reorder_medium
-  	end
-  end
-
-  def reorder_signature(ordered_keys, context)
-    return unless context[:signature]
-    if context[:signature_last]
-      reorder_keys(keys: ordered_keys, k: 'signature', i: -1)
-    elsif ref_key = signature_ref_key(ordered_keys, context)
-      reorder_keys(keys: ordered_keys, k: 'signature', ref: ref_key)
-    end
-  end
-
-  def signature_ref_key(ordered_keys, context)
-    if [:category, :certificate].none?{|k| ordered_keys.include?(k)} || [:numbered, :certificate].none?{|k| ordered_keys.include?(k)}
-      'medium'
-    elsif context[:proof_edition] && !context[:certificate]
-      !context[:embellishing] ? 'category' : 'embellishing'
-    end
-  end
-
-  def signature_params(context, store, v, k, tag_key)
-    v = gartner_blade_signature(v, tag_key) if context[:gartner_blade] && !context[:unsigned]
-    Item.case_merge(store, v, k, tag_key)
-  end
-
-  def gartner_blade_signature(v, tag_key)
-    v = (tag_key == 'tagline' ? "#{v} by GartnerBlade Glass." : "This piece is hand signed by GartnerBlade Glass.")
-  end
+  # def reorder_numbering_and_embellishing(ordered_keys, context)
+  # 	if args = reorder_args(context)
+  # 		reorder_keys({keys: ordered_keys}.merge!(args))
+  # 	end
+  # end
+  #
+  # def reorder_args(context)
+  # 	if context[:proof_edition]
+  # 		reorder_proof_edition
+  # 	elsif !context[:numbering] && context[:embellishing_category]
+  # 		reorder_medium
+  # 	end
+  # end
+  #
+  # def reorder_signature(ordered_keys, context)
+  #   return unless context[:signature]
+  #   if context[:signature_last]
+  #     reorder_keys(keys: ordered_keys, k: 'signature', i: -1)
+  #   elsif ref_key = signature_ref_key(ordered_keys, context)
+  #     reorder_keys(keys: ordered_keys, k: 'signature', ref: ref_key)
+  #   end
+  # end
+  #
+  # def signature_ref_key(ordered_keys, context)
+  #   if [:category, :certificate].none?{|k| ordered_keys.include?(k)} || [:numbered, :certificate].none?{|k| ordered_keys.include?(k)}
+  #     'medium'
+  #   elsif context[:proof_edition] && !context[:certificate]
+  #     !context[:embellishing] ? 'category' : 'embellishing'
+  #   end
+  # end
+  #
+  # def signature_params(context, store, v, k, tag_key)
+  #   v = gartner_blade_signature(v, tag_key) if context[:gartner_blade] && !context[:unsigned]
+  #   Item.case_merge(store, v, k, tag_key)
+  # end
+  #
+  # def gartner_blade_signature(v, tag_key)
+  #   v = (tag_key == 'tagline' ? "#{v} by GartnerBlade Glass." : "This piece is hand signed by GartnerBlade Glass.")
+  # end
 
   def field_context_order(k, tb_hsh, context)
   	admin_tb_keys.select {|tag_key| tb_hsh[tag_key]}.map{|tag_key| set_order(context, tag_key.to_sym, k)}
@@ -267,22 +208,18 @@ module Description
     Item.case_merge(context, key_group[tag_key][sub_key].index(k), tag_key, sub_key, k)
   end
 
-  def dependent_kinds_hsh(keys)
-  	dependent_kinds.each_with_object({}) {|(klass, kinds), h| h[klass] = kinds.reject{|k| keys.exclude?(k)}}.reject{|klass, kinds| kinds.empty?}
-  end
-
-  def config_compound_kinds(context)
-    compound_kind_context.map{|kinds| compound_keys(context, kinds)}
-  end
+  # def config_compound_kinds(context)
+  #   compound_kind_context.map{|kinds| compound_keys(context, kinds)}
+  # end
 
   ##context ####################################################################
-  def reorder_proof_edition
-    {k: 'numbering', ref: 'medium', i: 1}
-  end
-
-  def reorder_medium
-    {k: 'embellishing', ref: 'medium'}
-  end
+  # def reorder_proof_edition
+  #   {k: 'numbering', ref: 'medium', i: 1}
+  # end
+  #
+  # def reorder_medium
+  #   {k: 'embellishing', ref: 'medium'}
+  # end
 
   def context_from_selected(k, t, f_name, selected, context)
   	if valid_tag_attr?(k, selected)
@@ -352,94 +289,37 @@ module Description
     tag_hsh.dig(tag_key) && key_group.dig(tag_key.to_sym, k.to_sym)
   end
 
-  ##context ####################################################################
-  def compound_kind_context
-    [[:embellishing, :category], [:leafing, :remarque], [:numbered, :signed], [:animator_seal, :sports_seal]]
-  end
-
-  def dependent_kinds
-    {LimitedEdition: ['numbering'], Disclaimer: ['disclaimer'], Authentication: %w[certificate dated verification animator_seal sports_seal], Submedium: %w[leafing remarque]}
-  end
-
-  def abbrv_hsh
-    {category: [['Limited Edition', 'Ltd Ed']], medium: [['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]}
-  end
-
   ##############################################################################
 
-  def compound_keys(context, keys)
-    context[keys.map(&:to_s).join('_').to_sym] = true if keys.all?{|k| context[k]}
-  end
-
-  ##############################################################################
-
-  def set_compound_keys(context)
-    compound_kind_context.map{|kinds| compound_keys(context, kinds)}
-  end
-
-  def set_media_and_end_keys(context, key_group)
-    admin_tb_keys.map(&:to_sym).each do |tag_key|
-      context[tag_key].merge!(config_media_keys(context, key_group[tag_key]))
-      context[tag_key].merge!(config_end_keys(context, tag_key, key_group[tag_key]))
-    end
-  end
-
-  def config_media_keys(context, key_hsh, sub_key=:media)
-    {sub_key=>(context[:proof_edition] ? key_hsh[sub_key].insert(key_hsh[sub_key].index('material'), 'numbering') : key_hsh[sub_key])}
-  end
-
-  def config_end_keys(context, tag_key, key_hsh, sub_key=:end_key)
-    {sub_key=>(tag_key==:body && context[:numbered] ? key_hsh[sub_key].insert(1, 'numbering') : key_hsh[sub_key])}
-  end
-
-  ##############################################################################
-
-  def key_group
-    {
-      tagline: {
-        order: %w[artist title mounting embellishing category medium sculpture_type material dimension leafing remarque numbering signature certificate disclaimer],
-        media: %w[category medium sculpture_type material leafing remarque dimension],
-        end_key: [:danger, :unsigned],
-        category: [['Limited Edition']], medium: [['Giclee'], ['Hand Pulled'], ['Mixed Media']], material: [['Gallery Wrapped'], ['Rice'], ['Paper']], mounting: [['Framed']], signature: [['Unsigned'], ['Plate Signed', 'Signed'], ['Signed'], ['Signature', 'Signed']], disclaimer: [['Disclaimer', 'Danger']]
-      },
-      body: {
-        order: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
-        media: %w[text_after_title category numbering medium sculpture_type material leafing remarque artist],
-        end_key: %w[dated signature]
-      },
-      skip_hsh: {'tagline'=> [], 'invoice_tagline'=> %w[mounting disclaimer], 'search_tagline'=> %w[artist title mounting dimension disclaimer], 'body'=>[]}
-    }
-  end
-
-  def contexts
-    {
-      title_keys: %w[artist title mounting embellishing category medium sculpture_type material dimension leafing remarque numbering signature certificate disclaimer],
-      body_keys: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
-      skip_hsh: {'tagline'=> [], 'invoice_tagline'=> %w[mounting disclaimer], 'search_tagline'=> %w[artist title mounting dimension disclaimer], 'body'=>[]},
-      dependent_kinds: {
-        LimitedEdition: ['numbering'], Dimension: ['dimension'], Disclaimer: ['disclaimer'], Authentication: %w[certificate dated verification animator_seal sports_seal], Submedium: %w[embellishing leafing remarque]
-      },
-      gartner_blade: %w[category text_after_title sculpture_type sculpture_part signature dimension disclaimer],
-
-      tagline: {
-        category: [['Limited Edition']], medium: [['Giclee'], ['Hand Pulled'], ['Mixed Media']], material: [['Gallery Wrapped'], ['Rice'], ['Paper']], mounting: [['Framed']], signature: [['Unsigned'], ['Plate Signed', 'Signed'], ['Signed'], ['Signature', 'Signed']], disclaimer: [['Disclaimer', 'Danger']],
-        media: %w[category medium sculpture_type material leafing remarque dimension],
-        authentication: [:disclaimer, :unsigned]
-      },
-
-      abbrv: {
-        category: [['Limited Edition', 'Ltd Ed']], medium: [['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]
-      },
-      body: {
-        media: %w[text_after_title category numbering medium sculpture_type material leafing remarque artist],
-        authentication: %w[dated numbering signature]
-      },
-      csv: {
-        export: %w[sku artist artist_id title retail width height frame_width frame_height tagline property_room description art_type art_category material medium qty],
-        item_product: %w[title width height frame_width frame_height tagline description tagline_search invoice_tagline mounting_search measurements item_size]
-      }
-    }
-  end
+  # def contexts
+  #   {
+  #     title_keys: %w[artist title mounting embellishing category medium sculpture_type material dimension leafing remarque numbering signature certificate disclaimer],
+  #     body_keys: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
+  #     skip_hsh: {'tagline'=> [], 'invoice_tagline'=> %w[mounting disclaimer], 'search_tagline'=> %w[artist title mounting dimension disclaimer], 'body'=>[]},
+  #     dependent_kinds: {
+  #       LimitedEdition: ['numbering'], Dimension: ['dimension'], Disclaimer: ['disclaimer'], Authentication: %w[certificate dated verification animator_seal sports_seal], Submedium: %w[embellishing leafing remarque]
+  #     },
+  #     gartner_blade: %w[category text_after_title sculpture_type sculpture_part signature dimension disclaimer],
+  #
+  #     tagline: {
+  #       category: [['Limited Edition']], medium: [['Giclee'], ['Hand Pulled'], ['Mixed Media']], material: [['Gallery Wrapped'], ['Rice'], ['Paper']], mounting: [['Framed']], signature: [['Unsigned'], ['Plate Signed', 'Signed'], ['Signed'], ['Signature', 'Signed']], disclaimer: [['Disclaimer', 'Danger']],
+  #       media: %w[category medium sculpture_type material leafing remarque dimension],
+  #       authentication: [:disclaimer, :unsigned]
+  #     },
+  #
+  #     abbrv: {
+  #       category: [['Limited Edition', 'Ltd Ed']], medium: [['Mixed Media', 'MM'], ['Hand Pulled', 'HP']]
+  #     },
+  #     body: {
+  #       media: %w[text_after_title category numbering medium sculpture_type material leafing remarque artist],
+  #       authentication: %w[dated numbering signature]
+  #     },
+  #     csv: {
+  #       export: %w[sku artist artist_id title retail width height frame_width frame_height tagline property_room description art_type art_category material medium qty],
+  #       item_product: %w[title width height frame_width frame_height tagline description tagline_search invoice_tagline mounting_search measurements item_size]
+  #     }
+  #   }
+  # end
 
   def transform_params(params, conj, push=nil)
   	params.transform_values!{|tag_val| push ? "#{tag_val} #{conj}" : "#{conj} #{tag_val}"}
