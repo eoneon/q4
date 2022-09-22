@@ -8,7 +8,8 @@ module ProductCrud
     case update_case(old_id, new_id)
       when :add; add_product(new_val(t, new_id))
       when :remove; remove_product(old_val)
-      when :replace; replace_product(new_val(t, new_id), old_val)
+      when :replace; replace_product(old_val, new_val(t, new_id))
+      #when :skip; form_and_data(action: 'show')
     end
   end
 
@@ -17,7 +18,7 @@ module ProductCrud
   def add_product(product, dup=nil)
   	add_obj(product)
   	assign_fields_and_tags(get_default_product_fields(product.unpacked_fields))
-  	assign_cvtags_with_rows(form_and_data, dup)
+  	#assign_cvtags_with_rows(form_and_data, dup)
   end
 
   def assign_fields_and_tags(fields_and_tags)
@@ -53,7 +54,7 @@ module ProductCrud
     remove_obj(product)
   end
 
-  def replace_product(product, item_product)
+  def replace_product(item_product, product)
     remove_product(item_product)
     add_product(product)
   end

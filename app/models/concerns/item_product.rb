@@ -37,21 +37,6 @@ module ItemProduct
   	artist_params(context, attrs, d_hsh)
   	title_params(context, attrs, d_hsh)
   end
-  ##############################################################################
-
-  # def form_and_data(action:nil)
-  #   p = product
-  #   return [[], {}] if !p
-  #   input_group = item_product_attrs(p.tags, init_input_group)
-  #   config_group(fields: p.unpacked_fields, input_group: input_group)
-  #
-  #   config_form_group(input_group, p.tags)
-  #   return input_group[:rows] if action == 'show'
-  #
-  #   finish_config_group(input_group, input_group[:context], input_group[:d_hsh])
-  #   description_hsh(key_group, input_group[:context], input_group[:d_hsh], input_group[:attrs])
-  #   [input_group[:rows], input_group[:attrs]]
-  # end
 
   ##############################################################################
 
@@ -118,15 +103,6 @@ module ItemProduct
     tag_attr?(t) ? selected : selected.id
   end
 
-  #utiltiy-ish##################################################################
-  # def item_product_attrs(p_tags, input_group)
-  # 	d_hsh, context, attrs = [:d_hsh, :context, :attrs].map{|k| input_group[k]}
-  # 	config_attrs(p_tags, attrs)
-  # 	artist_params(context, attrs, d_hsh)
-  # 	title_params(context, attrs, d_hsh)
-  #   input_group
-  # end
-
   def config_attrs(p_tags, attrs)
     attrs.merge!(default_hsh(*csv_export_keys))
   	%w[sku retail qty].map{|k| attrs[k] = public_send(k)}
@@ -169,7 +145,6 @@ module ItemProduct
   	end
   end
 
-  ##############################################################################
   ##############################################################################
 
   def finish_config_group(input_group, context, d_hsh)
@@ -300,75 +275,5 @@ end
 #     gartner_blade_params(contexts[:gartner_blade], context, d_hsh, attrs, store)
 #   else
 #     standard_params(context, d_hsh, attrs, store)
-#   end
-# end
-
-# def config_form_group(input_group, tags, f_grp)
-#   f_grp[:context][product_category(tags['product_type'])] = true
-#   f_grp[:rows] = build_form_rows(input_group[:inputs].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
-#   #f_grp[:rows] = build_form_rows(hsh_slice_and_delete(input_group[:inputs]).group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
-# end
-
-# ### reorder_remove
-# def reorder_remove(context)
-#   reorder_rules(context)
-#   remove_rules(context)
-# end
-
-# def reorder_rules(context)
-#   context[:reorder] << {k:'numbering', ref: 'medium', i: 1} if context[:proof_edition]
-#   context[:reorder] << {k:'embellishing', ref: 'medium'} if context[:embellishing_category] && !context[:proof_edition] && !context[:numbered]
-#   if h = reorder_signature(context)
-#     context[:reorder] << h.merge!({k: 'signature'})
-#   end
-# end
-#
-# def reorder_signature(context)
-#   if context[:missing]
-#     {i: -1}
-#   elsif !context[:category]
-#     {ref: 'medium'} if context[:signature] && !context[:certificate]
-#   elsif context[:proof_edition] && !context[:certificate]
-#     !context[:embellishing] ? {ref: 'category'} : {ref: 'embellishing'}
-#   elsif context[:signature] && (!context[:numbered] && !context[:certificate])
-#     {ref: 'medium'}
-#   end
-# end
-
-# def remove_rules(context)
-#   context[:remove] << 'material' if context[:paper] && [:category, :embellishing, :leafing, :remarque, :signature].any?{|k| context[k]}
-#   context[:remove] << 'medium' if context[:giclee] && (context[:proof_edition] || context[:numbered] && context[:embellishing] || !context[:paper])
-# end
-
-# utility
-# def flatten_context(hsh, key='tagline')
-#   hsh.select{|k,h| h[key]}.transform_values{|h| h[key].values[0]}
-# end
-
-# key-array methods ########################################################## valid_description_keys: duplicate?
-# def valid_description_keys(store, keys, tag_key)
-#   keys.select{|k| store.dig(k,tag_key).present?}
-# end
-
-# 84, 297, 304: replace with: filtered_hsh(h:, keys:[], dig_set:[])
-# def description_params(store, keys, tag_key)
-#   keys.each_with_object({}) do |k,h|
-#     h[k] = store.dig(k,tag_key) if store.dig(k,tag_key)
-#   end
-# end
-
-# def filtered_params(hsh, keys, *dig_opts)
-#   keys.each_with_object({}) do |k,h|
-#     if tag_key = dig_opts.detect{|tag_key| hsh.dig(k,tag_key)}
-#       if v = hsh.dig(k,tag_key)
-#         h[k] = v
-#       end
-#     end
-#   end
-# end
-
-# def valid_description_params(store, keys, tag_key)
-#   keys.each_with_object({}) do |k,h|
-#     h[k] = store.dig(k,tag_key) if store.dig(k,tag_key)
 #   end
 # end

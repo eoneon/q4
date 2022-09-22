@@ -23,7 +23,7 @@ module ExportAttrs
     end
 
     def attr_keys
-      Item.new.csv_export_keys #contexts[:csv][:export]
+      Item.new.csv_export_keys 
     end
 
   end

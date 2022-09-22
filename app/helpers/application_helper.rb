@@ -53,8 +53,7 @@ module ApplicationHelper
   end
 
   def abbrv_tagline(item)
-    item.hattr('csv_tags', 'invoice_tagline') #.dig('invoice_tagline')
-    #Item.char_limit(item.hattr('csv_tags', 'invoice_tagline'), item.contexts[:search_tagline][:set], 90)
+    item.hattr('csv_tags', 'invoice_tagline')
   end
 end
 

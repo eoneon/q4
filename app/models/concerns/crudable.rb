@@ -33,6 +33,50 @@ module Crudable
   end
   # ############################################################################
 
+  ############################################################################
+  def update_item(assoc_params, item_params)
+  	return if assoc_params.detect {|target_name, param_val| update_item_target(target_name, public_send(target_name), param_val(target_name, param_val))}
+  	assign_attributes(item_params)
+  end
+
+  # def update_item(item_params, params)
+  #   if args = update_item_obj(params)
+  #     update_item_target(*args)
+  #   else
+  #     assign_attributes(item_params)
+  #   end
+  # end
+  #
+  # def update_item_obj(params)
+  # 	if param_key = Item.str_hsh_to_arr(params["update_field"]).detect{|param_key| param_key.split('_')[-1] == 'id'}
+  #     [param_key.sub('_id', ''), public_send(param_key.sub('_id', '')), param_val(param_key, params[:item][param_key.to_sym])]
+  # 	end
+  # end
+  ############################################################################
+  def update_item_target(target_name, old_target, new_id)
+    if update_context = update_case(target_id(old_target), new_id)
+  		public_send("update_item_#{target_name}", update_context, target_name, old_target, new_id)
+  	end
+  end
+
+  def update_item_product(update_context, target_name, old_target, new_id)
+  	case update_context
+      when :add; add_product(find_target(target_name, new_id))
+  		when :remove; remove_product(old_target)
+  		when :replace; replace_product(old_target, find_target(target_name, new_id))
+  	end
+  end
+
+  def update_item_artist(update_context, target_name, old_target, new_id)
+  	case update_context
+  		when :add; add_obj(find_target(target_name, new_id))
+  		when :remove; remove_obj(old_target)
+  		when :replace; replace_obj(old_target, find_target(target_name, new_id))
+  	end
+  end
+
+  ############################################################################
+  ############################################################################
   def update_target_case(t, old_val, new_val)
     case update_case(item_val(t, old_val), param_val(t, new_val))
       when :add; add_obj(new_val(t, new_val))

@@ -20,6 +20,10 @@ module FieldCrud
   # update context-routing methods #############################################
   # primary method #############################################################
 
+  def target_id(target)
+    target ? target.id : nil
+  end
+
   def param_val(t, v2)
     valid_field_val?(t, v2) ? v2.to_i : v2
   end

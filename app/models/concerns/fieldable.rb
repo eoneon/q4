@@ -26,7 +26,8 @@ module Fieldable
   end
 
   def fieldables
-  	FieldItem.where(id: item_groups.where(base_type: 'FieldItem').order(:sort).pluck(:target_id)).to_a
+    ids = item_groups.where(base_type: 'FieldItem').order(:sort).pluck(:target_id)
+    FieldItem.where(id: ids).order("position(id::text in '#{ids.join(',')}')").to_a
   end
 
   def grouped_fields

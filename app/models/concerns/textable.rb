@@ -67,6 +67,10 @@ module Textable
       str.split(' ').map(&:strip).join(' ')
     end
 
+    def str_hsh_to_arr(str_hsh)
+      ['[', ']'].inject(str_hsh){|v, i| v.gsub(i, ' ').strip}.split(' ')
+    end
+
     ############################################################################
 
     def is_acronym?(word)

@@ -103,16 +103,6 @@ module KindContext
   def insert_signature_before_medium_if_no_category_or_certificate(context)
   	{k: 'signature', ref: 'medium'} if [:certificate, :category, :numbered].none?{|k| context.include?(k)}
   end
-  ##############################################################################
-
-  # def signature_params(context, store, v, k, tag_key)
-  #   v = gartner_blade_signature(v, tag_key) if context[:gartner_blade] && !context[:unsigned]
-  #   Item.case_merge(store, v, k, tag_key)
-  # end
-  #
-  # def gartner_blade_signature(v, tag_key)
-  #   v = (tag_key == 'tagline' ? "#{v} by GartnerBlade Glass." : "This piece is hand signed by GartnerBlade Glass.")
-  # end
 
   #punct #######################################################################
   def config_punct_keys(insert_numbering_key, sub_key, keys, idx, ref_key)
@@ -176,41 +166,13 @@ module KindContext
   end
 end
 
-# def reorder_numbering_and_embellishing(ordered_keys, context)
-# 	if args = reorder_args(context)
-# 		reorder_keys({keys: ordered_keys}.merge!(args))
-# 	end
+##############################################################################
+
+# def signature_params(context, store, v, k, tag_key)
+#   v = gartner_blade_signature(v, tag_key) if context[:gartner_blade] && !context[:unsigned]
+#   Item.case_merge(store, v, k, tag_key)
 # end
 #
-# def reorder_args(context)
-# 	if context[:proof_edition]
-# 		reorder_proof_edition
-# 	elsif !context[:numbering] && context[:embellishing_category]
-# 		reorder_medium
-# 	end
-# end
-#
-# def reorder_proof_edition
-#   {k: 'numbering', ref: 'medium', i: 1}
-# end
-#
-# def reorder_medium
-#   {k: 'embellishing', ref: 'medium'}
-# end
-#
-# def reorder_signature(ordered_keys, context)
-#   return unless context[:signature]
-#   if context[:signature_last]
-#     reorder_keys(keys: ordered_keys, k: 'signature', i: -1)
-#   elsif ref_key = signature_ref_key(ordered_keys, context)
-#     reorder_keys(keys: ordered_keys, k: 'signature', ref: ref_key)
-#   end
-# end
-#
-# def signature_ref_key(ordered_keys, context)
-#   if [:category, :certificate].none?{|k| ordered_keys.include?(k)} || [:numbered, :certificate].none?{|k| ordered_keys.include?(k)}
-#     'medium'
-#   elsif context[:proof_edition] && !context[:certificate]
-#     !context[:embellishing] ? 'category' : 'embellishing'
-#   end
+# def gartner_blade_signature(v, tag_key)
+#   v = (tag_key == 'tagline' ? "#{v} by GartnerBlade Glass." : "This piece is hand signed by GartnerBlade Glass.")
 # end

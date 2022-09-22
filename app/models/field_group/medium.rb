@@ -109,7 +109,7 @@ class Medium
 
       class StandardSerigraph < Serigraph
         def self.targets
-          ['serigraph', 'original serigraph', 'silkscreen']
+          ['serigraph', 'original serigraph', 'silkscreen', '3D silkscreen']
         end
       end
 
