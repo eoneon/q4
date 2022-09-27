@@ -10,10 +10,10 @@ module FieldCrud
   end
 
   def update_field_case(pre_val, new_val, param_hsh, tags, k, t, f_name)
-  	case
-  		when add?(pre_val, new_val); add_param(k, t, f_name, new_val, tags)
-  		when remove?(pre_val, new_val); remove_param(k, t, f_name, pre_val, param_hsh, tags)
-  		when replace?(pre_val, new_val); replace_param(k, t, f_name, new_val, pre_val, param_hsh, tags)
+  	case update_case(pre_val, new_val)
+      when :add; add_param(k, t, f_name, new_val, tags)
+  		when :remove; remove_param(k, t, f_name, pre_val, param_hsh, tags)
+  		when :replace; replace_param(k, t, f_name, new_val, pre_val, param_hsh, tags)
   	end
   end
 
@@ -236,6 +236,13 @@ end
 
 
 
+# def update_field_case(pre_val, new_val, param_hsh, tags, k, t, f_name)
+#   case
+#     when add?(pre_val, new_val); add_param(k, t, f_name, new_val, tags)
+#     when remove?(pre_val, new_val); remove_param(k, t, f_name, pre_val, param_hsh, tags)
+#     when replace?(pre_val, new_val); replace_param(k, t, f_name, new_val, pre_val, param_hsh, tags)
+#   end
+# end
 
 # def update_actions(k:, t:, f_name:, v:, v2:, context:, input_params:)
 #   remove_field_set_fields(v.f_args(v.g_hsh), input_params) if remove_field_set?(t, context)

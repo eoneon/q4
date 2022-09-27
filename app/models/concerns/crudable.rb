@@ -39,20 +39,6 @@ module Crudable
   	assign_attributes(item_params)
   end
 
-  # def update_item(item_params, params)
-  #   if args = update_item_obj(params)
-  #     update_item_target(*args)
-  #   else
-  #     assign_attributes(item_params)
-  #   end
-  # end
-  #
-  # def update_item_obj(params)
-  # 	if param_key = Item.str_hsh_to_arr(params["update_field"]).detect{|param_key| param_key.split('_')[-1] == 'id'}
-  #     [param_key.sub('_id', ''), public_send(param_key.sub('_id', '')), param_val(param_key, params[:item][param_key.to_sym])]
-  # 	end
-  # end
-  ############################################################################
   def update_item_target(target_name, old_target, new_id)
     if update_context = update_case(target_id(old_target), new_id)
   		public_send("update_item_#{target_name}", update_context, target_name, old_target, new_id)

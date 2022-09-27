@@ -11,17 +11,19 @@ class FieldSet < FieldItem
 
   #validates :field_name, uniqueness: true
 
-  def add_and_assoc_targets(target_group)
-    assoc_targets(add_targets(target_group))
-  end
+  # def add_and_assoc_targets(target_group)
+  #   assoc_targets(add_targets(target_group))
+  # end
+  #
+  # def add_targets(target_group)
+  #   target_group.map{|args| to_class(args[0]).where(field_name: args[2], kind: args[1]).first_or_create}
+  # end
+  #
+  # def assoc_targets(targets)
+  #   targets.map{|target| assoc_unless_included(target)}
+  # end
 
-  def add_targets(target_group)
-    target_group.map{|target_set| to_class(target_set[0]).where(field_name: target_set[2], kind: target_set[1]).first_or_create}
-  end
-
-  def assoc_targets(targets)
-    targets.map{|target| assoc_unless_included(target)}
-  end
+  ##############################################################################
 
   def self.media_set
     FieldSet.kv_set_search([["kind", "medium"]])

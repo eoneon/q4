@@ -24,10 +24,3 @@ class ItemsController < ApplicationController
     param_hsh['item'].select {|param_key, param_val| param_key.split('_')[-1]=='id'}.transform_keys {|param_key|  param_key.sub('_id', '')}
   end
 end
-
-
-
-# @item.assign_attributes(item_params)
-# @item.update_target_case('artist', @item.artist, params[:item][:artist_id])
-# @rows = @item.update_product_case('product', @item.product, params[:item][:product_id])
-# @titles = Artist.titles(@item.artist)

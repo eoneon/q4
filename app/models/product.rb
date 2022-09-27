@@ -19,20 +19,10 @@ class Product < ApplicationRecord
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  # def config_form_group(f_grp)
-  # 	product_attrs(f_grp[:context], f_grp[:attrs], tags)
-  # 	#inputs_and_tags = inputs_and_tag_hsh(f_grp)
-  # 	f_grp[:rows] = build_form_rows(inputs_and_tags[:inputs].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
-  # 	f_grp[:d_hsh] = inputs_and_tags[:tag_hsh]
-  #   puts "d_hsh=> #{f_grp[:d_hsh]}"
-  # 	f_grp
-  # end
-
   def config_form_group(f_grp)
     product_attrs(f_grp[:context], f_grp[:attrs], tags)
     f_grp[:rows] = build_form_rows(f_grp[:inputs].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
     f_grp[:d_hsh] = f_grp[:tag_hsh]
-    puts "d_hsh=> #{f_grp[:d_hsh]}"
     f_grp
   end
 
@@ -40,11 +30,6 @@ class Product < ApplicationRecord
     f_grp[:context][product_category(tags['product_type'])] = true
     Medium.tag_keys.map{|k| f_grp[:attrs][k] = tags[k]}
   end
-
-  # def product_attrs(context, attrs, p_tags)
-  #   context[product_category(p_tags['product_type'])] = true
-  #   Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
-  # end
 
   def inputs_and_tag_hsh(input_group)
   	unpacked_fields.each_with_object(input_group) do |f, input_group|
@@ -213,6 +198,19 @@ class Product < ApplicationRecord
 
 end
 
+# def config_form_group(f_grp)
+# 	product_attrs(f_grp[:context], f_grp[:attrs], tags)
+# 	#inputs_and_tags = inputs_and_tag_hsh(f_grp)
+# 	f_grp[:rows] = build_form_rows(inputs_and_tags[:inputs].group_by{|h| h[:k]}, media_group(f_grp[:context]).merge!(form_groups))
+# 	f_grp[:d_hsh] = inputs_and_tags[:tag_hsh]
+#   puts "d_hsh=> #{f_grp[:d_hsh]}"
+# 	f_grp
+# end
+
+# def product_attrs(context, attrs, p_tags)
+#   context[product_category(p_tags['product_type'])] = true
+#   Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
+# end
 
 # GROUPING METHODS: CRUD/VIEW ################################################
 # def product_item_loop(i_hsh, f_grp, keys)
