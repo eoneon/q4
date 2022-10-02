@@ -32,12 +32,6 @@ module FieldSeed
     end
 
     # CRUD METHODS #############################################################
-    # def add_field_and_merge(f_class, kind, type, f_name, tags, targets, store)
-    #   f_obj = add_field(f_class, f_name.to_s, kind.to_s, tags)
-    #   f_obj.add_and_assoc_targets(targets) if targets
-    #   case_merge(store, f_obj, kind, type, f_name)
-    # end
-
     def add_field_and_merge(f_class, kind, type, f_name, tags, target_group, store)
     	f_obj = add_field(f_class, f_name.to_s, kind.to_s, tags)
     	f_obj.add_and_assoc_targets(target_group, f_obj.fattrs.join('::')) if target_group

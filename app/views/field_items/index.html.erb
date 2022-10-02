@@ -1,0 +1,38 @@
+<h1>FieldItems#index</h1>
+<% if @field_items.empty? %>
+  <p><strong>No Field Items</strong></p>
+<% end %>
+
+<h2>Export Field Items</h2>
+<p>
+  Download:
+  <%= link_to "CSV", field_items_path(format: "csv") %> |
+</p>
+
+<h2>Import Field Items</h2>
+<%= form_tag import_field_items_path, multipart: true do %>
+  <%= file_field_tag :file %>
+  <%= submit_tag "Import" %>
+<% end %>
+
+<table class="table">
+  <thead>
+    <th>ID</th>
+    <th>Kind</th>
+    <th>FieldName</th>
+    <th>Sort</th>
+    <th>Parent</th>
+  </thead>
+
+  <tbody>
+    <% @field_items.each do |field_item| %>
+      <tr>
+        <td><%= field_item.id %></td>
+        <td><%= field_item.kind %></td>
+        <td><%= field_item.field_name %></td>
+        <td><%= field_item.tags %></td>
+        <td><%= field_item.assocs %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

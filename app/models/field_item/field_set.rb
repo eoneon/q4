@@ -9,22 +9,6 @@ class FieldSet < FieldItem
   has_many :number_fields, through: :item_groups, source: :target, source_type: "NumberField"
   has_many :text_area_fields, through: :item_groups, source: :target, source_type: "TextAreaField"
 
-  #validates :field_name, uniqueness: true
-
-  # def add_and_assoc_targets(target_group)
-  #   assoc_targets(add_targets(target_group))
-  # end
-  #
-  # def add_targets(target_group)
-  #   target_group.map{|args| to_class(args[0]).where(field_name: args[2], kind: args[1]).first_or_create}
-  # end
-  #
-  # def assoc_targets(targets)
-  #   targets.map{|target| assoc_unless_included(target)}
-  # end
-
-  ##############################################################################
-
   def self.media_set
     FieldSet.kv_set_search([["kind", "medium"]])
   end
@@ -82,10 +66,12 @@ class FieldSet < FieldItem
     set.map{|i| i.tags[k]}.uniq.compact
   end
 
-  # def self.builder(f)
-  #   field_set = FieldSet.where(field_name: f[:field_name], kind: f[:kind]).first_or_create
-  #   update_tags(field_set, f[:tags])
-  #   f[:options].map {|opt| field_set.assoc_unless_included(opt)}
-  #   field_set
-  # end
 end
+
+
+# def self.builder(f)
+#   field_set = FieldSet.where(field_name: f[:field_name], kind: f[:kind]).first_or_create
+#   update_tags(field_set, f[:tags])
+#   f[:options].map {|opt| field_set.assoc_unless_included(opt)}
+#   field_set
+# end

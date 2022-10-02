@@ -29,7 +29,7 @@ module Crudable
   end
 
   def assign_or_merge(h, h2)
-    h.nil? ? h2 : h.merge(h2)
+    h.nil? ? h2 : h.merge!(h2)
   end
   # ############################################################################
 
