@@ -10,7 +10,9 @@
 </p>
 
 <h2>Import Field Items</h2>
+
 <%= form_tag import_field_items_path, multipart: true do %>
+<%#= form_with url: "/import", multipart: true do |form| %>
   <%= file_field_tag :file %>
   <%= submit_tag "Import" %>
 <% end %>
@@ -20,8 +22,8 @@
     <th>ID</th>
     <th>Kind</th>
     <th>FieldName</th>
-    <th>Sort</th>
-    <th>Parent</th>
+    <th>assocs</th>
+    <th>tags</th>
   </thead>
 
   <tbody>
@@ -30,8 +32,8 @@
         <td><%= field_item.id %></td>
         <td><%= field_item.kind %></td>
         <td><%= field_item.field_name %></td>
-        <td><%= field_item.tags %></td>
         <td><%= field_item.assocs %></td>
+        <td><%= field_item.tags %></td>
       </tr>
     <% end %>
   </tbody>

@@ -22,6 +22,7 @@ module ProductSeed
     def combine_and_build(origins, fields, tag_keys, product_name)
       origins.each do |f|
         combine_fields(push_one_or_many({f: f, set:[], group:[]}, fields)).each do |p_fields|
+          #puts "p_fields=>#{p_fields}"
           p_fields = sort_fields(p_fields.group_by(&:kind))
           build_product(p_fields, tag_keys, product_name)
         end

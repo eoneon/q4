@@ -5,7 +5,7 @@ class Submedium
   include Textable
 
   def self.attrs
-    {kind: 2, type: 1, f_name: -1}
+    {kind: 2, type: 1, field_name: -1}
   end
 
   def self.config_leafing(k, tb_hsh, k_hsh, input_group, context)

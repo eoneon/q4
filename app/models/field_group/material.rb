@@ -5,7 +5,7 @@ class Material
   include Textable
 
   def self.attrs
-    {kind: 0, type: 1, subkind: 2, f_name: -1}
+    {kind: 0, type: 1, subkind: 2, field_name: -1}
   end
 
   def self.input_group
@@ -119,7 +119,7 @@ class Material
       end
 
       def self.name_values(args)
-        {material_search: args[:subkind], product_name: "on #{str_edit(str: uncamel(args[:f_name]), swap: ['Standard', ''])}"}
+        {material_search: args[:subkind], product_name: "on #{str_edit(str: uncamel(args[:field_name]), swap: ['Standard', ''])}"}
       end
 
       class Canvas < FlatType

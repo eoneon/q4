@@ -6,15 +6,15 @@ class Medium
   include ProductSeed
 
   def self.attrs
-    {kind: 0, type: 1, subkind: 2, f_name: -1}
+    {kind: 0, type: 1, subkind: 2, field_name: -1}
   end
 
   def self.admin_attrs(args)
-    {medium: str_edit(str: uncamel(args[:f_name]), swap: ['Standard', '', 'Painting', '', 'Production','', 'Sculpture', '', 'Hand Made', ''])}
+    {medium: str_edit(str: uncamel(args[:field_name]), swap: ['Standard', '', 'Painting', '', 'Production','', 'Sculpture', '', 'Hand Made', ''])}
   end
 
   def self.name_values(args)
-    {medium_search: args[:subkind], product_name: str_edit(str: uncamel(args[:f_name]), swap: ['Standard', '', 'Sculpture', '', 'Unknown', '', ' And ', ' and '], skip:['and']), origin: args[:f_name]}
+    {medium_search: args[:subkind], product_name: str_edit(str: uncamel(args[:field_name]), swap: ['Standard', '', 'Sculpture', '', 'Unknown', '', ' And ', ' and '], skip:['and']), origin: args[:field_name]}
   end
 
   class SelectField < Medium
@@ -74,7 +74,7 @@ class Medium
 
     class Drawing < SelectField
       def self.admin_attrs(args)
-        {medium: (args[:f_name].index('Pencil') ? 'Pencil' : 'Pen and Ink'), paper_only: 'paper_only'}
+        {medium: (args[:field_name].index('Pencil') ? 'Pencil' : 'Pen and Ink'), paper_only: 'paper_only'}
       end
 
       class PencilDrawing < Drawing

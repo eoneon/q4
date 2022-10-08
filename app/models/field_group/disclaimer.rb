@@ -4,7 +4,7 @@ class Disclaimer
   include Hashable
 
   def self.attrs
-    {kind: 0, type: 1, f_name: -1}
+    {kind: 0, type: 1, field_name: -1}
   end
 
   def self.input_group
@@ -69,7 +69,7 @@ end
   # 		context[k.to_sym] = true if severity == 'danger'
   # 	end
   # end
-  
+
 # def self.config_disclaimer(k, disclaimer_hsh, input_group, context, d_hsh)
 #   tb_hsh = Item.new.slice_valid_subhsh!(disclaimer_hsh, *Item.new.tb_keys)
 #   d_hsh[k] = config_body(tb_hsh, disclaimer_hsh.values[0])

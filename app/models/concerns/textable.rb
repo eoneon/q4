@@ -71,54 +71,10 @@ module Textable
       ['[', ']'].inject(str_hsh){|v, i| v.gsub(i, ' ').strip}.split(' ')
     end
 
-    # def str_hsh_to_hsh(s)
-    #   #['{', '}'].inject(str){|v, i| v.gsub(i, '')}.split('=>').map(&:strip)
-    #   #str[0..-2].gsub(/{/,'').split(/},/).each_with_object({}) {|pair, hsh| pair.split(/=>/).map(&:strip)}
-    #   #str[0..-2].gsub(/{/,'').split(/},/).map{|pair| set=pair.split(/=>/).map(&:strip); [set]}
-    #   s.gsub(/[{}]/,'').split(/=>/) split(/}/).each_with_object({}) do |pair,h|
-    #     puts "pair.split=>#{pair.split(/=>/)}"
-    #     h << pair.split(/=>/)
-    #   end
-    #   #str[0..-2].gsub(/{/,'').split(/},/).inject({}){|pair| pair.split(/=>/)}
-    # end
-
-    # def parse_str_hsh(str, idxs, start_idx=0, end_idx=nil)
-    # 	idxs.each_with_index do |i,idx|
-    # 		if idxs[-1]==i
-    # 			puts "last=> #{str[start_idx..-1]}"
-    # 		else
-    #       puts "start_idx(...)=>#{start_idx}"
-    #       next_idx = idxs[idx+1]
-    #       puts "next_idx(29,55)=>#{next_idx}"
-    #       str_slice = str[0..next_idx]
-    #       puts "str_slice=>#{str_slice}"
-    #       end_idx = str_slice.rindex(', ')-1
-    # 			#end_idx = str[start_idx..next_idx].rindex(', ')-1
-    #       puts "end_idx=>#{end_idx}"
-    #       puts "start_idx..end_idx=> #{[start_idx..end_idx]}"
-    # 			puts "not_last=> #{str[start_idx..end_idx]}"
-    # 			start_idx = end_idx+2
-    # 		end
-    # 	end
-    # end
     def parse_str_hsh(str, start_idx=0)
       str.gsub!(/[{}"]/,'')
     	str_idxs(str,'=>')[1..-1].map{|i| str[0..i].rindex(/\s/)}.each_with_object([]) {|i,a| a << str[start_idx..i-2].split('=>'); start_idx = i+1}.append(str[start_idx..-1].split('=>')).to_h
     end
-
-    # def parse_str_hsh(str, start_idx=0, end_idx=nil)
-    #   str = str.gsub(/[{}]/,'')
-    #   idxs = str_idxs(str,'=>')
-    # 	idxs.each_with_object([]).each_with_index do |(i,a), idx|
-    # 		if next_idx = idxs[idx+1]
-    # 			end_idx = str[0..next_idx].rindex(', ')-1
-    # 			a << str[start_idx..end_idx].split('=>')
-    # 			start_idx = end_idx+2
-    # 		else
-    # 			a << str[start_idx..-1].split('=>')
-    # 		end
-    # 	end
-    # end
 
     def str_idxs(str,substr)
       str.enum_for(:scan, /(?=#{substr})/).map{Regexp.last_match.offset(0).first}  #str.enum_for(:scan, /(?==>)/).map{Regexp.last_match.offset(0).first}

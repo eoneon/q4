@@ -6,7 +6,7 @@ class Sculpture
   include ProductSeed
 
   def self.attrs
-    {kind: 2, type: 1, subkind: 3, f_name: -1}
+    {kind: 2, type: 1, subkind: 3, field_name: -1}
   end
 
   def self.input_group
@@ -47,7 +47,7 @@ class Sculpture
 
     class Medium < SelectField
       def self.admin_attrs(args)
-        {item_category: str_edit(str: uncamel(args[:f_name]), swap: ['Sculpture', ''])}
+        {item_category: str_edit(str: uncamel(args[:field_name]), swap: ['Sculpture', ''])}
       end
 
       class AcrylicSculpture < Medium
@@ -89,7 +89,7 @@ class Sculpture
 
     class GartnerBlade < SelectField
       def self.attrs
-        {kind: 3, subkind: 2, f_name: -1}
+        {kind: 3, subkind: 2, field_name: -1}
       end
 
       def self.target_tags(f_name)
@@ -253,7 +253,7 @@ class Sculpture
     class SculptureType < FieldSet
       class SculptureMedium < SculptureType
         def self.name_values(args)
-          {medium_search: args[:f_name], product_name: str_edit(str: uncamel(args[:f_name])), origin: args[:f_name]}
+          {medium_search: args[:field_name], product_name: str_edit(str: uncamel(args[:field_name])), origin: args[:field_name]}
         end
 
         class PrimitiveBowl < SculptureMedium

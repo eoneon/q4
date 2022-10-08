@@ -4,7 +4,7 @@ class Dimension
   include Hashable
 
   def self.attrs
-    {kind: 0, type: 1, f_name: -1}
+    {kind: 0, type: 1, field_name: -1}
   end
 
   def self.material_units

@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  get 'products/index'
+
+  get 'products/import'
+
   get 'field_items/index'
 
   #get 'search_items/search'
@@ -61,7 +65,11 @@ Rails.application.routes.draw do
   resources :field_items do
     collection { post :import }
   end
-  
+
+  resources :products do
+    collection { post :import }
+  end
+
   # resources :product_search, only: [:index, :show]
   # resources :product_items
   #

@@ -6,6 +6,7 @@ class Product < ApplicationRecord
   include Hashable
   include TypeCheck
   include Search
+  include CSVSeed
 
   validates :product_name, presence: true
   validates :product_name, uniqueness: true
@@ -187,14 +188,28 @@ class Product < ApplicationRecord
     def builder(product_name, fields, tags=nil)
       p = where(product_name: product_name).first_or_create
       p.update_tags(tags)
+      p.config_assocs(fields)
       p.assoc_targets(fields)
+      p.save
     end
 
+    def csv_seed(set)
+    	build_field_assocs
+    end
   end
 
   def assoc_targets(targets)
     targets.each_with_object(self){|target,p| assoc_unless_included(target)}
   end
+
+  # def update_assocs(fields)
+  # 	self.assocs = assign_or_merge(target.assocs, {assoc=>true})
+  # 	self.save
+  # end
+
+  # def config_assocs(fields)
+  #   self.assocs = fields.each_with_object({}).each_with_index {|(f,h),i| h[[f.type,f.field_name,f.kind].join('::')] = i+1}
+  # end
 
 end
 

@@ -10,6 +10,5 @@ class FieldItemsController < ApplicationController
   def import
     FieldItem.import(params[:file])
     redirect_to field_items_path
-    flash[:notice] = "Field items successfully imported."
   end
 end

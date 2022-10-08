@@ -5,7 +5,7 @@ class Category
   include Textable
 
   def self.attrs
-    {kind: 0, type: 1, subkind: 2, f_name: -1}
+    {kind: 0, type: 1, subkind: 2, field_name: -1}
   end
 
   def self.input_group
@@ -19,8 +19,8 @@ class Category
       end
 
       def self.name_values(args)
-        name = str_edit(str: uncamel(args[:f_name]), swap: ['Standard', '', 'One Of A Kind', 'One-of-a-Kind'])
-        {category_search: args[:f_name], product_name: name, tagline: name, body: name.downcase}
+        name = str_edit(str: uncamel(args[:field_name]), swap: ['Standard', '', 'One Of A Kind', 'One-of-a-Kind'])
+        {category_search: args[:field_name], product_name: name, tagline: name, body: name.downcase}
       end
 
       class StandardOriginal < Original #3
@@ -40,7 +40,7 @@ class Category
       end
 
       def self.name_values(args)
-        {category_search: args[:f_name]}
+        {category_search: args[:field_name]}
       end
 
       def self.targets
@@ -53,7 +53,7 @@ class Category
       end
 
       def self.name_values(args)
-        {category_search: args[:f_name].sub('Standard', '')}
+        {category_search: args[:field_name].sub('Standard', '')}
       end
 
       class StandardSculpture < Sculpture
@@ -121,8 +121,8 @@ class Category
       end
 
       def self.name_values(args)
-        name = str_edit(str: uncamel(args[:f_name]), swap: ['One Of A Kind', 'One-of-a-Kind', 'Of One', '1/1'])
-        {category_search: args[:f_name], product_name: name, tagline: name, body: name.downcase}
+        name = str_edit(str: uncamel(args[:field_name]), swap: ['One Of A Kind', 'One-of-a-Kind', 'Of One', '1/1'])
+        {category_search: args[:field_name], product_name: name, tagline: name, body: name.downcase}
       end
 
       class OneOfAKindOfOne < Original
