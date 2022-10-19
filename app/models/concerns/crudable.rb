@@ -124,6 +124,27 @@ module Crudable
     tags ? tags : {}
   end
 
+  # ############################################################################
+
+  # def build_field_assocs
+  #   all.select{|f| f.assocs && f.assocs.any?}.map {|f| assoc_fields(f)}
+  # end
+  #
+  # def assoc_fields(f)
+  #   f.assocs.transform_keys{|k| k.to_i}.sort_by{|k,v| k}.map{|assoc| build_assoc(f, *assoc[1].split('::'))}
+  # end
+
+  # def build_assoc(f, t, k, f_name)
+  #   f.assoc_unless_included(f.to_class(t).where(kind: k, field_name: f_name).first_or_create)
+  # end
+
+  # def assoc_fields
+  #   assocs.transform_keys{|k| k.to_i}.sort_by{|k,v| k}.map{|assoc| build_assoc(*assoc[1].split('::'))}
+  # end
+  #
+  # def build_assoc(t, k, f_name)
+  #   self.assoc_unless_included(to_class(t).where(kind: k, field_name: f_name).first_or_create)
+  # end
 end
 
 

@@ -1,6 +1,5 @@
 class FieldItem < ApplicationRecord
 
-  #require 'json'
   include Fieldable
   include Crudable
   include TypeCheck
@@ -13,17 +12,42 @@ class FieldItem < ApplicationRecord
   	[:kind, :type, :field_name].map{|attr| public_send(attr).underscore}
   end
 
-  def add_and_assoc_targets(target_group)
-  	add_targets(target_group).map{|target| assoc_unless_included(target)}
+  def self.seed
+    Medium.class_group('FieldGroup').reverse.each_with_object({}) do |c, store|
+      c.build_and_store(:targets, store)
+    end
   end
+end
 
-  def add_targets(target_group)
-  	target_group.map{|target_args| add_target(target_args)}
-  end
 
-  def add_target(target_args)
-  	to_class(target_args[0]).where(field_name: target_args[2], kind: target_args[1]).first_or_create
-  end
+
+
+
+
+
+
+# def add_and_assoc_targets(target_group)
+#   add_targets(target_group).map{|target| assoc_unless_included(target)}
+# end
+#
+# def add_targets(target_group)
+#   target_group.map{|target_args| add_target(target_args)}
+# end
+#
+# def add_target(target_args)
+#   to_class(target_args[0]).where(field_name: target_args[2], kind: target_args[1]).first_or_create
+# end
+
+# def update_hstores(f_hsh)
+#   %w[tags assocs].select{|hstore| f_hsh[hstore.to_sym].present?}.map{|hstore| self.public_send(hstore) = f_hsh[hstore.to_sym]; self.save}
+  # if hstores.any?
+  #   puts "f_hsh[hstore]=>#{f_hsh[hstore]}"
+  #   hstores.map{|hstore| self.public_send(hstore) = f_hsh[hstore]}
+  #   self.save
+  # end
+# end
+
+
 
   # def self.import(file)
   #   CSV.foreach(file.path, headers: true) do |row|
@@ -40,18 +64,6 @@ class FieldItem < ApplicationRecord
   #     end
   #   end
   # end
-
-  def self.csv_seed
-    [FieldSet, SelectMenu, SelectField].map{|c| c.build_field_assocs}
-  end
-
-  def self.seed
-    Medium.class_group('FieldGroup').reverse.each_with_object({}) do |c, store|
-      c.build_and_store(:targets, store)
-    end
-  end
-end
-
 
 # def self.hm_assocs
 #   self.reflect_on_all_associations(:has_many).map{|assoc| assoc.name.to_s} #plural

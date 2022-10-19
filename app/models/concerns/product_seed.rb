@@ -7,10 +7,12 @@ module ProductSeed
 
     def product_group(store)
       select_end_classes.each do |c|
-        fields = c.dig_product_fields(:assocs, store)
-        origins, fields = split_set(fields, fields.select{|f| f.tags&.has_key?('origin')})
-        combine_and_build(origins, fields, c.tag_keys, c.call_if(:product_name))
+        combine_and_build(*origins_and_fields(c.dig_product_fields(:assocs, store)), c.tag_keys, c.call_if(:product_name))
       end
+    end
+
+    def origins_and_fields(fields)
+      split_set(fields, fields.select{|f| f.tags&.has_key?('origin')})
     end
 
     def dig_product_fields(m,store)
@@ -22,24 +24,18 @@ module ProductSeed
     def combine_and_build(origins, fields, tag_keys, product_name)
       origins.each do |f|
         combine_fields(push_one_or_many({f: f, set:[], group:[]}, fields)).each do |p_fields|
-          #puts "p_fields=>#{p_fields}"
-          p_fields = sort_fields(p_fields.group_by(&:kind))
-          build_product(p_fields, tag_keys, product_name)
+          build_product(sort_fields(p_fields.group_by(&:kind)), tag_keys, product_name)
         end
       end
     end
 
     def combine_fields(p_hsh)
-      if p_hsh[:group].any?
-        [p_hsh[:f]].product(*p_hsh[:group]).map{|a| a + p_hsh[:set]}
-      else
-        [p_hsh[:set].append(p_hsh[:f])]
-      end
+      p_hsh[:group].any? ? [p_hsh[:f]].product(*p_hsh[:group]).map{|a| a + p_hsh[:set]} : [p_hsh[:set].append(p_hsh[:f])]
     end
 
     def push_one_or_many(p_hsh, fields)
-      fields.group_by(&:kind).values.each_with_object(p_hsh) do |a, p_hsh|
-        a.one? ? p_hsh[:set] << a[0] : p_hsh[:group] << a
+      fields.group_by(&:kind).each_with_object(p_hsh) do |(kind, vals), p_hsh|
+        vals.one? ? p_hsh[:set] << vals[0] : p_hsh[:group] << vals
       end
     end
 

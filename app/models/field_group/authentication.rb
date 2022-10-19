@@ -93,6 +93,7 @@ class Authentication
       def self.body(f_name)
         case
           when %w[plate authorized].any? {|i| f_name.split(' ').include?(i)}; "bearing the #{f_name} signature of the artist"
+          when f_name.split(' ').include?('thumbprinted'); "hand signed and bearing the thumbprint of the artist"
           when f_name == 'unsigned'; "This piece is unsigned."
           when f_name.index('estate'); f_name
           else "#{f_name} by the artist";
@@ -101,15 +102,15 @@ class Authentication
 
       class StandardSignature < Signature
         def self.targets
-          ['hand signed', 'hand signed inverso', 'plate signed', 'authorized', 'estate signed', 'estate signed inverso', 'unsigned']
+          ['hand signed', 'hand signed inverso', 'plate signed', 'authorized', 'estate signed', 'estate signed inverso', 'signed & thumbprinted', 'unsigned']
         end
       end
 
-      class WileySignature < Signature
-        def self.targets
-          ['hand signed and thumbprinted', 'hand signed', 'hand signed inverso', 'unsigned']
-        end
-      end
+      # class WileySignature < Signature
+      #   def self.targets
+      #     ['hand signed and thumbprinted', 'hand signed', 'hand signed inverso', 'unsigned']
+      #   end
+      # end
     end
 
     class Certificate < SelectField
@@ -190,6 +191,18 @@ class Authentication
   end
 
   class TextField < Authentication
+    class Signature < TextField
+      class Signer < Signature
+        def self.targets
+        end
+      end
+
+      class SignerTag < Signature
+        def self.targets
+        end
+      end
+    end
+
     class Verification < TextField
       class VerificationNumber < Verification
         def self.targets
@@ -206,6 +219,15 @@ class Authentication
   end
 
   class FieldSet < Authentication
+    #new
+    class Signature < FieldSet
+      class StandardSignature < Signature
+        def self.targets
+          [%W[SelectField Signature StandardSignature], %W[TextField Signature Signer], %W[TextField Signature SignerTag]]
+        end
+      end
+    end
+
     class Dated < FieldSet
       class StandardDated < Dated
         def self.targets
@@ -235,9 +257,15 @@ class Authentication
         {kind: 0}
       end
 
+      # class StandardAuthentication < GroupA
+      #   def self.targets
+      #     [%W[FieldSet Dated StandardDated], %W[SelectField Signature StandardSignature], %W[SelectField Certificate StandardCertificate]]
+      #   end
+      # end
+
       class StandardAuthentication < GroupA
         def self.targets
-          [%W[FieldSet Dated StandardDated], %W[SelectField Signature StandardSignature], %W[SelectField Certificate StandardCertificate]]
+          [%W[FieldSet Dated StandardDated], %W[FieldSet Signature StandardSignature], %W[SelectField Certificate StandardCertificate]]
         end
       end
 
@@ -253,21 +281,27 @@ class Authentication
         end
       end
 
-      class WileyAuthentication < GroupA
-        def self.targets
-          [%W[SelectField Signature WileySignature], %W[SelectField Certificate StandardCertificate]]
-        end
-      end
+      # class StandardSericelAuthentication < GroupA
+      #   def self.targets
+      #     [%W[SelectField Signature StandardSignature], %W[SelectField Seal AnimatorSeal], %W[SelectField Certificate StandardCertificate]]
+      #   end
+      # end
 
       class StandardSericelAuthentication < GroupA
         def self.targets
-          [%W[SelectField Signature StandardSignature], %W[SelectField Seal AnimatorSeal], %W[SelectField Certificate StandardCertificate]]
+          [%W[FieldSet Signature StandardSignature], %W[SelectField Seal AnimatorSeal], %W[SelectField Certificate StandardCertificate]]
         end
       end
 
+      # class SericelAuthentication < GroupA
+      #   def self.targets
+      #     [%W[FieldSet Dated StandardDated], %W[SelectField Signature StandardSignature], %W[FieldSet Seal AnimationSeal], %W[SelectField Certificate StandardCertificate]]
+      #   end
+      # end
+
       class SericelAuthentication < GroupA
         def self.targets
-          [%W[FieldSet Dated StandardDated], %W[SelectField Signature StandardSignature], %W[FieldSet Seal AnimationSeal], %W[SelectField Certificate StandardCertificate]]
+          [%W[FieldSet Dated StandardDated], %W[FieldSet Signature StandardSignature], %W[FieldSet Seal AnimationSeal], %W[SelectField Certificate StandardCertificate]]
         end
       end
     end

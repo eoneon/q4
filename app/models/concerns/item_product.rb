@@ -66,9 +66,14 @@ module ItemProduct
   	input_group[:inputs] << f_hsh(k, t, f_name, f)
   	if selected = input_group[:param_hsh].dig(k, t_type(t), f_name)
   		input_group[:inputs][-1][:selected] = format_selected(t, selected)
+      k = reset_kind(k, f_name)
       context_from_selected(k, t, f_name, selected, input_group[:context])
-  		tag_attr?(t) ? selected_tag_attr(input_group[:d_hsh], selected, k, f_name) : selected_field(input_group, selected, *selected.fattrs)
+      tag_attr?(t) ? selected_tag_attr(input_group[:d_hsh], selected, k, f_name) : selected_field(input_group, selected, k, selected.type.underscore, selected.field_name.underscore)
   	end
+  end
+
+  def reset_kind(k, f_name)
+    k=='seal' ? f_name : k
   end
 
   def selected_tag_attr(d_hsh, selected, k, f_name)
@@ -111,7 +116,7 @@ module ItemProduct
 
   ##############################################################################
   def init_input_group(input_group={:param_hsh=>{}, :d_hsh=>{}, :context=>{}, :inputs=>[], :attrs=>{}})
-    tags.each_with_object (input_group) {|(key, selected), hsh| Item.case_merge(input_group, (tag_attr?(key.split('::')[1]) ? selected : fieldables.detect{|f| f.id==(selected.to_i)}), :param_hsh, *key.split('::'))}
+    tags.each_with_object(input_group) {|(key, selected), hsh| Item.case_merge(input_group, (tag_attr?(key.split('::')[1]) ? selected : fieldables.detect{|f| f.id==(selected.to_i)}), :param_hsh, *key.split('::'))}
   end
 
   ##############################################################################
@@ -154,6 +159,7 @@ module ItemProduct
 
   def config_dependent_kinds(input_group, context, d_hsh)
     dependent_kinds_hsh(context[:body][:order].keys).each do |klass, kinds|
+      puts "d_hsh=>#{d_hsh}"
       kinds.map {|k| config_public_kind(k, klass, d_hsh[k], d_hsh[k].slice!(*tb_keys), input_group, context)}
     end
   end

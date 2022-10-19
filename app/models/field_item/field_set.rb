@@ -1,4 +1,5 @@
 class FieldSet < FieldItem
+  #include CSVSeed
 
   has_many :select_menus, through: :item_groups, source: :target, source_type: "SelectMenu"
   has_many :field_sets, through: :item_groups, source: :target, source_type: "FieldSet"

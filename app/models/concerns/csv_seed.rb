@@ -9,7 +9,6 @@ module CSVSeed
   end
 
   def assoc_val(target)
-    #puts "target=>#{target}"
   	(target.class==Array ? ['Option', target[1], target[0]] : field_assoc(target)).join('::')
   end
 
@@ -17,12 +16,12 @@ module CSVSeed
   	%w[type kind field_name].map{|attr| f.public_send(attr)}
   end
 
-  def assoc_fields
-    assocs.transform_keys{|k| k.to_i}.sort_by{|k,v| k}.values.map {|assoc| build_assoc(*assoc.split('::'))}
+  def build_field_assocs
+    all.select{|f| f.assocs && f.assocs.any?}.map {|f| f.assoc_fields}
   end
 
-  def build_assoc(t, k, f_name)
-    assoc_unless_included(to_class(t).where(kind: k, field_name: f_name))
+  def build_field_assocs
+    all.select{|f| f.assocs && f.assocs.any?}.map {|f| assoc_fields(f)}
   end
 
   class_methods do
@@ -49,19 +48,24 @@ module CSVSeed
     end
 
     def config_hstore(row)
-      #each_with_object(row).select{|k,v| %w[tags assocs].include?(k) && v.present?} do |hstore, row|
-      %w[tags assocs].each_with_object(row) do |hstore, row|
-        puts "#{hstore}=>#{row[hstore]}"
-        if row[hstore].present?
+      %w[tags assocs].each_with_object(row) do |hstore, row| #each_with_object(row).select{|k,v| %w[tags assocs].include?(k) && v.present?} do |hstore, row|
+        if row[hstore].present? && row[hstore] !="{}"
           row[hstore] = Item.parse_str_hsh(row[hstore])
         end
       end
     end
 
     def build_field_assocs
-    	all.select{|origin| origin.assocs}.map {|origin| origin.assoc_fields}
+      all.select{|f| f.assocs && f.assocs.any?}.map {|f| assoc_fields(f)}
     end
 
+    def assoc_fields(f)
+      f.assocs.transform_keys{|k| k.to_i}.sort_by{|k,v| k}.map{|assoc| build_assoc(f, *assoc[1].split('::'))}
+    end
+
+    def build_assoc(f, t, k, f_name)
+      f.assoc_unless_included(f.to_class(t).where(kind: k, field_name: f_name).first_or_create)
+    end
   end
 
 end

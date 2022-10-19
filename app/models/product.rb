@@ -193,8 +193,8 @@ class Product < ApplicationRecord
       p.save
     end
 
-    def csv_seed(set)
-    	build_field_assocs
+    def csv_seed
+      [FieldSet, SelectMenu, SelectField, Product].map{|c| c.build_field_assocs}
     end
   end
 
@@ -202,16 +202,17 @@ class Product < ApplicationRecord
     targets.each_with_object(self){|target,p| assoc_unless_included(target)}
   end
 
-  # def update_assocs(fields)
-  # 	self.assocs = assign_or_merge(target.assocs, {assoc=>true})
-  # 	self.save
-  # end
-
-  # def config_assocs(fields)
-  #   self.assocs = fields.each_with_object({}).each_with_index {|(f,h),i| h[[f.type,f.field_name,f.kind].join('::')] = i+1}
-  # end
-
 end
+
+
+# def update_assocs(fields)
+# 	self.assocs = assign_or_merge(target.assocs, {assoc=>true})
+# 	self.save
+# end
+
+# def config_assocs(fields)
+#   self.assocs = fields.each_with_object({}).each_with_index {|(f,h),i| h[[f.type,f.field_name,f.kind].join('::')] = i+1}
+# end
 
 # def config_form_group(f_grp)
 # 	product_attrs(f_grp[:context], f_grp[:attrs], tags)

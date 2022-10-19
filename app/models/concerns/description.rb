@@ -104,27 +104,24 @@ module Description
   end
 
   def config_option_context(k, f_name, tag_hsh, context)
-  	set_option_kind_context(k, context)
+    set_option_kind_context(k, context)
   	set_numbering_context(k, f_name, context)
   	set_tagline_value_context(k, tag_hsh, context)
   	field_context_order(k, tag_hsh, context)
   end
 
   def set_option_kind_context(k, context)
-  	context[k.to_sym] = true if valid_option_kind?(k)
+    context[k.to_sym] = true if valid_option_kind?(k)
+    context[:seal] = true if k=='animator_seal' || k=='sports_seal'
   end
 
   def valid_option_kind?(k)
-  	%w[embellishing category medium sculpture_type numbering leafing remarque animator_seal sports_seal certificate].include?(k)
+  	%w[embellishing category medium sculpture_type numbering leafing remarque seal animator_seal sports_seal certificate].include?(k)
   end
 
   def config_tag_attr_context(k, selected, context)
   	context[k.to_sym] = true
   	set_order(context, :body, k)
-  end
-
-  def set_kind_context(k, selected, context)
-    context[k.to_sym] = true if valid_kind_context?(k, selected)
   end
 
   def set_numbering_context(k, f_name, context)
