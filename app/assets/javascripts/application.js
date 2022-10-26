@@ -67,7 +67,7 @@ $(document).ready(function(){
   	thisForm($(this)).submit();
   });
 
-  $("body").on("change", "#search-items .product, .search.artist, hattrs .title, .hattrs .mounting, .hattrs .measures, .hattrs .edition", function() {
+  $("body").on("change", "#search-items .product, .search.artist, .hattrs .title, .hattrs .mounting, .hattrs .measures, .hattrs .edition", function() {
     thisForm($(this)).submit();
   });
 

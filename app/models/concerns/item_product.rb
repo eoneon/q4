@@ -109,7 +109,7 @@ module ItemProduct
   end
 
   def config_attrs(p_tags, attrs)
-    attrs.merge!(default_hsh(*csv_export_keys))
+    attrs.merge!(default_hsh(*csv_export_attrs))
   	%w[sku retail qty].map{|k| attrs[k] = public_send(k)}
   	Medium.tag_keys.map{|k| attrs[k] = p_tags[k]}
   end
@@ -159,7 +159,6 @@ module ItemProduct
 
   def config_dependent_kinds(input_group, context, d_hsh)
     dependent_kinds_hsh(context[:body][:order].keys).each do |klass, kinds|
-      puts "d_hsh=>#{d_hsh}"
       kinds.map {|k| config_public_kind(k, klass, d_hsh[k], d_hsh[k].slice!(*tb_keys), input_group, context)}
     end
   end

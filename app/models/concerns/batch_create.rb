@@ -10,7 +10,7 @@ module BatchCreate
   end
 
   def black_list
-    %w[severity damage mounting_width mounting_height edition edition_size]
+    %w[severity damage edition edition_size]
   end
 
   ##############################################################################

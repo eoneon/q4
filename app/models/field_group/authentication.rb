@@ -47,8 +47,12 @@ class Authentication
     end
   end
 
+  def self.config_signature(k, tb_hsh, k_hsh, input_group, context)
+  	#
+  end
+
   def self.config_animator_seal(k, tb_hsh, k_hsh, input_group, context)
-  	tb_hsh.transform_values!{|tag_val| config_animator_seal_value(tag_val, context)}
+    tb_hsh.transform_values!{|tag_val| config_animator_seal_value(tag_val, context)}
   end
 
   def self.config_animator_seal_value(tag_val, context)

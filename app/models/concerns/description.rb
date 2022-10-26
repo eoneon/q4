@@ -29,7 +29,7 @@ module Description
   end
 
   def config_invoice_tagline_hsh(keys, tag_key, d_hsh)
-  	keys.each_with_object({}) {|k, hsh| hsh[k]= config_invoice_tagline_val(k, d_hsh.dig(k, tag_key), d_hsh)}
+  	keys.append('dimension').each_with_object({}) {|k, hsh| hsh[k]= config_invoice_tagline_val(k, d_hsh.dig(k, tag_key), d_hsh)}
   end
 
   def config_invoice_tagline_val(k, tag_val, d_hsh, alt_key='tagline')

@@ -26,10 +26,8 @@ class Dimension
   def self.config_dimension(k, dimension_hsh, input_group, context, d_hsh)
     config_dimension_hsh(dimension_hsh, context, input_group[:attrs])
     material_dimension, mounting_dimension = Dimension.tags.map{|key| dimension_hsh.dig(key)}
-    input_group[:attrs].merge!({'item_size'=> material_dimension['item_size']})
+    input_group[:attrs].merge!({'item_size'=> material_dimension['item_size'], 'measurements'=>material_dimension['measurements'], 'mounting_search'=>d_hsh.dig('mounting', 'mounting_search')})
     Dimension.new.tb_dimensions(k, material_dimension, mounting_dimension, d_hsh)
-    #context[:order]['tagline'].delete(k) unless d_hsh.dig(k, 'tagline')
-    #d_hsh.dig(k, 'tagline') ? context['tagline'][:media_punct] = 'dimension' : context['tagline'][:order].delete(k)
   end
 
   def self.measurement_hsh(tag_hsh, selected, k, f_name, key='measurements')
@@ -426,6 +424,7 @@ class Dimension
     measurements = [material_measurements, abbrv_mounting_measurements(mounting_dimensions)].compact
     measurements = measurements.count>1 ? measurements.join(' - ') : measurements[0]
     Item.case_merge(d_hsh, "(#{measurements})", k, 'invoice_tagline')
+    #Item.case_merge(d_hsh, material_measurements, k, 'measurements')
   end
 
   def dimension_description_params(dimensions, diameter, dimension_tag)

@@ -22,7 +22,7 @@ module KindContext
   end
 
   def dependent_kinds
-    {LimitedEdition: ['numbering'], Disclaimer: ['disclaimer'], Authentication: %w[certificate dated verification animator_seal sports_seal], Submedium: %w[leafing remarque]}
+    {LimitedEdition: ['numbering'], Disclaimer: ['disclaimer'], Authentication: %w[certificate dated verification animator_seal sports_seal signature], Submedium: %w[leafing remarque]}
   end
   ##############################################################################
 
@@ -151,13 +151,13 @@ module KindContext
   def key_group
     {
       tagline: {
-        order: %w[artist title mounting embellishing category medium sculpture_type material dimension leafing remarque numbering signature certificate disclaimer],
+        order: %w[artist title mounting embellishing category medium sculpture_type material dimension leafing remarque numbering signature signer signer_tag certificate disclaimer],
         media: %w[category medium sculpture_type material leafing remarque dimension],
         end_key: [:danger, :unsigned],
-        category: [['Limited Edition']], medium: [['Giclee'], ['Hand Pulled'], ['Mixed Media']], material: [['Gallery Wrapped'], ['Rice'], ['Paper']], mounting: [['Framed']], signature: [['Unsigned'], ['Plate Signed', 'Signed'], ['Signed'], ['Signature', 'Signed']], disclaimer: [['Disclaimer', 'Danger']]
+        category: [['Limited Edition']], medium: [['Giclee'], ['Hand Pulled'], ['Mixed Media']], material: [['Gallery Wrapped'], ['Rice'], ['Paper']], mounting: [['Framed']], signature: [['Unsigned'], ['Plate Signed', 'Signed'], ['Signed'], ['Signature', 'Signed'], ['Signer'], ['SignerTag']], disclaimer: [['Disclaimer', 'Danger']]
       },
       body: {
-        order: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
+        order: %w[title text_after_title embellishing category medium sculpture_type material leafing remarque artist dated numbering signature signer signer_tag verification text_before_coa mounting animator_seal sports_seal certificate dimension disclaimer],
         media: %w[text_after_title category numbering medium sculpture_type material leafing remarque artist],
         end_key: %w[dated signature]
       },
