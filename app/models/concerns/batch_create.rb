@@ -9,11 +9,42 @@ module BatchCreate
     i.batch_loop_create_skus(skus[1..-1], sku_params) if skus[1..-1].any?
   end
 
+  def batch_dup_items(skus, item_params, artist, params_hsh, dig_group)
+    i = dup_item(skus, item_params, artist, tags.reject{|k,v| black_list.include?(k.split('::').last)}, params_hsh, dig_group)
+    i.batch_loop_create_skus(skus[1..-1], item_params) if skus[1..-1].any?
+  end
+
+  def get_hattr_form_rows(rows, dig_keys_for_dup_form)
+    dig_keys_for_dup_form.each_with_object({}) {|dig_keys, new_rows| filter_row(*dig_keys, rows, new_rows)}
+  end
+
+  def filter_row(k, t, rows, new_rows)
+    rows[k].map{|form_lev, field_set| Item.case_merge(new_rows, field_set.select{|f_hsh| f_hsh[:t_type]==t}, k, form_lev)}
+  end
+
   def black_list
     %w[severity damage edition edition_size]
   end
 
   ##############################################################################
+  def dup_item(skus, item_params, artist, tag_hsh, params_hsh, dig_group)
+  	Item.model_dup_sku(skus[0], item_params, {:fields=> fieldables, :tags=> update_tag_hsh(params_hsh, tag_hsh, dig_group)}, artist, product)
+  end
+
+  def update_tag_hsh(params_hsh, tag_hsh, dig_group)
+    puts "tag_hsh=>#{tag_hsh}"
+  	return {} if !tag_hsh
+  	dig_group.each_with_object(tag_hsh) {|dig_keys, tag_hsh| update_dup_tags(tag_hsh, params_hsh.dig(*dig_keys), *dig_keys)}
+  end
+
+  def update_dup_tags(tag_hsh, hattrs, k, t)
+    puts "hattrs=>#{hattrs}"
+  	hattrs.each_with_object(tag_hsh) do |(f_name,v), tag_hsh|
+      tag_key = [k, t, f_name].join('::')
+      puts "tag_key=>#{tag_key}"
+  		v.present? ? tag_hsh[tag_key] = v : tag_hsh.delete(tag_key)
+  	end
+  end
 
   def batch_loop_create_skus(skus, sku_params)
   	skus.each do |sku|

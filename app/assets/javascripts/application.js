@@ -122,6 +122,19 @@ $(document).ready(function(){
     toggleTab(new_id, e);
   });
 
+  // $("body").on("click", ".list-group-item", function(e){
+  // 	var [new_id, form] = [$(this).attr("id"), $(this).attr("data-form")];
+  // 	var input = $(form).find($($(this).attr("data-field")));
+  // 	new_id = toggleSet(input, new_id, $(input).val());
+  // 	requiredFields(input);
+  // 	toggleTab(new_id, e);
+  // 	if (new_id==""){
+  // 		$("#test-form").remove();
+  // 	} else {
+  // 		$(form).submit();
+  // 	}
+  // });
+
   $("body").on("click", ".toggle-view", function(){
     var toggle_targets = "."+$(this).attr("id");
     $(toggle_targets).toggleClass("show collapse");
@@ -426,8 +439,13 @@ $(document).ready(function(){
   }
 
   //TOGGLE VALUES
+  // function toggleSet(input, new_id, old_id) {
+  //   $(input).val(toggleVal(new_id, old_id));
+  // }
   function toggleSet(input, new_id, old_id) {
-    $(input).val(toggleVal(new_id, old_id));
+  	var v = toggleVal(new_id, old_id)
+  	$(input).val(v);
+  	return v
   }
   function toggleVal(new_id, old_id) {
     return new_id == old_id ? "" : new_id

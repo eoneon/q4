@@ -8,6 +8,10 @@
   <%= render "item_fields/edit", item: item, rows: rows %>
 </div>
 
+<div class="collapse" id="dup-item-toggle" data-parent="#<%= dom_ref('navbar-forms', item) %>">
+  <%= render 'batch_items/dup_form', invoice: invoice, item: item, hattr_rows: @hattr_rows %>
+</div>
+
 <div class="collapse" id="edit-sku-toggle" data-parent="#<%= dom_ref('navbar-forms', item) %>">
   <%= render 'skus/edit', invoice: invoice, item: item %>
 </div>

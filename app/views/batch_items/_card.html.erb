@@ -1,0 +1,5 @@
+<div class="card bg-gray-d p-0 mb-1">
+  <%= number_field_tag "item_id", item.id, class: "collapse required" %>
+  <%= render "batch_items/header", f: f, item: item %>
+  <%= render "batch_items/body", f: f, item: item, rows: rows %>
+</div>

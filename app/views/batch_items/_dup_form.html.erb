@@ -1,0 +1,5 @@
+<%= form_with model: Item.new, url: invoice_batch_items_path(invoice), id: dom_ref('new-item-skus', item) do |f| %>
+  <div class="form">
+    <%= render "batch_items/card", f: f, item: item, rows: hattr_rows %>
+  </div>
+<% end %>

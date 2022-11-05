@@ -2,8 +2,32 @@
   <div class="card-header bg-transparent border-0 pt-0 pb-0 pr-0 mr-0">
     <div class="row">
       <div class="col-auto p-0 pt-1 pr-0 ml-0 mr-0 my-0">
-        <span id="#<%= dom_ref('sku', item) %>" class="fs-s sku-span pt-1"><%= item.sku %></span>
+
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#<%= dom_ref('modal', item) %>">
+          <span id="#<%= dom_ref('sku', item) %>" class="fs-s sku-span"><%= item.sku %></span>
+        </button>
+
         <%= render 'table_skus/abbrv_tagline', item: item %>
+      </div>
+
+      <div class="modal fade" id="<%= dom_ref('modal', item) %>" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              ...
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="col d-flex flex-row-reverse ml-0 pl-0 py-0 my-0 mr-1">

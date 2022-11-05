@@ -12,9 +12,11 @@ module ProductCrud
   def assign_fields_and_tags(fields_and_tags)
   	fields_and_tags[:fields].map{|f| assoc_unless_included(f)}
   	self.tags = fields_and_tags[:tags]
+    self.save
   end
 
   def assign_cvtags_with_rows(form_n_data, dup=nil)
+    puts "form_n_data=>#{form_n_data}"
     self.csv_tags = form_n_data[-1]
   	self.save
   	dup ? self : form_n_data[0]
