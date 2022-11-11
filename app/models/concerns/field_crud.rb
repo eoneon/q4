@@ -4,8 +4,12 @@ module FieldCrud
   extend ActiveSupport::Concern
 
   def update_field(dig_keys, param_hsh)
+    #puts "dig_keys=>#{dig_keys}"
+    #puts "param_hsh[:update_context]=>#{param_hsh[:update_context]}"
   	update_field_case(param_val(dig_keys[2], param_hsh[:update_context]), param_val(dig_keys[2], param_hsh.dig(*dig_keys)), param_hsh[:item], (self.tags || {}), *dig_keys[1..-1])
-  	self.tags = tags
+  	# puts "tags=>#{tags}"
+    # puts "self.tags=>#{self.tags}"
+    # self.tags = tags
   	assign_cvtags_with_rows(form_and_data)
   end
 

@@ -5,7 +5,7 @@
       <div class="input-group input-group-sm" data-obj="artistInput, .artist, itemForm, <%=dom_ref('#new-item-skus', item)%>">
         <%= render "item_fields/caret", card_id: 'artist', target: nil, body: true, i: 0, context: 'body' %>
         <%= render "item_fields/label", label: 'artist' %>
-        <%= f.collection_select :artist_id, Artist.sorted, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'item', 'artist'), id: dom_ref('new-item-skus-artist', item) %>
+        <%= f.collection_select :artist_id, Artist.sorted, :id, :artist_name, {include_blank: true, selected: (item.artist.id || nil)}, class: boot_classes(:input, 'item', 'artist'), id: dom_ref('new-item-skus-artist', item) %>
       </div>
     </div>
 
@@ -13,21 +13,21 @@
       <div class="input-group input-group-sm" data-input=".title-text" data-target=".title-toggle">
         <%= render 'items/title_toggle' %>
         <%= render 'items/title', titles: [] %>
-        <%= f.text_field :title, class: boot_classes(:input, 'show', 'title', 'title-toggle', 'title-text'), id: 'title-text' %>
+        <%= f.text_field :title, value: (item.title || ''), class: boot_classes(:input, 'show', 'title', 'title-toggle', 'title-text'), id: 'title-text' %>
       </div>
     </div>
 
     <div class="col-2 ml-0">
       <div class="input-group input-group-sm">
         <%= render "item_fields/label", label: 'retail' %>
-        <%= f.number_field :retail, class: boot_classes(:input) %>
+        <%= f.number_field :retail, value: (item.retail || nil), class: boot_classes(:input) %>
       </div>
     </div>
 
     <div class="col-2">
       <div class="input-group input-group-sm">
         <%= render "item_fields/label", label: 'qty' %>
-        <%= f.number_field :qty, class: boot_classes(:input) %>
+        <%= f.number_field :qty, value: 1, class: boot_classes(:input) %>
       </div>
     </div>
   </div>

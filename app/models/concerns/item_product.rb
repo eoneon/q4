@@ -104,12 +104,6 @@ module ItemProduct
     end
   end
 
-  # def related_field_params(d_hsh, f, k, t, f_name)
-  #   f.tags.select{|k,v| Dimension.tags.include?(k) && v != 'n/a'}.each do |tag_key, tag_val|
-  #     Item.case_merge(d_hsh, tag_val, 'dimension', tag_key, 'tag')
-  #   end
-  # end
-
   def format_selected(t, selected)
     tag_attr?(t) ? selected : selected.id
   end
@@ -149,17 +143,9 @@ module ItemProduct
   	end
   end
 
-  # def config_dimensions(input_group, context, d_hsh, k='dimension')
-  # 	if dimension_hsh = hsh_slice_and_delete(d_hsh, k)
-  #     Dimension.config_dimension(k, dimension_hsh, input_group, context, d_hsh)
-  #     field_context_order(k, d_hsh[k], context)
-  # 	end
-  # end
-
   def config_dimensions(input_group, context, d_hsh, k='dimension')
   	if dimension_hsh = hsh_slice_and_delete(d_hsh, k)
   		Dimension.config_dimension(k, Dimension.get_measurements(dimension_hsh), dimension_hsh, input_group, context, d_hsh)
-  		field_context_order(k, d_hsh[k], context)
   	end
   end
   ##############################################################################

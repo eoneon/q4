@@ -6,7 +6,7 @@ class TableSkusController < ApplicationController
     @titles = @product_inputs[:title][:opts]
     @rows, attrs = @item.form_and_data(action: action_name)
     @hattr_rows = @item.get_hattr_form_rows(@rows, dig_keys_for_dup_form)
-    puts "@hattr_rows=>#{@hattr_rows}"
+
     respond_to do |format|
       format.js
     end
@@ -27,14 +27,6 @@ class TableSkusController < ApplicationController
   def sku_params
     params.require(:item).permit!
   end
-
-  # def get_hattr_form_rows(rows, dig_keys_for_dup_form)
-  # 	dig_keys_for_dup_form.each_with_object({}) {|dig_keys, new_rows| filter_row(*dig_keys, rows[k], new_rows)}
-  # end
-  #
-  # def filter_row(k, t, row, new_rows)
-  # 	row.map{|form_lev, field_set| Item.case_merge(new_rows, field_set.select{|f_hsh| f_hsh[:t_type]==t}, k, form_lev)}
-  # end
 
   def dig_keys_for_dup_form
   	[%w[dimension number_field]]

@@ -32,16 +32,13 @@ module BatchCreate
   end
 
   def update_tag_hsh(params_hsh, tag_hsh, dig_group)
-    puts "tag_hsh=>#{tag_hsh}"
   	return {} if !tag_hsh
   	dig_group.each_with_object(tag_hsh) {|dig_keys, tag_hsh| update_dup_tags(tag_hsh, params_hsh.dig(*dig_keys), *dig_keys)}
   end
 
   def update_dup_tags(tag_hsh, hattrs, k, t)
-    puts "hattrs=>#{hattrs}"
   	hattrs.each_with_object(tag_hsh) do |(f_name,v), tag_hsh|
       tag_key = [k, t, f_name].join('::')
-      puts "tag_key=>#{tag_key}"
   		v.present? ? tag_hsh[tag_key] = v : tag_hsh.delete(tag_key)
   	end
   end

@@ -76,6 +76,8 @@ $(document).ready(function(){
   $("body").on("change", ".new-item-select-product, .table-product", function(){
     var d = searchData($(this));
     $(d.itemForm).find(d.productInput).val(d.selected);
+    $(d.itemForm).find(d.updateProduct).val($(this).attr('name'));
+    $(d.itemForm).find(d.updateContext).val(d.selected);
     thisForm($(this)).submit();
   });
 

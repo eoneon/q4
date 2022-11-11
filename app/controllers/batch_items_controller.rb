@@ -22,7 +22,7 @@ class BatchItemsController < ApplicationController
   def create
   	@invoice = Invoice.find(params[:invoice_id])
   	@item = Item.find(params[:item_id])
-    @item.batch_dup_items(skus, item_params, cond_find(Artist, params[:item][:artist_id]), param_hsh['item'], dig_keys_for_dup_form)
+    @item.batch_dup_items(skus, item_params, cond_find(Artist, params[:item][:artist_id]), param_hsh['item'], dig_keys_for_dup_form) if skus
 
     respond_to do |format|
         format.js

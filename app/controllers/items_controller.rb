@@ -3,11 +3,12 @@ class ItemsController < ApplicationController
   def update
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
+    puts "item_params=>#{item_params}"
     @item.update_item(assoc_params, item_params)
     @rows = @item.assign_cvtags_with_rows(@item.form_and_data)
     @titles = Artist.titles(@item.artist)
 
-    @item.save
+    #@item.save
 
     respond_to do |format|
       format.js
@@ -17,7 +18,7 @@ class ItemsController < ApplicationController
   private
 
   def item_params
-    params.require(:item).permit(:sku, :title, :retail, :qty)
+    params.require(:item).permit(:title, :retail, :qty)
   end
 
   def assoc_params
