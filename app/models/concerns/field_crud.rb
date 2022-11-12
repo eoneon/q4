@@ -10,7 +10,7 @@ module FieldCrud
   	# puts "tags=>#{tags}"
     # puts "self.tags=>#{self.tags}"
     # self.tags = tags
-  	assign_cvtags_with_rows(form_and_data)
+  	#assign_cvtags_with_rows(form_and_data)
   end
 
   def update_field_case(pre_val, new_val, param_hsh, tags, k, t, f_name)

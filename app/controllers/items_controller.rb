@@ -1,14 +1,9 @@
 class ItemsController < ApplicationController
 
   def update
-    @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
-    puts "item_params=>#{item_params}"
-    @item.update_item(assoc_params, item_params)
-    @rows = @item.assign_cvtags_with_rows(@item.form_and_data)
-    @titles = Artist.titles(@item.artist)
-
-    #@item.save
+    @toggle = param_hsh[:card_id]
+	  @rows, @titles = @item.update_item(param_hsh, item_params, dig_keys_for_param_update(param_hsh[:update_field]))
 
     respond_to do |format|
       format.js
@@ -21,7 +16,4 @@ class ItemsController < ApplicationController
     params.require(:item).permit(:title, :retail, :qty)
   end
 
-  def assoc_params
-    param_hsh['item'].select {|param_key, param_val| param_key.split('_')[-1]=='id'}.transform_keys {|param_key|  param_key.sub('_id', '')}
-  end
 end

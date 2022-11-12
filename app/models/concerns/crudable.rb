@@ -32,12 +32,27 @@ module Crudable
     h.nil? ? h2 : h.merge!(h2)
   end
   # ############################################################################
-
-  ############################################################################
-  def update_item(assoc_params, item_params)
-  	return if assoc_params.detect {|target_name, param_val| update_item_target(target_name, public_send(target_name), param_val(target_name, param_val))}
-  	assign_attributes(item_params)
+  def update_item(param_hsh, item_params, dig_keys)
+  	update_item_params(param_hsh, item_params, dig_keys)
+  	[assign_cvtags_with_rows(form_and_data), Artist.titles(artist)]
   end
+
+  def update_item_params(param_hsh, item_params, dig_keys)
+  	if %w[field_set option number_field text_field text_area_field].include?(dig_keys[2])
+  		update_field(dig_keys, param_hsh)
+  	elsif item_params.keys.include?(dig_keys[-1])
+  		assign_attributes(item_params)
+  	elsif target_name = dig_keys[-1].sub('_id', '')
+      #param_key, target_name = dig_keys[-1], dig_keys[-1].sub('_id', '')#, dig_keys[-1].split('_').last=='id'
+  		#update_item_target(dig_keys[-1].sub('_id', ''), public_send(dig_keys[-1].sub('_id', '')), param_val(dig_keys[-1].sub('_id', ''), param_hsh.dig(*dig_keys)))
+      update_item_target(target_name, public_send(target_name), param_val(target_name, param_hsh.dig(*dig_keys)))
+  	end
+  end
+  ############################################################################
+  # def update_item(assoc_params, item_params)
+  # 	return if assoc_params.detect {|target_name, param_val| update_item_target(target_name, public_send(target_name), param_val(target_name, param_val))}
+  # 	assign_attributes(item_params)
+  # end
 
   def update_item_target(target_name, old_target, new_id)
     if update_context = update_case(target_id(old_target), new_id)

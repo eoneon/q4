@@ -15,7 +15,7 @@ module BatchCreate
   end
 
   def get_hattr_form_rows(rows, dig_keys_for_dup_form)
-    dig_keys_for_dup_form.each_with_object({}) {|dig_keys, new_rows| filter_row(*dig_keys, rows, new_rows)}
+    rows.any? ? dig_keys_for_dup_form.each_with_object({}) {|dig_keys, new_rows| filter_row(*dig_keys, rows, new_rows)} : {}
   end
 
   def filter_row(k, t, rows, new_rows)
