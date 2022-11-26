@@ -4,7 +4,7 @@
 
   <tbody>
     <% invoice.items.order(:sku).each do |item| %>
-      <%= render 'items/item', item: item %>
+      <%= render 'table_skus/item', item: item %>
     <% end %>
   </tbody>
 </table>

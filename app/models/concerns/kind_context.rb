@@ -97,11 +97,11 @@ module KindContext
   end
 
   def reorder_signature_for_proof_edition_if_no_certificate(context)
-  	{k: 'signature', ref: (!context[:embellishing] ? 'category' : 'embellishing')} if context[:proof_edition] && !context[:certificate]
+  	{k: 'signature', ref: (!context[:embellishing] ? 'category' : 'embellishing')} if context[:signed] && context[:proof_edition] && !context[:certificate]
   end
 
   def insert_signature_before_medium_if_no_category_or_certificate(context)
-  	{k: 'signature', ref: 'medium'} if [:certificate, :category, :numbered].none?{|k| context.include?(k)}
+  	{k: 'signature', ref: 'medium'} if context[:signed] && [:certificate, :category, :numbered].none?{|k| context.include?(k)}
   end
 
   #punct #######################################################################

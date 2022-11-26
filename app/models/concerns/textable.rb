@@ -37,7 +37,7 @@ module Textable
     end
 
     def detect_swap(str, swap_sets)
-      if swap_set = swap_sets.detect{|swap_set| swap_set.index(swap_set[0])}
+      if swap_set = swap_sets.detect{|swap_set| str.index(swap_set[0])}
         strip_space(str.sub(*swap_set))
       else
         str
@@ -73,7 +73,7 @@ module Textable
 
     def parse_str_hsh(str, start_idx=0)
       str.gsub!(/[{}"]/,'')
-	    str_idxs(str,'=>')[1..-1].map{|i| str[0..i].rindex(/\s/)}.each_with_object([]) {|i,a| a << str[start_idx..i-2].split('=>'); start_idx = i+1}.append(str[start_idx..-1].split('=>')).to_h if str  
+	    str_idxs(str,'=>')[1..-1].map{|i| str[0..i].rindex(/\s/)}.each_with_object([]) {|i,a| a << str[start_idx..i-2].split('=>'); start_idx = i+1}.append(str[start_idx..-1].split('=>')).to_h if str
     end
 
     def str_idxs(str,substr)

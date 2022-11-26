@@ -38,6 +38,9 @@ class LimitedEdition
     if edition_hsh.keys.count==2
       attrs['numbering'] = edition_hsh.values.join('/')
       tb_hsh.transform_values!{|tag_val| [tag_val, attrs['numbering']].join(' ')}
+    elsif edition_hsh.values[0] && edition_hsh.values[0].index('/')
+      attrs['numbering'] = edition_hsh.values[0]
+      tb_hsh.transform_values!{|tag_val| [tag_val, attrs['numbering']].join(' ')}
     end
   end
 

@@ -24,15 +24,19 @@ class Authentication
   end
 
   def self.config_dated(k, tb_hsh, k_hsh, input_group, context)
-    config_auth_params(k, k_hsh.values[0], k_hsh, context)
+    config_auth_params(k, tb_hsh, k_hsh, context)
   end
 
   def self.config_verification(k, tb_hsh, k_hsh, input_group, context)
-    config_auth_params(k, k_hsh.values[0], context)
+    config_auth_params(k, tb_hsh, k_hsh, context)
   end
 
-  def self.config_auth_params(k, tb_hsh, input_val, context)
-    tb_hsh.transform_values!{|tag_val| config_auth_value(context, k, "#{tag_val} (#{input_val})")}
+  def self.config_auth_params(k, tb_hsh, k_hsh, context)
+    if k_hsh.any? && tb_hsh.any?
+      tb_hsh.transform_values!{|tag_val| config_auth_value(context, k, "#{tag_val} (#{k_hsh.values[0]})")}
+    else
+      tb_hsh.clear
+    end
   end
 
   def self.config_auth_value(context, k, v)

@@ -32,4 +32,13 @@ class Detail
       end
     end
   end
+
+  class TextAreaField < Detail
+    class TextBeforeCOA < TextAreaField
+      class Comment < TextBeforeCOA
+        def self.targets
+        end
+      end
+    end
+  end
 end

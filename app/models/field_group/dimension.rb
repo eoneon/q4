@@ -27,6 +27,7 @@ class Dimension
   	return if !measurements.has_key?(tags[0])
   	measurements.each {|dimension_key, measurement_hsh| format_measurement_values(dimension_key, *measurement_hsh.values, dimension_hsh, context, attrs)}
   	material_dimension, mounting_dimension = Dimension.tags.map{|key| dimension_hsh.dig(key)}
+    
   	input_group[:attrs].merge!({'item_size'=> material_dimension['item_size'], 'measurements'=>material_dimension['measurements'], 'mounting_search'=>d_hsh.dig('mounting', 'mounting_search')})
   	Dimension.new.tb_dimensions(k, material_dimension, mounting_dimension, d_hsh)
     Item.new.field_context_order(k, d_hsh[k], context)

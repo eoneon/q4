@@ -32,6 +32,8 @@ module Crudable
     h.nil? ? h2 : h.merge!(h2)
   end
   # ############################################################################
+  ############################################################################
+
   def update_item(param_hsh, item_params, dig_keys)
   	update_item_params(param_hsh, item_params, dig_keys)
   	[assign_cvtags_with_rows(form_and_data), Artist.titles(artist)]
@@ -43,16 +45,9 @@ module Crudable
   	elsif item_params.keys.include?(dig_keys[-1])
   		assign_attributes(item_params)
   	elsif target_name = dig_keys[-1].sub('_id', '')
-      #param_key, target_name = dig_keys[-1], dig_keys[-1].sub('_id', '')#, dig_keys[-1].split('_').last=='id'
-  		#update_item_target(dig_keys[-1].sub('_id', ''), public_send(dig_keys[-1].sub('_id', '')), param_val(dig_keys[-1].sub('_id', ''), param_hsh.dig(*dig_keys)))
       update_item_target(target_name, public_send(target_name), param_val(target_name, param_hsh.dig(*dig_keys)))
   	end
   end
-  ############################################################################
-  # def update_item(assoc_params, item_params)
-  # 	return if assoc_params.detect {|target_name, param_val| update_item_target(target_name, public_send(target_name), param_val(target_name, param_val))}
-  # 	assign_attributes(item_params)
-  # end
 
   def update_item_target(target_name, old_target, new_id)
     if update_context = update_case(target_id(old_target), new_id)
@@ -138,30 +133,28 @@ module Crudable
   def hsh_init(tags)
     tags ? tags : {}
   end
-
-  # ############################################################################
-
-  # def build_field_assocs
-  #   all.select{|f| f.assocs && f.assocs.any?}.map {|f| assoc_fields(f)}
-  # end
-  #
-  # def assoc_fields(f)
-  #   f.assocs.transform_keys{|k| k.to_i}.sort_by{|k,v| k}.map{|assoc| build_assoc(f, *assoc[1].split('::'))}
-  # end
-
-  # def build_assoc(f, t, k, f_name)
-  #   f.assoc_unless_included(f.to_class(t).where(kind: k, field_name: f_name).first_or_create)
-  # end
-
-  # def assoc_fields
-  #   assocs.transform_keys{|k| k.to_i}.sort_by{|k,v| k}.map{|assoc| build_assoc(*assoc[1].split('::'))}
-  # end
-  #
-  # def build_assoc(t, k, f_name)
-  #   self.assoc_unless_included(to_class(t).where(kind: k, field_name: f_name).first_or_create)
-  # end
 end
 
+
+# def build_field_assocs
+#   all.select{|f| f.assocs && f.assocs.any?}.map {|f| assoc_fields(f)}
+# end
+#
+# def assoc_fields(f)
+#   f.assocs.transform_keys{|k| k.to_i}.sort_by{|k,v| k}.map{|assoc| build_assoc(f, *assoc[1].split('::'))}
+# end
+
+# def build_assoc(f, t, k, f_name)
+#   f.assoc_unless_included(f.to_class(t).where(kind: k, field_name: f_name).first_or_create)
+# end
+
+# def assoc_fields
+#   assocs.transform_keys{|k| k.to_i}.sort_by{|k,v| k}.map{|assoc| build_assoc(*assoc[1].split('::'))}
+# end
+#
+# def build_assoc(t, k, f_name)
+#   self.assoc_unless_included(to_class(t).where(kind: k, field_name: f_name).first_or_create)
+# end
 
 # def remove_hmt(obj, join_assoc=:item_groups)
 #   self.public_send(join_assoc).where(target_id: obj.id, target_type: obj.class.name).first.destroy

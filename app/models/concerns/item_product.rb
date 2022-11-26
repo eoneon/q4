@@ -20,6 +20,7 @@ module ItemProduct
   end
 
   def rows_and_attrs(input_group)
+    puts "context=>#{input_group[:context]}"
   	finish_config_group(input_group, input_group[:context], input_group[:d_hsh])
   	description_hsh(key_group, input_group[:context], input_group[:d_hsh], input_group[:attrs])
   	[:rows, :attrs].map{|k| input_group[k]}
@@ -227,9 +228,19 @@ module ItemProduct
     input_group[:rows] = build_form_rows(input_group[:inputs].group_by{|h| h[:k]}, media_group(input_group[:context]).merge!(form_groups))
   end
 
+  def related_form_rows(form_hsh)
+  	form_hsh['dimension'].each do |f_hsh|
+  		if Dimension.material_units.include?(f_hsh[:f_name])
+  			form_hsh['material'].append(f_hsh)
+  		elsif Dimension.mounting_units.include?(f_hsh[:f_name])
+  			form_hsh['mounting'].append(f_hsh)
+  		end
+  	end
+  end
+
   def media_group(context)
     case
-      when context[:flat_art]; {'media'=> {header: %w[category embellishing medium], body: %w[leafing remarque]}}
+      when context[:flat_art]; {'media'=> {header: %w[category medium], body: %w[embellishing leafing remarque]}}
       when context[:sculpture_art]; {'media'=> {header: %w[category embellishing medium sculpture_type], body: %w[]}}
       when context[:gartner_blade]; {'media'=> {header: %w[sculpture_type sculpture_part], body: %w[]}}
     end
@@ -237,20 +248,32 @@ module ItemProduct
 
   def form_groups
     {
+      'material'=> {header: %w[material], body: %w[]},
+      'mounting'=> {header: %w[mounting], body: %w[]},
       'numbering'=> {header: %w[numbering], body: %w[]},
-      'material_mounting'=> {header: %w[material mounting], body: %w[]},
       'authentication'=> {header: %w[seal signature certificate], body: %w[dated verification]},
-      'dimension'=> {header: %w[dimension], body: %w[]},
-      'disclaimer'=> {header: %w[disclaimer], body: %w[]}
+      'disclaimer'=> {header: %w[disclaimer], body: %w[]},
+      'dimension'=> {header: %w[dimension], body: %w[]}
     }
   end
 
+  # def form_groups
+  #   {
+  #     'numbering'=> {header: %w[numbering], body: %w[]},
+  #     'material_mounting'=> {header: %w[mounting], body: %w[]},
+  #     'authentication'=> {header: %w[seal signature certificate], body: %w[dated verification]},
+  #     'dimension'=> {header: %w[dimension], body: %w[]},
+  #     'disclaimer'=> {header: %w[disclaimer], body: %w[]}
+  #   }
+  # end
+
   def build_form_rows(form_hsh, form_group)
+    related_form_rows(form_hsh)
     form_group.each_with_object({}) do |(card_id,card), hsh|
-      if card[:header].any?{|k| form_hsh[k]}
+      #if card[:header].any?{|k| form_hsh[k]}
         Item.case_merge(hsh, build_row(card[:header], form_hsh), card_id, :header)
         Item.case_merge(hsh, build_row(card[:body], form_hsh), card_id, :body)
-      end
+      #end
     end
   end
 

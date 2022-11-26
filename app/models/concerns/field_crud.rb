@@ -4,13 +4,7 @@ module FieldCrud
   extend ActiveSupport::Concern
 
   def update_field(dig_keys, param_hsh)
-    #puts "dig_keys=>#{dig_keys}"
-    #puts "param_hsh[:update_context]=>#{param_hsh[:update_context]}"
   	update_field_case(param_val(dig_keys[2], param_hsh[:update_context]), param_val(dig_keys[2], param_hsh.dig(*dig_keys)), param_hsh[:item], (self.tags || {}), *dig_keys[1..-1])
-  	# puts "tags=>#{tags}"
-    # puts "self.tags=>#{self.tags}"
-    # self.tags = tags
-  	#assign_cvtags_with_rows(form_and_data)
   end
 
   def update_field_case(pre_val, new_val, param_hsh, tags, k, t, f_name)
@@ -89,12 +83,15 @@ module FieldCrud
   end
 
   def remove_field(k, t, f_name, old_val, tags)
+    puts "tags=>#{tags}"
   	remove_tag_assoc(k, t, f_name, tags)
     remove_hmt(target_id: old_val, target_type: t.classify)
   end
 
   def remove_tag_assoc(k, t, f_name, tags)
   	tags.delete(tag_key(k, t, f_name))
+    puts "tags=>#{tags}"
+    puts "k=>#{k}, t=>#{t}, f_name=>#{f_name}"
   end
 
   def remove_field_set_params(k, param_hsh, tags)

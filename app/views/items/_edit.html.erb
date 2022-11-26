@@ -2,7 +2,7 @@
   <%= hidden_field_tag "update_field", nil, class: "update-field" %>
   <%= hidden_field_tag "update_context", nil, class: "update-context" %>
   <%= text_field_tag "card_id", nil, class: "collapse", id: 'caret-id' %>
-  
+
   <div class="form">
     <div class="card border-0 p-0 mb-1 <%= table_strip(1)%>">
       <%= number_field_tag "item[product_id]", @item.product.try(:id), class: "product collapse" %>
@@ -39,5 +39,6 @@
         </div>
       </div>
     </div>
+    <%= render "items/field_rows", f: f, item: item, rows: rows %>
   </div>
 <% end %>
