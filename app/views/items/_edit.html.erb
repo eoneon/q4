@@ -1,9 +1,9 @@
-<%= form_with model: item, url: invoice_item_path(invoice, item), id: dom_ref('edit-item', item) do |f| %>
+<%= form_with model: item, url: invoice_item_path(invoice, item), id: dom_ref('edit', item) do |f| %>
   <%= hidden_field_tag "update_field", nil, class: "update-field" %>
   <%= hidden_field_tag "update_context", nil, class: "update-context" %>
-  <%= text_field_tag "card_id", nil, class: "collapse", id: 'caret-id' %>
 
   <div class="form">
+    <%= text_field_tag "card_id", nil, class: "collapse", id: 'caret-id' %>
     <div class="card border-0 p-0 mb-1 <%= table_strip(1)%>">
       <%= number_field_tag "item[product_id]", @item.product.try(:id), class: "product collapse" %>
 
@@ -37,8 +37,9 @@
             <%= f.number_field :qty, class: boot_classes(:input, 'field-param'), data: {oldVal:nil} %>
           </div>
         </div>
+
       </div>
+      <%= render "items/field_rows", f: f, item: item, rows: rows %>
     </div>
-    <%= render "items/field_rows", f: f, item: item, rows: rows %>
   </div>
 <% end %>

@@ -23,6 +23,7 @@ class SkusController < ApplicationController
     @invoice = Invoice.find(params[:invoice_id])
     @item = Item.find(params[:id])
     @item.assign_attributes(sku_params)
+    @item.csv_tags["sku"] = sku_params[:sku]
     @item.save
 
     respond_to do |format|

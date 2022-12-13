@@ -14,6 +14,7 @@ class Authentication
 
   def self.config_certificate(k, tb_hsh, k_hsh, input_group, context)
   	config_certificate_title(tb_hsh)
+    tb_hsh
   end
 
   def self.config_certificate_title(tb_hsh, tag_key='tagline')
@@ -23,20 +24,16 @@ class Authentication
     end
   end
 
-  def self.config_dated(k, tb_hsh, k_hsh, input_group, context)
-    config_auth_params(k, tb_hsh, k_hsh, context)
+  def self.config_dated(k, tb_hsh, auth_hsh, input_group, context)
+  	config_auth_params(k, tb_hsh, auth_hsh, context)
   end
 
-  def self.config_verification(k, tb_hsh, k_hsh, input_group, context)
-    config_auth_params(k, tb_hsh, k_hsh, context)
+  def self.config_verification(k, tb_hsh, auth_hsh, input_group, context)
+  	config_auth_params(k, tb_hsh, auth_hsh, context)
   end
 
-  def self.config_auth_params(k, tb_hsh, k_hsh, context)
-    if k_hsh.any? && tb_hsh.any?
-      tb_hsh.transform_values!{|tag_val| config_auth_value(context, k, "#{tag_val} (#{k_hsh.values[0]})")}
-    else
-      tb_hsh.clear
-    end
+  def self.config_auth_params(k, tb_hsh, auth_hsh, context)
+  	tb_hsh.transform_values!{|tag_val| config_auth_value(context, k, "#{tag_val} (#{auth_hsh.values[0]})")} if tb_hsh.any? && auth_hsh.any?
   end
 
   def self.config_auth_value(context, k, v)
@@ -264,12 +261,6 @@ class Authentication
       def self.attrs
         {kind: 0}
       end
-
-      # class StandardAuthentication < GroupA
-      #   def self.targets
-      #     [%W[FieldSet Dated StandardDated], %W[SelectField Signature StandardSignature], %W[SelectField Certificate StandardCertificate]]
-      #   end
-      # end
 
       class StandardAuthentication < GroupA
         def self.targets

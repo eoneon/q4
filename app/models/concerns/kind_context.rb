@@ -17,12 +17,12 @@ module KindContext
   end
 
   #dependent_kinds #############################################################
-  def dependent_kinds_hsh(keys)
-  	dependent_kinds.each_with_object({}) {|(klass, kinds), h| h[klass] = kinds.reject{|k| keys.exclude?(k)}}.reject{|klass, kinds| kinds.empty?}
+  def conditional_kinds
+  	{Disclaimer: ['disclaimer'], Authentication: %w[dated verification], Dimension: ['dimension']}
   end
 
-  def dependent_kinds
-    {LimitedEdition: ['numbering'], Disclaimer: ['disclaimer'], Authentication: %w[certificate dated verification animator_seal sports_seal signature], Submedium: %w[leafing remarque]}
+  def compound_kinds
+  	{LimitedEdition: ['numbering'], Authentication: %w[certificate animator_seal sports_seal], Submedium: %w[leafing]}
   end
   ##############################################################################
 
@@ -167,6 +167,13 @@ module KindContext
 end
 
 ##############################################################################
+# def dependent_kinds_hsh(keys)
+# 	dependent_kinds.each_with_object({}) {|(klass, kinds), h| h[klass] = kinds.reject{|k| keys.exclude?(k)}}.reject{|klass, kinds| kinds.empty?}
+# end
+#
+# def dependent_kinds
+#   {LimitedEdition: ['numbering'], Disclaimer: ['disclaimer'], Authentication: %w[certificate dated verification animator_seal sports_seal signature], Submedium: %w[leafing remarque]}
+# end
 
 # def signature_params(context, store, v, k, tag_key)
 #   v = gartner_blade_signature(v, tag_key) if context[:gartner_blade] && !context[:unsigned]

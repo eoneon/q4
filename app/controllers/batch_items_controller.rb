@@ -9,16 +9,6 @@ class BatchItemsController < ApplicationController
     end
   end
 
-  # def create
-  # 	@invoice = Invoice.find(params[:invoice_id])
-  # 	Item.find(params[:item_id]).batch_dup_skus(skus, item_params, cond_find(Artist, params[:item][:artist_id])) if skus
-  # 	@item_inputs = Item.search(item_search_params)
-  #
-  # 	respond_to do |format|
-  # 			format.js
-  # 	end
-  # end
-
   def create
   	@invoice = Invoice.find(params[:invoice_id])
   	@item = Item.find(params[:item_id])
@@ -47,3 +37,13 @@ class BatchItemsController < ApplicationController
   	[%w[dimension number_field]]
   end
 end
+
+# def create
+# 	@invoice = Invoice.find(params[:invoice_id])
+# 	Item.find(params[:item_id]).batch_dup_skus(skus, item_params, cond_find(Artist, params[:item][:artist_id])) if skus
+# 	@item_inputs = Item.search(item_search_params)
+#
+# 	respond_to do |format|
+# 			format.js
+# 	end
+# end

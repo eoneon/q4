@@ -83,15 +83,12 @@ module FieldCrud
   end
 
   def remove_field(k, t, f_name, old_val, tags)
-    puts "tags=>#{tags}"
   	remove_tag_assoc(k, t, f_name, tags)
     remove_hmt(target_id: old_val, target_type: t.classify)
   end
 
   def remove_tag_assoc(k, t, f_name, tags)
   	tags.delete(tag_key(k, t, f_name))
-    puts "tags=>#{tags}"
-    puts "k=>#{k}, t=>#{t}, f_name=>#{f_name}"
   end
 
   def remove_field_set_params(k, param_hsh, tags)

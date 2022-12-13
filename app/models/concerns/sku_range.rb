@@ -34,7 +34,7 @@ module SkuRange
     end
 
     def valid_range_format?(sku_range)
-      sku_range.all?{|i| i.length <= 3} || sku_range.all?{|i| i.length == 6}
+      sku_range.all?{|i| i.length <= 5} || sku_range.all?{|i| i.length == 6}
     end
 
     def asc_range?(sku_range)

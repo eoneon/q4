@@ -1,20 +1,19 @@
 <% rows.reject{|k,v| k=='dimension'}.each_with_index do |(card_id, card), i| %>
-
   <div class="card border-0 px-1 py-0 mb-1 <%=table_strip(i)%>" data-target=".card-body">
 
     <div class="card-header border-0 bg-transparent pt-1 pb-1 pl-0 pr-0">
       <div class="form-row">
         <% if card[:header].empty? && card[:body].any? %>
-          <%= render "item_fields/caret", card_id: dom_ref(:show, card_id), target: dom_ref('#edit-item-fields', card_id), body: card[:body], i: card[:body][0][:i], context: 'header' %>
+          <%= render "item_fields/caret", card_id: dom_ref(:show, card_id), target: dom_ref('#edit', card_id), body: card[:body], i: card[:body][0][:i], context: 'header' %>
         <% else %>
           <% card[:header].each do |f_hsh| %>
-            <%= render "item_fields/form_row", f: f, f_hsh: f_hsh, card_id: dom_ref(:show, card_id), target: dom_ref('#edit-item-fields', card_id), card: card, i: f_hsh[:i], context: 'header' %>
+            <%= render "item_fields/form_row", f: f, f_hsh: f_hsh, card_id: dom_ref(:show, card_id), target: dom_ref('#edit', card_id), card: card, i: f_hsh[:i], context: 'header' %>
           <% end %>
         <% end %>
       </div>
     </div>
 
-    <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-white border border-white border-top-0 rounded-bottom collapse" id="<%= dom_ref('edit-item-fields', card_id) %>" data-parent="#<%= dom_ref('edit-item-fields', item) %>">
+    <div class="card-body pt-1 pb-1 pl-0 pr-0 bg-white border border-white border-top-0 rounded-bottom collapse" id="<%= dom_ref('edit', card_id) %>" data-parent="#<%= dom_ref('edit', item) %>">
       <div class="form-row">
         <% card[:body].each do |f_hsh| %>
           <%= render "item_fields/form_row", f: f, f_hsh: f_hsh, card_id: dom_ref(:show, card_id), target: nil, card: card, i: f_hsh[:i], context: 'body' %>

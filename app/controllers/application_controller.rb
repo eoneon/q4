@@ -151,7 +151,7 @@ class ApplicationController < ActionController::Base
   end
 
   def valid_range_format?(sku_range)
-    sku_range.all?{|i| i.length <= 3} || sku_range.all?{|i| i.length == 6}
+    sku_range.all?{|i| i.length <= 5} || sku_range.all?{|i| i.length == 6}
   end
 
   def asc_range?(sku_range)
@@ -159,7 +159,7 @@ class ApplicationController < ActionController::Base
   end
 
   def format_sku(sku, skus)
-    skus << sku.to_i if sku.length <= 3 || sku.length == 6
+    skus << sku.to_i if sku.length <= 5 || sku.length == 6
   end
 
   def extract_digits(num_str)

@@ -69,7 +69,7 @@ module Description
 
   def property_room_case(k, descriptions_hsh, tagline_hsh)
   	if k.class == Array
-  		tagline_hsh.transform_values!{|v| v.sub(*k)}
+  		tagline_hsh.transform_values!{|v| v.sub(*k) if v}
   	elsif k == 'numbered'
   		tagline_hsh['numbering'] = descriptions_hsh[:search_tagline]['numbering']
   	elsif %w[certificate numbering].include?(k)
@@ -88,15 +88,9 @@ module Description
   end
 
   def context_from_selected(k, t, f_name, selected, context)
-  	if valid_tag_attr?(k, selected)
-  		config_tag_attr_context(k, selected, context)
-  	elsif tag_hsh = valid_option?(k, selected)
+  	if tag_hsh = valid_option?(k, selected)
   		config_option_context(k, f_name, tag_hsh, context)
   	end
-  end
-
-  def valid_tag_attr?(k, selected)
-  	selected.class == String && %w[dated verification disclaimer].include?(k)
   end
 
   def valid_option?(k, selected)
@@ -111,8 +105,12 @@ module Description
   end
 
   def set_option_kind_context(k, context)
-    context[k.to_sym] = true if valid_option_kind?(k)
-    context[:seal] = true if k=='animator_seal' || k=='sports_seal'
+  	set_context(k, context) if valid_option_kind?(k)
+  	set_context(:seal, context) if k=='animator_seal' || k=='sports_seal'
+  end
+
+  def set_context(k, context)
+  	context[k.to_sym] = true
   end
 
   def valid_option_kind?(k)
@@ -156,3 +154,15 @@ module Description
   	params.transform_values!{|tag_val| push ? "#{tag_val} #{conj}" : "#{conj} #{tag_val}"}
   end
 end
+
+# def context_from_selected(k, t, f_name, selected, context)
+# 	if valid_tag_attr?(k, selected)
+# 		config_tag_attr_context(k, selected, context)
+# 	elsif tag_hsh = valid_option?(k, selected)
+# 		config_option_context(k, f_name, tag_hsh, context)
+# 	end
+# end
+
+# def valid_tag_attr?(k, selected)
+# 	selected.class == String && %w[dated verification disclaimer].include?(k)
+# end

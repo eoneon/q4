@@ -23,14 +23,16 @@ class Dimension
     %w[material mounting dimension]
   end
 
-  def self.config_dimension(k, measurements, dimension_hsh, input_group, context, d_hsh)
+  def self.config_dimension(k, dimension_hsh, mounting_search, input_group, context)
+  	config_dimension_params(k, dimension_hsh, get_measurements(dimension_hsh), mounting_search, input_group, context)
+  end
+
+  def self.config_dimension_params(k, dimension_hsh, measurements, mounting_search, input_group, context)
   	return if !measurements.has_key?(tags[0])
-  	measurements.each {|dimension_key, measurement_hsh| format_measurement_values(dimension_key, *measurement_hsh.values, dimension_hsh, context, attrs)}
-  	material_dimension, mounting_dimension = Dimension.tags.map{|key| dimension_hsh.dig(key)}
-    
-  	input_group[:attrs].merge!({'item_size'=> material_dimension['item_size'], 'measurements'=>material_dimension['measurements'], 'mounting_search'=>d_hsh.dig('mounting', 'mounting_search')})
-  	Dimension.new.tb_dimensions(k, material_dimension, mounting_dimension, d_hsh)
-    Item.new.field_context_order(k, d_hsh[k], context)
+  	measurements.each {|dimension_key, measurement_hsh| format_measurement_values(dimension_key, *measurement_hsh.values, dimension_hsh, context, input_group[:attrs])}
+    material_dimension, mounting_dimension = Dimension.tags.map{|key| dimension_hsh.dig(key)}
+  	input_group[:attrs].merge!({'item_size'=> material_dimension['item_size'], 'measurements'=>material_dimension['measurements'], 'mounting_search'=>mounting_search})
+  	Dimension.new.tb_dimensions(k, material_dimension, mounting_dimension)
   end
 
   def self.get_measurements(dimension_hsh)
@@ -205,28 +207,29 @@ class Dimension
   end
 
   # tagline, body & attributes 26 ##############################################
-  def tb_dimensions(k, material_dimensions, mounting_dimensions, d_hsh)
-    tagline_dimensions(k, (mounting_dimensions.present? ? mounting_dimensions : material_dimensions), d_hsh)
-    body_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, d_hsh)
-    abbrv_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, d_hsh)
+  def tb_dimensions(k, material_dimensions, mounting_dimensions, tb_hsh={})
+  	tagline_dimensions(k, (mounting_dimensions.present? ? mounting_dimensions : material_dimensions), tb_hsh)
+  	body_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, tb_hsh)
+  	abbrv_dimensions(k, material_dimensions['measurements'], material_dimensions['tag'], mounting_dimensions, tb_hsh)
+  	tb_hsh
   end
 
   def tagline_dimensions(k, dimension_hsh, d_hsh)
     if dimension_hsh.dig('item_size').to_i >= 1300
-      Item.case_merge(d_hsh, "(#{dimension_hsh.dig('measurements')})", k, 'tagline')
+      Item.case_merge(d_hsh, "(#{dimension_hsh.dig('measurements')})", 'tagline')
     end
   end
 
   def body_dimensions(k, material_measurements, material_tag, mounting_dimensions, d_hsh)
     material_measurements = body_material_measurements(material_measurements, material_tag, (';' if material_tag && material_tag.index('weight')))
     measurements = ["Measures approx.", body_mounting_measurements(mounting_dimensions), material_measurements].compact.join(' ')
-    Item.case_merge(d_hsh, measurements, k, 'body')
+    Item.case_merge(d_hsh, measurements, 'body')
   end
 
   def abbrv_dimensions(k, material_measurements, material_tag, mounting_dimensions, d_hsh)
     measurements = [material_measurements, abbrv_mounting_measurements(mounting_dimensions)].compact
     measurements = measurements.count>1 ? measurements.join(' - ') : measurements[0]
-    Item.case_merge(d_hsh, "(#{measurements})", k, 'invoice_tagline')
+    Item.case_merge(d_hsh, "(#{measurements})", 'invoice_tagline')
   end
 
   def dimension_description_params(dimensions, diameter, dimension_tag)
@@ -246,7 +249,7 @@ class Dimension
 
   def abbrv_mounting_measurements(mounting_dimensions)
     if dimensions = valid_mounting_measurements(mounting_dimensions)
-      mounting_tag = dimensions.slice!(1) #.reverse.join(' ')
+      mounting_tag = dimensions.slice!(1)
       [dimensions, abbrv_mounting_tag(mounting_tag)].join(' ')
     end
   end

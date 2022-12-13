@@ -247,6 +247,7 @@ $(document).ready(function(){
   //ELEMENT-SPECIFIC: TOGGLE-DATA: from SLIDE, NAV-BTN or CARET
   function toggleBtnData(this_btn, d) {
     toggleTargetData(this_btn, d);
+    console.log(d)
     siblingData(d.btn.vis_target, valid(visibleDataSiblingTarget(this_btn)), d.btn);
     d.btn.this_btn = this_btn;
     d.btn = $.extend(true, d.btn, this_btn.data());

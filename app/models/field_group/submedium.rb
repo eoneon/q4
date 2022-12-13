@@ -9,7 +9,11 @@ class Submedium
   end
 
   def self.config_leafing(k, tb_hsh, k_hsh, input_group, context)
-    config_submedia(k, tb_hsh, input_group, context)
+    if context[:remarque]
+      Item.new.transform_params(tb_hsh, 'and', 1)
+    else
+      tb_hsh
+    end
   end
 
   def self.config_remarque(k, tb_hsh, k_hsh, input_group, context)
@@ -21,6 +25,7 @@ class Submedium
   end
 
   def self.config_leafing_params(tb_hsh, context)
+    puts "context[:leafing_remarque]=>#{context[:leafing_remarque]}"
     Item.new.transform_params(tb_hsh, 'and', 1) if context[:leafing_remarque]
   end
 

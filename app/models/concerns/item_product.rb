@@ -20,8 +20,6 @@ module ItemProduct
   end
 
   def rows_and_attrs(input_group)
-    puts "context=>#{input_group[:context]}"
-  	finish_config_group(input_group, input_group[:context], input_group[:d_hsh])
   	description_hsh(key_group, input_group[:context], input_group[:d_hsh], input_group[:attrs])
   	[:rows, :attrs].map{|k| input_group[k]}
   end
@@ -43,7 +41,9 @@ module ItemProduct
 
   def config_group(fields:nil, input_group:nil)
   	config_loop(fields: fields, input_group: input_group)
-    config_dimensions(input_group, input_group[:context], input_group[:d_hsh])
+  	config_conditional_kinds(input_group, input_group[:context], input_group[:d_hsh])
+  	set_compound_keys(input_group[:context])
+  	config_compound_kinds(input_group, input_group[:context], input_group[:d_hsh])
   end
 
   def config_loop(fields:nil, input_group:nil)
@@ -67,22 +67,21 @@ module ItemProduct
   	input_group[:inputs] << f_hsh(k, t, f_name, f)
   	if selected = input_group[:param_hsh].dig(k, t_type(t), f_name)
   		input_group[:inputs][-1][:selected] = format_selected(t, selected)
-      k = reset_kind(k, f_name)
-      context_from_selected(k, t, f_name, selected, input_group[:context])
-      tag_attr?(t) ? selected_tag_attr(input_group[:d_hsh], selected, k, f_name) : selected_field(input_group, selected, k, selected.type.underscore, selected.field_name.underscore)
+  		config_selected(reset_kind(k, f_name), t, f_name, selected, input_group)
   	end
+  end
+
+  def config_selected(k, t, f_name, selected, input_group)
+  	context_from_selected(k, t, f_name, selected, input_group[:context])
+  	tag_attr?(t) ? selected_tag_attr(input_group[:d_hsh], selected, k, f_name) : selected_field(input_group, selected, k, selected.type.underscore, selected.field_name.underscore)
+  end
+
+  def selected_tag_attr(d_hsh, selected, k, f_name)
+  	k=='dimension' ? Dimension.measurement_hsh(d_hsh, selected, k, f_name) : Item.case_merge(d_hsh, selected, k, f_name)
   end
 
   def reset_kind(k, f_name)
     k=='seal' ? f_name : k
-  end
-
-  def selected_tag_attr(d_hsh, selected, k, f_name)
-    if k=='dimension'
-      Dimension.measurement_hsh(d_hsh, selected, k, f_name)
-    else
-      Item.case_merge(d_hsh, selected, k, f_name)
-    end
   end
 
   def selected_field(input_group, selected, k, t, f_name)
@@ -144,26 +143,34 @@ module ItemProduct
   	end
   end
 
-  def config_dimensions(input_group, context, d_hsh, k='dimension')
-  	if dimension_hsh = hsh_slice_and_delete(d_hsh, k)
-  		Dimension.config_dimension(k, Dimension.get_measurements(dimension_hsh), dimension_hsh, input_group, context, d_hsh)
-  	end
-  end
   ##############################################################################
-
-  def finish_config_group(input_group, context, d_hsh)
-    set_compound_keys(context)
-    config_dependent_kinds(input_group, context, d_hsh)
-  end
-
-  def config_dependent_kinds(input_group, context, d_hsh)
-    dependent_kinds_hsh(context[:body][:order].keys).each do |klass, kinds|
-      kinds.map {|k| config_public_kind(k, klass, d_hsh[k], d_hsh[k].slice!(*tb_keys), input_group, context)}
+  def config_conditional_kinds(input_group, context, d_hsh)
+    extract_meth_hsh(conditional_kinds, d_hsh).each do |hsh|
+      sub_hsh = hsh[:k]=='dimension' ? d_hsh.dig('mounting', 'mounting_search') : hsh[:k_hsh].slice!(*tb_keys)
+      config_conditional_kind(hsh[:k], hsh[:klass], d_hsh, hsh[:k_hsh], sub_hsh, input_group, context)
     end
   end
 
-  def config_public_kind(k, klass, tb_hsh, k_hsh, input_group, context)
-  	to_class(klass).public_send("config_#{k}", k, tb_hsh, k_hsh, input_group, context)
+  def config_conditional_kind(k, klass, d_hsh, kind_hsh, sub_hsh, input_group, context, meth_key='config')
+  	if tb_hsh = handle_public_kind(k, klass, kind_hsh, sub_hsh, input_group, context, meth_key)
+  		d_hsh[k] = tb_hsh
+  		set_context(k, context)
+  		field_context_order(k, tb_hsh, context)
+  	end
+  end
+
+  def config_compound_kinds(input_group, context, d_hsh)
+    extract_meth_hsh(compound_kinds, d_hsh).each do |hsh|
+      d_hsh[hsh[:k]] = handle_public_kind(hsh[:k], hsh[:klass], hsh[:k_hsh], hsh[:k_hsh].slice!(*tb_keys), input_group, context, 'config')
+    end
+  end
+
+  def extract_meth_hsh(meth_hsh, d_hsh)
+    meth_hsh.transform_values {|kinds| kinds.select{|k| d_hsh[k]}.map{|k| {k: k, k_hsh: hsh_slice_and_delete(d_hsh, k)}}}.select{|klass, kinds| kinds.any?}.each {|klass, kinds| kinds.map{|hsh| hsh[:klass] = klass}}.values.flatten
+  end
+
+  def handle_public_kind(k, klass, kind_hsh, sub_hsh, input_group, context, meth_key)
+  	to_class(klass).public_send("#{meth_key}_#{k}", k, kind_hsh, sub_hsh, input_group, context)
   end
 
   ##############################################################################
@@ -257,23 +264,11 @@ module ItemProduct
     }
   end
 
-  # def form_groups
-  #   {
-  #     'numbering'=> {header: %w[numbering], body: %w[]},
-  #     'material_mounting'=> {header: %w[mounting], body: %w[]},
-  #     'authentication'=> {header: %w[seal signature certificate], body: %w[dated verification]},
-  #     'dimension'=> {header: %w[dimension], body: %w[]},
-  #     'disclaimer'=> {header: %w[disclaimer], body: %w[]}
-  #   }
-  # end
-
   def build_form_rows(form_hsh, form_group)
     related_form_rows(form_hsh)
     form_group.each_with_object({}) do |(card_id,card), hsh|
-      #if card[:header].any?{|k| form_hsh[k]}
-        Item.case_merge(hsh, build_row(card[:header], form_hsh), card_id, :header)
-        Item.case_merge(hsh, build_row(card[:body], form_hsh), card_id, :body)
-      #end
+      Item.case_merge(hsh, build_row(card[:header], form_hsh), card_id, :header)
+      Item.case_merge(hsh, build_row(card[:body], form_hsh), card_id, :body)
     end
   end
 
@@ -285,6 +280,30 @@ module ItemProduct
 end
 
 # THE END ######################################################################
+# def form_groups
+#   {
+#     'numbering'=> {header: %w[numbering], body: %w[]},
+#     'material_mounting'=> {header: %w[mounting], body: %w[]},
+#     'authentication'=> {header: %w[seal signature certificate], body: %w[dated verification]},
+#     'dimension'=> {header: %w[dimension], body: %w[]},
+#     'disclaimer'=> {header: %w[disclaimer], body: %w[]}
+#   }
+# end
+
+# def finish_config_group(input_group, context, d_hsh)
+#   set_compound_keys(context)
+#   config_dependent_kinds(input_group, context, d_hsh)
+# end
+#
+# def config_dependent_kinds(input_group, context, d_hsh)
+#   dependent_kinds_hsh(context[:body][:order].keys).each do |klass, kinds|
+#     kinds.map {|k| config_public_kind(k, klass, d_hsh[k], d_hsh[k].slice!(*tb_keys), input_group, context)}
+#   end
+# end
+#
+# def config_public_kind(k, klass, tb_hsh, k_hsh, input_group, context)
+# 	to_class(klass).public_send("config_#{k}", k, tb_hsh, k_hsh, input_group, context)
+# end
 
 # def config_prev_kind(prevk, k, kset, input_group, context, d_hsh)
 #   kset << k if prevk != k

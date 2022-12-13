@@ -12,11 +12,12 @@ class Disclaimer
   end
 
   def self.config_disclaimer(k, tb_hsh, disclaimer_hsh, input_group, context)
-  	config_body(tb_hsh, disclaimer_hsh.values[0])
+    config_body(tb_hsh, disclaimer_hsh.values[0]) if tb_hsh.any? && disclaimer_hsh.any?
   end
 
   def self.config_body(tb_hsh, damage, tag_key='body')
   	tb_hsh[tag_key] = disclaimer(tb_hsh[tag_key], damage)
+    tb_hsh
   end
 
   def self.disclaimer(severity, damage)
@@ -61,46 +62,3 @@ class Disclaimer
     end
   end
 end
-
-
-  # def self.config_disclaimer_params(k, severity, damage, disclaimer_hsh, context, d_hsh)
-  # 	if damage && severity
-  # 		d_hsh.merge!({k=> disclaimer_hsh.merge!({'body'=> disclaimer(severity, damage)})})
-  # 		context[k.to_sym] = true if severity == 'danger'
-  # 	end
-  # end
-
-# def self.config_disclaimer(k, disclaimer_hsh, input_group, context, d_hsh)
-#   tb_hsh = Item.new.slice_valid_subhsh!(disclaimer_hsh, *Item.new.tb_keys)
-#   d_hsh[k] = config_body(tb_hsh, disclaimer_hsh.values[0])
-# end
-#
-# def self.config_body(tb_hsh, damage, tag_key='body')
-#   tb_hsh[tag_key] = disclaimer(tb_hsh[tag_key], damage)
-#   tb_hsh
-# end
-
-# def self.config_disclaimer(k, disclaimer_hsh, input_group, context, d_hsh)
-#   if tb_hsh = Item.new.slice_valid_subhsh!(disclaimer_hsh, *Item.new.tb_keys)
-#     if body = config_body(tb_hsh, disclaimer_hsh)
-#       d_hsh.merge!({k=> tb_hsh.merge!({'body'=> body})})
-#       if tb_hsh['tagline']
-#         context[k.to_sym] = true
-#       elsif context[:unsigned]
-#         context[:signature_last] = true
-#       end
-#     end
-#   end
-# end
-#
-# def self.config_body(tb_hsh, damage_hsh, tag_key='body')
-#   disclaimer(tb_hsh[tag_key], damage_hsh.values[0]) if damage_hsh.any?
-# end
-
-# def self.config_disclaimer(k, disclaimer_hsh, d_hsh, input_group)
-#   tb_hsh = slice_valid_subhsh!(disclaimer_hsh, *Item.new.tb_keys)
-#   return unless disclaimer_hsh.any?
-# 	damage, severity = disclaimer_hsh['body'], damage_hsh.values[0]
-# 	d_hsh.merge!({k=> disclaimer_hsh.merge!({'body'=> disclaimer(severity, damage)})})
-# 	context[k.to_sym] = true if severity == 'danger'
-# end
