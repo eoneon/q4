@@ -124,19 +124,6 @@ $(document).ready(function(){
     toggleTab(new_id, e);
   });
 
-  // $("body").on("click", ".list-group-item", function(e){
-  // 	var [new_id, form] = [$(this).attr("id"), $(this).attr("data-form")];
-  // 	var input = $(form).find($($(this).attr("data-field")));
-  // 	new_id = toggleSet(input, new_id, $(input).val());
-  // 	requiredFields(input);
-  // 	toggleTab(new_id, e);
-  // 	if (new_id==""){
-  // 		$("#test-form").remove();
-  // 	} else {
-  // 		$(form).submit();
-  // 	}
-  // });
-
   $("body").on("click", ".toggle-view", function(){
     var toggle_targets = "."+$(this).attr("id");
     $(toggle_targets).toggleClass("show collapse");
@@ -247,7 +234,6 @@ $(document).ready(function(){
   //ELEMENT-SPECIFIC: TOGGLE-DATA: from SLIDE, NAV-BTN or CARET
   function toggleBtnData(this_btn, d) {
     toggleTargetData(this_btn, d);
-    console.log(d)
     siblingData(d.btn.vis_target, valid(visibleDataSiblingTarget(this_btn)), d.btn);
     d.btn.this_btn = this_btn;
     d.btn = $.extend(true, d.btn, this_btn.data());
@@ -345,7 +331,7 @@ $(document).ready(function(){
 
   //toggle current caret-icon & card-body ######################################
   function caretToggle(d) {
-    toggleSet(d.btn.this_btn, $(d.btn.this_btn).attr("id"), $(d.btn.input).val());
+    toggleSet(d.btn.input, $(d.btn.this_btn).attr("id"), $(d.btn.input).val());
     toggleCard(d.btn.this_btn, d.btn.target);
     if (d.btn.sibling.vis_target) toggleCard(d.btn.sibling.this_btn, d.btn.sibling.vis_target);
   }
@@ -442,9 +428,6 @@ $(document).ready(function(){
   }
 
   //TOGGLE VALUES
-  // function toggleSet(input, new_id, old_id) {
-  //   $(input).val(toggleVal(new_id, old_id));
-  // }
   function toggleSet(input, new_id, old_id) {
   	var v = toggleVal(new_id, old_id)
   	$(input).val(v);

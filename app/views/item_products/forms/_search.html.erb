@@ -13,7 +13,7 @@
         <% end %>
 
         <div class="col-6 border-light-gray p-1">
-          <div class="input-group input-group-sm" data-obj="searchForm, #<%= dom_ref('search-item-product', item) %>, itemForm, #<%= dom_ref('edit-item', item) %>, productInput, .product, updateProduct, .update-field, updateContext, .update-context">
+          <div class="input-group input-group-sm" data-obj="searchForm, #<%= dom_ref('search-item-product', item) %>, itemForm, #<%= dom_ref('edit', item) %>, productInput, .product, updateProduct, .update-field, updateContext, .update-context">
             <%= render 'item_products/forms/search_label', input_name: 'product' %>
             <%= render 'item_products/forms/reset_search', class_param: 'unselect-table-product' %>
             <%= f.collection_select :product_id, inputs[:product][:opts], :id, :product_name, {include_blank: true, selected: inputs[:product][:selected]}, id: "product-select", class: boot_classes(:search_input, 'table-product', 'product', 'edit-item-select-product') %>

@@ -21,12 +21,12 @@ module ItemProduct
 
   def rows_and_attrs(input_group)
   	description_hsh(key_group, input_group[:context], input_group[:d_hsh], input_group[:attrs])
-  	[:rows, :attrs].map{|k| input_group[k]}
+    [:rows, :attrs].map{|k| input_group[k]}
   end
 
   def config_item_product(p_tags, p_fields, input_group)
   	item_product_attrs(p_tags, input_group[:d_hsh], input_group[:context], input_group[:attrs])
-  	config_group(fields: p_fields, input_group: input_group)
+    config_group(fields: p_fields, input_group: input_group)
   	config_form_group(input_group, p_tags)
   	input_group
   end
@@ -67,6 +67,7 @@ module ItemProduct
   	input_group[:inputs] << f_hsh(k, t, f_name, f)
   	if selected = input_group[:param_hsh].dig(k, t_type(t), f_name)
   		input_group[:inputs][-1][:selected] = format_selected(t, selected)
+      #set_order(input_group[:context], :body, 'mounting') if k=='material' && selected.tags.keys.include?('material_mounting')
   		config_selected(reset_kind(k, f_name), t, f_name, selected, input_group)
   	end
   end
@@ -84,25 +85,48 @@ module ItemProduct
     k=='seal' ? f_name : k
   end
 
+  ###################################################################
   def selected_field(input_group, selected, k, t, f_name)
-  	tags_from_selected_field(input_group[:d_hsh], input_group[:context], selected, k, t, f_name) if selected.tags
-  	config_loop(fields: selected.fieldables, input_group: input_group) if field_set?(t)
+    tags_from_selected_field(input_group, selected, k) if selected.tags
+    config_loop(fields: selected.fieldables, input_group: input_group) if field_set?(t)
   end
 
-  def tags_from_selected_field(d_hsh, context, selected, k, t, f_name)
-    related_field_params(d_hsh, selected, k, t, f_name) if Dimension.related_kinds.include?(k)
-    tb_tags_from_field(d_hsh, selected, k) unless k=='dimension'
+  def tags_from_selected_field(input_group, f, k)
+  	related_field_params(input_group, f, k)
+  	tb_tags_from_field(input_group[:d_hsh], f, k) unless k=='dimension'
+  end
+
+  def related_field_params(input_group, f, k)
+  	public_send("related_#{k}_params", input_group, f, k) if Dimension.related_kinds.include?(k) #&& Material.method_exists?("related_#{k}_params")
+  end
+
+  def related_dimension_params(input_group, f, k, sub_key='tag')
+  	f.tags.select{|key,val| Dimension.tags.include?(key) && val != 'n/a'}.each {|tag_key, tag_val| Item.case_merge(input_group[:d_hsh], tag_val, k, tag_key, sub_key)}
+  end
+
+  def related_material_params(input_group, f, k, k2='mounting')
+  	related_material_mounting(input_group, f, k2)
+    related_mounting_search(input_group, f, k2)
+  end
+
+  def related_material_mounting(input_group, f, k, sub_key='material_mounting', tag_key='body')
+    if material_mounting = f.tags[sub_key]
+      Item.case_merge(input_group[:d_hsh], material_mounting, k, tag_key)
+      set_order(input_group[:context], tag_key.to_sym, k)
+    end
+  end
+
+  def related_mounting_search(input_group, f, k, sub_key='mounting_search')
+    if mounting_search = f.tags[sub_key]
+      Item.case_merge(input_group[:d_hsh], f.tags[sub_key], k, sub_key)
+    end
   end
 
   def tb_tags_from_field(d_hsh, f, k)
-    (%w[material_mounting mounting_search] + tb_keys).map {|tag_key| Item.case_merge(d_hsh, f.tags[tag_key], k, tag_key)} if f.tags
+    tb_keys.map {|tag_key| Item.case_merge(d_hsh, f.tags[tag_key], k, tag_key)} if f.tags
   end
 
-  def related_field_params(d_hsh, f, k, t, f_name)
-    f.tags.select{|k,v| Dimension.tags.include?(k) && v != 'n/a'}.each do |tag_key, tag_val|
-      Item.case_merge(d_hsh, tag_val, 'dimension', tag_key, 'tag')
-    end
-  end
+  ###################################################################
 
   def format_selected(t, selected)
     tag_attr?(t) ? selected : selected.id
@@ -237,9 +261,9 @@ module ItemProduct
 
   def related_form_rows(form_hsh)
   	form_hsh['dimension'].each do |f_hsh|
-  		if Dimension.material_units.include?(f_hsh[:f_name])
-  			form_hsh['material'].append(f_hsh)
-  		elsif Dimension.mounting_units.include?(f_hsh[:f_name])
+  		if Dimension.material_units.include?(f_hsh[:f_name]) || Dimension.mounting_units.exclude?(f_hsh[:f_name])
+  			form_hsh[form_hsh['material'] ? 'material' : 'medium'].append(f_hsh)
+  		else
   			form_hsh['mounting'].append(f_hsh)
   		end
   	end

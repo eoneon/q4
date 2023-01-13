@@ -2,8 +2,7 @@
   <%= f.fields_for :tags, OpenStruct.new(artist.tags) do |ff| %>
     <div class="<%= "#{field['col']} pt-2" %>">
       <div class="input-group input-group-sm">
-        <%= render "item_fields/label", label: field['label'] %>
-        <%= ff.text_field field['name'], class: "#{boot_classes(:input)}", id: field['name'] %>
+        <%= render "artists/fields/#{field_type}", f: ff, label: field['label'], field_name: field['name'] %>
       </div>
     </div>
   <% end %>

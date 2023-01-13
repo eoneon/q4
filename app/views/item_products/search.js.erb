@@ -1,5 +1,5 @@
 $("#<%= dom_ref('search-item-product', @item) %>").html("<%= j render 'item_products/forms/search', item: @item, inputs: @product_inputs %>");
 
 $(function(){
-  if ("<%= @update %>"=='true') $("#<%= dom_ref('edit-item', @item) %>").submit();
+  if ("<%= @update %>"=='true') $("#<%= dom_ref('edit', @item) %>").submit();
 });

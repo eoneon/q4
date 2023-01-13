@@ -25,4 +25,8 @@ module ItemsHelper
     [[:dimension, %w[dimension]], [:mounting, %w[mounting]], [:sub_media, %w[leafing remarque]], [:numbering, %w[numbering]], [:authentication, %w[signature certificate]], [:media_suffix, %w[media_suffix]], [:disclaimer, %w[disclaimer]]]
   end
 
+  def field_rows(rows)
+    rows.reject{|k,v| k=='dimension' || v.all?{|key, val| val.empty?}}
+  end
+
 end

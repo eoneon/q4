@@ -9,7 +9,7 @@
           </div>
         </div>
 
-        <%= render 'artists/tags', f: f, fields: %w[yob yod], artist: Artist.new %>
+        <%= render 'artists/tags', f: f, fields: %w[yob yod], field_type: 'text_field', artist: Artist.new %>
 
         <div class="col-2 pt-2">
           <div class="input-group input-group-sm">
@@ -22,7 +22,10 @@
         </div>
       </div>
       <div class="form-row pl-1 pr-2 ml-0 mb-2">
-        <%= render 'artists/tags', f: f, fields: %w[title body], artist: Artist.new %>
+        <%= render 'artists/tags', f: f, fields: %w[title body], field_type: 'text_field', artist: Artist.new %>
+      </div>
+      <div class="form-row pl-1 pr-2 ml-0 mb-2">
+        <%#= render 'artists/tags', f: f, fields: %w[split artist singular], field_type: 'check_box', artist: Artist.new %>
       </div>
     </div>
   </div>

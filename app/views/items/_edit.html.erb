@@ -7,8 +7,7 @@
     <div class="card border-0 p-0 mb-1 <%= table_strip(1)%>">
       <%= number_field_tag "item[product_id]", @item.product.try(:id), class: "product collapse" %>
 
-      <div class="form-row pl-1 py-0 ml-0 mb-1">
-
+      <div class="form-row py-0 ml-0 mb-1">
         <div class="col-3 pl-4 pr-2 py-1">
           <div class="input-group input-group-sm">
             <%= render "item_fields/label", label: 'artist' %>
@@ -16,7 +15,7 @@
           </div>
         </div>
 
-        <div class="col-4 py-1 pl-0">
+        <div class="col-3 py-1 pl-4">
           <div class="input-group input-group-sm">
             <%= render 'items/title_toggle' %>
             <%= render 'items/title', titles: titles %>
@@ -24,14 +23,14 @@
           </div>
         </div>
 
-        <div class="col-2 py-1">
+        <div class="col-2 py-1 pl-4">
           <div class="input-group input-group-sm">
-            <%= render "item_fields/label", label: 'retail' %>
+            <%= render "item_fields/label", label: '$' %>
             <%= f.number_field :retail, class: boot_classes(:input, 'field-param'), data: {oldVal:nil} %>
           </div>
         </div>
 
-        <div class="col-1 py-1 pr-1">
+        <div class="col-2 py-1 pl-4">
           <div class="input-group input-group-sm">
             <%= render "item_fields/label", label: 'qty' %>
             <%= f.number_field :qty, class: boot_classes(:input, 'field-param'), data: {oldVal:nil} %>
@@ -39,7 +38,8 @@
         </div>
 
       </div>
-      <%= render "items/field_rows", f: f, item: item, rows: rows %>
+
     </div>
+    <%= render "items/field_rows", f: f, item: item, rows: rows %>
   </div>
 <% end %>

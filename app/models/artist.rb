@@ -12,16 +12,24 @@ class Artist < ApplicationRecord
     [artist_name, life_span].compact.join(' ')
   end
 
-  def tagline
-    title_tag ? "#{formal_name} #{title_tag}" : formal_name
+  def description(name_tag)
+    name_tag ? "#{formal_name} #{name_tag}" : formal_name
   end
 
   def life_span(tag_keys=%w[yob yod])
-    "(#{tag_keys.map{|k| tags[k]}.join('-')})" if tags &&  tag_keys.all?{|k| !tags.dig(k).blank?}
+    "(#{tag_keys.map{|k| tags[k]}.join('-')})" if tags && tag_keys.all?{|k| !tags.dig(k).blank?}
   end
 
   def title_tag(tag_key='title')
-    "(#{tags[tag_key]})" if tags && !tags[tag_key].blank?
+    "(#{artist_tag(tag_key)})" if artist_tag(tag_key)
+  end
+
+  def body_tag(tag_key='body')
+    artist_tag(tag_key)
+  end
+
+  def artist_tag(tag_key)
+    tags[tag_key] if tags && !tags[tag_key].blank?
   end
 
   def last_name_first
@@ -32,8 +40,8 @@ class Artist < ApplicationRecord
 
   def artist_params
     {'d_hsh'=>{
-      'tagline'=> "#{tagline},",
-      'body'=> "by #{formal_name}",
+      'tagline'=> "#{description(title_tag)},",
+      'body'=> "by #{description(body_tag)}",
       'invoice_tagline'=> "#{abbrv_artist_name(artist_name.split(' '))},"},
     'attrs'=> {
       'artist'=> artist_name,

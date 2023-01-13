@@ -4,8 +4,18 @@ module ArtistsHelper
     row.map{|f_name| {'name' => f_name, 'label'=> f_name, 'col' => col_size(f_name)}}
   end
 
+  # def col_size(f_name)
+  #   %w[title body].include?(f_name) ? 'col-6' : 'col-2'
+  # end
+
   def col_size(f_name)
-    %w[title body].include?(f_name) ? 'col-6' : 'col-2'
+    if %w[title body].include?(f_name)
+      'col-6'
+    elsif %w[yob yod].include?(f_name)
+      'col-2'
+    else
+      'col-1'
+    end
   end
 end
 

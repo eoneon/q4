@@ -25,7 +25,7 @@
             <div class="input-group input-group-sm" data-obj="searchForm, #search-skus, artistInput, .artist, itemForm, #new-skus, titleInput, .title">
               <%= render "item_fields/caret", card_id: 'artist', target: nil, body: true, i: 0, context: 'body' %>
               <%= render "item_fields/label", label: 'artist' %>
-              <%= f.collection_select :artist_id, Artist.sorted, :id, :artist_name, {include_blank: true}, class: boot_classes(:input, 'item', 'artist'), id: "new-skus-artist" %>
+              <%= f.collection_select :artist_id, Artist.sorted, :id, :last_name_first, {include_blank: true}, class: boot_classes(:input, 'item', 'artist'), id: "new-skus-artist" %>
             </div>
           </div>
 
