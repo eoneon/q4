@@ -1,0 +1,5 @@
+<h1>FieldItems#index</h1>
+<% if @field_items.empty? %>
+  <p><strong>No Field Items</strong></p>
+<% end %>
+<%= render 'field_groups/table', field_items: @field_items %>

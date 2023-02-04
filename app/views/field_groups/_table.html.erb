@@ -1,0 +1,10 @@
+<table class="table table-sm table-striped table-hover" id="field-index">
+  <thead>
+  </thead>
+
+  <tbody>
+    <% field_items.each_with_index do |(k, fields), i| %>
+      <%= render 'field_items/card', f: nil, fields: fields, card_id: k, header: k, i: 0, parent: "#field-index" %>
+    <% end %>
+  </tbody>
+</table>

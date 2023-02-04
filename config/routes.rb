@@ -54,6 +54,7 @@ Rails.application.routes.draw do
   end
 
   resources :item_fields
+  resources :field_groups
   resources :products
 
   resources :artists do
@@ -79,7 +80,7 @@ Rails.application.routes.draw do
   #   end
   # end
 
-  root to: 'product_items#index'
+  root to: 'invoices#index'
 end
 
 # resources :items, only: [:search] do

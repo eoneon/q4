@@ -4,11 +4,8 @@ module Hashable
   extend ActiveSupport::Concern
 
   # parameter methods  #########################################################
-  # def defualt_hsh(*keys)
-  #   keys.each_with_object({}) {|k,h| h[k]=nil}
-  # end
   def order_hsh(keys, hsh)
-    keys.each_with_object({}) {|k,h| h[k]=hsh.dig(k)}
+    hsh.blank? ? {} : keys.each_with_object({}) {|k,h| h[k]=hsh.dig(k)}
   end
 
   def order_valid_hsh(keys, hsh)

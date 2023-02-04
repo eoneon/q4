@@ -12,6 +12,14 @@ class Material
     [2, %w[material mounting]]
   end
 
+  def self.merge_related_params(input_group, f, args)
+  	if v = f.tags[args[1]]
+  		Item.case_merge(input_group[:d_hsh], v, *args)
+  		f.set_order(input_group[:context], args[-1].to_sym, args[0])
+  		Mounting.mounting_search_params(input_group[:d_hsh], f.tags, args[0])
+  	end
+  end
+
   class SelectField < Material
     def self.target_tags(f_name)
       {tagline: "on #{tagline(f_name)}", body: "on #{body(f_name)}", invoice_tagline: "on #{str_edit(str: f_name)}", tagline_search: "on #{tagline_search(f_name)}", material_mounting: ('This piece comes gallery wrapped.' if f_name.index('gallery'))}

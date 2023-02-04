@@ -67,14 +67,13 @@ module ItemProduct
   	input_group[:inputs] << f_hsh(k, t, f_name, f)
   	if selected = input_group[:param_hsh].dig(k, t_type(t), f_name)
   		input_group[:inputs][-1][:selected] = format_selected(t, selected)
-      #set_order(input_group[:context], :body, 'mounting') if k=='material' && selected.tags.keys.include?('material_mounting')
   		config_selected(reset_kind(k, f_name), t, f_name, selected, input_group)
   	end
   end
 
   def config_selected(k, t, f_name, selected, input_group)
   	context_from_selected(k, t, f_name, selected, input_group[:context])
-  	tag_attr?(t) ? selected_tag_attr(input_group[:d_hsh], selected, k, f_name) : selected_field(input_group, selected, k, selected.type.underscore, selected.field_name.underscore)
+    tag_attr?(t) ? selected_tag_attr(input_group[:d_hsh], selected, k, f_name) : selected_field(input_group, selected, k)
   end
 
   def selected_tag_attr(d_hsh, selected, k, f_name)
@@ -86,44 +85,32 @@ module ItemProduct
   end
 
   ###################################################################
-  def selected_field(input_group, selected, k, t, f_name)
-    tags_from_selected_field(input_group, selected, k) if selected.tags
-    config_loop(fields: selected.fieldables, input_group: input_group) if field_set?(t)
+  def selected_field(input_group, selected, k)
+    tags_from_selected_fields(input_group, selected, k) if selected.tags && selected.tags.any?
+    config_loop(fields: selected.fieldables, input_group: input_group) if field_set?(selected.type)
   end
 
-  def tags_from_selected_field(input_group, f, k)
-  	related_field_params(input_group, f, k)
+  ###################################################################
+  ###################################################################
+  def tags_from_selected_fields(input_group, f, k)
+  	tags_from_related_fields(input_group, f, k)
   	tb_tags_from_field(input_group[:d_hsh], f, k) unless k=='dimension'
   end
 
-  def related_field_params(input_group, f, k)
-  	public_send("related_#{k}_params", input_group, f, k) if Dimension.related_kinds.include?(k) #&& Material.method_exists?("related_#{k}_params")
+  def tags_from_related_fields(input_group, f, k)
+  	if args = related_param_args(k)
+  		f.to_class(k).merge_related_params(input_group, f, args)
+  	end
   end
 
-  def related_dimension_params(input_group, f, k, sub_key='tag')
-  	f.tags.select{|key,val| Dimension.tags.include?(key) && val != 'n/a'}.each {|tag_key, tag_val| Item.case_merge(input_group[:d_hsh], tag_val, k, tag_key, sub_key)}
+  def related_param_args(k)
+  	{'dimension'=> [k, 'material_dimension', 'tag'], 'material'=> ['mounting', 'material_mounting', 'body'], 'mounting'=> ['dimension', 'mounting_dimension', 'tag']}[k]
   end
-
-  def related_material_params(input_group, f, k, k2='mounting')
-  	related_material_mounting(input_group, f, k2)
-    related_mounting_search(input_group, f, k2)
-  end
-
-  def related_material_mounting(input_group, f, k, sub_key='material_mounting', tag_key='body')
-    if material_mounting = f.tags[sub_key]
-      Item.case_merge(input_group[:d_hsh], material_mounting, k, tag_key)
-      set_order(input_group[:context], tag_key.to_sym, k)
-    end
-  end
-
-  def related_mounting_search(input_group, f, k, sub_key='mounting_search')
-    if mounting_search = f.tags[sub_key]
-      Item.case_merge(input_group[:d_hsh], f.tags[sub_key], k, sub_key)
-    end
-  end
+  ###################################################################
+  ###################################################################
 
   def tb_tags_from_field(d_hsh, f, k)
-    tb_keys.map {|tag_key| Item.case_merge(d_hsh, f.tags[tag_key], k, tag_key)} if f.tags
+    tb_keys.map {|tag_key| Item.case_merge(d_hsh, f.tags[tag_key], k, tag_key)} if f.tags && f.tags.any?
   end
 
   ###################################################################
@@ -304,6 +291,39 @@ module ItemProduct
 end
 
 # THE END ######################################################################
+# def related_field_params(input_group, f, k)
+# 	public_send("related_#{k}_params", input_group, f, k) if Dimension.related_kinds.include?(k) #Material.method_exists?("related_#{k}_params") #Dimension.related_kinds.include?(k) &&
+# end
+#
+# def related_dimension_params(input_group, f, k, sub_key='material_dimension', tag_key='tag')
+# 	if tag = f.tags[sub_key]
+# 		Item.case_merge(input_group[:d_hsh], tag, 'dimension', sub_key, tag_key)
+#     related_mounting_search(input_group, f, k) if k=='mounting'
+# 	end
+# end
+#
+# def related_mounting_params(input_group, f, k, sub_key='mounting_dimension', tag_key='tag')
+#   related_dimension_params(input_group, f, k, sub_key, tag_key)
+# end
+#
+# def related_material_params(input_group, f, k, k2='mounting')
+# 	related_material_mounting(input_group, f, k2)
+#   related_mounting_search(input_group, f, k2)
+# end
+#
+# def related_material_mounting(input_group, f, k, sub_key='material_mounting', tag_key='body')
+#   if material_mounting = f.tags[sub_key]
+#     Item.case_merge(input_group[:d_hsh], material_mounting, k, tag_key)
+#     set_order(input_group[:context], tag_key.to_sym, k)
+#   end
+# end
+#
+# def related_mounting_search(input_group, f, k, sub_key='mounting_search')
+#   if mounting_search = f.tags[sub_key]
+#     Item.case_merge(input_group[:d_hsh], f.tags[sub_key], k, sub_key)
+#   end
+# end
+
 # def form_groups
 #   {
 #     'numbering'=> {header: %w[numbering], body: %w[]},

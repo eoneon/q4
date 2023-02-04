@@ -24,6 +24,7 @@ class LimitedEdition
     tb_hsh['search_tagline'] = tb_hsh['tagline'].sub('Edition', 'Ed')
     tb_hsh['invoice_tagline'] = tb_hsh['search_tagline']
     attrs['edition'] = tb_hsh['search_tagline'].split(' ')[2..3].join(' ')
+    tb_hsh
   end
 
   def self.config_numbered_edition(tb_hsh, edition_hsh, context, attrs)

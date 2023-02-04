@@ -1,0 +1,20 @@
+<div class="card border-0 p-1 mb-1 bg-disabled" id="<%= dom_ref('parent', card_id) %>">
+  <%= render "field_items/header", card_id: dom_ref(card_id, i), header: header %>
+
+  <div class="card-body p-1 mb-1 bg-white border border-white border-top-0 rounded-bottom collapse" data-parent="<%= parent %>" id="<%= dom_ref('target', card_id, i) %>">
+    <% if f %>
+      <% if f.admin_tags.any? %>
+        <%= render "field_items/description_tags", f: f, card_id: dom_ref(card_id, 'admin-tags'), tags: f.admin_tags, header: 'admin-tags', parent: dom_ref('#parent', card_id) %>
+      <% end %>
+      <% if f.description_tags.any? %>
+        <%= render "field_items/description_tags", f: f, card_id: dom_ref(card_id, 'description-tags'), tags: f.description_tags, header: 'description-tags', parent: dom_ref('#parent', card_id) %>
+      <% end %>
+    <% end %>
+
+    <% if fields.any? %>
+      <% fields.each do |ff| %>
+        <%= render "field_items/card", f: ff, fields: ff.fieldables, card_id: dom_ref(ff.type, ff.id), header: "#{ff.type}: #{ff.field_name}", i: i+1, parent: dom_ref('#parent', card_id) %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

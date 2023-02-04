@@ -2,6 +2,7 @@ class FieldItem < ApplicationRecord
 
   include Fieldable
   include Crudable
+  include Hashable
   include TypeCheck
   include CSVSeed
 
@@ -10,6 +11,14 @@ class FieldItem < ApplicationRecord
 
   def fattrs
   	[:kind, :type, :field_name].map{|attr| public_send(attr).underscore}
+  end
+
+  def description_tags
+    order_valid_hsh(Item.new.tb_keys, tags)
+  end
+
+  def admin_tags
+    order_valid_hsh(Product.hattr_keys, tags)
   end
 
   def self.seed

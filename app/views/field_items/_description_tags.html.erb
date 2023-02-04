@@ -1,0 +1,16 @@
+
+<div class="card border-0 p-1 mb-1 bg-disabled" id="<%= dom_ref('parent', card_id) %>">
+  <%= render "field_items/header", card_id: card_id, header: header %>
+
+  <div class="card-body p-1 mb-1 bg-white border border-white border-top-0 rounded-bottom collapse" data-parent="<%= parent %>" id="<%= dom_ref('target', card_id) %>">
+
+    <% tags.each do |tag_key, tag_val| %>
+      <div class="form-row">
+        <div class="col p-2 mx-1 bg-disabled">
+          <%= "#{tag_key}: #{tag_val}" %>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+</div>

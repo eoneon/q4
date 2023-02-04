@@ -150,17 +150,13 @@ class Product < ApplicationRecord
     	inputs[k][:selected] = nil
     end
 
-    ############################################################################
+    ############################################################################ 
     def grouped_fields
       Product.new.grouped_hsh(enum: sorted_fields.to_a, attrs: [:kind])
     end
 
     def sorted_fields
       FieldItem.where(id: ItemGroup.join_group('Product', Product.all.ids, %w[FieldSet SelectMenu RadioButton SelectField]).pluck(:target_id).uniq)
-    end
-
-    def field_tags(tags)
-    	(Product.new.tb_keys+hattr_keys).select{|tag_key| tags[tag_key]}
     end
 
     ############################################################################

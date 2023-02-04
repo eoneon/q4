@@ -7,6 +7,19 @@ class Mounting
     {kind: 0, type: 1, field_name: -1}
   end
 
+  def self.merge_related_params(input_group, f, args)
+  	if v = f.tags[args[1]]
+  		Item.case_merge(input_group[:d_hsh], v, *args)
+  		mounting_search_params(input_group[:d_hsh], f.tags, args[0])
+  	end
+  end
+
+  def self.mounting_search_params(d_hsh, tags, k, sub_key='mounting_search')
+  	if v = tags[sub_key]
+  		Item.case_merge(d_hsh, v, k, sub_key)
+  	end
+  end
+
   class SelectField < Mounting
     def self.target_tags(f_name)
       {mounting_search: f_name.split(' ').map(&:capitalize).join(' ')}

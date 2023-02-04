@@ -23,6 +23,12 @@ class Dimension
     %w[material mounting dimension]
   end
 
+  def self.merge_related_params(input_group, f, args)
+  	if v = f.tags[args[1]]
+  		Item.case_merge(input_group[:d_hsh], v, *args)
+  	end
+  end
+  
   def self.config_dimension(k, dimension_hsh, mounting_search, input_group, context)
   	config_dimension_params(k, dimension_hsh, get_measurements(dimension_hsh), mounting_search, input_group, context)
   end
